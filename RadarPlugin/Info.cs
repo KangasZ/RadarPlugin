@@ -19,5 +19,5 @@ public static class Info
         5478, // ruby carbuncle
         7974, //ball lightning
         7958, //hidden trap
-    };
+    }; // TODO: probs not needed (cope)
 }

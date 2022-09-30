@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -47,6 +48,7 @@ public class RadarLogic : IDisposable
         {
             if (!npc.IsValid()) continue;
             if (npc.CurrentHp <= 0) continue;
+            if (npc.CurrentMp <= 0) continue;
             Vector2 vector2;
             var p = Services.GameGui.WorldToScreen(npc.Position, out vector2);
             if (!p) continue;
@@ -85,7 +87,8 @@ public class RadarLogic : IDisposable
         foreach (var obj in objectTable)
         {
             if (obj is not BattleNpc mob) continue;
-            if (Info.IgnoreList.Contains(mob.NameId)) continue;
+            if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
+            if (mob.CurrentMp <= 0) continue;
             nearbyMobs.Add(mob);
         }
 
