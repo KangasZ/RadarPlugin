@@ -6,9 +6,9 @@ namespace RadarPlugin;
 
 public static class Info
 {
-    public static Dictionary<uint, uint> HuntRecolors = new Dictionary<uint, uint>()
+    public static Dictionary<uint, Vector4> HuntRecolors = new Dictionary<uint, Vector4>()
     {
-        { 8131, 0xFFFFFFFF } // white - Hydatos Elemental
+        { 8131, new Vector4(1f,1f,1f,1f) } // white - Hydatos Elemental 
     };
 
     public static HashSet<uint> IgnoreList = new HashSet<uint>()

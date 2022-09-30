@@ -53,18 +53,37 @@ public class RadarLogic : IDisposable
             var p = Services.GameGui.WorldToScreen(npc.Position, out vector2);
             if (!p) continue;
             uint color =
-                Info.HuntRecolors.ContainsKey(npc.NameId)
+                ImGui.ColorConvertFloat4ToU32(Info.HuntRecolors.ContainsKey(npc.NameId)
                     ? Info.HuntRecolors[npc.NameId]
-                    : 0xFF0000FF;
-
+                    : new Vector4(1,0,0,1));
+            
             //PluginLog.Debug($"Creating vector for character: {ObjectDraw.Name} at {X}, {Y}, {Z} : 2D Vector at {vector2.X}, {vector2.Y}");
             ImGui.GetForegroundDrawList().AddCircleFilled(vector2, 5f, color, 8);
+            var text = $"{npc.Name}-{npc.NameId}";
+            var textSize = ImGui.CalcTextSize(text);
             ImGui.GetForegroundDrawList().
                 AddText(
-                    new Vector2((vector2.X - 30), (vector2.Y + 20)), 
+                    new Vector2((vector2.X - textSize.X/2f), (vector2.Y + textSize.X/2f)), 
                     color, 
                     $"{npc.Name} {npc.NameId}");
         }
+    }
+    
+    private void DrawHealthCircle(Vector2 position, int health, int max_health, float radius)
+    {
+        // FROM: https://www.unknowncheats.me/forum/direct3d/488372-health-circle-esp-imgui-function.html
+        float PI = 3.14159265359f;
+        string health_text = max_health.ToString();
+        float a_max = ((PI * 2.0f));
+        float v1 = (float)health / (float)max_health;
+        float difference = v1 - 1.0f;
+        Vector4 colorVector = new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f);
+        ImGui.GetForegroundDrawList().PathArcTo(position, radius, (-(a_max / 4.0f)) + (a_max / max_health) * (max_health - health), a_max - (a_max / 4.0f), 200 - 1);
+        ImGui.GetForegroundDrawList().PathStroke(ImGui.ColorConvertFloat4ToU32(colorVector), ImDrawFlags.None, 2.0f);
+        ImGui.GetForegroundDrawList().AddText(
+            new Vector2((position.X - ImGui.CalcTextSize(health_text).X / 2.0f), (position.Y - ImGui.CalcTextSize(health_text).Y / 2.0f)),
+            ImGui.ColorConvertFloat4ToU32(new Vector4(1,1,1,1.0f)),
+            health_text);
     }
     
     private void BackgroundLoop()
@@ -79,7 +98,7 @@ public class RadarLogic : IDisposable
             Thread.Sleep(2000);
         }
     }
-
+    
     private void UpdateMobInfo()
     {
         var nearbyMobs = new List<BattleNpc>();
