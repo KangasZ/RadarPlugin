@@ -64,18 +64,16 @@ public class PluginUi
         {
             return;
         }
-
+        
         ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(new Vector2(390, 330), new Vector2(float.MaxValue, float.MaxValue));
-        if (ImGui.Begin("Anti AFK Kick", ref visible,
+        if (ImGui.Begin("Radar Plugin", ref visible,
                 ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoResize))
         {
             ImGui.Text(
-                "UI Anti Afk Kick is a modification on EterniaS AntiAfkKick\n" +
-                "The purpose is to function better in dungeons and raids.\n" +
-                "No more \"wiggle checks\" mid-raid!");
+                "A 3d-radar plugin. This is basically a hack please leave me alone.");
             ImGui.Spacing();
-            ImGui.Text($"Plugin Enabled: {configuration.Enabled} (This doesnt actually work rn)");
+            ImGui.Text($"Plugin Enabled: {configuration.Enabled}");
 
             // can't ref a property, so use a local copy
             var configValue = configuration.Enabled;
@@ -83,13 +81,6 @@ public class PluginUi
             {
                 configuration.Enabled = configValue;
                 // can save immediately on change, if you don't want to provide a "Save and Close" button
-                configuration.Save();
-            }
-
-            var seconds = configuration.Seconds;
-            if (ImGui.SliderFloat("Seconds Between Inputs", ref seconds, (float)0.1, 600))
-            {
-                configuration.Seconds = seconds;
                 configuration.Save();
             }
 
@@ -102,6 +93,10 @@ public class PluginUi
             }
 
             ImGui.Spacing();
+            if (ImGui.Button("Load Current Mobs"))
+            {
+                
+            }
         }
 
         ImGui.End();
