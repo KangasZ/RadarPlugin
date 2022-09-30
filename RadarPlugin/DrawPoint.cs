@@ -36,28 +36,25 @@ public class DrawPoint
     
     private static Vector2 dotCenter;
     
-    private Character? ObjectDraw;
-    public DrawPoint(Character character)
+    private BattleNpc ObjectDraw;
+    public DrawPoint(BattleNpc character)
     {
         ObjectDraw = character;
     }
 
-    public void DrawUnder()
+    public Vector2 DrawUnder()
     {
-        if (ObjectDraw == null)
-        {
-            return;
-        }
-        var pos = ObjectDraw.Position;
+        /*var pos = ObjectDraw.Position;
         X = pos.X;
         Y = pos.Y;
         Z = pos.Z;
-        Vector3 = new Vector3(X, Y, Z);
+        Vector3 = new Vector3(X, Y, Z);*/
         Vector2 vector2;
-        Services.GameGui.WorldToScreen(Vector3, out vector2);
-        PluginLog.Debug($"Creating vector for character: {ObjectDraw.Name} at {X}, {Y}, {Z} : 2D Vector at {vector2.X}, {vector2.Y}");
+        Services.GameGui.WorldToScreen(ObjectDraw.Position, out vector2);
+        //PluginLog.Debug($"Creating vector for character: {ObjectDraw.Name} at {X}, {Y}, {Z} : 2D Vector at {vector2.X}, {vector2.Y}");
         dotCenter = new Vector2(vector2.X, vector2.Y);
-        ImGui.GetForegroundDrawList().AddCircleFilled(dotCenter, 5f, 4278190335, 5);
+        return dotCenter;
+        //ImGui.GetForegroundDrawList().AddCircleFilled(dotCenter, 5f, 4278190335, 8);
         //ImGui.GetForegroundDrawList().AddCircleFilled(dotCenter, 5f, 4278190335, 9);
     }
 }

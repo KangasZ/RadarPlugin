@@ -12,7 +12,7 @@ public class PluginCommands : IDisposable
     {
         this.pluginUi = pluginUi;
         this.commandManager = commandManager;
-        this.commandManager.AddHandler("/3dradar", new CommandInfo(SettingsCommand)
+        this.commandManager.AddHandler("/radar", new CommandInfo(SettingsCommand)
         {
             HelpMessage = "Opens configuration for anti afk plugin",
             ShowInHelp = true
@@ -26,6 +26,6 @@ public class PluginCommands : IDisposable
     
     public void Dispose()
     {
-        commandManager.RemoveHandler("/3dradar");
+        commandManager.RemoveHandler("/radar");
     }
 }
