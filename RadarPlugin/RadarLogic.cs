@@ -45,12 +45,14 @@ public class RadarLogic : IDisposable
         if (refreshing) return;
         foreach (var npc in currentMobs)
         {
+            if (!npc.IsValid()) continue;
+            if (npc.CurrentHp <= 0) continue;
             Vector2 vector2;
             var p = Services.GameGui.WorldToScreen(npc.Position, out vector2);
             if (!p) continue;
             uint color =
-                ImportantHunts.Hunts.ContainsKey(npc.NameId)
-                    ? ImportantHunts.Hunts[npc.NameId]
+                Info.HuntRecolors.ContainsKey(npc.NameId)
+                    ? Info.HuntRecolors[npc.NameId]
                     : 0xFF0000FF;
 
             //PluginLog.Debug($"Creating vector for character: {ObjectDraw.Name} at {X}, {Y}, {Z} : 2D Vector at {vector2.X}, {vector2.Y}");
@@ -60,7 +62,6 @@ public class RadarLogic : IDisposable
                     new Vector2((vector2.X - 30), (vector2.Y + 20)), 
                     color, 
                     $"{npc.Name} {npc.NameId}");
-
         }
     }
     
@@ -84,6 +85,7 @@ public class RadarLogic : IDisposable
         foreach (var obj in objectTable)
         {
             if (obj is not BattleNpc mob) continue;
+            if (Info.IgnoreList.Contains(mob.NameId)) continue;
             nearbyMobs.Add(mob);
         }
 
