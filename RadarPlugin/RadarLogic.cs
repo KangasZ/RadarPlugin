@@ -18,6 +18,7 @@ using RadarPlugin;
 namespace RadarPlugin;
 public class RadarLogic : IDisposable
 {
+    private const float PI = 3.14159265359f;
     private DalamudPluginInterface pluginInterface { get; set; }
     private Configuration configInterface { get; set; }
     private DrawPoint myChara { get; set; }
@@ -49,8 +50,8 @@ public class RadarLogic : IDisposable
             if (!npc.IsValid()) continue;
             if (npc.CurrentHp <= 0) continue;
             if (npc.CurrentMp <= 0) continue;
-            Vector2 vector2;
-            var p = Services.GameGui.WorldToScreen(npc.Position, out vector2);
+            Vector2 onScreenPosition;
+            var p = Services.GameGui.WorldToScreen(npc.Position, out onScreenPosition);
             if (!p) continue;
             uint color =
                 ImGui.ColorConvertFloat4ToU32(Info.HuntRecolors.ContainsKey(npc.NameId)
@@ -58,32 +59,39 @@ public class RadarLogic : IDisposable
                     : new Vector4(1,0,0,1));
             
             //PluginLog.Debug($"Creating vector for character: {ObjectDraw.Name} at {X}, {Y}, {Z} : 2D Vector at {vector2.X}, {vector2.Y}");
-            ImGui.GetForegroundDrawList().AddCircleFilled(vector2, 5f, color, 8);
+            /*ImGui.GetForegroundDrawList().AddCircleFilled(vector2, 5f, color, 8);*/
             var text = $"{npc.Name}-{npc.NameId}";
             var textSize = ImGui.CalcTextSize(text);
-            ImGui.GetForegroundDrawList().
-                AddText(
-                    new Vector2((vector2.X - textSize.X/2f), (vector2.Y + textSize.X/2f)), 
-                    color, 
-                    $"{npc.Name} {npc.NameId}");
+            DrawHealthCircle(onScreenPosition, npc, 13f);
+            
         }
     }
     
-    private void DrawHealthCircle(Vector2 position, int health, int max_health, float radius)
+    private void DrawHealthCircle(Vector2 position, BattleNpc npc, float radius)
     {
         // FROM: https://www.unknowncheats.me/forum/direct3d/488372-health-circle-esp-imgui-function.html
-        float PI = 3.14159265359f;
-        string health_text = max_health.ToString();
-        float a_max = ((PI * 2.0f));
-        float v1 = (float)health / (float)max_health;
-        float difference = v1 - 1.0f;
-        Vector4 colorVector = new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f);
-        ImGui.GetForegroundDrawList().PathArcTo(position, radius, (-(a_max / 4.0f)) + (a_max / max_health) * (max_health - health), a_max - (a_max / 4.0f), 200 - 1);
-        ImGui.GetForegroundDrawList().PathStroke(ImGui.ColorConvertFloat4ToU32(colorVector), ImDrawFlags.None, 2.0f);
+        var v1 = (float)npc.CurrentHp / (float)npc.MaxHp;
+        var aMax = ((PI * 2.0f));
+        var difference = v1 - 1.0f;
+
+        var healthText = ((int)(v1*100)).ToString();
+        var tagText = $"{npc.Name}, {npc.NameId}";
+        
+        var healthTextSize = ImGui.CalcTextSize(healthText);
+        var tagTextSize = ImGui.CalcTextSize(tagText);
+        var colorWhite = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1.0f));
+        var colorHealth = ImGui.ColorConvertFloat4ToU32(new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f));
+        ImGui.GetForegroundDrawList().PathArcTo(position, radius, (-(aMax / 4.0f)) + (aMax / npc.MaxHp) * (npc.MaxHp - npc.CurrentHp), aMax - (aMax / 4.0f), 200 - 1);
+        ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
         ImGui.GetForegroundDrawList().AddText(
-            new Vector2((position.X - ImGui.CalcTextSize(health_text).X / 2.0f), (position.Y - ImGui.CalcTextSize(health_text).Y / 2.0f)),
-            ImGui.ColorConvertFloat4ToU32(new Vector4(1,1,1,1.0f)),
-            health_text);
+            new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
+            colorWhite,
+            healthText);
+        ImGui.GetForegroundDrawList().
+            AddText(
+                new Vector2(position.X - tagTextSize.X/2f, position.Y + tagTextSize.Y/2f), 
+                colorWhite, 
+                tagText);
     }
     
     private void BackgroundLoop()
