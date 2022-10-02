@@ -36,9 +36,9 @@ jobs:
             Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
             
       - name: Build
-        run: msbuild AntiAfkKick.sln /p:Configuration=Release
+        run: msbuild RadarPlugin.sln /p:Configuration=Release
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v2.2.1
         with:
-          path: ./UIAntiAfkKick/bin/x64/Release/*
+          path: ./RadarPlugin/bin/x64/Release/*
