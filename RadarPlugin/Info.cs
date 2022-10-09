@@ -20,4 +20,9 @@ public static class Info
         7974, //ball lightning
         7958, //hidden trap
     }; // TODO: probs not needed (cope)
+
+    public static HashSet<string> ObjectTrackList = new HashSet<string>()
+    {
+        "Treasure Chest",
+    };
 }

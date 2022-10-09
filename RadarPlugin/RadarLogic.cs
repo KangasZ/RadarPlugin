@@ -11,6 +11,7 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
+using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using RadarPlugin;
@@ -25,7 +26,7 @@ public class RadarLogic : IDisposable
     private Task backgroundLoop { get; set; }
     private bool keepRunning { get; set; }
     private ObjectTable objectTable { get; set; }
-    private List<BattleNpc> currentMobs { get; set; }
+    private List<GameObject> areaObjects { get; set; }
     private bool refreshing { get; set; }
     
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable)
@@ -38,32 +39,48 @@ public class RadarLogic : IDisposable
         this.pluginInterface.UiBuilder.Draw += DrawRadar;
         backgroundLoop = Task.Run(BackgroundLoop);
 
-        currentMobs = new List<BattleNpc>();
+        areaObjects = new List<GameObject>();
     }
 
     private void DrawRadar()
     {
         if (!configInterface.Enabled) return;
         if (refreshing) return;
-        foreach (var npc in currentMobs)
+        foreach (var areaObject in areaObjects)
         {
-            if (!npc.IsValid()) continue;
-            if (npc.CurrentHp <= 0) continue;
-            if (npc.CurrentMp <= 0) continue;
+            if (!areaObject.IsValid()) continue;
             Vector2 onScreenPosition;
-            var p = Services.GameGui.WorldToScreen(npc.Position, out onScreenPosition);
+            var p = Services.GameGui.WorldToScreen(areaObject.Position, out onScreenPosition);
             if (!p) continue;
-            uint color =
-                ImGui.ColorConvertFloat4ToU32(Info.HuntRecolors.ContainsKey(npc.NameId)
-                    ? Info.HuntRecolors[npc.NameId]
-                    : new Vector4(1,0,0,1));
-            
-            //PluginLog.Debug($"Creating vector for character: {ObjectDraw.Name} at {X}, {Y}, {Z} : 2D Vector at {vector2.X}, {vector2.Y}");
-            /*ImGui.GetForegroundDrawList().AddCircleFilled(vector2, 5f, color, 8);*/
-            var text = $"{npc.Name}-{npc.NameId}";
-            var textSize = ImGui.CalcTextSize(text);
-            DrawHealthCircle(onScreenPosition, npc, 13f);
-            
+
+            if (areaObject is BattleNpc mob)
+            {
+                if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
+                if (mob.CurrentHp <= 0) continue;
+                /*uint color =
+                    ImGui.ColorConvertFloat4ToU32(Info.HuntRecolors.ContainsKey(npc.NameId)
+                        ? Info.HuntRecolors[npc.NameId]
+                        : new Vector4(1,0,0,1));*/
+
+                /*ImGui.GetForegroundDrawList().AddCircleFilled(vector2, 5f, color, 8);*/
+                //var tagText = $"{areaObject.Name}, {areaObject.HitboxRadius}, {areaObject.Rotation}, {areaObject.SubKind}, {areaObject.DataId}";
+                //var tagTextSize = ImGui.CalcTextSize(tagText);
+                DrawHealthCircle(onScreenPosition, mob, 13f);
+                /*ImGui.GetForegroundDrawList().AddText(
+                    new Vector2(onScreenPosition.X - tagTextSize.X / 2f, onScreenPosition.Y + tagTextSize.Y / 2f),
+                    0xFFFFFFFF,
+                    tagText);*/
+            } 
+            else if (areaObject is GameObject obj)
+            {
+                var tagText = $"{areaObject.Name}, {areaObject.HitboxRadius}, {areaObject.Rotation}, {areaObject.SubKind}, {areaObject.DataId}";
+                var tagTextSize = ImGui.CalcTextSize(tagText);
+                //DrawHealthCircle(onScreenPosition, npc, 13f);
+                ImGui.GetForegroundDrawList().AddText(
+                    new Vector2(onScreenPosition.X - tagTextSize.X / 2f, onScreenPosition.Y + tagTextSize.Y / 2f),
+                    0xFF007EFF,
+                    tagText);
+            }
         }
     }
     
@@ -109,19 +126,35 @@ public class RadarLogic : IDisposable
     
     private void UpdateMobInfo()
     {
-        var nearbyMobs = new List<BattleNpc>();
+        var nearbyMobs = new List<GameObject>();
 
         foreach (var obj in objectTable)
         {
-            if (obj is not BattleNpc mob) continue;
-            if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
-            if (mob.CurrentMp <= 0) continue;
-            nearbyMobs.Add(mob);
+            if (obj.Name.TextValue.IsNullOrWhitespace()) continue;
+            if (obj is BattleChara mob)
+            {
+                if (mob.CurrentHp <= 0) continue;
+                if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
+                nearbyMobs.Add(obj);
+            }
+            else
+            {
+                if (!configInterface.ObjectShow) continue;
+                if (configInterface.UseObjectHideList)
+                {
+                    if (!Info.ObjectTrackList.Contains(obj.Name.TextValue)) continue;
+                }
+                
+                if (obj.SubKind == 4) continue;
+                nearbyMobs.Add(obj);
+            }
+            //if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
+            //if (mob.CurrentMp <= 0) continue;
         }
 
         refreshing = true; // TODO change off refreshing
-        currentMobs.Clear();
-        currentMobs.AddRange(nearbyMobs);
+        areaObjects.Clear();
+        areaObjects.AddRange(nearbyMobs);
         refreshing = false;
 
     }

@@ -84,14 +84,30 @@ public class PluginUi
                 configuration.Save();
             }
 
-            var instance = configuration.Instance;
-            if (ImGui.Checkbox("Only In Instance", ref instance))
+            var objSHow = configuration.ObjectShow;
+            if (ImGui.Checkbox("Show Objects", ref objSHow))
             {
-                configuration.Instance = instance;
+                configuration.ObjectShow = objSHow;
                 // can save immediately on change, if you don't want to provide a "Save and Close" button
                 configuration.Save();
             }
-
+            
+            var objHideList = configuration.UseObjectHideList;
+            if (ImGui.Checkbox("Use object hide list", ref objHideList))
+            {
+                configuration.UseObjectHideList = objHideList;
+                // can save immediately on change, if you don't want to provide a "Save and Close" button
+                configuration.Save();
+            }
+            
+            var players = configuration.ShowPlayers;
+            if (ImGui.Checkbox("Show Players", ref players))
+            {
+                configuration.ShowPlayers = players;
+                // can save immediately on change, if you don't want to provide a "Save and Close" button
+                configuration.Save();
+            }
+            
             ImGui.Spacing();
             if (ImGui.Button("Load Current Mobs"))
             {

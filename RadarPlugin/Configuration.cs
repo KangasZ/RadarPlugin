@@ -11,8 +11,10 @@ public class Configuration
     {
         public int Version { get; set; } = 0;
         public bool Enabled { get; set; } = true;
-        public float Seconds { get; set; } = 30f;
-        public bool Instance { get; set; } = false;
+        public bool ObjectShow { get; set; } = false;
+        public bool UseObjectHideList { get; set; } = false;
+        public bool ShowPlayers { get; set; } = false;
+
     }
 
     private Config cfg;
@@ -26,13 +28,19 @@ public class Configuration
         get => cfg.Enabled;
         set => cfg.Enabled = value;
     }
-    public float Seconds {
-        get => cfg.Seconds;
-        set => cfg.Seconds = value;
+    public bool ObjectShow {
+        get => cfg.ObjectShow;
+        set => cfg.ObjectShow = value;
     }
-    public bool Instance {
-        get => cfg.Instance;
-        set => cfg.Instance = value;
+    
+    public bool UseObjectHideList {
+        get => cfg.UseObjectHideList;
+        set => cfg.UseObjectHideList = value;
+    }
+    
+    public bool ShowPlayers {
+        get => cfg.ShowPlayers;
+        set => cfg.ShowPlayers = value;
     }
     
     [NonSerialized]
