@@ -61,10 +61,22 @@ public class PluginUi
         ImGui.SetNextWindowSizeConstraints(new Vector2(390, 500), new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
+            ImGui.BeginTable("objecttable", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.TableSetupColumn("Kind");
+            ImGui.TableSetupColumn("Name");
+            ImGui.TableSetupColumn("DataID");
+            ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
             {
-                ImGui.Text($"{x.SubKind} - {x.Name} - {x.DataId} {x.HitboxRadius}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{x.SubKind}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{x.Name}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{x.DataId}");
+                ImGui.TableNextRow();
             }
+            ImGui.EndTable();
         }
         if (!currentMobsVisible)
         {
