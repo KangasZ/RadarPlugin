@@ -4,7 +4,7 @@ using ImGuiNET;
 
 namespace RadarPlugin;
 
-public static class Info
+public static class UtilInfo
 {
     public static Dictionary<uint, Vector4> HuntRecolors = new Dictionary<uint, Vector4>()
     {
@@ -25,4 +25,16 @@ public static class Info
     {
         "Treasure Chest",
     };
+
+    public static Dictionary<uint, uint> BossFixList = new Dictionary<uint, uint>()
+    {
+        { 2137, 2319 }, //ultima weapon
+        { 4776, 5346 }  //sephirot
+    };
+
+    public static uint Color(byte r, byte b, byte g, byte o)
+    {
+        var intColor = (o << 24) | (g << 16) | (b << 8) | r;
+        return (uint)intColor;
+    }
 }

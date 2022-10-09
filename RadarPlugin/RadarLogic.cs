@@ -78,7 +78,7 @@ public class RadarLogic : IDisposable
                 //DrawHealthCircle(onScreenPosition, npc, 13f);
                 ImGui.GetForegroundDrawList().AddText(
                     new Vector2(onScreenPosition.X - tagTextSize.X / 2f, onScreenPosition.Y + tagTextSize.Y / 2f),
-                    0xFF007EFF,
+                    UtilInfo.Color(0xFF, 0x7E, 0x00, 0xFF),
                     tagText);
             }
         }
@@ -92,11 +92,11 @@ public class RadarLogic : IDisposable
         var difference = v1 - 1.0f;
 
         var healthText = ((int)(v1*100)).ToString();
-        var tagText = $"{npc.Name}, {npc.NameId}";
+        var tagText = $"{npc.Name}, {npc.NameId}, {npc.DataId}";
         
         var healthTextSize = ImGui.CalcTextSize(healthText);
         var tagTextSize = ImGui.CalcTextSize(tagText);
-        var colorWhite = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1.0f));
+        var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
         var colorHealth = ImGui.ColorConvertFloat4ToU32(new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f));
         ImGui.GetForegroundDrawList().PathArcTo(position, radius, (-(aMax / 4.0f)) + (aMax / npc.MaxHp) * (npc.MaxHp - npc.CurrentHp), aMax - (aMax / 4.0f), 200 - 1);
         ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
@@ -135,6 +135,7 @@ public class RadarLogic : IDisposable
             {
                 if (mob.CurrentHp <= 0) continue;
                 if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
+                if (UtilInfo.BossFixList.ContainsKey(mob.NameId) && mob.DataId != UtilInfo.BossFixList[mob.NameId]) continue;
                 nearbyMobs.Add(obj);
             }
             else
@@ -142,7 +143,7 @@ public class RadarLogic : IDisposable
                 if (!configInterface.ObjectShow) continue;
                 if (configInterface.UseObjectHideList)
                 {
-                    if (!Info.ObjectTrackList.Contains(obj.Name.TextValue)) continue;
+                    if (!UtilInfo.ObjectTrackList.Contains(obj.Name.TextValue)) continue;
                 }
                 
                 if (obj.SubKind == 4) continue;
