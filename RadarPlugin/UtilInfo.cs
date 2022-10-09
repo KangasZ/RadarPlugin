@@ -21,12 +21,26 @@ public static class UtilInfo
         7958, //hidden trap
     }; // TODO: probs not needed (cope)
 
-    public static HashSet<string> ObjectTrackList = new HashSet<string>()
+    /**
+     * This list is a dictionary for objects to track along with renames for them
+     * KEY: uint representing DATA ID
+     * Value: String representing name
+     */
+    public static Dictionary<uint, string> ObjectTrackList = new()
     {
-        "Treasure Chest",
+        {451, "Treasure Coffer"}, 
+        {2007358, "Gold Coffer"},
+        {802, "Bronze Coffer"},
+        {2007188, "Cairn of Passage"},
+        {2007357, "Silver Coffer"},
     };
 
-    public static Dictionary<uint, uint> BossFixList = new Dictionary<uint, uint>()
+    /**
+     * This is a dictionary to fix bosses that have duplicates on the screen
+     * KEY: uint representing name id
+     * VALUE: uint representing DATA ID
+     */
+    public static Dictionary<uint, uint> BossFixList = new()
     {
         { 2137, 2319 }, //ultima weapon
         { 4776, 5346 }  //sephirot

@@ -1,73 +1,94 @@
-﻿using ImGuiNET;
+﻿using System.Collections.Generic;
+using ImGuiNET;
 using System.Numerics;
+using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 
 namespace RadarPlugin;
 
 public class PluginUi
 {
+    private List<GameObject> areaObjects { get; set; }
+    private ObjectTable objectTable { get; set; }
     private Configuration configuration { get; set; }
     private DalamudPluginInterface dalamudPluginInterface { get; set; }
     //private ImGuiScene.TextureWrap goatImage;
 
     // this extra bool exists for ImGui, since you can't ref a property
-    private bool visible;
+    private bool mainWindowVisible;
 
-    public bool Visible
+    public bool MainWindowVisible
     {
-        get { return visible; }
-        set { visible = value; }
+        get { return mainWindowVisible; }
+        set { mainWindowVisible = value; }
     }
 
-    private bool settingsVisible;
+    private bool currentMobsVisible;
 
-    public bool SettingsVisible
+    public bool CurrentMobsVisible
     {
-        get { return settingsVisible; }
-        set { settingsVisible = value; }
+        get { return currentMobsVisible; }
+        set { currentMobsVisible = value; }
     }
 
     // passing in the image here just for simplicity
-    public PluginUi(DalamudPluginInterface dalamudPluginInterface, Configuration configuration)
+    public PluginUi(DalamudPluginInterface dalamudPluginInterface, Configuration configuration, ObjectTable objectTable)
     {
+        areaObjects = new List<GameObject>();
+        this.objectTable = objectTable;
         this.configuration = configuration;
         this.dalamudPluginInterface = dalamudPluginInterface;
-        this.dalamudPluginInterface.UiBuilder.Draw += DrawUi;
+        this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.dalamudPluginInterface.UiBuilder.OpenConfigUi += OpenUi;
     }
 
     public void Draw()
     {
-        // This is our only draw handler attached to UIBuilder, so it needs to be
-        // able to draw any windows we might have open.
-        // Each method checks its own visibility/state to ensure it only draws when
-        // it actually makes sense.
-        // There are other ways to do this, but it is generally best to keep the number of
-        // draw delegates as low as possible.
-
         DrawMainWindow();
+        DrawCurrentMobsWindow();
     }
 
-    public void DrawUi()
+    private void DrawCurrentMobsWindow()
     {
-        Draw();
+        if (!CurrentMobsVisible)
+        {
+            return;
+        }
+        
+        ImGui.SetNextWindowSize(new Vector2(375, 500), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSizeConstraints(new Vector2(390, 500), new Vector2(float.MaxValue, float.MaxValue));
+        if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
+        {
+            foreach (var x in areaObjects)
+            {
+                ImGui.Text($"{x.SubKind} - {x.Name} - {x.DataId} {x.HitboxRadius}");
+            }
+        }
+        if (!currentMobsVisible)
+        {
+            PluginLog.Debug("Clearing Area Objects");
+            areaObjects.Clear();
+        }
+        ImGui.End();
     }
 
     public void OpenUi()
     {
-        Visible = true;
+        MainWindowVisible = true;
     }
     
     public void DrawMainWindow()
     {
-        if (!Visible)
+        if (!MainWindowVisible)
         {
             return;
         }
         
         ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(new Vector2(390, 330), new Vector2(float.MaxValue, float.MaxValue));
-        if (ImGui.Begin("Radar Plugin", ref visible,
+        if (ImGui.Begin("Radar Plugin", ref mainWindowVisible,
                 ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoResize))
         {
             ImGui.Text(
@@ -75,12 +96,10 @@ public class PluginUi
             ImGui.Spacing();
             ImGui.Text($"Plugin Enabled: {configuration.Enabled}");
 
-            // can't ref a property, so use a local copy
             var configValue = configuration.Enabled;
             if (ImGui.Checkbox("Enable", ref configValue))
             {
                 configuration.Enabled = configValue;
-                // can save immediately on change, if you don't want to provide a "Save and Close" button
                 configuration.Save();
             }
 
@@ -88,7 +107,6 @@ public class PluginUi
             if (ImGui.Checkbox("Show Objects", ref objSHow))
             {
                 configuration.ObjectShow = objSHow;
-                // can save immediately on change, if you don't want to provide a "Save and Close" button
                 configuration.Save();
             }
             
@@ -96,7 +114,6 @@ public class PluginUi
             if (ImGui.Checkbox("Use object hide list", ref objHideList))
             {
                 configuration.UseObjectHideList = objHideList;
-                // can save immediately on change, if you don't want to provide a "Save and Close" button
                 configuration.Save();
             }
             
@@ -104,14 +121,15 @@ public class PluginUi
             if (ImGui.Checkbox("Show Players", ref players))
             {
                 configuration.ShowPlayers = players;
-                // can save immediately on change, if you don't want to provide a "Save and Close" button
                 configuration.Save();
             }
             
             ImGui.Spacing();
-            if (ImGui.Button("Load Current Mobs"))
+            if (ImGui.Button("Load Current Objects"))
             {
-                
+                CurrentMobsVisible = true;
+                areaObjects.Clear();
+                areaObjects.AddRange(objectTable);
             }
         }
 

@@ -17,6 +17,7 @@ using ImGuiNET;
 using RadarPlugin;
 
 namespace RadarPlugin;
+
 public class RadarLogic : IDisposable
 {
     private const float PI = 3.14159265359f;
@@ -28,7 +29,7 @@ public class RadarLogic : IDisposable
     private ObjectTable objectTable { get; set; }
     private List<GameObject> areaObjects { get; set; }
     private bool refreshing { get; set; }
-    
+
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable)
     {
         this.objectTable = objectTable;
@@ -57,23 +58,22 @@ public class RadarLogic : IDisposable
             {
                 if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
                 if (mob.CurrentHp <= 0) continue;
-                /*uint color =
-                    ImGui.ColorConvertFloat4ToU32(Info.HuntRecolors.ContainsKey(npc.NameId)
-                        ? Info.HuntRecolors[npc.NameId]
-                        : new Vector4(1,0,0,1));*/
-
-                /*ImGui.GetForegroundDrawList().AddCircleFilled(vector2, 5f, color, 8);*/
-                //var tagText = $"{areaObject.Name}, {areaObject.HitboxRadius}, {areaObject.Rotation}, {areaObject.SubKind}, {areaObject.DataId}";
-                //var tagTextSize = ImGui.CalcTextSize(tagText);
                 DrawHealthCircle(onScreenPosition, mob, 13f);
-                /*ImGui.GetForegroundDrawList().AddText(
-                    new Vector2(onScreenPosition.X - tagTextSize.X / 2f, onScreenPosition.Y + tagTextSize.Y / 2f),
-                    0xFFFFFFFF,
-                    tagText);*/
-            } 
+
+            }
             else if (areaObject is GameObject obj)
             {
-                var tagText = $"{areaObject.Name}, {areaObject.HitboxRadius}, {areaObject.Rotation}, {areaObject.SubKind}, {areaObject.DataId}";
+                var tagText = String.Empty;
+                if (UtilInfo.ObjectTrackList.ContainsKey(obj.DataId))
+                {
+                    tagText = $"{UtilInfo.ObjectTrackList[obj.DataId]}, {obj.DataId}";
+                }
+                else
+                {
+                    tagText =
+                        $"{areaObject.Name}, {areaObject.SubKind}, {areaObject.DataId}";
+                }
+
                 var tagTextSize = ImGui.CalcTextSize(tagText);
                 //DrawHealthCircle(onScreenPosition, npc, 13f);
                 ImGui.GetForegroundDrawList().AddText(
@@ -83,7 +83,7 @@ public class RadarLogic : IDisposable
             }
         }
     }
-    
+
     private void DrawHealthCircle(Vector2 position, BattleNpc npc, float radius)
     {
         // FROM: https://www.unknowncheats.me/forum/direct3d/488372-health-circle-esp-imgui-function.html
@@ -91,26 +91,26 @@ public class RadarLogic : IDisposable
         var aMax = ((PI * 2.0f));
         var difference = v1 - 1.0f;
 
-        var healthText = ((int)(v1*100)).ToString();
+        var healthText = ((int)(v1 * 100)).ToString();
         var tagText = $"{npc.Name}, {npc.NameId}, {npc.DataId}";
-        
+
         var healthTextSize = ImGui.CalcTextSize(healthText);
         var tagTextSize = ImGui.CalcTextSize(tagText);
         var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
         var colorHealth = ImGui.ColorConvertFloat4ToU32(new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f));
-        ImGui.GetForegroundDrawList().PathArcTo(position, radius, (-(aMax / 4.0f)) + (aMax / npc.MaxHp) * (npc.MaxHp - npc.CurrentHp), aMax - (aMax / 4.0f), 200 - 1);
+        ImGui.GetForegroundDrawList().PathArcTo(position, radius,
+            (-(aMax / 4.0f)) + (aMax / npc.MaxHp) * (npc.MaxHp - npc.CurrentHp), aMax - (aMax / 4.0f), 200 - 1);
         ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
         ImGui.GetForegroundDrawList().AddText(
             new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
             colorWhite,
             healthText);
-        ImGui.GetForegroundDrawList().
-            AddText(
-                new Vector2(position.X - tagTextSize.X/2f, position.Y + tagTextSize.Y/2f), 
-                colorWhite, 
-                tagText);
+        ImGui.GetForegroundDrawList().AddText(
+            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
+            colorWhite,
+            tagText);
     }
-    
+
     private void BackgroundLoop()
     {
         while (keepRunning)
@@ -120,10 +120,11 @@ public class RadarLogic : IDisposable
                 UpdateMobInfo();
                 PluginLog.Debug("Refreshed Mob Info!");
             }
+
             Thread.Sleep(2000);
         }
     }
-    
+
     private void UpdateMobInfo()
     {
         var nearbyMobs = new List<GameObject>();
@@ -135,7 +136,8 @@ public class RadarLogic : IDisposable
             {
                 if (mob.CurrentHp <= 0) continue;
                 if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
-                if (UtilInfo.BossFixList.ContainsKey(mob.NameId) && mob.DataId != UtilInfo.BossFixList[mob.NameId]) continue;
+                if (UtilInfo.BossFixList.ContainsKey(mob.NameId) &&
+                    mob.DataId != UtilInfo.BossFixList[mob.NameId]) continue;
                 nearbyMobs.Add(obj);
             }
             else
@@ -143,10 +145,9 @@ public class RadarLogic : IDisposable
                 if (!configInterface.ObjectShow) continue;
                 if (configInterface.UseObjectHideList)
                 {
-                    if (!UtilInfo.ObjectTrackList.Contains(obj.Name.TextValue)) continue;
+                    if (!UtilInfo.ObjectTrackList.ContainsKey(obj.DataId)) continue;
                 }
-                
-                if (obj.SubKind == 4) continue;
+
                 nearbyMobs.Add(obj);
             }
             //if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
@@ -157,7 +158,6 @@ public class RadarLogic : IDisposable
         areaObjects.Clear();
         areaObjects.AddRange(nearbyMobs);
         refreshing = false;
-
     }
 
     public void Dispose()

@@ -22,7 +22,7 @@ public sealed class RadarPlugin : IDalamudPlugin
         pluginInterface.Create<Services>(); // Todo: Remove this
         this.objectTable = objectTable;
         configuration = new Configuration(pluginInterface);
-        pluginUi = new PluginUi(pluginInterface, configuration);
+        pluginUi = new PluginUi(pluginInterface, configuration, this.objectTable);
         pluginCommands = new PluginCommands(commandManager, pluginUi);
         radarLogic = new RadarLogic(pluginInterface, configuration, this.objectTable);
     }
