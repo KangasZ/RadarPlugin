@@ -23,7 +23,6 @@ public class RadarLogic : IDisposable
     private const float PI = 3.14159265359f;
     private DalamudPluginInterface pluginInterface { get; set; }
     private Configuration configInterface { get; set; }
-    private DrawPoint myChara { get; set; }
     private Task backgroundLoop { get; set; }
     private bool keepRunning { get; set; }
     private ObjectTable objectTable { get; set; }
@@ -71,7 +70,7 @@ public class RadarLogic : IDisposable
                 else
                 {
                     tagText =
-                        $"{areaObject.Name}, {areaObject.SubKind}, {areaObject.DataId}";
+                        $"{areaObject.Name}";
                 }
 
                 var tagTextSize = ImGui.CalcTextSize(tagText);
@@ -92,7 +91,7 @@ public class RadarLogic : IDisposable
         var difference = v1 - 1.0f;
 
         var healthText = ((int)(v1 * 100)).ToString();
-        var tagText = $"{npc.Name}, {npc.NameId}, {npc.DataId}";
+        var tagText = $"{npc.Name}";
 
         var healthTextSize = ImGui.CalcTextSize(healthText);
         var tagTextSize = ImGui.CalcTextSize(tagText);

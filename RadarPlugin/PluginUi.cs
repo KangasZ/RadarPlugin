@@ -57,13 +57,14 @@ public class PluginUi
             return;
         }
         
-        ImGui.SetNextWindowSize(new Vector2(375, 500), ImGuiCond.FirstUseEver);
-        ImGui.SetNextWindowSizeConstraints(new Vector2(390, 500), new Vector2(float.MaxValue, float.MaxValue));
+        ImGui.SetNextWindowSize(new Vector2(420, 500), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSizeConstraints(new Vector2(420, 500), new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
-            ImGui.BeginTable("objecttable", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.BeginTable("objecttable", 4, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
+            ImGui.TableSetupColumn("NameID");
             ImGui.TableSetupColumn("DataID");
             ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
@@ -72,6 +73,11 @@ public class PluginUi
                 ImGui.Text($"{x.SubKind}");
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.Name}");
+                ImGui.TableNextColumn();
+                if (x is BattleNpc mob)
+                {
+                    ImGui.Text($"{mob.NameId}");
+                }
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.DataId}");
                 ImGui.TableNextRow();
