@@ -48,17 +48,13 @@ public class RadarLogic : IDisposable
         if (refreshing) return;
         foreach (var areaObject in areaObjects)
         {
-            if (!areaObject.IsValid()) continue;
             Vector2 onScreenPosition;
             var p = Services.GameGui.WorldToScreen(areaObject.Position, out onScreenPosition);
             if (!p) continue;
 
             if (areaObject is BattleNpc mob)
             {
-                if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
-                if (mob.CurrentHp <= 0) continue;
                 DrawHealthCircle(onScreenPosition, mob, 13f);
-
             }
             else if (areaObject is GameObject obj)
             {
@@ -70,7 +66,7 @@ public class RadarLogic : IDisposable
                 else
                 {
                     tagText =
-                        $"{areaObject.Name}";
+                        $"{areaObject.Name} {areaObject.DataId}";
                 }
 
                 var tagTextSize = ImGui.CalcTextSize(tagText);
@@ -91,7 +87,7 @@ public class RadarLogic : IDisposable
         var difference = v1 - 1.0f;
 
         var healthText = ((int)(v1 * 100)).ToString();
-        var tagText = $"{npc.Name}";
+        var tagText = $"{npc.Name} {npc.DataId}";
 
         var healthTextSize = ImGui.CalcTextSize(healthText);
         var tagTextSize = ImGui.CalcTextSize(tagText);
@@ -120,7 +116,7 @@ public class RadarLogic : IDisposable
                 PluginLog.Debug("Refreshed Mob Info!");
             }
 
-            Thread.Sleep(2000);
+            Thread.Sleep(1000);
         }
     }
 
@@ -130,13 +126,25 @@ public class RadarLogic : IDisposable
 
         foreach (var obj in objectTable)
         {
-            if (obj.Name.TextValue.IsNullOrWhitespace()) continue;
+            if (!obj.IsValid()) continue;
+            //if (obj.Name.TextValue.IsNullOrWhitespace()) continue;
             if (obj is BattleChara mob)
             {
+                if (obj is BattleNpc npc)
+                {
+                    if (npc.BattleNpcKind != BattleNpcSubKind.Enemy)
+                        continue;
+                }
+
                 if (mob.CurrentHp <= 0) continue;
                 if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
-                if (UtilInfo.BossFixList.ContainsKey(mob.NameId) &&
-                    mob.DataId != UtilInfo.BossFixList[mob.NameId]) continue;
+                if (configInterface.UseObjectHideList)
+                {
+                    if (UtilInfo.BossFixList.ContainsKey(mob.NameId) &&
+                        mob.DataId != UtilInfo.BossFixList[mob.NameId]) continue;
+                    if (UtilInfo.IgnoreList.Contains(mob.NameId)) continue;
+                }
+
                 nearbyMobs.Add(obj);
             }
             else
@@ -144,13 +152,17 @@ public class RadarLogic : IDisposable
                 if (!configInterface.ObjectShow) continue;
                 if (configInterface.UseObjectHideList)
                 {
-                    if (!UtilInfo.ObjectTrackList.ContainsKey(obj.DataId)) continue;
+                    if (UtilInfo.ObjectTrackList.ContainsKey(obj.DataId) ||
+                        UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))
+                    {
+                        nearbyMobs.Add(obj);
+                    }
+
+                    continue;
                 }
 
                 nearbyMobs.Add(obj);
             }
-            //if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
-            //if (mob.CurrentMp <= 0) continue;
         }
 
         refreshing = true; // TODO change off refreshing
