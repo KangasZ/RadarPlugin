@@ -6,18 +6,30 @@ namespace RadarPlugin;
 
 public static class UtilInfo
 {
+    /**
+     * What is this used for again?
+     * Oh yeah, thats right, it's not (currently)
+     */
     public static Dictionary<uint, Vector4> HuntRecolors = new Dictionary<uint, Vector4>()
     {
         { 8131, new Vector4(1f,1f,1f,1f) } // white - Hydatos Elemental 
     };
 
+    /**
+     * Name ID's to NOT render
+     */
     public static HashSet<uint> IgnoreList = new HashSet<uint>()
     {
         7977, // Relative Virtue
         7958, // Eureka Hidden Trap
         7982, // Shadow in Ozma Fight
+        7971, //Munderg on owain
+        7974, //Ball Lightning on Raiden
     };
 
+    /**
+     * Strings to render
+     */
     public static HashSet<string> ObjectStringList = new()
     {
         "Treasure Coffer"
@@ -45,12 +57,12 @@ public static class UtilInfo
      */
     public static Dictionary<uint, uint> BossFixList = new()
     {
-        { 2137, 2319 }, //ultima weapon
         { 4776, 5346 }, //sephirot
         //{ 9818, 9818 }, //ART
         { 7973, 9733 }, // Raiden
         { 7976, 9692 }, // AV
         { 7981, 9704 }, // Ozma
+        { 7970, 9821 }, // Owain
     };
 
     public static uint Color(byte r, byte b, byte g, byte o)
