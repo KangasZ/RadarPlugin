@@ -23,8 +23,9 @@ public static class UtilInfo
         7977, // Relative Virtue
         7958, // Eureka Hidden Trap
         7982, // Shadow in Ozma Fight
-        7971, //Munderg on owain
-        7974, //Ball Lightning on Raiden
+        7971, // Munderg on owain
+        7974, // Ball Lightning on Raiden
+        108, // scarmiglione fight barriers
     };
 
     /**
@@ -63,6 +64,7 @@ public static class UtilInfo
         { 7976, 9692 }, // AV
         { 7981, 9704 }, // Ozma
         { 7970, 9821 }, // Owain
+        { 11372, 14789 }, // Scarmiglione in Trioa
     };
 
     public static uint Color(byte r, byte b, byte g, byte o)
