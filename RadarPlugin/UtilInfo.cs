@@ -26,6 +26,8 @@ public static class UtilInfo
         7971, // Munderg on owain
         7974, // Ball Lightning on Raiden
         108, // scarmiglione fight barriers
+        7969, //art spears
+        10745, // akantha in hesperos fight
     };
 
     /**
@@ -59,12 +61,14 @@ public static class UtilInfo
     public static Dictionary<uint, uint> BossFixList = new()
     {
         { 4776, 5346 }, //sephirot
-        //{ 9818, 9818 }, //ART
+        { 7968, 9818 }, //ART
         { 7973, 9733 }, // Raiden
         { 7976, 9692 }, // AV
         { 7981, 9704 }, // Ozma
         { 7970, 9821 }, // Owain
         { 11372, 14789 }, // Scarmiglione in Trioa
+        { 10744, 13824 }, // Hesperos 2
+        { 10742, 13821 }, //hesperos 1
     };
 
     public static uint Color(byte r, byte b, byte g, byte o)

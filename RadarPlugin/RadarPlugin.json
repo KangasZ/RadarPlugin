@@ -1,16 +1,7 @@
 ﻿{
-  "Disabled": false,
-  "ScheduledForDeletion": false,
-  "InstalledFromUrl": "",
-  "IsThirdParty": false,
-  "EffectiveVersion": "1.0.0.0",
+  "Name": "Radar Plugin",
   "Author": "KangasZ",
-  "Name": "3D Radar Plugin",
-  "Punchline": "3D-Radar Plugin",
-  "Description": "Uh IDK",
-  "Changelog": null,
-  "Tags": null,
-  "InternalName": "3DRadar",
-  "AssemblyVersion": "1.0.0.0",
-  "RepoUrl": "https://github.com/KangasZ/RadarPlugin"
+  "Description": "Radar plugin that will break your eyes.",
+  "RepoUrl": "https://github.com/KangasZ/RadarPlugin",
+  "Punchline": "See things through walls like a badass."
 }

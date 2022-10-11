@@ -1,14 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Name>3D Radar Plugin</Name>
-		<Punchline>No more wiggle checks!</Punchline>
+		<Name>Radar Plugin</Name>
+		<Punchline>3D-Radar ESP</Punchline>
 		<Authors>KangasZ</Authors>
-		<Version>3.1.0.1</Version>
-		<RootNamespace>UiAntiAfkKick</RootNamespace>
-		<Description>Dont die\n/antiafk</Description>
-		<Copyright>None. Leave me alone</Copyright>
-		<PackageProjectUrl>https://github.com/KangasZ/UIAntiAfkKick</PackageProjectUrl>
+		<Version>1.0.0.1</Version>
+		<RootNamespace>RadarPlugin</RootNamespace>
+		<Copyright>MIT</Copyright>
 	</PropertyGroup>
 
 	<PropertyGroup>
