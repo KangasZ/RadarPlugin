@@ -14,7 +14,7 @@ public class PluginCommands : IDisposable
         this.commandManager = commandManager;
         this.commandManager.AddHandler("/radar", new CommandInfo(SettingsCommand)
         {
-            HelpMessage = "Opens configuration for anti afk plugin",
+            HelpMessage = "Opens configuration",
             ShowInHelp = true
         });
     }

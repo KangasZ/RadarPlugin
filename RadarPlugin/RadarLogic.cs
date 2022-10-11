@@ -61,12 +61,12 @@ public class RadarLogic : IDisposable
                 var tagText = String.Empty;
                 if (UtilInfo.ObjectTrackList.ContainsKey(obj.DataId))
                 {
-                    tagText = $"{UtilInfo.ObjectTrackList[obj.DataId]}, {obj.DataId}";
+                    tagText = $"{UtilInfo.ObjectTrackList[obj.DataId]}";
                 }
                 else
                 {
                     tagText =
-                        $"{areaObject.Name} {areaObject.DataId}";
+                        $"{areaObject.Name}";
                 }
 
                 var tagTextSize = ImGui.CalcTextSize(tagText);
@@ -87,7 +87,7 @@ public class RadarLogic : IDisposable
         var difference = v1 - 1.0f;
 
         var healthText = ((int)(v1 * 100)).ToString();
-        var tagText = $"{npc.Name} {npc.DataId}";
+        var tagText = $"{npc.Name}";
 
         var healthTextSize = ImGui.CalcTextSize(healthText);
         var tagTextSize = ImGui.CalcTextSize(tagText);
@@ -138,7 +138,7 @@ public class RadarLogic : IDisposable
 
                 if (mob.CurrentHp <= 0) continue;
                 if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
-                if (configInterface.UseObjectHideList)
+                if (!configInterface.DebugMode)
                 {
                     if (UtilInfo.BossFixList.ContainsKey(mob.NameId) &&
                         mob.DataId != UtilInfo.BossFixList[mob.NameId]) continue;
@@ -150,7 +150,7 @@ public class RadarLogic : IDisposable
             else
             {
                 if (!configInterface.ObjectShow) continue;
-                if (configInterface.UseObjectHideList)
+                if (!configInterface.DebugMode)
                 {
                     if (UtilInfo.ObjectTrackList.ContainsKey(obj.DataId) ||
                         UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))

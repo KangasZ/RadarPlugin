@@ -131,10 +131,10 @@ public class PluginUi
                 configuration.Save();
             }
             
-            var objHideList = configuration.UseObjectHideList;
-            if (ImGui.Checkbox("Use object hide list", ref objHideList))
+            var objHideList = configuration.DebugMode;
+            if (ImGui.Checkbox("Debug Mode Enabled", ref objHideList))
             {
-                configuration.UseObjectHideList = objHideList;
+                configuration.DebugMode = objHideList;
                 configuration.Save();
             }
             

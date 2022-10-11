@@ -12,7 +12,7 @@ public class Configuration
         public int Version { get; set; } = 0;
         public bool Enabled { get; set; } = true;
         public bool ObjectShow { get; set; } = false;
-        public bool UseObjectHideList { get; set; } = false;
+        public bool DebugMode { get; set; } = false;
         public bool ShowPlayers { get; set; } = false;
 
     }
@@ -33,9 +33,9 @@ public class Configuration
         set => cfg.ObjectShow = value;
     }
     
-    public bool UseObjectHideList {
-        get => cfg.UseObjectHideList;
-        set => cfg.UseObjectHideList = value;
+    public bool DebugMode {
+        get => cfg.DebugMode;
+        set => cfg.DebugMode = value;
     }
     
     public bool ShowPlayers {
