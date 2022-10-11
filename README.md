@@ -2,11 +2,10 @@
 ## Description
 A Dalamud plugin for 3d-radaring
 
-Go and download the artifact and run it as a dev plugin. 
+To use this, install the dev directory... here:
+`https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/custom_repos.json`
 
-Goto the top -> Actions -> Build RadarPlugin then at the button click 'Artifact' to use it :).
-
-This is my own pet project, please understand that.
+This is my own pet project, please understand that. PR or issue if you feel like it.
 
 ![](https://i.imgur.com/jPlpQ7C.png)
 
