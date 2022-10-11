@@ -148,6 +148,7 @@ public class PluginUi
             ImGui.Spacing();
             if (ImGui.Button("Load Current Objects"))
             {
+                PluginLog.Debug("Pulling Area Objects");
                 CurrentMobsVisible = true;
                 areaObjects.Clear();
                 areaObjects.AddRange(objectTable);
