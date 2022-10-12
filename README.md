@@ -3,7 +3,7 @@
 A Dalamud plugin for 3d-radaring
 
 To use this, install the dev directory... here:
-`https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/custom_repos.json`
+`https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json`
 
 This is my own pet project, please understand that. PR or issue if you feel like it.
 
