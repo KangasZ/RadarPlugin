@@ -8,7 +8,7 @@ on:
 env:
   SOLUTION_NAME: RadarPlugin
   INTERNAL_NAME: RadarPlugin
-  RELEASE_DIR: ./bin/Release/RadarPlugin
+  RELEASE_DIR: ./bin/x64/Release/RadarPlugin
   PERSONAL_PLUGIN_REPO: KangasZ/DalamudPluginRepository
   BRANCH: main
 
