@@ -10,7 +10,7 @@ env:
   INTERNAL_NAME: RadarPlugin
   RELEASE_DIR: ./bin/Release/RadarPlugin
   PERSONAL_PLUGIN_REPO: KangasZ/DalamudPluginRepository
-  BRANCH: master
+  BRANCH: main
 
 jobs:
   build:
