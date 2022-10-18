@@ -18,7 +18,7 @@ public static class UtilInfo
     /**
      * Name ID's to NOT render
      */
-    public static HashSet<uint> IgnoreList = new HashSet<uint>()
+    public static HashSet<uint> NameIdIgnoreList = new HashSet<uint>()
     {
         7977, // Relative Virtue
         7958, // Eureka Hidden Trap
@@ -28,14 +28,27 @@ public static class UtilInfo
         108, // scarmiglione fight barriers
         7969, //art spears
         10745, // akantha in hesperos fight
+        8346, //granite goal in e4s
     };
 
+    /**
+     * This is a dictionary to fix bosses that have duplicates on the screen
+     * KEY: uint representing name id
+     * VALUE: uint representing DATA ID
+     */
+    public static HashSet<uint> DataIdIgnoreList = new()
+    {
+        9020, // Titan e4s
+        5352, // sephirot
+    };
+    
     /**
      * Strings to render
      */
     public static HashSet<string> ObjectStringList = new()
     {
-        "Treasure Coffer"
+        "Treasure Coffer",
+        "Personal Spoils"
     };
 
     /**
@@ -69,6 +82,7 @@ public static class UtilInfo
         { 11372, 14789 }, // Scarmiglione in Trioa
         { 10744, 13824 }, // Hesperos 2
         { 10742, 13821 }, //hesperos 1
+        { 8350, 10639 }, //titan in e4s
     };
 
     public static uint Color(byte r, byte b, byte g, byte o)

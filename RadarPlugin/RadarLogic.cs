@@ -65,8 +65,16 @@ public class RadarLogic : IDisposable
                 }
                 else
                 {
-                    tagText =
-                        $"{areaObject.Name}";
+                    if (configInterface.DebugMode)
+                    {
+                        tagText =
+                            $"{areaObject.Name}, {areaObject.DataId}";
+                    }
+                    else
+                    {
+                        tagText =
+                            $"{areaObject.Name}";
+                    }
                 }
 
                 var tagTextSize = ImGui.CalcTextSize(tagText);
@@ -87,8 +95,17 @@ public class RadarLogic : IDisposable
         var difference = v1 - 1.0f;
 
         var healthText = ((int)(v1 * 100)).ToString();
-        var tagText = $"{npc.Name}";
-
+        var tagText = String.Empty;
+        if (configInterface.DebugMode)
+        {
+            tagText =
+                $"{npc.Name}, {npc.DataId}";
+        }
+        else
+        {
+            tagText =
+                $"{npc.Name}";
+        }
         var healthTextSize = ImGui.CalcTextSize(healthText);
         var tagTextSize = ImGui.CalcTextSize(tagText);
         var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
@@ -140,9 +157,7 @@ public class RadarLogic : IDisposable
                 if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
                 if (!configInterface.DebugMode)
                 {
-                    if (UtilInfo.BossFixList.ContainsKey(mob.NameId) &&
-                        mob.DataId != UtilInfo.BossFixList[mob.NameId]) continue;
-                    if (UtilInfo.IgnoreList.Contains(mob.NameId)) continue;
+                    if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) || UtilInfo.NameIdIgnoreList.Contains(mob.NameId)) continue;
                 }
 
                 nearbyMobs.Add(obj);
