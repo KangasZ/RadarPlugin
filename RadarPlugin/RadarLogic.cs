@@ -31,11 +31,15 @@ public class RadarLogic : IDisposable
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable)
     {
+        // Creates Dependencies
         this.objectTable = objectTable;
         this.pluginInterface = pluginInterface;
-        configInterface = configuration;
+        this.configInterface = configuration;
+
+        // Loads plugin
         PluginLog.Debug($"Radar Loaded");
         keepRunning = true;
+        // TODO: In the future adjust this
         this.pluginInterface.UiBuilder.Draw += DrawRadar;
         backgroundLoop = Task.Run(BackgroundLoop);
 
@@ -52,31 +56,31 @@ public class RadarLogic : IDisposable
             var p = Services.GameGui.WorldToScreen(areaObject.Position, out onScreenPosition);
             if (!p) continue;
 
-            if (areaObject is BattleNpc mob)
+            var tagText = String.Empty;
+            if (configInterface.DebugMode)
             {
-                DrawHealthCircle(onScreenPosition, mob, 13f);
+                tagText =
+                    $"{areaObject.Name}, {areaObject.DataId}";
+            }
+            else
+            {
+                tagText =
+                    $"{areaObject.Name}";
+            }
+
+            if (areaObject is BattleChara mob)
+            {
+                if (mob.SubKind == 4) // Currently player support will not work.
+                {
+                    DrawMob(onScreenPosition, mob, 13f);
+                }
             }
             else if (areaObject is GameObject obj)
             {
-                var tagText = String.Empty;
-                if (UtilInfo.RenameList.ContainsKey(obj.DataId))
+                if (UtilInfo.RenameList.ContainsKey(areaObject.DataId))
                 {
-                    tagText = $"{UtilInfo.RenameList[obj.DataId]}";
+                    tagText = $"{UtilInfo.RenameList[areaObject.DataId]}";
                 }
-                else
-                {
-                    if (configInterface.DebugMode)
-                    {
-                        tagText =
-                            $"{areaObject.Name}, {areaObject.DataId}";
-                    }
-                    else
-                    {
-                        tagText =
-                            $"{areaObject.Name}";
-                    }
-                }
-
                 var tagTextSize = ImGui.CalcTextSize(tagText);
                 //DrawHealthCircle(onScreenPosition, npc, 13f);
                 ImGui.GetForegroundDrawList().AddText(
@@ -87,7 +91,7 @@ public class RadarLogic : IDisposable
         }
     }
 
-    private void DrawHealthCircle(Vector2 position, BattleNpc npc, float radius)
+    private void DrawMob(Vector2 position, BattleChara npc, float radius)
     {
         // FROM: https://www.unknowncheats.me/forum/direct3d/488372-health-circle-esp-imgui-function.html
         var v1 = (float)npc.CurrentHp / (float)npc.MaxHp;
@@ -106,6 +110,7 @@ public class RadarLogic : IDisposable
             tagText =
                 $"{npc.Name}";
         }
+
         var healthTextSize = ImGui.CalcTextSize(healthText);
         var tagTextSize = ImGui.CalcTextSize(tagText);
         var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
@@ -143,6 +148,12 @@ public class RadarLogic : IDisposable
 
         foreach (var obj in objectTable)
         {
+            if (configInterface.DebugMode)
+            {
+                nearbyMobs.Add(obj);
+                continue;
+            }
+
             if (!obj.IsValid()) continue;
             if (obj is BattleChara mob)
             {
@@ -154,28 +165,17 @@ public class RadarLogic : IDisposable
 
                 if (mob.CurrentHp <= 0) continue;
                 if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
-                if (!configInterface.DebugMode)
-                {
-                    if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId)) continue;
-                }
-
+                if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
+                    configInterface.DataIdIgnoreList.Contains(mob.DataId)) continue;
                 nearbyMobs.Add(obj);
             }
-            else
+            else if (configInterface.ObjectShow)
             {
-                if (!configInterface.ObjectShow) continue;
-                if (!configInterface.DebugMode)
+                if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
+                    UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))
                 {
-                    if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
-                        UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))
-                    {
-                        nearbyMobs.Add(obj);
-                    }
-
-                    continue;
+                    nearbyMobs.Add(obj);
                 }
-
-                nearbyMobs.Add(obj);
             }
         }
 

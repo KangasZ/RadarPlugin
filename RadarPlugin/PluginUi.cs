@@ -31,15 +31,7 @@ public class PluginUi
         get { return currentMobsVisible; }
         set { currentMobsVisible = value; }
     }
-
-    private bool stringRenameWindowVisible;
-
-    public bool StringRenameWindowVisible
-    {
-        get { return stringRenameWindowVisible; }
-        set { stringRenameWindowVisible = value; }
-    }
-
+    
     public PluginUi(DalamudPluginInterface dalamudPluginInterface, Configuration configuration, ObjectTable objectTable)
     {
         areaObjects = new List<GameObject>();
@@ -55,7 +47,7 @@ public class PluginUi
         MainWindowVisible = true;
     }
     
-    public void Draw()
+    private void Draw()
     {
         DrawMainWindow();
         DrawCurrentMobsWindow();
@@ -107,7 +99,7 @@ public class PluginUi
                 }
                 ImGui.TableNextColumn();
                 bool doesExist = configuration.DataIdIgnoreList.Contains(x.DataId);
-                if (ImGui.Checkbox("Delete", ref doesExist))
+                if (ImGui.Checkbox("", ref doesExist))
                 {
                     if (doesExist)
                     {
@@ -117,6 +109,7 @@ public class PluginUi
                     {
                         configuration.DataIdIgnoreList.Remove(x.DataId);
                     }
+                    configuration.Save();
                 }
                 ImGui.TableNextRow();
             }
@@ -130,7 +123,7 @@ public class PluginUi
         ImGui.End();
     }
 
-    public void DrawMainWindow()
+    private void DrawMainWindow()
     {
         if (!MainWindowVisible)
         {
