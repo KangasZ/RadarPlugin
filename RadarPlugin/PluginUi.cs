@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ImGuiNET;
 using System.Numerics;
 using Dalamud.Game.ClientState.Objects;
@@ -14,9 +15,7 @@ public class PluginUi
     private ObjectTable objectTable { get; set; }
     private Configuration configuration { get; set; }
     private DalamudPluginInterface dalamudPluginInterface { get; set; }
-    //private ImGuiScene.TextureWrap goatImage;
 
-    // this extra bool exists for ImGui, since you can't ref a property
     private bool mainWindowVisible;
 
     public bool MainWindowVisible
@@ -33,7 +32,14 @@ public class PluginUi
         set { currentMobsVisible = value; }
     }
 
-    // passing in the image here just for simplicity
+    private bool stringRenameWindowVisible;
+
+    public bool StringRenameWindowVisible
+    {
+        get { return stringRenameWindowVisible; }
+        set { stringRenameWindowVisible = value; }
+    }
+
     public PluginUi(DalamudPluginInterface dalamudPluginInterface, Configuration configuration, ObjectTable objectTable)
     {
         areaObjects = new List<GameObject>();
@@ -43,7 +49,12 @@ public class PluginUi
         this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.dalamudPluginInterface.UiBuilder.OpenConfigUi += OpenUi;
     }
-
+    
+    public void OpenUi()
+    {
+        MainWindowVisible = true;
+    }
+    
     public void Draw()
     {
         DrawMainWindow();
@@ -57,8 +68,8 @@ public class PluginUi
             return;
         }
         
-        ImGui.SetNextWindowSize(new Vector2(420, 500), ImGuiCond.FirstUseEver);
-        ImGui.SetNextWindowSizeConstraints(new Vector2(420, 500), new Vector2(float.MaxValue, float.MaxValue));
+        ImGui.SetNextWindowSize(new Vector2(560, 500), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSizeConstraints(new Vector2(560, 500), new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
             ImGui.BeginTable("objecttable", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
@@ -67,6 +78,8 @@ public class PluginUi
             ImGui.TableSetupColumn("DataID");
             ImGui.TableSetupColumn("NameID");
             ImGui.TableSetupColumn("CurrHP");
+            ImGui.TableSetupColumn("Blocked");
+            ImGui.TableSetupColumn("Custom Block");
             ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
             {
@@ -83,6 +96,28 @@ public class PluginUi
                     ImGui.TableNextColumn();
                     ImGui.Text($"{mob.CurrentHp}");
                 }
+                else
+                {
+                    ImGui.TableNextColumn();
+                }
+                ImGui.TableNextColumn();
+                if (UtilInfo.DataIdIgnoreList.Contains(x.DataId))
+                {
+                    ImGui.Text($"X");
+                }
+                ImGui.TableNextColumn();
+                bool doesExist = configuration.DataIdIgnoreList.Contains(x.DataId);
+                if (ImGui.Checkbox("Delete", ref doesExist))
+                {
+                    if (doesExist)
+                    {
+                        configuration.DataIdIgnoreList.Add(x.DataId);
+                    }
+                    else
+                    {
+                        configuration.DataIdIgnoreList.Remove(x.DataId);
+                    }
+                }
                 ImGui.TableNextRow();
             }
             ImGui.EndTable();
@@ -95,11 +130,6 @@ public class PluginUi
         ImGui.End();
     }
 
-    public void OpenUi()
-    {
-        MainWindowVisible = true;
-    }
-    
     public void DrawMainWindow()
     {
         if (!MainWindowVisible)
@@ -115,10 +145,9 @@ public class PluginUi
             ImGui.Text(
                 "A 3d-radar plugin. This is basically a hack please leave me alone.");
             ImGui.Spacing();
-            ImGui.Text($"Plugin Enabled: {configuration.Enabled}");
 
             var configValue = configuration.Enabled;
-            if (ImGui.Checkbox("Enable", ref configValue))
+            if (ImGui.Checkbox("Enabled", ref configValue))
             {
                 configuration.Enabled = configValue;
                 configuration.Save();
@@ -127,6 +156,7 @@ public class PluginUi
             var objSHow = configuration.ObjectShow;
             if (ImGui.Checkbox("Show Objects", ref objSHow))
             {
+                ImGui.SetTooltip("Enables showing objects on the screen.");
                 configuration.ObjectShow = objSHow;
                 configuration.Save();
             }

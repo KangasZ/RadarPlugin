@@ -59,9 +59,9 @@ public class RadarLogic : IDisposable
             else if (areaObject is GameObject obj)
             {
                 var tagText = String.Empty;
-                if (UtilInfo.ObjectTrackList.ContainsKey(obj.DataId))
+                if (UtilInfo.RenameList.ContainsKey(obj.DataId))
                 {
-                    tagText = $"{UtilInfo.ObjectTrackList[obj.DataId]}";
+                    tagText = $"{UtilInfo.RenameList[obj.DataId]}";
                 }
                 else
                 {
@@ -144,7 +144,6 @@ public class RadarLogic : IDisposable
         foreach (var obj in objectTable)
         {
             if (!obj.IsValid()) continue;
-            //if (obj.Name.TextValue.IsNullOrWhitespace()) continue;
             if (obj is BattleChara mob)
             {
                 if (obj is BattleNpc npc)
@@ -157,7 +156,7 @@ public class RadarLogic : IDisposable
                 if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
                 if (!configInterface.DebugMode)
                 {
-                    if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) || UtilInfo.NameIdIgnoreList.Contains(mob.NameId)) continue;
+                    if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId)) continue;
                 }
 
                 nearbyMobs.Add(obj);
@@ -167,7 +166,7 @@ public class RadarLogic : IDisposable
                 if (!configInterface.ObjectShow) continue;
                 if (!configInterface.DebugMode)
                 {
-                    if (UtilInfo.ObjectTrackList.ContainsKey(obj.DataId) ||
+                    if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
                         UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))
                     {
                         nearbyMobs.Add(obj);
