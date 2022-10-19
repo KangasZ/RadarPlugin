@@ -56,23 +56,16 @@ public class RadarLogic : IDisposable
             var p = Services.GameGui.WorldToScreen(areaObject.Position, out onScreenPosition);
             if (!p) continue;
 
-            var tagText = String.Empty;
-            if (configInterface.DebugMode)
-            {
-                tagText =
-                    $"{areaObject.Name}, {areaObject.DataId}";
-            }
-            else
-            {
-                tagText =
-                    $"{areaObject.Name}";
-            }
+            var tagText = GetText(areaObject);
 
             if (areaObject is BattleChara mob)
             {
-                if (mob.SubKind == 4) // Currently player support will not work.
+                if (mob.SubKind == 5) // Mobs
                 {
-                    DrawMob(onScreenPosition, mob, 13f);
+                    DrawMob(onScreenPosition, mob, tagText);
+                } else if (mob.SubKind == 4) // Players
+                {
+                    DrawPlayer(onScreenPosition, mob, tagText);
                 }
             }
             else if (areaObject is GameObject obj)
@@ -82,52 +75,71 @@ public class RadarLogic : IDisposable
                     tagText = $"{UtilInfo.RenameList[areaObject.DataId]}";
                 }
                 var tagTextSize = ImGui.CalcTextSize(tagText);
-                //DrawHealthCircle(onScreenPosition, npc, 13f);
+                
                 ImGui.GetForegroundDrawList().AddText(
                     new Vector2(onScreenPosition.X - tagTextSize.X / 2f, onScreenPosition.Y + tagTextSize.Y / 2f),
-                    UtilInfo.Color(0xFF, 0x7E, 0x00, 0xFF),
+                    UtilInfo.Color(0xFF, 0x7E, 0x00, 0xFF), //  #FF7E00
                     tagText);
             }
         }
     }
 
-    private void DrawMob(Vector2 position, BattleChara npc, float radius)
+    private void DrawPlayer(Vector2 position, BattleChara chara, string mobText)
     {
-        // FROM: https://www.unknowncheats.me/forum/direct3d/488372-health-circle-esp-imgui-function.html
-        var v1 = (float)npc.CurrentHp / (float)npc.MaxHp;
-        var aMax = ((PI * 2.0f));
-        var difference = v1 - 1.0f;
-
-        var healthText = ((int)(v1 * 100)).ToString();
-        var tagText = String.Empty;
-        if (configInterface.DebugMode)
-        {
-            tagText =
-                $"{npc.Name}, {npc.DataId}";
-        }
-        else
-        {
-            tagText =
-                $"{npc.Name}";
-        }
-
-        var healthTextSize = ImGui.CalcTextSize(healthText);
-        var tagTextSize = ImGui.CalcTextSize(tagText);
-        var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
-        var colorHealth = ImGui.ColorConvertFloat4ToU32(new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f));
-        ImGui.GetForegroundDrawList().PathArcTo(position, radius,
-            (-(aMax / 4.0f)) + (aMax / npc.MaxHp) * (npc.MaxHp - npc.CurrentHp), aMax - (aMax / 4.0f), 200 - 1);
-        ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
+        var tagTextSize = ImGui.CalcTextSize(chara.Name.TextValue);
         ImGui.GetForegroundDrawList().AddText(
-            new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
-            colorWhite,
-            healthText);
+            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
+            UtilInfo.Color(0x00, 0x99, 0x99, 0xff), //  #009999
+            chara.Name.TextValue);
+    }
+    
+    private void DrawMob(Vector2 position, BattleChara npc, string mobText)
+    {
+        if (true) // TODO: Make config option
+        {
+            DrawHealthCircle(position, npc.MaxHp, npc.CurrentHp);
+        }
+
+        var tagTextSize = ImGui.CalcTextSize(mobText);
+        var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
         ImGui.GetForegroundDrawList().AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
             colorWhite,
-            tagText);
+            mobText);
     }
 
+    private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, bool includeText = true)
+    {
+        var radius = 13f;
+        var v1 = (float)currHp / (float)maxHp;
+        var aMax = PI * 2.0f;
+        var difference = v1 - 1.0f;
+
+        var healthText = ((int)(v1 * 100)).ToString();   
+        var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
+        var colorHealth = ImGui.ColorConvertFloat4ToU32(new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f));
+        ImGui.GetForegroundDrawList().PathArcTo(position, radius,
+            (-(aMax / 4.0f)) + (aMax / maxHp) * (maxHp - currHp), aMax - (aMax / 4.0f), 200 - 1);
+        ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
+        if (includeText)
+        {
+            var healthTextSize = ImGui.CalcTextSize(healthText);
+            ImGui.GetForegroundDrawList().AddText(
+                new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
+                colorWhite,
+                healthText);
+        }
+    }
+
+    private string GetText(GameObject obj)
+    {
+        if (configInterface.DebugMode)
+        {
+            return $"{obj.Name}, {obj.DataId}";
+        }
+        return $"{obj.Name}";
+    }
+    
     private void BackgroundLoop()
     {
         while (keepRunning)
