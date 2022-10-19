@@ -52,47 +52,52 @@ public class RadarLogic : IDisposable
         if (refreshing) return;
         foreach (var areaObject in areaObjects)
         {
-            Vector2 onScreenPosition;
-            var p = Services.GameGui.WorldToScreen(areaObject.Position, out onScreenPosition);
+            var p = Services.GameGui.WorldToScreen(areaObject.Position, out var onScreenPosition);
             if (!p) continue;
 
             var tagText = GetText(areaObject);
 
-            if (areaObject is BattleChara mob)
+            switch (areaObject)
             {
-                if (mob.SubKind == 5) // Mobs
-                {
+                // Mobs
+                case BattleNpc mob:
                     DrawMob(onScreenPosition, mob, tagText);
-                } else if (mob.SubKind == 4) // Players
+                    break;
+                // Players
+                case BattleChara chara:
                 {
-                    DrawPlayer(onScreenPosition, mob, tagText);
+                    DrawPlayer(onScreenPosition, chara, tagText);
+                    break;
                 }
-            }
-            else if (areaObject is GameObject obj)
-            {
-                if (UtilInfo.RenameList.ContainsKey(areaObject.DataId))
+                // Objects
+                default:
                 {
-                    tagText = $"{UtilInfo.RenameList[areaObject.DataId]}";
+                    if (UtilInfo.RenameList.ContainsKey(areaObject.DataId))
+                    {
+                        tagText = UtilInfo.RenameList[areaObject.DataId];
+                    }
+
+                    var tagTextSize = ImGui.CalcTextSize(tagText);
+
+                    ImGui.GetForegroundDrawList().AddText(
+                        new Vector2(onScreenPosition.X - tagTextSize.X / 2f, onScreenPosition.Y + tagTextSize.Y / 2f),
+                        UtilInfo.Color(0xFF, 0x7E, 0x00, 0xFF), //  #FF7E00
+                        tagText);
+                    break;
                 }
-                var tagTextSize = ImGui.CalcTextSize(tagText);
-                
-                ImGui.GetForegroundDrawList().AddText(
-                    new Vector2(onScreenPosition.X - tagTextSize.X / 2f, onScreenPosition.Y + tagTextSize.Y / 2f),
-                    UtilInfo.Color(0xFF, 0x7E, 0x00, 0xFF), //  #FF7E00
-                    tagText);
             }
         }
     }
 
-    private void DrawPlayer(Vector2 position, BattleChara chara, string mobText)
+    private void DrawPlayer(Vector2 position, BattleChara chara, string charaText)
     {
-        var tagTextSize = ImGui.CalcTextSize(chara.Name.TextValue);
+        var tagTextSize = ImGui.CalcTextSize(charaText);
         ImGui.GetForegroundDrawList().AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
             UtilInfo.Color(0x00, 0x99, 0x99, 0xff), //  #009999
-            chara.Name.TextValue);
+            charaText);
     }
-    
+
     private void DrawMob(Vector2 position, BattleChara npc, string mobText)
     {
         if (true) // TODO: Make config option
@@ -110,25 +115,23 @@ public class RadarLogic : IDisposable
 
     private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, bool includeText = true)
     {
-        var radius = 13f;
+        const float radius = 13f;
         var v1 = (float)currHp / (float)maxHp;
         var aMax = PI * 2.0f;
         var difference = v1 - 1.0f;
 
-        var healthText = ((int)(v1 * 100)).ToString();   
+        var healthText = ((int)(v1 * 100)).ToString();
         var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
         var colorHealth = ImGui.ColorConvertFloat4ToU32(new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f));
         ImGui.GetForegroundDrawList().PathArcTo(position, radius,
             (-(aMax / 4.0f)) + (aMax / maxHp) * (maxHp - currHp), aMax - (aMax / 4.0f), 200 - 1);
         ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
-        if (includeText)
-        {
-            var healthTextSize = ImGui.CalcTextSize(healthText);
-            ImGui.GetForegroundDrawList().AddText(
-                new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
-                colorWhite,
-                healthText);
-        }
+        if (!includeText) return;
+        var healthTextSize = ImGui.CalcTextSize(healthText);
+        ImGui.GetForegroundDrawList().AddText(
+            new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
+            colorWhite,
+            healthText);
     }
 
     private string GetText(GameObject obj)
@@ -137,9 +140,10 @@ public class RadarLogic : IDisposable
         {
             return $"{obj.Name}, {obj.DataId}";
         }
+
         return $"{obj.Name}";
     }
-    
+
     private void BackgroundLoop()
     {
         while (keepRunning)
@@ -167,27 +171,32 @@ public class RadarLogic : IDisposable
             }
 
             if (!obj.IsValid()) continue;
-            if (obj is BattleChara mob)
+            switch (obj)
             {
-                if (obj is BattleNpc npc)
-                {
-                    if (npc.BattleNpcKind != BattleNpcSubKind.Enemy)
-                        continue;
-                }
-
-                if (mob.CurrentHp <= 0) continue;
-                if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
-                if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
-                    configInterface.DataIdIgnoreList.Contains(mob.DataId)) continue;
-                nearbyMobs.Add(obj);
-            }
-            else if (configInterface.ObjectShow)
-            {
-                if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
-                    UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))
-                {
+                // Mobs
+                case BattleNpc mob:
+                    if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
+                    if (mob.CurrentHp <= 0) continue;
+                    if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
+                    if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
+                        configInterface.DataIdIgnoreList.Contains(mob.DataId)) continue;
                     nearbyMobs.Add(obj);
-                }
+                    continue;
+                // Players
+                case BattleChara chara:
+                    if (!configInterface.ShowPlayers) continue;
+                    if (chara.CurrentHp <= 0) continue;
+                    nearbyMobs.Add(obj);
+                    continue;
+                // Objects
+                default:
+                    if (!configInterface.ObjectShow) continue;
+                    if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
+                        UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))
+                    {
+                        nearbyMobs.Add(obj);
+                    }
+                    continue;
             }
         }
 
