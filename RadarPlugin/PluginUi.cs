@@ -64,11 +64,10 @@ public class PluginUi
         ImGui.SetNextWindowSizeConstraints(new Vector2(560, 500), new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
-            ImGui.BeginTable("objecttable", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.BeginTable("objecttable", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
             ImGui.TableSetupColumn("DataID");
-            ImGui.TableSetupColumn("NameID");
             ImGui.TableSetupColumn("CurrHP");
             ImGui.TableSetupColumn("Blocked");
             ImGui.TableSetupColumn("Custom Block");
@@ -84,24 +83,23 @@ public class PluginUi
                 ImGui.TableNextColumn();
                 if (x is BattleNpc mob)
                 {
-                    ImGui.Text($"{mob.NameId}");
-                    ImGui.TableNextColumn();
                     ImGui.Text($"{mob.CurrentHp}");
-                }
-                else
-                {
-                    ImGui.TableNextColumn();
                 }
                 ImGui.TableNextColumn();
                 if (UtilInfo.DataIdIgnoreList.Contains(x.DataId))
                 {
-                    ImGui.Text($"X");
+                    ImGui.Text($"Yes");
+                }
+                else
+                {
+                    ImGui.Text("No");
                 }
                 ImGui.TableNextColumn();
                 bool doesExist = configuration.DataIdIgnoreList.Contains(x.DataId);
                 if (ImGui.Checkbox("", ref doesExist))
                 {
-                    if (doesExist)
+                    PluginLog.Debug($"{doesExist}, {configuration.DataIdIgnoreList}");
+                    if (configuration.DataIdIgnoreList.Contains(x.DataId))
                     {
                         configuration.DataIdIgnoreList.Add(x.DataId);
                     }

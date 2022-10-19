@@ -23,6 +23,7 @@ public static class UtilInfo
     {
         9020, // Titan e4s
         5352, // sephirot
+        14816,
     };
     
     /**
