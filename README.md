@@ -1,8 +1,8 @@
 # 3D Radar Plugin
 ## Description
-This plugin is essentially an ESP you would see in a FPS game. It was originally intended for POTD and BA, but surely has uses outside of those contexts.
+This plugin is essentially an ESP you would see in a FPS game. It was originally intended for POTD and BA, but surely has uses outside of those contexts. 
 
-This plugin is designed as a relatively advanced plugin and may over time get more useful for non-advanced users. This is a personal project so it is up to my own free time and willingness to support the plugin. Feel free to PR or open issues, though there are no garuntees I will look at them and or accept them.
+This plugin is not necessarily user friendly currently. This is a personal project so it is up to my own free time and willingness to support the plugin. Feel free to PR or open issues, though there are no garuntees I will look at them and or accept them.
 
 ## Installation
 To use the plugin, please install the custom repository with the following link:
