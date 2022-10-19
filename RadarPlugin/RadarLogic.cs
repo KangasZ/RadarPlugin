@@ -61,12 +61,14 @@ public class RadarLogic : IDisposable
             {
                 // Mobs
                 case BattleNpc mob:
-                    DrawMob(onScreenPosition, mob, tagText);
+                    var color = UtilInfo.Color(0x00, 0x99, 0x99, 0xff);
+                    DrawEsp(onScreenPosition, mob, tagText, color, drawHealthCircle: true);
                     break;
                 // Players
                 case BattleChara chara:
                 {
-                    DrawPlayer(onScreenPosition, chara, tagText);
+                    var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
+                    DrawEsp(onScreenPosition, chara, tagText, colorWhite);
                     break;
                 }
                 // Objects
@@ -89,18 +91,9 @@ public class RadarLogic : IDisposable
         }
     }
 
-    private void DrawPlayer(Vector2 position, BattleChara chara, string charaText)
+    private void DrawEsp(Vector2 position, Character npc, string mobText, uint color, bool drawHealthCircle = false)
     {
-        var tagTextSize = ImGui.CalcTextSize(charaText);
-        ImGui.GetForegroundDrawList().AddText(
-            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
-            UtilInfo.Color(0x00, 0x99, 0x99, 0xff), //  #009999
-            charaText);
-    }
-
-    private void DrawMob(Vector2 position, BattleChara npc, string mobText)
-    {
-        if (true) // TODO: Make config option
+        if (drawHealthCircle) // TODO: Make config option
         {
             DrawHealthCircle(position, npc.MaxHp, npc.CurrentHp);
         }
