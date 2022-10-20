@@ -95,13 +95,15 @@ public class PluginUi
                     ImGui.Text("No");
                 }
                 ImGui.TableNextColumn();
+                // TODO: Change this all to a button that opens a window 
                 bool doesExist = configuration.DataIdIgnoreList.Contains(x.DataId);
-                if (ImGui.Checkbox("", ref doesExist))
+                if (ImGui.Checkbox($"{configuration.DataIdIgnoreList.Contains(x.DataId)}", ref doesExist))
                 {
                     PluginLog.Debug($"{doesExist}, {configuration.DataIdIgnoreList}");
-                    if (configuration.DataIdIgnoreList.Contains(x.DataId))
+                    if (!configuration.DataIdIgnoreList.Contains(x.DataId))
                     {
                         configuration.DataIdIgnoreList.Add(x.DataId);
+                        PluginLog.Debug("Added DataID?");
                     }
                     else
                     {

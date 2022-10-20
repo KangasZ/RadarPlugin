@@ -156,12 +156,6 @@ public class RadarLogic : IDisposable
 
         foreach (var obj in objectTable)
         {
-            if (configInterface.DebugMode)
-            {
-                nearbyMobs.Add(obj);
-                continue;
-            }
-
             if (!obj.IsValid()) continue;
             switch (obj)
             {
@@ -178,12 +172,22 @@ public class RadarLogic : IDisposable
                 // Players
                 case BattleChara chara:
                     if (!configInterface.ShowPlayers) continue;
+                    if (configInterface.DebugMode)
+                    {
+                        nearbyMobs.Add(obj);
+                        continue;
+                    }
                     if (chara.CurrentHp <= 0) continue;
                     nearbyMobs.Add(obj);
                     continue;
                 // Objects
                 default:
                     if (!configInterface.ObjectShow) continue;
+                    if (configInterface.DebugMode)
+                    {
+                        nearbyMobs.Add(obj);
+                        continue;
+                    }
                     if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
                         UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))
                     {
