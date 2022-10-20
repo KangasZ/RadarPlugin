@@ -61,14 +61,15 @@ public class RadarLogic : IDisposable
             {
                 // Mobs
                 case BattleNpc mob:
-                    var color = UtilInfo.Color(0x00, 0x99, 0x99, 0xff);
-                    DrawEsp(onScreenPosition, mob, tagText, color, drawHealthCircle: true);
+                    if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
+                    var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
+                    DrawEsp(onScreenPosition, mob, tagText, colorWhite, drawHealthCircle: true);
                     break;
                 // Players
                 case BattleChara chara:
                 {
-                    var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
-                    DrawEsp(onScreenPosition, chara, tagText, colorWhite);
+                    var color = UtilInfo.Color(0x00, 0x99, 0x99, 0xff);
+                    DrawEsp(onScreenPosition, chara, tagText, color);
                     break;
                 }
                 // Objects
@@ -99,10 +100,9 @@ public class RadarLogic : IDisposable
         }
 
         var tagTextSize = ImGui.CalcTextSize(mobText);
-        var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
         ImGui.GetForegroundDrawList().AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
-            colorWhite,
+            color,
             mobText);
     }
 
