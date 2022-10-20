@@ -61,7 +61,6 @@ public class RadarLogic : IDisposable
             {
                 // Mobs
                 case BattleNpc mob:
-                    if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
                     DrawEsp(onScreenPosition, mob, tagText, colorWhite, drawHealthCircle: true);
                     break;
@@ -168,6 +167,7 @@ public class RadarLogic : IDisposable
             {
                 // Mobs
                 case BattleNpc mob:
+                    if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
                     if (mob.CurrentHp <= 0) continue;
                     if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
