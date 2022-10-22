@@ -21,9 +21,13 @@ public static class UtilInfo
      */
     public static HashSet<uint> DataIdIgnoreList = new()
     {
-        9020, // Titan e4s
+        9020, // a bunch of stuff
         5352, // sephirot
-        14816,
+        14816, // sephirot
+        14835, // silkie
+        14836, // eastern ewer
+        14766, // Infern brand
+        14764, // Infern brand
     };
     
     /**
