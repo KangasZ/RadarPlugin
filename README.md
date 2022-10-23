@@ -13,6 +13,7 @@ Please do not include my projects in other custom repos like Aku API.
 
 ## Examples
 ![Picture of the plugin in action](https://i.imgur.com/jPlpQ7C.png)
+![UI](https://i.imgur.com/if8VGLZ.png)
 
 ## Notice
 This is distributed with the MIT license. I take absolutely no responsibility for what users do with the plugin.
