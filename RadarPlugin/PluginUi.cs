@@ -12,6 +12,7 @@ namespace RadarPlugin;
 public class PluginUi
 {
     private List<GameObject> areaObjects { get; set; }
+    private GameObject localObject { get; set; }
     private ObjectTable objectTable { get; set; }
     private Configuration configuration { get; set; }
     private DalamudPluginInterface dalamudPluginInterface { get; set; }
@@ -32,6 +33,14 @@ public class PluginUi
         set { currentMobsVisible = value; }
     }
     
+    private bool mobEditVisible;
+
+    public bool MobEditVisible
+    {
+        get { return mobEditVisible; }
+        set { mobEditVisible = value; }
+    }
+
     public PluginUi(DalamudPluginInterface dalamudPluginInterface, Configuration configuration, ObjectTable objectTable)
     {
         areaObjects = new List<GameObject>();
@@ -51,6 +60,89 @@ public class PluginUi
     {
         DrawMainWindow();
         DrawCurrentMobsWindow();
+        DrawMobEditWindow();
+    }
+
+    private void DrawMobEditWindow()
+    {
+        if (!MobEditVisible)
+        {
+            return;
+        }
+
+        var size = new Vector2(600, 300);
+        ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
+        ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
+        if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible))
+        {
+            ImGui.Columns(2);
+            var utilIgnored = UtilInfo.DataIdIgnoreList.Contains(localObject.DataId);
+            var userIgnored = configuration.DataIdIgnoreList.Contains(localObject.DataId);
+            ImGui.SetColumnWidth(0, ImGui.GetWindowWidth() / 2);
+            // Setup First column
+            ImGui.Text("Information Table");
+            ImGui.BeginTable("localobjecttable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.TableSetupColumn("Setting");
+            ImGui.TableSetupColumn("Value");
+            ImGui.TableHeadersRow();
+            ImGui.TableNextColumn();
+            ImGui.Text("Name");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{localObject.Name}");
+            ImGui.TableNextColumn();
+            ImGui.Text("Data ID");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{localObject.DataId}");
+            ImGui.EndTable();
+            
+            ImGui.Text("Disabled table");
+            ImGui.BeginTable("disabledbylocalobjecttable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.TableSetupColumn("Source");
+            ImGui.TableSetupColumn("Value");
+            ImGui.TableHeadersRow();
+            ImGui.TableNextColumn();
+            ImGui.Text("Utility");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{utilIgnored}");
+            ImGui.TableNextColumn();
+            ImGui.Text("User");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{userIgnored}");
+            ImGui.TableNextColumn();
+            ImGui.Text("Overall");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{userIgnored || utilIgnored}");
+            ImGui.TableNextColumn();
+            ImGui.Text("Disablable?");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{localObject.DataId != 0}");
+            ImGui.EndTable();
+
+            // Setup second column
+            ImGui.NextColumn();
+            ImGui.Text("You cannot disable a mod with a data id of 0");
+            if (ImGui.Button($"Add to block list"))
+            {
+                if (!configuration.DataIdIgnoreList.Contains(localObject.DataId))
+                {
+                    if (localObject.DataId != 0)
+                    {
+                        configuration.DataIdIgnoreList.Add(localObject.DataId);
+                        configuration.Save();
+                    }
+                }
+            }
+            if (ImGui.Button($"Remove from block list"))
+            {
+                if (configuration.DataIdIgnoreList.Contains(localObject.DataId))
+                {
+                    configuration.DataIdIgnoreList.Remove(localObject.DataId);
+                    configuration.Save();
+                }
+            }
+        }
+        ImGui.End();
+        
     }
 
     private void DrawCurrentMobsWindow()
@@ -59,18 +151,20 @@ public class PluginUi
         {
             return;
         }
-        
-        ImGui.SetNextWindowSize(new Vector2(560, 500), ImGuiCond.FirstUseEver);
-        ImGui.SetNextWindowSizeConstraints(new Vector2(560, 500), new Vector2(float.MaxValue, float.MaxValue));
+
+        var size = new Vector2(560, 500);
+        ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
-            ImGui.BeginTable("objecttable", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.BeginTable("objecttable", 7, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
             ImGui.TableSetupColumn("DataID");
             ImGui.TableSetupColumn("CurrHP");
             ImGui.TableSetupColumn("Blocked");
-            ImGui.TableSetupColumn("Custom Block");
+            ImGui.TableSetupColumn("Quick Block");
+            ImGui.TableSetupColumn("Settings");
             ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
             {
@@ -88,28 +182,48 @@ public class PluginUi
                 ImGui.TableNextColumn();
                 if (UtilInfo.DataIdIgnoreList.Contains(x.DataId))
                 {
-                    ImGui.Text($"Yes");
+                    ImGui.Text($"Default");
+                }
+                else if (configuration.DataIdIgnoreList.Contains(x.DataId))
+                {
+                    ImGui.Text("User");
                 }
                 else
                 {
                     ImGui.Text("No");
                 }
                 ImGui.TableNextColumn();
-                // TODO: Change this all to a button that opens a window 
-                bool doesExist = configuration.DataIdIgnoreList.Contains(x.DataId);
-                if (ImGui.Checkbox($"{configuration.DataIdIgnoreList.Contains(x.DataId)}", ref doesExist))
+                if (x.DataId != 0)
                 {
-                    PluginLog.Debug($"{doesExist}, {configuration.DataIdIgnoreList}");
-                    if (!configuration.DataIdIgnoreList.Contains(x.DataId))
+                    var configBlocked = configuration.DataIdIgnoreList.Contains(x.DataId);
+                    if (ImGui.Checkbox($"##{x.Address}", ref configBlocked))
                     {
-                        configuration.DataIdIgnoreList.Add(x.DataId);
-                        PluginLog.Debug("Added DataID?");
+                        if (configBlocked)
+                        {
+                            if (!configuration.DataIdIgnoreList.Contains(x.DataId))
+                            {
+                                configuration.DataIdIgnoreList.Add(x.DataId);
+                            }
+                        }
+                        else
+                        {
+                            configuration.DataIdIgnoreList.Remove(x.DataId);
+                        }
+
+                        configuration.Save();
                     }
-                    else
-                    {
-                        configuration.DataIdIgnoreList.Remove(x.DataId);
-                    }
-                    configuration.Save();
+                }
+                else
+                {
+                    ImGui.Text("O");
+                }
+
+                ImGui.TableNextColumn();
+                // TODO: Change this all to a button that opens a window 
+                if (ImGui.Button($"Edit##{x.Address}"))
+                {
+                    localObject = x;
+                    MobEditVisible = true;
                 }
                 ImGui.TableNextRow();
             }
@@ -129,9 +243,10 @@ public class PluginUi
         {
             return;
         }
-        
-        ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
-        ImGui.SetNextWindowSizeConstraints(new Vector2(390, 330), new Vector2(float.MaxValue, float.MaxValue));
+
+        var size = new Vector2(375, 250);
+        ImGui.SetNextWindowSize(size); //, ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible,
                 ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoResize))
         {

@@ -27,7 +27,7 @@ public static class UtilInfo
         14835, // silkie
         14836, // eastern ewer
         14766, // Infern brand
-        14764, // Infern brand
+        14764, // Infern brand 2
     };
     
     /**
