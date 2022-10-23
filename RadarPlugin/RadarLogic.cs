@@ -197,7 +197,7 @@ public class RadarLogic : IDisposable
             }
         }
 
-        refreshing = true; // TODO change off refreshing
+        refreshing = true; // TODO change to mutex off refreshing
         areaObjects.Clear();
         areaObjects.AddRange(nearbyMobs);
         refreshing = false;

@@ -219,7 +219,6 @@ public class PluginUi
                 }
 
                 ImGui.TableNextColumn();
-                // TODO: Change this all to a button that opens a window 
                 if (ImGui.Button($"Edit##{x.Address}"))
                 {
                     localObject = x;
