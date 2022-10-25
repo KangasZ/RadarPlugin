@@ -331,6 +331,12 @@ public class PluginUi : IDisposable
                     configuration.ShowAreaObjects = showAreaObjs;
                     configuration.Save();
                 }
+                var showAetherytes = configuration.ShowAetherytes;
+                if (ImGui.Checkbox("Aetherytes", ref showAetherytes))
+                {
+                    configuration.ShowAetherytes = showAetherytes;
+                    configuration.Save();
+                }
                 ImGui.EndTabItem();
                 ImGui.NextColumn();
             }
