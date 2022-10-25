@@ -20,6 +20,7 @@ public class Configuration
         public bool ShowCompanion { get; set; } = false;
         public bool ShowEventNpc { get; set; } = false;
         public bool ShowAreaObjects { get; set; } = false;
+        public bool ShowAetherytes { get; set; } = false;
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
     }
     private Config cfg;
@@ -82,6 +83,12 @@ public class Configuration
     {
         get => cfg.ShowAreaObjects;
         set => cfg.ShowAreaObjects = value;
+    }
+    
+    public bool ShowAetherytes
+    {
+        get => cfg.ShowAetherytes;
+        set => cfg.ShowAetherytes = value;
     }
     
     public HashSet<uint> DataIdIgnoreList

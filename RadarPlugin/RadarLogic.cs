@@ -181,16 +181,6 @@ public class RadarLogic : IDisposable
                     if (chara.CurrentHp <= 0) continue;
                     nearbyMobs.Add(obj);
                     continue;
-                // Event Objects
-                case EventObj chara:
-                    if (!configInterface.ShowEvents) continue;
-                    nearbyMobs.Add(obj);
-                    continue;
-                // Npcs
-                case Npc npc:
-                    if (!configInterface.ShowCompanion) continue;
-                    nearbyMobs.Add(obj);
-                    continue;
                 // Objects
                 default:
                     switch (obj.ObjectKind)
@@ -204,8 +194,11 @@ public class RadarLogic : IDisposable
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.Area:
-                        case ObjectKind.Aetheryte:
                             if (!configInterface.ShowAreaObjects) continue;
+                            nearbyMobs.Add(obj);
+                            break;
+                        case ObjectKind.Aetheryte:
+                            if (!configInterface.ShowAetherytes) continue;
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.EventNpc:
@@ -217,7 +210,7 @@ public class RadarLogic : IDisposable
                             nearbyMobs.Add(obj);
                             break;
                     }
-                    if (UtilInfo.RenameList.ContainsKey(obj.DataId))
+                    if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // This is for certain coffers, I havn't checked potd or ba recently
                     {
                         nearbyMobs.Add(obj);
                     }
