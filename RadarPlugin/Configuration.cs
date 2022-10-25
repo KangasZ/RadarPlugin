@@ -9,7 +9,7 @@ namespace RadarPlugin;
 public class Configuration
 {
     private class Config : IPluginConfiguration
-    { 
+    {
         public int Version { get; set; } = 0;
         public bool Enabled { get; set; } = true;
         public bool ObjectShow { get; set; } = false;
@@ -17,7 +17,9 @@ public class Configuration
         public bool ShowPlayers { get; set; } = false;
         public bool ShowEnemies { get; set; } = true;
         public bool ShowEvents { get; set; } = false;
-        public bool ShowNpc { get; set; } = false;
+        public bool ShowCompanion { get; set; } = false;
+        public bool ShowEventNpc { get; set; } = false;
+        public bool ShowAreaObjects { get; set; } = false;
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
     }
     private Config cfg;
@@ -34,7 +36,7 @@ public class Configuration
         set => cfg.Enabled = value;
     }
 
-    public bool ShowObjects
+    public bool ShowLoot
     {
         get => cfg.ObjectShow;
         set => cfg.ObjectShow = value;
@@ -64,17 +66,28 @@ public class Configuration
         set => cfg.ShowEvents = value;
     }
     
-    public bool ShowNpc
+    public bool ShowCompanion
     {
-        get => cfg.ShowNpc;
-        set => cfg.ShowNpc = value;
+        get => cfg.ShowCompanion;
+        set => cfg.ShowCompanion = value;
+    }
+    
+    public bool ShowEventNpc
+    {
+        get => cfg.ShowEventNpc;
+        set => cfg.ShowEventNpc = value;
+    }
+    
+    public bool ShowAreaObjects
+    {
+        get => cfg.ShowAreaObjects;
+        set => cfg.ShowAreaObjects = value;
     }
     
     public HashSet<uint> DataIdIgnoreList
     {
         get => cfg.DataIdIgnoreList;
         set => cfg.DataIdIgnoreList = value;
-
     }
     
     [NonSerialized] private DalamudPluginInterface pluginInterface;

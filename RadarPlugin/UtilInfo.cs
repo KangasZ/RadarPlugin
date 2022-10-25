@@ -31,15 +31,6 @@ public static class UtilInfo
     };
     
     /**
-     * Strings to render
-     */
-    public static HashSet<string> ObjectStringList = new()
-    {
-        "Treasure Coffer",
-        "Personal Spoils"
-    };
-
-    /**
      * This list is a dictionary for objects to track along with renames for them
      * KEY: uint representing DATA ID
      * Value: String representing name

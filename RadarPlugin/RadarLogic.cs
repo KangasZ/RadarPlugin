@@ -131,7 +131,7 @@ public class RadarLogic : IDisposable
     {
         if (configInterface.DebugMode)
         {
-            return $"{obj.Name}, {obj.DataId}";
+            return $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}";
         }
 
         return $"{obj.Name}";
@@ -158,10 +158,16 @@ public class RadarLogic : IDisposable
         foreach (var obj in objectTable)
         {
             if (!obj.IsValid()) continue;
+            if (configInterface.DebugMode)
+            {
+                nearbyMobs.Add(obj);
+                continue;
+            }
             switch (obj)
             {
                 // Mobs
                 case BattleNpc mob:
+                    if (!configInterface.ShowEnemies) continue;
                     if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
                     if (mob.CurrentHp <= 0) continue;
@@ -172,11 +178,6 @@ public class RadarLogic : IDisposable
                 // Players -- Unsure if this is others as well
                 case PlayerCharacter chara:
                     if (!configInterface.ShowPlayers) continue;
-                    if (configInterface.DebugMode)
-                    {
-                        nearbyMobs.Add(obj);
-                        continue;
-                    }
                     if (chara.CurrentHp <= 0) continue;
                     nearbyMobs.Add(obj);
                     continue;
@@ -187,19 +188,36 @@ public class RadarLogic : IDisposable
                     continue;
                 // Npcs
                 case Npc npc:
-                    if (!configInterface.ShowNpc) continue;
+                    if (!configInterface.ShowCompanion) continue;
                     nearbyMobs.Add(obj);
                     continue;
                 // Objects
                 default:
-                    if (!configInterface.ShowObjects) continue;
-                    if (configInterface.DebugMode)
+                    switch (obj.ObjectKind)
                     {
-                        nearbyMobs.Add(obj);
-                        continue;
+                        case ObjectKind.Treasure:
+                            if (!configInterface.ShowLoot) continue;
+                            nearbyMobs.Add(obj);
+                            break;
+                        case ObjectKind.Companion:
+                            if (!configInterface.ShowCompanion) continue;
+                            nearbyMobs.Add(obj);
+                            break;
+                        case ObjectKind.Area:
+                        case ObjectKind.Aetheryte:
+                            if (!configInterface.ShowAreaObjects) continue;
+                            nearbyMobs.Add(obj);
+                            break;
+                        case ObjectKind.EventNpc:
+                            if (!configInterface.ShowEventNpc) continue;
+                            nearbyMobs.Add(obj);
+                            break;
+                        case ObjectKind.EventObj:
+                            if (!configInterface.ShowEvents) continue;
+                            nearbyMobs.Add(obj);
+                            break;
                     }
-                    if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
-                        UtilInfo.ObjectStringList.Contains(obj.Name.TextValue))
+                    if (UtilInfo.RenameList.ContainsKey(obj.DataId))
                     {
                         nearbyMobs.Add(obj);
                     }

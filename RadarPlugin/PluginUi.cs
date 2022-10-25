@@ -100,6 +100,10 @@ public class PluginUi : IDisposable
             ImGui.Text("Data ID");
             ImGui.TableNextColumn();
             ImGui.Text($"{localObject.DataId}");
+            ImGui.TableNextColumn();
+            ImGui.Text("Type");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{localObject.ObjectKind}");
             ImGui.EndTable();
             
             ImGui.Text("Disabled table");
@@ -176,7 +180,7 @@ public class PluginUi : IDisposable
             foreach (var x in areaObjects)
             {
                 ImGui.TableNextColumn();
-                ImGui.Text($"{x.SubKind}");
+                ImGui.Text($"{x.ObjectKind}");
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.Name}");
                 ImGui.TableNextColumn();
@@ -279,11 +283,11 @@ public class PluginUi : IDisposable
                     configuration.ShowEnemies = enemyShow;
                     configuration.Save();
                 }
-                var objShow = configuration.ShowObjects;
-                if (ImGui.Checkbox("Objects", ref objShow))
+                var objShow = configuration.ShowLoot;
+                if (ImGui.Checkbox("Loot", ref objShow))
                 {
                     ImGui.SetTooltip("Enables showing objects on the screen.");
-                    configuration.ShowObjects = objShow;
+                    configuration.ShowLoot = objShow;
                     configuration.Save();
                 }
                 var players = configuration.ShowPlayers;
@@ -294,15 +298,22 @@ public class PluginUi : IDisposable
                 }
                 ImGui.Separator();
                 ImGui.Text("Below this line are things that generally won't be supported");
+                ImGui.Columns(2, "##visibility-column", false);
                 ImGui.Spacing();
-                var npc = configuration.ShowNpc;
-                if (ImGui.Checkbox("Non-Battle NPCs", ref npc))
+                var npc = configuration.ShowCompanion;
+                if (ImGui.Checkbox("Companion", ref npc))
                 {
-                    configuration.ShowNpc = npc;
+                    configuration.ShowCompanion = npc;
+                    configuration.Save();
+                }
+                var eventNpcs = configuration.ShowEventNpc;
+                if (ImGui.Checkbox("Event NPCs", ref eventNpcs))
+                {
+                    configuration.ShowEventNpc = eventNpcs;
                     configuration.Save();
                 }
                 var events = configuration.ShowEvents;
-                if (ImGui.Checkbox("Events", ref events))
+                if (ImGui.Checkbox("Event Objects", ref events))
                 {
                     configuration.ShowEvents = events;
                     configuration.Save();
@@ -313,7 +324,15 @@ public class PluginUi : IDisposable
                     configuration.DebugMode = objHideList;
                     configuration.Save();
                 }
+                ImGui.NextColumn();
+                var showAreaObjs = configuration.ShowAreaObjects;
+                if (ImGui.Checkbox("Area Objects", ref showAreaObjs))
+                {
+                    configuration.ShowAreaObjects = showAreaObjs;
+                    configuration.Save();
+                }
                 ImGui.EndTabItem();
+                ImGui.NextColumn();
             }
             if (ImGui.BeginTabItem($"Blocking##radar-tabs"))
             {
