@@ -250,11 +250,10 @@ public class PluginUi : IDisposable
             return;
         }
 
-        var size = new Vector2(375, 250);
+        var size = new Vector2(375, 350);
         ImGui.SetNextWindowSize(size); //, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
-        if (ImGui.Begin("Radar Plugin", ref mainWindowVisible,
-                ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoResize))
+        if (ImGui.Begin("Radar Plugin", ref mainWindowVisible))
         {
             ImGui.Text(
                 "A 3d-radar plugin. This is basically a hack please leave me alone.");
@@ -272,7 +271,7 @@ public class PluginUi : IDisposable
                 }
                 ImGui.EndTabItem();
             }
-            else if (ImGui.BeginTabItem($"Visibility##radar-tabs"))
+            if (ImGui.BeginTabItem($"Visibility##radar-tabs"))
             {
                 var enemyShow = configuration.ShowEnemies;
                 if (ImGui.Checkbox("Enemies", ref enemyShow))
@@ -314,8 +313,9 @@ public class PluginUi : IDisposable
                     configuration.DebugMode = objHideList;
                     configuration.Save();
                 }
+                ImGui.EndTabItem();
             }
-            else if (ImGui.BeginTabItem($"Blocking##radar-tabs"))
+            if (ImGui.BeginTabItem($"Blocking##radar-tabs"))
             {
                 if (ImGui.Button("Load Current Objects"))
                 {
@@ -324,12 +324,10 @@ public class PluginUi : IDisposable
                     areaObjects.Clear();
                     areaObjects.AddRange(objectTable);
                 }
+                ImGui.EndTabItem();
             }
-                
             ImGui.EndTabBar();
-
         }
-
         ImGui.End();
     }
 }
