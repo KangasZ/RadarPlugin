@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using System.Numerics;
@@ -9,7 +10,7 @@ using Dalamud.Plugin;
 
 namespace RadarPlugin;
 
-public class PluginUi
+public class PluginUi : IDisposable
 {
     private List<GameObject> areaObjects { get; set; }
     private GameObject localObject { get; set; }
@@ -49,6 +50,12 @@ public class PluginUi
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.dalamudPluginInterface.UiBuilder.OpenConfigUi += OpenUi;
+    }
+
+    public void Dispose()
+    {
+        this.dalamudPluginInterface.UiBuilder.Draw -= Draw;
+        this.dalamudPluginInterface.UiBuilder.OpenConfigUi -= OpenUi;
     }
     
     public void OpenUi()
@@ -253,43 +260,74 @@ public class PluginUi
                 "A 3d-radar plugin. This is basically a hack please leave me alone.");
             ImGui.Spacing();
 
-            var configValue = configuration.Enabled;
-            if (ImGui.Checkbox("Enabled", ref configValue))
-            {
-                configuration.Enabled = configValue;
-                configuration.Save();
-            }
+            ImGui.BeginTabBar("radar-settings-tabs");
 
-            var objSHow = configuration.ObjectShow;
-            if (ImGui.Checkbox("Show Objects", ref objSHow))
-            {
-                ImGui.SetTooltip("Enables showing objects on the screen.");
-                configuration.ObjectShow = objSHow;
-                configuration.Save();
+            if (ImGui.BeginTabItem($"General##radar-tabs")) {
+                
+                var configValue = configuration.Enabled;
+                if (ImGui.Checkbox("Enabled", ref configValue))
+                {
+                    configuration.Enabled = configValue;
+                    configuration.Save();
+                }
+                ImGui.EndTabItem();
             }
-            
-            var objHideList = configuration.DebugMode;
-            if (ImGui.Checkbox("Debug Mode Enabled", ref objHideList))
+            else if (ImGui.BeginTabItem($"Visibility##radar-tabs"))
             {
-                configuration.DebugMode = objHideList;
-                configuration.Save();
+                var enemyShow = configuration.ShowEnemies;
+                if (ImGui.Checkbox("Enemies", ref enemyShow))
+                {
+                    configuration.ShowEnemies = enemyShow;
+                    configuration.Save();
+                }
+                var objShow = configuration.ShowObjects;
+                if (ImGui.Checkbox("Objects", ref objShow))
+                {
+                    ImGui.SetTooltip("Enables showing objects on the screen.");
+                    configuration.ShowObjects = objShow;
+                    configuration.Save();
+                }
+                var players = configuration.ShowPlayers;
+                if (ImGui.Checkbox("Players", ref players))
+                {
+                    configuration.ShowPlayers = players;
+                    configuration.Save();
+                }
+                ImGui.Separator();
+                ImGui.Text("Below this line are things that generally won't be supported");
+                ImGui.Spacing();
+                var npc = configuration.ShowNpc;
+                if (ImGui.Checkbox("Non-Battle NPCs", ref npc))
+                {
+                    configuration.ShowNpc = npc;
+                    configuration.Save();
+                }
+                var events = configuration.ShowEvents;
+                if (ImGui.Checkbox("Events", ref events))
+                {
+                    configuration.ShowEvents = events;
+                    configuration.Save();
+                }
+                var objHideList = configuration.DebugMode;
+                if (ImGui.Checkbox("Debug Mode", ref objHideList))
+                {
+                    configuration.DebugMode = objHideList;
+                    configuration.Save();
+                }
             }
-            
-            var players = configuration.ShowPlayers;
-            if (ImGui.Checkbox("Show Players", ref players))
+            else if (ImGui.BeginTabItem($"Blocking##radar-tabs"))
             {
-                configuration.ShowPlayers = players;
-                configuration.Save();
+                if (ImGui.Button("Load Current Objects"))
+                {
+                    PluginLog.Debug("Pulling Area Objects");
+                    CurrentMobsVisible = true;
+                    areaObjects.Clear();
+                    areaObjects.AddRange(objectTable);
+                }
             }
-            
-            ImGui.Spacing();
-            if (ImGui.Button("Load Current Objects"))
-            {
-                PluginLog.Debug("Pulling Area Objects");
-                CurrentMobsVisible = true;
-                areaObjects.Clear();
-                areaObjects.AddRange(objectTable);
-            }
+                
+            ImGui.EndTabBar();
+
         }
 
         ImGui.End();

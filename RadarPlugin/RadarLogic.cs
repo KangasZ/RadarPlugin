@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Utility;
@@ -56,24 +57,25 @@ public class RadarLogic : IDisposable
             if (!p) continue;
 
             var tagText = GetText(areaObject);
-
+            uint color = UInt32.MinValue;
             switch (areaObject)
             {
                 // Mobs
                 case BattleNpc mob:
-                    var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
-                    DrawEsp(onScreenPosition, mob, tagText, colorWhite, drawHealthCircle: true);
+                    color = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
+                    DrawEsp(onScreenPosition, mob, tagText, color, drawHealthCircle: true);
                     break;
                 // Players
-                case BattleChara chara:
-                {
-                    var color = UtilInfo.Color(0x00, 0x99, 0x99, 0xff);
+                case PlayerCharacter chara:
+                    color = UtilInfo.Color(0x00, 0x99, 0x99, 0xff);
                     DrawEsp(onScreenPosition, chara, tagText, color);
                     break;
-                }
+                // Event Objects
+                case EventObj chara:
+                // Npcs
+                case Npc npc:
                 // Objects
                 default:
-                {
                     if (UtilInfo.RenameList.ContainsKey(areaObject.DataId))
                     {
                         tagText = UtilInfo.RenameList[areaObject.DataId];
@@ -86,7 +88,6 @@ public class RadarLogic : IDisposable
                         UtilInfo.Color(0xFF, 0x7E, 0x00, 0xFF), //  #FF7E00
                         tagText);
                     break;
-                }
             }
         }
     }
@@ -164,13 +165,12 @@ public class RadarLogic : IDisposable
                     if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
                     if (mob.CurrentHp <= 0) continue;
-                    if (!configInterface.ShowPlayers && obj.SubKind == 4) continue;
                     if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
                         configInterface.DataIdIgnoreList.Contains(mob.DataId)) continue;
                     nearbyMobs.Add(obj);
                     continue;
-                // Players
-                case BattleChara chara:
+                // Players -- Unsure if this is others as well
+                case PlayerCharacter chara:
                     if (!configInterface.ShowPlayers) continue;
                     if (configInterface.DebugMode)
                     {
@@ -180,9 +180,19 @@ public class RadarLogic : IDisposable
                     if (chara.CurrentHp <= 0) continue;
                     nearbyMobs.Add(obj);
                     continue;
+                // Event Objects
+                case EventObj chara:
+                    if (!configInterface.ShowEvents) continue;
+                    nearbyMobs.Add(obj);
+                    continue;
+                // Npcs
+                case Npc npc:
+                    if (!configInterface.ShowNpc) continue;
+                    nearbyMobs.Add(obj);
+                    continue;
                 // Objects
                 default:
-                    if (!configInterface.ObjectShow) continue;
+                    if (!configInterface.ShowObjects) continue;
                     if (configInterface.DebugMode)
                     {
                         nearbyMobs.Add(obj);
@@ -205,6 +215,7 @@ public class RadarLogic : IDisposable
 
     public void Dispose()
     {
+        this.pluginInterface.UiBuilder.Draw -= DrawRadar;
         keepRunning = false;
         while (!backgroundLoop.IsCompleted) ;
         PluginLog.Debug($"Radar Unloaded");

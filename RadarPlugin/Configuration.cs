@@ -15,6 +15,9 @@ public class Configuration
         public bool ObjectShow { get; set; } = false;
         public bool DebugMode { get; set; } = false;
         public bool ShowPlayers { get; set; } = false;
+        public bool ShowEnemies { get; set; } = true;
+        public bool ShowEvents { get; set; } = false;
+        public bool ShowNpc { get; set; } = false;
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
     }
     private Config cfg;
@@ -31,7 +34,7 @@ public class Configuration
         set => cfg.Enabled = value;
     }
 
-    public bool ObjectShow
+    public bool ShowObjects
     {
         get => cfg.ObjectShow;
         set => cfg.ObjectShow = value;
@@ -49,6 +52,24 @@ public class Configuration
         set => cfg.ShowPlayers = value;
     }
 
+    public bool ShowEnemies
+    {
+        get => cfg.ShowEnemies;
+        set => cfg.ShowEnemies = value;
+    }
+    
+    public bool ShowEvents
+    {
+        get => cfg.ShowEvents;
+        set => cfg.ShowEvents = value;
+    }
+    
+    public bool ShowNpc
+    {
+        get => cfg.ShowNpc;
+        set => cfg.ShowNpc = value;
+    }
+    
     public HashSet<uint> DataIdIgnoreList
     {
         get => cfg.DataIdIgnoreList;

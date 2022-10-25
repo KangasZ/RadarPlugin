@@ -29,6 +29,7 @@ public sealed class RadarPlugin : IDalamudPlugin
 
     public void Dispose()
     {
+        pluginUi.Dispose();
         pluginCommands.Dispose();
         radarLogic.Dispose();
     }
