@@ -80,7 +80,7 @@ public class PluginUi : IDisposable
         var size = new Vector2(600, 300);
         ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
-        if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible))
+        if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible, ImGuiWindowFlags.NoResize))
         {
             ImGui.Columns(2);
             var utilIgnored = UtilInfo.DataIdIgnoreList.Contains(localObject.DataId);
