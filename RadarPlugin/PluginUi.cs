@@ -80,7 +80,7 @@ public class PluginUi : IDisposable
         var size = new Vector2(600, 300);
         ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
-        if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible, ImGuiWindowFlags.NoResize))
+        if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible))
         {
             ImGui.Columns(2);
             var utilIgnored = UtilInfo.DataIdIgnoreList.Contains(localObject.DataId);
@@ -257,7 +257,7 @@ public class PluginUi : IDisposable
         var size = new Vector2(375, 350);
         ImGui.SetNextWindowSize(size); //, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
-        if (ImGui.Begin("Radar Plugin", ref mainWindowVisible))
+        if (ImGui.Begin("Radar Plugin", ref mainWindowVisible, ImGuiWindowFlags.NoResize))
         {
             ImGui.Text(
                 "A 3d-radar plugin. This is basically a hack please leave me alone.");

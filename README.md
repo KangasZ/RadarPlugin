@@ -11,11 +11,15 @@ To use the plugin, please install the custom repository with the following link:
 
 Please do not include my projects in other custom repos like Aku API.
 
-## Examples
-![Picture of the plugin in action](https://i.imgur.com/jPlpQ7C.png)
-![UI](https://i.imgur.com/if8VGLZ.png)
-
 ## Notice
 This is distributed with the MIT license. I take absolutely no responsibility for what users do with the plugin.
 
-Under no circumstance will I condone, support, or implement features designed to cheat in any competitive modes. Do not ask me, do not tell me if you are using this in PVP for an advantage.
+Under no circumstance is this plugin designed to assist any PvP-centric modes. I will not condone nor support this activity
+
+## Examples
+![Picture of the plugin in action](https://i.imgur.com/jPlpQ7C.png)
+![UI](https://i.imgur.com/7ipeLib.png)
+![UI](https://i.imgur.com/RARJRI4.png)
+![UI](https://i.imgur.com/Szp39o1.png)
+![UI](https://i.imgur.com/ITIytFR.png)
+![UI](https://i.imgur.com/Enkjtat.png)
