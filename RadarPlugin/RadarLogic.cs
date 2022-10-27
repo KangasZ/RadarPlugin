@@ -129,12 +129,7 @@ public class RadarLogic : IDisposable
 
     private string GetText(GameObject obj)
     {
-        if (configInterface.DebugMode)
-        {
-            return $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}";
-        }
-
-        return $"{obj.Name}";
+        return configInterface.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{obj.Name}";
     }
 
     private void BackgroundLoop()

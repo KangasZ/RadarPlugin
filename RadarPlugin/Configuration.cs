@@ -12,7 +12,8 @@ public class Configuration
     {
         public int Version { get; set; } = 0;
         public bool Enabled { get; set; } = true;
-        public bool ObjectShow { get; set; } = false;
+        public bool ShowBaDdObjects { get; set; } = true;
+        public bool ShowLoot { get; set; } = false;
         public bool DebugMode { get; set; } = false;
         public bool ShowPlayers { get; set; } = false;
         public bool ShowEnemies { get; set; } = true;
@@ -39,8 +40,8 @@ public class Configuration
 
     public bool ShowLoot
     {
-        get => cfg.ObjectShow;
-        set => cfg.ObjectShow = value;
+        get => cfg.ShowLoot;
+        set => cfg.ShowLoot = value;
     }
 
     public bool DebugMode
@@ -95,6 +96,12 @@ public class Configuration
     {
         get => cfg.DataIdIgnoreList;
         set => cfg.DataIdIgnoreList = value;
+    }
+    
+    public bool ShowBaDdObjects
+    {
+        get => cfg.ShowBaDdObjects;
+        set => cfg.ShowBaDdObjects = value;
     }
     
     [NonSerialized] private DalamudPluginInterface pluginInterface;

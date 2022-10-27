@@ -296,6 +296,14 @@ public class PluginUi : IDisposable
                     configuration.ShowPlayers = players;
                     configuration.Save();
                 }
+
+                var badd = configuration.ShowBaDdObjects;
+                if (ImGui.Checkbox("Eureka/Deep Dungeons", ref badd))
+                {
+                    configuration.ShowBaDdObjects = badd;
+                    configuration.Save();
+                }
+                
                 ImGui.Separator();
                 ImGui.Text("Below this line are things that generally won't be supported");
                 ImGui.Columns(2, "##visibility-column", false);
