@@ -197,6 +197,13 @@ public class RadarLogic : IDisposable
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.EventNpc:
+                            if (configInterface.ShowBaDdObjects)
+                            {
+                                if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
+                                {
+                                    nearbyMobs.Add(obj);
+                                }
+                            }
                             if (!configInterface.ShowEventNpc) continue;
                             nearbyMobs.Add(obj);
                             break;
@@ -204,10 +211,6 @@ public class RadarLogic : IDisposable
                             if (!configInterface.ShowEvents) continue;
                             nearbyMobs.Add(obj);
                             break;
-                    }
-                    if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // This is for certain coffers, I havn't checked potd or ba recently
-                    {
-                        nearbyMobs.Add(obj);
                     }
                     continue;
             }
