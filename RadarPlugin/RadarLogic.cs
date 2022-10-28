@@ -202,6 +202,7 @@ public class RadarLogic : IDisposable
                                 if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
                                 {
                                     nearbyMobs.Add(obj);
+                                    continue;
                                 }
                             }
                             if (!configInterface.ShowEventNpc) continue;
