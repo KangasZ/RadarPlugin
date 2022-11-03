@@ -49,7 +49,7 @@ public class RadarLogic : IDisposable
 
     private void DrawRadar()
     {
-        if (!configInterface.Enabled) return;
+        if (!configInterface.cfg.Enabled) return;
         if (refreshing) return;
         foreach (var areaObject in areaObjects)
         {
@@ -129,14 +129,14 @@ public class RadarLogic : IDisposable
 
     private string GetText(GameObject obj)
     {
-        return configInterface.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{obj.Name}";
+        return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{obj.Name}";
     }
 
     private void BackgroundLoop()
     {
         while (keepRunning)
         {
-            if (configInterface.Enabled)
+            if (configInterface.cfg.Enabled)
             {
                 UpdateMobInfo();
                 PluginLog.Debug("Refreshed Mob Info!");
@@ -153,7 +153,7 @@ public class RadarLogic : IDisposable
         foreach (var obj in objectTable)
         {
             if (!obj.IsValid()) continue;
-            if (configInterface.DebugMode)
+            if (configInterface.cfg.DebugMode)
             {
                 nearbyMobs.Add(obj);
                 continue;
@@ -162,17 +162,17 @@ public class RadarLogic : IDisposable
             {
                 // Mobs
                 case BattleNpc mob:
-                    if (!configInterface.ShowEnemies) continue;
+                    if (!configInterface.cfg.ShowEnemies) continue;
                     if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
                     if (mob.CurrentHp <= 0) continue;
                     if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
-                        configInterface.DataIdIgnoreList.Contains(mob.DataId)) continue;
+                        configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) continue;
                     nearbyMobs.Add(obj);
                     continue;
                 // Players -- Unsure if this is others as well
                 case PlayerCharacter chara:
-                    if (!configInterface.ShowPlayers) continue;
+                    if (!configInterface.cfg.ShowPlayers) continue;
                     if (chara.CurrentHp <= 0) continue;
                     nearbyMobs.Add(obj);
                     continue;
@@ -181,23 +181,23 @@ public class RadarLogic : IDisposable
                     switch (obj.ObjectKind)
                     {
                         case ObjectKind.Treasure:
-                            if (!configInterface.ShowLoot) continue;
+                            if (!configInterface.cfg.ShowLoot) continue;
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.Companion:
-                            if (!configInterface.ShowCompanion) continue;
+                            if (!configInterface.cfg.ShowCompanion) continue;
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.Area:
-                            if (!configInterface.ShowAreaObjects) continue;
+                            if (!configInterface.cfg.ShowAreaObjects) continue;
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.Aetheryte:
-                            if (!configInterface.ShowAetherytes) continue;
+                            if (!configInterface.cfg.ShowAetherytes) continue;
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.EventNpc:
-                            if (configInterface.ShowBaDdObjects)
+                            if (configInterface.cfg.ShowBaDdObjects)
                             {
                                 if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
                                 {
@@ -205,11 +205,11 @@ public class RadarLogic : IDisposable
                                     continue;
                                 }
                             }
-                            if (!configInterface.ShowEventNpc) continue;
+                            if (!configInterface.cfg.ShowEventNpc) continue;
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.EventObj:
-                            if (!configInterface.ShowEvents) continue;
+                            if (!configInterface.cfg.ShowEvents) continue;
                             nearbyMobs.Add(obj);
                             break;
                     }

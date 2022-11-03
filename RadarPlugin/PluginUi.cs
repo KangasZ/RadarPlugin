@@ -84,7 +84,7 @@ public class PluginUi : IDisposable
         {
             ImGui.Columns(2);
             var utilIgnored = UtilInfo.DataIdIgnoreList.Contains(localObject.DataId);
-            var userIgnored = configuration.DataIdIgnoreList.Contains(localObject.DataId);
+            var userIgnored = configuration.cfg.DataIdIgnoreList.Contains(localObject.DataId);
             ImGui.SetColumnWidth(0, ImGui.GetWindowWidth() / 2);
             // Setup First column
             ImGui.Text("Information Table");
@@ -134,20 +134,20 @@ public class PluginUi : IDisposable
             ImGui.Text("You cannot disable a mod with a data id of 0");
             if (ImGui.Button($"Add to block list"))
             {
-                if (!configuration.DataIdIgnoreList.Contains(localObject.DataId))
+                if (!configuration.cfg.DataIdIgnoreList.Contains(localObject.DataId))
                 {
                     if (localObject.DataId != 0)
                     {
-                        configuration.DataIdIgnoreList.Add(localObject.DataId);
+                        configuration.cfg.DataIdIgnoreList.Add(localObject.DataId);
                         configuration.Save();
                     }
                 }
             }
             if (ImGui.Button($"Remove from block list"))
             {
-                if (configuration.DataIdIgnoreList.Contains(localObject.DataId))
+                if (configuration.cfg.DataIdIgnoreList.Contains(localObject.DataId))
                 {
-                    configuration.DataIdIgnoreList.Remove(localObject.DataId);
+                    configuration.cfg.DataIdIgnoreList.Remove(localObject.DataId);
                     configuration.Save();
                 }
             }
@@ -195,7 +195,7 @@ public class PluginUi : IDisposable
                 {
                     ImGui.Text($"Default");
                 }
-                else if (configuration.DataIdIgnoreList.Contains(x.DataId))
+                else if (configuration.cfg.DataIdIgnoreList.Contains(x.DataId))
                 {
                     ImGui.Text("User");
                 }
@@ -206,19 +206,19 @@ public class PluginUi : IDisposable
                 ImGui.TableNextColumn();
                 if (x.DataId != 0)
                 {
-                    var configBlocked = configuration.DataIdIgnoreList.Contains(x.DataId);
+                    var configBlocked = configuration.cfg.DataIdIgnoreList.Contains(x.DataId);
                     if (ImGui.Checkbox($"##{x.Address}", ref configBlocked))
                     {
                         if (configBlocked)
                         {
-                            if (!configuration.DataIdIgnoreList.Contains(x.DataId))
+                            if (!configuration.cfg.DataIdIgnoreList.Contains(x.DataId))
                             {
-                                configuration.DataIdIgnoreList.Add(x.DataId);
+                                configuration.cfg.DataIdIgnoreList.Add(x.DataId);
                             }
                         }
                         else
                         {
-                            configuration.DataIdIgnoreList.Remove(x.DataId);
+                            configuration.cfg.DataIdIgnoreList.Remove(x.DataId);
                         }
 
                         configuration.Save();
@@ -267,40 +267,40 @@ public class PluginUi : IDisposable
 
             if (ImGui.BeginTabItem($"General##radar-tabs")) {
                 
-                var configValue = configuration.Enabled;
+                var configValue = configuration.cfg.Enabled;
                 if (ImGui.Checkbox("Enabled", ref configValue))
                 {
-                    configuration.Enabled = configValue;
+                    configuration.cfg.Enabled = configValue;
                     configuration.Save();
                 }
                 ImGui.EndTabItem();
             }
             if (ImGui.BeginTabItem($"Visibility##radar-tabs"))
             {
-                var enemyShow = configuration.ShowEnemies;
+                var enemyShow = configuration.cfg.ShowEnemies;
                 if (ImGui.Checkbox("Enemies", ref enemyShow))
                 {
-                    configuration.ShowEnemies = enemyShow;
+                    configuration.cfg.ShowEnemies = enemyShow;
                     configuration.Save();
                 }
-                var objShow = configuration.ShowLoot;
+                var objShow = configuration.cfg.ShowLoot;
                 if (ImGui.Checkbox("Loot", ref objShow))
                 {
                     ImGui.SetTooltip("Enables showing objects on the screen.");
-                    configuration.ShowLoot = objShow;
+                    configuration.cfg.ShowLoot = objShow;
                     configuration.Save();
                 }
-                var players = configuration.ShowPlayers;
+                var players = configuration.cfg.ShowPlayers;
                 if (ImGui.Checkbox("Players", ref players))
                 {
-                    configuration.ShowPlayers = players;
+                    configuration.cfg.ShowPlayers = players;
                     configuration.Save();
                 }
 
-                var badd = configuration.ShowBaDdObjects;
+                var badd = configuration.cfg.ShowBaDdObjects;
                 if (ImGui.Checkbox("Eureka/Deep Dungeons", ref badd))
                 {
-                    configuration.ShowBaDdObjects = badd;
+                    configuration.cfg.ShowBaDdObjects = badd;
                     configuration.Save();
                 }
                 
@@ -308,41 +308,41 @@ public class PluginUi : IDisposable
                 ImGui.Text("Below this line are things that generally won't be supported");
                 ImGui.Columns(2, "##visibility-column", false);
                 ImGui.Spacing();
-                var npc = configuration.ShowCompanion;
+                var npc = configuration.cfg.ShowCompanion;
                 if (ImGui.Checkbox("Companion", ref npc))
                 {
-                    configuration.ShowCompanion = npc;
+                    configuration.cfg.ShowCompanion = npc;
                     configuration.Save();
                 }
-                var eventNpcs = configuration.ShowEventNpc;
+                var eventNpcs = configuration.cfg.ShowEventNpc;
                 if (ImGui.Checkbox("Event NPCs", ref eventNpcs))
                 {
-                    configuration.ShowEventNpc = eventNpcs;
+                    configuration.cfg.ShowEventNpc = eventNpcs;
                     configuration.Save();
                 }
-                var events = configuration.ShowEvents;
+                var events = configuration.cfg.ShowEvents;
                 if (ImGui.Checkbox("Event Objects", ref events))
                 {
-                    configuration.ShowEvents = events;
+                    configuration.cfg.ShowEvents = events;
                     configuration.Save();
                 }
-                var objHideList = configuration.DebugMode;
+                var objHideList = configuration.cfg.DebugMode;
                 if (ImGui.Checkbox("Debug Mode", ref objHideList))
                 {
-                    configuration.DebugMode = objHideList;
+                    configuration.cfg.DebugMode = objHideList;
                     configuration.Save();
                 }
                 ImGui.NextColumn();
-                var showAreaObjs = configuration.ShowAreaObjects;
+                var showAreaObjs = configuration.cfg.ShowAreaObjects;
                 if (ImGui.Checkbox("Area Objects", ref showAreaObjs))
                 {
-                    configuration.ShowAreaObjects = showAreaObjs;
+                    configuration.cfg.ShowAreaObjects = showAreaObjs;
                     configuration.Save();
                 }
-                var showAetherytes = configuration.ShowAetherytes;
+                var showAetherytes = configuration.cfg.ShowAetherytes;
                 if (ImGui.Checkbox("Aetherytes", ref showAetherytes))
                 {
-                    configuration.ShowAetherytes = showAetherytes;
+                    configuration.cfg.ShowAetherytes = showAetherytes;
                     configuration.Save();
                 }
                 ImGui.EndTabItem();
