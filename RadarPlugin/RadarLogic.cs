@@ -197,6 +197,10 @@ public class RadarLogic : IDisposable
                             nearbyMobs.Add(obj);
                             break;
                         case ObjectKind.EventNpc:
+                            if (!configInterface.cfg.ShowEventNpc) continue;
+                            nearbyMobs.Add(obj);
+                            break;
+                        case ObjectKind.EventObj:
                             if (configInterface.cfg.ShowBaDdObjects)
                             {
                                 if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
@@ -205,10 +209,6 @@ public class RadarLogic : IDisposable
                                     continue;
                                 }
                             }
-                            if (!configInterface.cfg.ShowEventNpc) continue;
-                            nearbyMobs.Add(obj);
-                            break;
-                        case ObjectKind.EventObj:
                             if (!configInterface.cfg.ShowEvents) continue;
                             nearbyMobs.Add(obj);
                             break;
