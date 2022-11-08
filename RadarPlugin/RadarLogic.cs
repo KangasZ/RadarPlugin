@@ -58,6 +58,7 @@ public class RadarLogic : IDisposable
 
             var tagText = GetText(areaObject);
             uint color = UInt32.MinValue;
+            
             switch (areaObject)
             {
                 // Mobs
@@ -158,10 +159,52 @@ public class RadarLogic : IDisposable
                 nearbyMobs.Add(obj);
                 continue;
             }
-            switch (obj)
+
+            switch (obj.ObjectKind)
             {
-                // Mobs
-                case BattleNpc mob:
+                case ObjectKind.Treasure:
+                    if (!configInterface.cfg.ShowLoot) continue;
+                    nearbyMobs.Add(obj);
+                    break;
+                case ObjectKind.Companion:
+                    if (!configInterface.cfg.ShowCompanion) continue;
+                    nearbyMobs.Add(obj);
+                    break;
+                case ObjectKind.Area:
+                    if (!configInterface.cfg.ShowAreaObjects) continue;
+                    nearbyMobs.Add(obj);
+                    break;
+                case ObjectKind.Aetheryte:
+                    if (!configInterface.cfg.ShowAetherytes) continue;
+                    nearbyMobs.Add(obj);
+                    break;
+                case ObjectKind.EventNpc:
+                    if (!configInterface.cfg.ShowEventNpc) continue;
+                    nearbyMobs.Add(obj);
+                    break;
+                case ObjectKind.EventObj:
+                    if (configInterface.cfg.ShowBaDdObjects)
+                    {
+                        if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
+                        {
+                            nearbyMobs.Add(obj);
+                            continue;
+                        }
+                    }
+
+                    if (!configInterface.cfg.ShowEvents) continue;
+                    nearbyMobs.Add(obj);
+                    break;
+                case ObjectKind.None:
+                    break;
+                case ObjectKind.Player:
+                    if (obj is not PlayerCharacter chara) continue;
+                    if (!configInterface.cfg.ShowPlayers) continue;
+                    if (chara.CurrentHp <= 0) continue;
+                    nearbyMobs.Add(obj);
+                    break;
+                case ObjectKind.BattleNpc:
+                    if (obj is not BattleNpc mob) continue;
                     if (!configInterface.cfg.ShowEnemies) continue;
                     if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
@@ -169,51 +212,21 @@ public class RadarLogic : IDisposable
                     if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
                         configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) continue;
                     nearbyMobs.Add(obj);
-                    continue;
-                // Players -- Unsure if this is others as well
-                case PlayerCharacter chara:
-                    if (!configInterface.cfg.ShowPlayers) continue;
-                    if (chara.CurrentHp <= 0) continue;
-                    nearbyMobs.Add(obj);
-                    continue;
-                // Objects
+                    break;
+                case ObjectKind.GatheringPoint:
+                    break;
+                case ObjectKind.MountType:
+                    break;
+                case ObjectKind.Retainer:
+                    break;
+                case ObjectKind.Housing:
+                    break;
+                case ObjectKind.Cutscene:
+                    break;
+                case ObjectKind.CardStand:
+                    break;
                 default:
-                    switch (obj.ObjectKind)
-                    {
-                        case ObjectKind.Treasure:
-                            if (!configInterface.cfg.ShowLoot) continue;
-                            nearbyMobs.Add(obj);
-                            break;
-                        case ObjectKind.Companion:
-                            if (!configInterface.cfg.ShowCompanion) continue;
-                            nearbyMobs.Add(obj);
-                            break;
-                        case ObjectKind.Area:
-                            if (!configInterface.cfg.ShowAreaObjects) continue;
-                            nearbyMobs.Add(obj);
-                            break;
-                        case ObjectKind.Aetheryte:
-                            if (!configInterface.cfg.ShowAetherytes) continue;
-                            nearbyMobs.Add(obj);
-                            break;
-                        case ObjectKind.EventNpc:
-                            if (!configInterface.cfg.ShowEventNpc) continue;
-                            nearbyMobs.Add(obj);
-                            break;
-                        case ObjectKind.EventObj:
-                            if (configInterface.cfg.ShowBaDdObjects)
-                            {
-                                if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
-                                {
-                                    nearbyMobs.Add(obj);
-                                    continue;
-                                }
-                            }
-                            if (!configInterface.cfg.ShowEvents) continue;
-                            nearbyMobs.Add(obj);
-                            break;
-                    }
-                    continue;
+                    throw new ArgumentOutOfRangeException();
             }
         }
 

@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Numerics;
+using Dalamud.Interface.Colors;
 
 namespace RadarPlugin;
 
 public static class UtilInfo
 {
+    public static readonly uint Red = 0xFF0000FF;
     /**
      * What is this used for again?
      * Oh yeah, thats right, it's not (currently)

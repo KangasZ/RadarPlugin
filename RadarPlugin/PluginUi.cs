@@ -5,6 +5,8 @@ using ImGuiNET;
 using System.Numerics;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 
@@ -247,6 +249,18 @@ public class PluginUi : IDisposable
         ImGui.End();
     }
 
+    private void DrawGeneralSettings()
+    {
+        ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff), "This is a radar plugin.\nIt is made by KangasZ for use in FFXIV.\nPlease use this with caution.");
+        var configValue = configuration.cfg.Enabled;
+        if (ImGui.Checkbox("Enabled", ref configValue))
+        {
+            configuration.cfg.Enabled = configValue;
+            configuration.Save();
+        }
+        ImGui.EndTabItem();
+    }
+    
     private void DrawMainWindow()
     {
         if (!MainWindowVisible)
@@ -264,18 +278,15 @@ public class PluginUi : IDisposable
             ImGui.Spacing();
             ImGui.BeginTabBar("radar-settings-tabs");
 
-            if (ImGui.BeginTabItem($"General##radar-tabs")) {
-                
-                var configValue = configuration.cfg.Enabled;
-                if (ImGui.Checkbox("Enabled", ref configValue))
-                {
-                    configuration.cfg.Enabled = configValue;
-                    configuration.Save();
-                }
-                ImGui.EndTabItem();
+            
+            if (ImGui.BeginTabItem($"General##radar-tabs"))
+            {
+                DrawGeneralSettings();
             }
+            ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
             if (ImGui.BeginTabItem($"Visibility##radar-tabs"))
             {
+                ImGui.PopStyleColor();
                 var enemyShow = configuration.cfg.ShowEnemies;
                 if (ImGui.Checkbox("Enemies", ref enemyShow))
                 {
@@ -348,6 +359,10 @@ public class PluginUi : IDisposable
                 ImGui.EndChild();
                 ImGui.EndTabItem();
             }
+            else
+            {
+                ImGui.PopStyleColor();
+            }
             if (ImGui.BeginTabItem($"3D-Settings##radar-tabs"))
             {
                 if (ImGui.CollapsingHeader("Npc Settings##radar-collapsing-header"))
@@ -355,13 +370,25 @@ public class PluginUi : IDisposable
                     ImGui.BeginChild("##npc-settings-child");
                     ImGui.Columns(2, "##npc-settings-columns", false);
                     ImGui.Text("Color placeholder that will sooner or later be there");
-                    var showName = configuration.cfg.NpcOption.ShowName;
-                    if (ImGui.Checkbox("Show Name##npc-settings", ref showName))
+                    var showNpcName = configuration.cfg.NpcOption.ShowName;
+                    if (ImGui.Checkbox("Show Name##npc-settings", ref showNpcName))
                     {
-                        configuration.cfg.NpcOption.ShowName = showName;
+                        configuration.cfg.NpcOption.ShowName = showNpcName;
                         configuration.Save();
                     }
                     ImGui.NextColumn();
+                    var showNpcHealthBar = configuration.cfg.NpcOption.ShowHealthBar;
+                    if (ImGui.Checkbox("Show Health Bar##npc-settings", ref showNpcHealthBar))
+                    {
+                        configuration.cfg.NpcOption.ShowHealthBar = showNpcHealthBar;
+                        configuration.Save();
+                    }
+                    var showNpcHealthValue = configuration.cfg.NpcOption.ShowHealthValue;
+                    if (ImGui.Checkbox("Show Health Value##npc-settings", ref showNpcHealthValue))
+                    {
+                        configuration.cfg.NpcOption.ShowHealthValue = showNpcHealthValue;
+                        configuration.Save();
+                    }
                     
                     ImGui.EndChild();
                     
