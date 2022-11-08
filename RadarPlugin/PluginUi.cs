@@ -262,7 +262,6 @@ public class PluginUi : IDisposable
             ImGui.Text(
                 "A 3d-radar plugin. This is basically a hack please leave me alone.");
             ImGui.Spacing();
-
             ImGui.BeginTabBar("radar-settings-tabs");
 
             if (ImGui.BeginTabItem($"General##radar-tabs")) {
@@ -306,6 +305,7 @@ public class PluginUi : IDisposable
                 
                 ImGui.Separator();
                 ImGui.Text("Below this line are things that generally won't be supported");
+                ImGui.BeginChild("##visibilitychild");
                 ImGui.Columns(2, "##visibility-column", false);
                 ImGui.Spacing();
                 var npc = configuration.cfg.ShowCompanion;
@@ -344,6 +344,27 @@ public class PluginUi : IDisposable
                 {
                     configuration.cfg.ShowAetherytes = showAetherytes;
                     configuration.Save();
+                }
+                ImGui.EndChild();
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem($"3D-Settings##radar-tabs"))
+            {
+                if (ImGui.CollapsingHeader("Npc Settings##radar-collapsing-header"))
+                {
+                    ImGui.BeginChild("##npc-settings-child");
+                    ImGui.Columns(2, "##npc-settings-columns", false);
+                    ImGui.Text("Color placeholder that will sooner or later be there");
+                    var showName = configuration.cfg.NpcOption.ShowName;
+                    if (ImGui.Checkbox("Show Name##npc-settings", ref showName))
+                    {
+                        configuration.cfg.NpcOption.ShowName = showName;
+                        configuration.Save();
+                    }
+                    ImGui.NextColumn();
+                    
+                    ImGui.EndChild();
+                    
                 }
                 ImGui.EndTabItem();
                 ImGui.NextColumn();

@@ -11,6 +11,7 @@ public class Configuration
     public class ESPOption
     {
         public bool ShowName = true;
+        public bool ShowDot = true;
         public uint Color = uint.MinValue;
     }
     public class NpcOption : ESPOption
