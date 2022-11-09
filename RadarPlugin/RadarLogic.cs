@@ -198,8 +198,8 @@ public class RadarLogic : IDisposable
                 case ObjectKind.None:
                     break;
                 case ObjectKind.Player:
-                    if (obj is not PlayerCharacter chara) continue;
                     if (!configInterface.cfg.ShowPlayers) continue;
+                    if (obj is not PlayerCharacter chara) continue;
                     if (chara.CurrentHp <= 0) continue;
                     nearbyMobs.Add(obj);
                     break;
@@ -226,7 +226,7 @@ public class RadarLogic : IDisposable
                 case ObjectKind.CardStand:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    break;
             }
         }
 
