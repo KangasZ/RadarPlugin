@@ -6,6 +6,7 @@ namespace RadarPlugin;
 
 public static class UtilInfo
 {
+    public static readonly uint Green = 0x0000FFFF;
     public static readonly uint Red = 0xFF0000FF;
     /**
      * What is this used for again?

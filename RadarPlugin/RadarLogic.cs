@@ -30,7 +30,7 @@ public class RadarLogic : IDisposable
     private List<GameObject> areaObjects { get; set; }
     private bool refreshing { get; set; }
 
-    public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable)
+    public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable, Condition condition)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -50,6 +50,7 @@ public class RadarLogic : IDisposable
     private void DrawRadar()
     {
         if (!configInterface.cfg.Enabled) return;
+        if (objectTable.Length == 0) return;
         if (refreshing) return;
         foreach (var areaObject in areaObjects)
         {
@@ -58,54 +59,71 @@ public class RadarLogic : IDisposable
 
             var tagText = GetText(areaObject);
             uint color = UInt32.MinValue;
-            
-            switch (areaObject)
-            {
-                // Mobs
-                case BattleNpc mob:
-                    color = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
-                    DrawEsp(onScreenPosition, mob, tagText, color, drawHealthCircle: true);
-                    break;
-                // Players
-                case PlayerCharacter chara:
-                    color = UtilInfo.Color(0x00, 0x99, 0x99, 0xff);
-                    DrawEsp(onScreenPosition, chara, tagText, color);
-                    break;
-                // Event Objects
-                case EventObj chara:
-                // Npcs
-                case Npc npc:
-                // Objects
-                default:
-                    if (UtilInfo.RenameList.ContainsKey(areaObject.DataId))
-                    {
-                        tagText = UtilInfo.RenameList[areaObject.DataId];
-                    }
 
-                    var tagTextSize = ImGui.CalcTextSize(tagText);
-
-                    ImGui.GetForegroundDrawList().AddText(
-                        new Vector2(onScreenPosition.X - tagTextSize.X / 2f, onScreenPosition.Y + tagTextSize.Y / 2f),
-                        UtilInfo.Color(0xFF, 0x7E, 0x00, 0xFF), //  #FF7E00
-                        tagText);
-                    break;
-            }
+            DrawEsp(onScreenPosition, areaObject);
         }
     }
 
-    private void DrawEsp(Vector2 position, Character npc, string mobText, uint color, bool drawHealthCircle = false)
+    private void DrawEsp(Vector2 position, GameObject gameObject)
     {
-        if (drawHealthCircle) // TODO: Make config option
+        switch (gameObject)
         {
-            DrawHealthCircle(position, npc.MaxHp, npc.CurrentHp);
-        }
+            // Mobs
+            case BattleNpc mob:
+                var npcOpt = configInterface.cfg.NpcOption;
+                if (npcOpt.ShowHealthBar)
+                {
+                    DrawHealthCircle(position, mob.MaxHp, mob.CurrentHp, npcOpt.ShowHealthValue);
+                }
 
-        var tagTextSize = ImGui.CalcTextSize(mobText);
+                if (npcOpt.ShowName)
+                {
+                    var tagText = GetText(gameObject);
+                    DrawName(position, tagText, npcOpt.Color);
+                }
+
+                break;
+            // Players
+            case PlayerCharacter chara:
+                var playerOpt = configInterface.cfg.PlayerOption;
+                if (playerOpt.ShowHealthBar)
+                {
+                    DrawHealthCircle(position, chara.MaxHp, chara.CurrentHp, playerOpt.ShowHealthValue);
+                }
+
+                if (playerOpt.ShowName)
+                {
+                    var tagText = GetText(gameObject);
+                    DrawName(position, tagText, playerOpt.Color);
+                }
+
+                break;
+            // Event Objects
+            case EventObj chara:
+            // Npcs
+            case Npc npc:
+            // Objects
+            default:
+                var objectOption = configInterface.cfg.ObjectOption;
+                if (objectOption.ShowName)
+                {
+                    var tagText = GetText(gameObject);
+                    DrawName(position, tagText, objectOption.Color);
+                }
+
+                break;
+        }
+    }
+
+    private void DrawName(Vector2 position, string tagText, Vector4 objectOptionColor)
+    {
+        var tagTextSize = ImGui.CalcTextSize(tagText);
         ImGui.GetForegroundDrawList().AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
-            color,
-            mobText);
+            ImGui.ColorConvertFloat4ToU32(objectOptionColor),
+            tagText);
     }
+
 
     private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, bool includeText = true)
     {
@@ -130,6 +148,11 @@ public class RadarLogic : IDisposable
 
     private string GetText(GameObject obj)
     {
+        if (obj.DataId != 0 && UtilInfo.RenameList.ContainsKey(obj.DataId))
+        {
+            return UtilInfo.RenameList[obj.DataId];
+        }
+
         return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{obj.Name}";
     }
 

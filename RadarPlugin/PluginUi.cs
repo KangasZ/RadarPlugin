@@ -35,7 +35,7 @@ public class PluginUi : IDisposable
         get { return currentMobsVisible; }
         set { currentMobsVisible = value; }
     }
-    
+
     private bool mobEditVisible;
 
     public bool MobEditVisible
@@ -59,12 +59,12 @@ public class PluginUi : IDisposable
         this.dalamudPluginInterface.UiBuilder.Draw -= Draw;
         this.dalamudPluginInterface.UiBuilder.OpenConfigUi -= OpenUi;
     }
-    
+
     public void OpenUi()
     {
         MainWindowVisible = true;
     }
-    
+
     private void Draw()
     {
         DrawMainWindow();
@@ -107,7 +107,7 @@ public class PluginUi : IDisposable
             ImGui.TableNextColumn();
             ImGui.Text($"{localObject.ObjectKind}");
             ImGui.EndTable();
-            
+
             ImGui.Text("Disabled table");
             ImGui.BeginTable("disabledbylocalobjecttable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
             ImGui.TableSetupColumn("Source");
@@ -145,6 +145,7 @@ public class PluginUi : IDisposable
                     }
                 }
             }
+
             if (ImGui.Button($"Remove from block list"))
             {
                 if (configuration.cfg.DataIdIgnoreList.Contains(localObject.DataId))
@@ -154,8 +155,8 @@ public class PluginUi : IDisposable
                 }
             }
         }
+
         ImGui.End();
-        
     }
 
     private void DrawCurrentMobsWindow()
@@ -192,6 +193,7 @@ public class PluginUi : IDisposable
                 {
                     ImGui.Text($"{mob.CurrentHp}");
                 }
+
                 ImGui.TableNextColumn();
                 if (UtilInfo.DataIdIgnoreList.Contains(x.DataId))
                 {
@@ -205,6 +207,7 @@ public class PluginUi : IDisposable
                 {
                     ImGui.Text("No");
                 }
+
                 ImGui.TableNextColumn();
                 if (x.DataId != 0)
                 {
@@ -237,30 +240,36 @@ public class PluginUi : IDisposable
                     localObject = x;
                     MobEditVisible = true;
                 }
+
                 ImGui.TableNextRow();
             }
+
             ImGui.EndTable();
         }
+
         if (!currentMobsVisible)
         {
             PluginLog.Debug("Clearing Area Objects");
             areaObjects.Clear();
         }
+
         ImGui.End();
     }
 
     private void DrawGeneralSettings()
     {
-        ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff), "This is a radar plugin.\nIt is made by KangasZ for use in FFXIV.\nPlease use this with caution.");
+        ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
+            "This is a radar plugin.\nIt is made by KangasZ for use in FFXIV.\nPlease use this with caution.");
         var configValue = configuration.cfg.Enabled;
         if (ImGui.Checkbox("Enabled", ref configValue))
         {
             configuration.cfg.Enabled = configValue;
             configuration.Save();
         }
+
         ImGui.EndTabItem();
     }
-    
+
     private void DrawMainWindow()
     {
         if (!MainWindowVisible)
@@ -268,7 +277,7 @@ public class PluginUi : IDisposable
             return;
         }
 
-        var size = new Vector2(375, 350);
+        var size = new Vector2(405, 365);
         ImGui.SetNextWindowSize(size); //, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible, ImGuiWindowFlags.NoResize))
@@ -278,11 +287,12 @@ public class PluginUi : IDisposable
             ImGui.Spacing();
             ImGui.BeginTabBar("radar-settings-tabs");
 
-            
+
             if (ImGui.BeginTabItem($"General##radar-tabs"))
             {
                 DrawGeneralSettings();
             }
+
             ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
             if (ImGui.BeginTabItem($"Visibility##radar-tabs"))
             {
@@ -293,6 +303,7 @@ public class PluginUi : IDisposable
                     configuration.cfg.ShowEnemies = enemyShow;
                     configuration.Save();
                 }
+
                 var objShow = configuration.cfg.ShowLoot;
                 if (ImGui.Checkbox("Loot", ref objShow))
                 {
@@ -300,6 +311,7 @@ public class PluginUi : IDisposable
                     configuration.cfg.ShowLoot = objShow;
                     configuration.Save();
                 }
+
                 var players = configuration.cfg.ShowPlayers;
                 if (ImGui.Checkbox("Players", ref players))
                 {
@@ -313,7 +325,7 @@ public class PluginUi : IDisposable
                     configuration.cfg.ShowBaDdObjects = badd;
                     configuration.Save();
                 }
-                
+
                 ImGui.Separator();
                 ImGui.Text("Below this line are things that generally won't be supported");
                 ImGui.BeginChild("##visibilitychild");
@@ -325,24 +337,28 @@ public class PluginUi : IDisposable
                     configuration.cfg.ShowCompanion = npc;
                     configuration.Save();
                 }
+
                 var eventNpcs = configuration.cfg.ShowEventNpc;
                 if (ImGui.Checkbox("Event NPCs", ref eventNpcs))
                 {
                     configuration.cfg.ShowEventNpc = eventNpcs;
                     configuration.Save();
                 }
+
                 var events = configuration.cfg.ShowEvents;
                 if (ImGui.Checkbox("Event Objects", ref events))
                 {
                     configuration.cfg.ShowEvents = events;
                     configuration.Save();
                 }
+
                 var objHideList = configuration.cfg.DebugMode;
                 if (ImGui.Checkbox("Debug Mode", ref objHideList))
                 {
                     configuration.cfg.DebugMode = objHideList;
                     configuration.Save();
                 }
+
                 ImGui.NextColumn();
                 var showAreaObjs = configuration.cfg.ShowAreaObjects;
                 if (ImGui.Checkbox("Area Objects", ref showAreaObjs))
@@ -350,12 +366,14 @@ public class PluginUi : IDisposable
                     configuration.cfg.ShowAreaObjects = showAreaObjs;
                     configuration.Save();
                 }
+
                 var showAetherytes = configuration.cfg.ShowAetherytes;
                 if (ImGui.Checkbox("Aetherytes", ref showAetherytes))
                 {
                     configuration.cfg.ShowAetherytes = showAetherytes;
                     configuration.Save();
                 }
+
                 ImGui.EndChild();
                 ImGui.EndTabItem();
             }
@@ -363,39 +381,140 @@ public class PluginUi : IDisposable
             {
                 ImGui.PopStyleColor();
             }
+
+            ImGui.PushStyleColor(ImGuiCol.Text, 0xFF00FF00);
             if (ImGui.BeginTabItem($"3D-Settings##radar-tabs"))
             {
-                if (ImGui.CollapsingHeader("Npc Settings##radar-collapsing-header"))
+                ImGui.PopStyleColor();
+                ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
+                    "This menu is WIP. Odd things may occur or not be working.");
+                var objectStr = "object";
+                if (ImGui.CollapsingHeader($"Object Settings##radar-{objectStr}-collapsing-header"))
                 {
-                    ImGui.BeginChild("##npc-settings-child");
-                    ImGui.Columns(2, "##npc-settings-columns", false);
-                    ImGui.Text("Color placeholder that will sooner or later be there");
+                    ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, 80));
+                    ImGui.Columns(2, $"##{objectStr}-settings-columns", false);
+                    var colorChange = configuration.cfg.ObjectOption.Color;
+                    if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+                    {
+                        configuration.cfg.ObjectOption.Color = colorChange;
+                        configuration.Save();
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.TextColored(configuration.cfg.ObjectOption.Color, "Curr");
+                    var showObjectName = configuration.cfg.ObjectOption.ShowName;
+                    if (ImGui.Checkbox($"Show Name##{objectStr}-settings", ref showObjectName))
+                    {
+                        configuration.cfg.ObjectOption.ShowName = showObjectName;
+                        configuration.Save();
+                    }
+
+                    var showObjectDot = configuration.cfg.ObjectOption.ShowDot;
+                    if (ImGui.Checkbox($"Show Dot##{objectStr}-settings", ref showObjectDot))
+                    {
+                        configuration.cfg.ObjectOption.ShowDot = showObjectDot;
+                        configuration.Save();
+                    }
+
+                    ImGui.EndChild();
+                }
+
+                var npcStr = "npc";
+                if (ImGui.CollapsingHeader($"Npc Settings##radar-{npcStr}-collapsing-header"))
+                {
+                    ImGui.BeginChild($"##{npcStr}-radar-tabs-child", new Vector2(0, 80));
+                    ImGui.Columns(2, $"##{npcStr}-settings-columns", false);
+                    var colorChange = configuration.cfg.NpcOption.Color;
+                    if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+                    {
+                        configuration.cfg.NpcOption.Color = colorChange;
+                        configuration.Save();
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.TextColored(configuration.cfg.NpcOption.Color, "Current");
                     var showNpcName = configuration.cfg.NpcOption.ShowName;
-                    if (ImGui.Checkbox("Show Name##npc-settings", ref showNpcName))
+                    if (ImGui.Checkbox($"Show Name##{npcStr}-settings", ref showNpcName))
                     {
                         configuration.cfg.NpcOption.ShowName = showNpcName;
                         configuration.Save();
                     }
+                    var showNpcDot = configuration.cfg.NpcOption.ShowDot;
+                    if (ImGui.Checkbox($"Show Dot##{npcStr}-settings", ref showNpcDot))
+                    {
+                        configuration.cfg.NpcOption.ShowDot = showNpcDot;
+                        configuration.Save();
+                    }
                     ImGui.NextColumn();
                     var showNpcHealthBar = configuration.cfg.NpcOption.ShowHealthBar;
-                    if (ImGui.Checkbox("Show Health Bar##npc-settings", ref showNpcHealthBar))
+                    if (ImGui.Checkbox($"Show Health Bar##{npcStr}-settings", ref showNpcHealthBar))
                     {
                         configuration.cfg.NpcOption.ShowHealthBar = showNpcHealthBar;
                         configuration.Save();
                     }
+
                     var showNpcHealthValue = configuration.cfg.NpcOption.ShowHealthValue;
-                    if (ImGui.Checkbox("Show Health Value##npc-settings", ref showNpcHealthValue))
+                    if (ImGui.Checkbox($"Show Health Value##{npcStr}-settings", ref showNpcHealthValue))
                     {
                         configuration.cfg.NpcOption.ShowHealthValue = showNpcHealthValue;
                         configuration.Save();
                     }
-                    
+
                     ImGui.EndChild();
-                    
                 }
+
+                var playerStr = "player";
+                if (ImGui.CollapsingHeader($"Player Settings##radar-{playerStr}-collapsing-header"))
+                {
+                    ImGui.BeginChild($"##{playerStr}-radar-tabs-child", new Vector2(0, 80));
+                    ImGui.Columns(2, $"##{playerStr}-settings-columns", false);
+                    var colorChange = configuration.cfg.PlayerOption.Color;
+                    if (ImGui.ColorEdit4($"Color##{playerStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+                    {
+                        configuration.cfg.PlayerOption.Color = colorChange;
+                        configuration.Save();
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.TextColored(configuration.cfg.PlayerOption.Color, "Curr");
+                    var showPlayerName = configuration.cfg.PlayerOption.ShowName;
+                    if (ImGui.Checkbox($"Show Name##{playerStr}-settings", ref showPlayerName))
+                    {
+                        configuration.cfg.PlayerOption.ShowName = showPlayerName;
+                        configuration.Save();
+                    }
+                    var showPlayerDot = configuration.cfg.PlayerOption.ShowDot;
+                    if (ImGui.Checkbox($"Show Dot##{playerStr}-settings", ref showPlayerDot))
+                    {
+                        configuration.cfg.PlayerOption.ShowDot = showPlayerDot;
+                        configuration.Save();
+                    }
+                    ImGui.NextColumn();
+                    var showPlayerHealthBar = configuration.cfg.PlayerOption.ShowHealthBar;
+                    if (ImGui.Checkbox($"Show Health Bar##{playerStr}-settings", ref showPlayerHealthBar))
+                    {
+                        configuration.cfg.PlayerOption.ShowHealthBar = showPlayerHealthBar;
+                        configuration.Save();
+                    }
+
+                    var showPlayerHealthValue = configuration.cfg.PlayerOption.ShowHealthValue;
+                    if (ImGui.Checkbox($"Show Health Value##{playerStr}-settings", ref showPlayerHealthValue))
+                    {
+                        configuration.cfg.PlayerOption.ShowHealthValue = showPlayerHealthValue;
+                        configuration.Save();
+                    }
+
+                    ImGui.EndChild();
+                }
+
                 ImGui.EndTabItem();
                 ImGui.NextColumn();
             }
+            else
+            {
+                ImGui.PopStyleColor();
+            }
+
             if (ImGui.BeginTabItem($"Blocking##radar-tabs"))
             {
                 if (ImGui.Button("Load Current Objects"))
@@ -405,10 +524,13 @@ public class PluginUi : IDisposable
                     areaObjects.Clear();
                     areaObjects.AddRange(objectTable);
                 }
+
                 ImGui.EndTabItem();
             }
+
             ImGui.EndTabBar();
         }
+
         ImGui.End();
     }
 }
