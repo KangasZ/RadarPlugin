@@ -24,6 +24,7 @@ public class RadarLogic : IDisposable
     private const float PI = 3.14159265359f;
     private DalamudPluginInterface pluginInterface { get; set; }
     private Configuration configInterface { get; set; }
+    private Condition conditionInterface { get; set; }
     private Task backgroundLoop { get; set; }
     private bool keepRunning { get; set; }
     private ObjectTable objectTable { get; set; }
@@ -36,6 +37,7 @@ public class RadarLogic : IDisposable
         this.objectTable = objectTable;
         this.pluginInterface = pluginInterface;
         this.configInterface = configuration;
+        this.conditionInterface = condition;
 
         // Loads plugin
         PluginLog.Debug($"Radar Loaded");
@@ -51,6 +53,7 @@ public class RadarLogic : IDisposable
     {
         if (!configInterface.cfg.Enabled) return;
         if (objectTable.Length == 0) return;
+        if (this.conditionInterface[ConditionFlag.LoggingOut]) return;
         if (refreshing) return;
         foreach (var areaObject in areaObjects)
         {
