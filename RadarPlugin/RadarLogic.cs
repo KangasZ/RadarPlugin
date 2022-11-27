@@ -129,7 +129,7 @@ public class RadarLogic : IDisposable
     
     private void DrawHealthValue(Vector2 position, uint maxHp, uint currHp, Vector4 playerOptColor)
     {
-        var healthText = (((double)currHp / maxHp) * 100).ToString();
+        var healthText = ((int)(((double)currHp / maxHp) * 100)).ToString();
         var healthTextSize = ImGui.CalcTextSize(healthText);
         ImGui.GetForegroundDrawList().AddText(
             new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
