@@ -76,9 +76,12 @@ public class RadarLogic : IDisposable
                 var npcOpt = configInterface.cfg.NpcOption;
                 if (npcOpt.ShowHealthBar)
                 {
-                    DrawHealthCircle(position, mob.MaxHp, mob.CurrentHp, npcOpt.ShowHealthValue);
+                    DrawHealthCircle(position, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
                 }
-
+                if (npcOpt.ShowHealthValue)
+                {
+                    DrawHealthValue(position, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
+                }
                 if (npcOpt.ShowName)
                 {
                     var tagText = GetText(gameObject);
@@ -89,9 +92,15 @@ public class RadarLogic : IDisposable
             // Players
             case PlayerCharacter chara:
                 var playerOpt = configInterface.cfg.PlayerOption;
+                //var hp = chara.CurrentHp / chara.MaxHp;
                 if (playerOpt.ShowHealthBar)
                 {
-                    DrawHealthCircle(position, chara.MaxHp, chara.CurrentHp, playerOpt.ShowHealthValue);
+                    DrawHealthCircle(position, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
+                }
+                
+                if (playerOpt.ShowHealthValue)
+                {
+                    DrawHealthValue(position, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
                 }
 
                 if (playerOpt.ShowName)
@@ -117,6 +126,17 @@ public class RadarLogic : IDisposable
                 break;
         }
     }
+    
+    private void DrawHealthValue(Vector2 position, uint maxHp, uint currHp, Vector4 playerOptColor)
+    {
+        var healthText = (((double)currHp / maxHp) * 100).ToString();
+        var healthTextSize = ImGui.CalcTextSize(healthText);
+        ImGui.GetForegroundDrawList().AddText(
+            new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
+            ImGui.ColorConvertFloat4ToU32(playerOptColor),
+            healthText);
+        
+    }
 
     private void DrawName(Vector2 position, string tagText, Vector4 objectOptionColor)
     {
@@ -128,25 +148,17 @@ public class RadarLogic : IDisposable
     }
 
 
-    private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, bool includeText = true)
+    private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, Vector4 playerOptColor)
     {
         const float radius = 13f;
+        
         var v1 = (float)currHp / (float)maxHp;
         var aMax = PI * 2.0f;
         var difference = v1 - 1.0f;
-
-        var healthText = ((int)(v1 * 100)).ToString();
-        var colorWhite = UtilInfo.Color(0xff, 0xff, 0xff, 0xff);
-        var colorHealth = ImGui.ColorConvertFloat4ToU32(new Vector4(Math.Abs(v1 - difference), v1, v1, 1.0f));
+        var colorHealth = ImGui.ColorConvertFloat4ToU32(playerOptColor);
         ImGui.GetForegroundDrawList().PathArcTo(position, radius,
             (-(aMax / 4.0f)) + (aMax / maxHp) * (maxHp - currHp), aMax - (aMax / 4.0f), 200 - 1);
         ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
-        if (!includeText) return;
-        var healthTextSize = ImGui.CalcTextSize(healthText);
-        ImGui.GetForegroundDrawList().AddText(
-            new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
-            colorWhite,
-            healthText);
     }
 
     private string GetText(GameObject obj)
