@@ -12,7 +12,7 @@ public class Configuration
     public class ESPOption
     {
         public bool ShowName = true;
-        public bool ShowDot = true;
+        public bool ShowDot = false;
     }
 
     public class ObjectOption : ESPOption
@@ -30,9 +30,10 @@ public class Configuration
     public class PlayerOption : NpcOption
     {
         public bool ShowFC = false; // Unused
-        public bool ShowHealthBar = false;
-        public bool ShowHealthValue = false;
-        public Vector4 Color = new(0x99, 0x00, 0x99, 0xFF);
+        public new bool ShowHealthBar = false;
+        public new bool ShowHealthValue = false;
+        public new bool ShowDot = true;
+        public new Vector4 Color = new(0x99, 0x00, 0x99, 0xFF);
     }
 
     public class Config : IPluginConfiguration

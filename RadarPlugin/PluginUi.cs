@@ -84,15 +84,14 @@ public class PluginUi : IDisposable
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible, ImGuiWindowFlags.NoResize))
         {
-            ImGui.Text(
-                "A 3d-radar plugin. This is basically a hack please leave me alone.");
+            ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff), "Radar Plugin. This is basically a hack. Please use with caution.");
             ImGui.Spacing();
             ImGui.BeginTabBar("radar-settings-tabs");
 
-            DrawTab("General##radar-tabs", UInt32.MaxValue, DrawGeneralSettings);
+            DrawTab("General##radar-tabs", UtilInfo.White, DrawGeneralSettings);
             DrawTab("Visibility##radar-tabs", UtilInfo.Red, DrawVisibilitySettings);
-            DrawTab("Radar Settings##radar-tabs", 0xFF00FF00, Draw3DRadarSettings);
-            DrawTab("Utility##radar-tabs", UInt32.MaxValue, DrawUtilityTab);
+            DrawTab("3-D Settings##radar-tabs", UtilInfo.Green, Draw3DRadarSettings);
+            DrawTab("Utility##radar-tabs", UtilInfo.White, DrawUtilityTab);
 
             ImGui.EndTabBar();
         }
@@ -121,6 +120,12 @@ public class PluginUi : IDisposable
             configuration.cfg.Enabled = configValue;
             configuration.Save();
         }
+
+        ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
+            "    1. Enable type in visiblity\n" +
+            "    2. Set display options in settings\n" +
+            "    3. Remove invisible mobs by utility tab\n");
+        ImGui.TextWrapped("Note: Entities that are not on the client are not viewable. For instance, BA traps are not visible until you unveil them.");
     }
 
     private void Draw3DRadarSettings()
@@ -260,12 +265,22 @@ public class PluginUi : IDisposable
             configuration.Save();
         }
 
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Shows most enemies that are considered battleable");
+        }
+
         var objShow = configuration.cfg.ShowLoot;
         if (ImGui.Checkbox("Loot", ref objShow))
         {
             ImGui.SetTooltip("Enables showing objects on the screen.");
             configuration.cfg.ShowLoot = objShow;
             configuration.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Shows most loot. The loot classification is via the dalamud's association.");
         }
 
         var players = configuration.cfg.ShowPlayers;

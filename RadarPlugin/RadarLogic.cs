@@ -31,7 +31,8 @@ public class RadarLogic : IDisposable
     private List<GameObject> areaObjects { get; set; }
     private bool refreshing { get; set; }
 
-    public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable, Condition condition)
+    public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
+        Condition condition)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -78,14 +79,21 @@ public class RadarLogic : IDisposable
                 {
                     DrawHealthCircle(position, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
                 }
+
                 if (npcOpt.ShowHealthValue)
                 {
                     DrawHealthValue(position, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
                 }
+
                 if (npcOpt.ShowName)
                 {
                     var tagText = GetText(gameObject);
                     DrawName(position, tagText, npcOpt.Color);
+                }
+
+                if (npcOpt.ShowDot)
+                {
+                    DrawDot(position, npcOpt.Color);
                 }
 
                 break;
@@ -97,7 +105,7 @@ public class RadarLogic : IDisposable
                 {
                     DrawHealthCircle(position, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
                 }
-                
+
                 if (playerOpt.ShowHealthValue)
                 {
                     DrawHealthValue(position, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
@@ -108,7 +116,10 @@ public class RadarLogic : IDisposable
                     var tagText = GetText(gameObject);
                     DrawName(position, tagText, playerOpt.Color);
                 }
-
+                if (playerOpt.ShowDot)
+                {
+                    DrawDot(position, playerOpt.Color);
+                }
                 break;
             // Event Objects
             case EventObj chara:
@@ -122,11 +133,19 @@ public class RadarLogic : IDisposable
                     var tagText = GetText(gameObject);
                     DrawName(position, tagText, objectOption.Color);
                 }
-
+                if (objectOption.ShowDot)
+                {
+                    DrawDot(position, objectOption.Color);
+                }
                 break;
         }
     }
-    
+
+    private void DrawDot(Vector2 position, Vector4 npcOptColor)
+    {
+        ImGui.GetForegroundDrawList().AddCircleFilled(position, 3f, ImGui.ColorConvertFloat4ToU32(npcOptColor), 100);
+    }
+
     private void DrawHealthValue(Vector2 position, uint maxHp, uint currHp, Vector4 playerOptColor)
     {
         var healthText = ((int)(((double)currHp / maxHp) * 100)).ToString();
@@ -135,7 +154,6 @@ public class RadarLogic : IDisposable
             new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
             ImGui.ColorConvertFloat4ToU32(playerOptColor),
             healthText);
-        
     }
 
     private void DrawName(Vector2 position, string tagText, Vector4 objectOptionColor)
@@ -151,7 +169,7 @@ public class RadarLogic : IDisposable
     private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, Vector4 playerOptColor)
     {
         const float radius = 13f;
-        
+
         var v1 = (float)currHp / (float)maxHp;
         var aMax = PI * 2.0f;
         var difference = v1 - 1.0f;
