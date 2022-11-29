@@ -113,7 +113,7 @@ public class PluginUi : IDisposable
     private void DrawGeneralSettings()
     {
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
-            "This is a radar plugin.\nIt is made by KangasZ for use in FFXIV.\nPlease use this with caution.");
+            "This is made by KangasZ for use in FFXIV.");
         var configValue = configuration.cfg.Enabled;
         if (ImGui.Checkbox("Enabled", ref configValue))
         {
