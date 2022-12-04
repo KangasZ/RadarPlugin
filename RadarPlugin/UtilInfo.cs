@@ -52,7 +52,8 @@ public static class UtilInfo
         {2007542, "Accursed Hoard"},
         {2007182, "Combustion Trap"},
         {2007183, "Luring Trap"},
-        {2007184, "Enervation Trap"}
+        {2007184, "Enervation Trap"},
+        {2009504, "Otter Trap"}
     };
     
 
