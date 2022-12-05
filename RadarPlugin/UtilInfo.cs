@@ -53,7 +53,9 @@ public static class UtilInfo
         {2007182, "Combustion Trap"},
         {2007183, "Luring Trap"},
         {2007184, "Enervation Trap"},
-        {2009504, "Otter Trap"}
+        {2009504, "Otter Trap"},
+        {2009726, "Unstable Portal"},
+        {2009727, "Stable Portal"}
     };
     
 
