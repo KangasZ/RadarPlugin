@@ -192,9 +192,10 @@ public class RadarLogic : IDisposable
         if (obj.DataId != 0 && UtilInfo.RenameList.ContainsKey(obj.DataId))
         {
             text = UtilInfo.RenameList[obj.DataId];
-        } else if (String.IsNullOrWhiteSpace(obj.Name.TextValue))
+        }
+        else if (String.IsNullOrWhiteSpace(obj.Name.TextValue))
         {
-            text = "nameless";
+            text = "''";
         }
         else
         {
@@ -234,7 +235,6 @@ public class RadarLogic : IDisposable
             {
                 continue;
             }
-            
             switch (obj.ObjectKind)
             {
                 case ObjectKind.Treasure:
