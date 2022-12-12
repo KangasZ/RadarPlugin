@@ -127,13 +127,13 @@ public class PluginUi : IDisposable
             "    2. Set display options in settings\n" +
             "    3. Remove invisible mobs by utility tab\n");
         ImGui.TextWrapped(
-            "Note 1: Entities to shown are refreshed once per second. Please be mindful of this.");
+            "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
         ImGui.TextWrapped(
             "Note 2: Entities that are not on the client are not viewable. For instance, BA traps are not visible until you unveil them.");
         ImGui.Spacing();
         ImGui.TextWrapped(
-            "Note 2: Invisible mobs can / will be shown. Use the Utility tab to remove these. This is being worked on but");
+            "Note 2: Invisible mobs can / will be shown. Use the Utility tab to remove these. This is kinda being worked on but may not have an easy solution.");
     }
 
     private void Draw3DRadarSettings()
