@@ -50,6 +50,7 @@ public class Configuration
         public bool ShowEventNpc { get; set; } = false;
         public bool ShowAreaObjects { get; set; } = false;
         public bool ShowAetherytes { get; set; } = false;
+        public bool ShowOnlyVisible { get; set; } = true;
         public NpcOption NpcOption { get; set; } = new();
         public PlayerOption PlayerOption { get; set; } = new();
         public ObjectOption ObjectOption { get; set; } = new();

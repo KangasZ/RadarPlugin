@@ -16,6 +16,9 @@ using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
 using RadarPlugin;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
+using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
 namespace RadarPlugin;
 
@@ -116,10 +119,12 @@ public class RadarLogic : IDisposable
                     var tagText = GetText(gameObject);
                     DrawName(position, tagText, playerOpt.Color);
                 }
+
                 if (playerOpt.ShowDot)
                 {
                     DrawDot(position, playerOpt.Color);
                 }
+
                 break;
             // Event Objects
             case EventObj chara:
@@ -133,10 +138,12 @@ public class RadarLogic : IDisposable
                     var tagText = GetText(gameObject);
                     DrawName(position, tagText, objectOption.Color);
                 }
+
                 if (objectOption.ShowDot)
                 {
                     DrawDot(position, objectOption.Color);
                 }
+
                 break;
         }
     }
@@ -181,12 +188,19 @@ public class RadarLogic : IDisposable
 
     private string GetText(GameObject obj)
     {
+        var text = "";
         if (obj.DataId != 0 && UtilInfo.RenameList.ContainsKey(obj.DataId))
         {
-            return UtilInfo.RenameList[obj.DataId];
+            text = UtilInfo.RenameList[obj.DataId];
+        } else if (String.IsNullOrWhiteSpace(obj.Name.TextValue))
+        {
+            text = "nameless";
         }
-
-        return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{obj.Name}";
+        else
+        {
+            text = obj.Name.TextValue;
+        }
+        return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
     }
 
     private void BackgroundLoop()
@@ -203,7 +217,7 @@ public class RadarLogic : IDisposable
         }
     }
 
-    private void UpdateMobInfo()
+    private unsafe void UpdateMobInfo()
     {
         var nearbyMobs = new List<GameObject>();
 
@@ -215,7 +229,12 @@ public class RadarLogic : IDisposable
                 nearbyMobs.Add(obj);
                 continue;
             }
-
+            if (this.configInterface.cfg.ShowOnlyVisible &&
+                ((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address)->RenderFlags != 0)
+            {
+                continue;
+            }
+            
             switch (obj.ObjectKind)
             {
                 case ObjectKind.Treasure:
@@ -255,16 +274,15 @@ public class RadarLogic : IDisposable
                     break;
                 case ObjectKind.Player:
                     if (!configInterface.cfg.ShowPlayers) continue;
-                    if (obj is not PlayerCharacter chara) continue;
-                    if (chara.CurrentHp <= 0) continue;
+                    //if (obj is not PlayerCharacter chara) continue;
                     nearbyMobs.Add(obj);
                     break;
                 case ObjectKind.BattleNpc:
                     if (obj is not BattleNpc mob) continue;
                     if (!configInterface.cfg.ShowEnemies) continue;
-                    if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
+                    //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
-                    if (mob.CurrentHp <= 0) continue;
+                    if (mob.IsDead) continue;
                     if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
                         configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) continue;
                     nearbyMobs.Add(obj);

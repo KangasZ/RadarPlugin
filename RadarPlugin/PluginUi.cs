@@ -84,7 +84,8 @@ public class PluginUi : IDisposable
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible, ImGuiWindowFlags.NoResize))
         {
-            ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff), "Radar Plugin. This is basically a hack. Please use with caution.");
+            ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
+                "Radar Plugin. This is basically a hack. Please use with caution.");
             ImGui.Spacing();
             ImGui.BeginTabBar("radar-settings-tabs");
 
@@ -125,7 +126,8 @@ public class PluginUi : IDisposable
             "    1. Enable type in visiblity\n" +
             "    2. Set display options in settings\n" +
             "    3. Remove invisible mobs by utility tab\n");
-        ImGui.TextWrapped("Note: Entities that are not on the client are not viewable. For instance, BA traps are not visible until you unveil them.");
+        ImGui.TextWrapped(
+            "Note: Entities that are not on the client are not viewable. For instance, BA traps are not visible until you unveil them.");
     }
 
     private void Draw3DRadarSettings()
@@ -343,6 +345,18 @@ public class PluginUi : IDisposable
         {
             configuration.cfg.ShowAetherytes = showAetherytes;
             configuration.Save();
+        }
+
+        var onlyVisible = configuration.cfg.ShowOnlyVisible;
+        if (ImGui.Checkbox("Only Visible", ref onlyVisible))
+        {
+            configuration.cfg.ShowOnlyVisible = onlyVisible;
+            configuration.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Show only visible mobs. You probably don't want to turn this off.");
         }
 
         ImGui.EndChild();
