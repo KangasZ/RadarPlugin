@@ -32,7 +32,6 @@ public class RadarLogic : IDisposable
     private bool keepRunning { get; set; }
     private ObjectTable objectTable { get; set; }
     private List<GameObject> areaObjects { get; set; }
-    private bool refreshing { get; set; }
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
         Condition condition)
@@ -44,7 +43,7 @@ public class RadarLogic : IDisposable
         this.conditionInterface = condition;
 
         // Loads plugin
-        PluginLog.Debug($"Radar Loaded");
+        PluginLog.Debug("Radar Loaded");
         keepRunning = true;
         // TODO: In the future adjust this
         this.pluginInterface.UiBuilder.Draw += DrawRadar;
@@ -58,7 +57,12 @@ public class RadarLogic : IDisposable
         if (!configInterface.cfg.Enabled) return;
         if (objectTable.Length == 0) return;
         if (this.conditionInterface[ConditionFlag.LoggingOut]) return;
-        if (refreshing) return;
+        if (!Monitor.TryEnter(areaObjects))
+        {
+            PluginLog.Error("Try Enter Failed. This is not an error");
+            return;
+        }
+
         foreach (var areaObject in areaObjects)
         {
             var p = Services.GameGui.WorldToScreen(areaObject.Position, out var onScreenPosition);
@@ -69,6 +73,8 @@ public class RadarLogic : IDisposable
 
             DrawEsp(onScreenPosition, areaObject);
         }
+
+        Monitor.Exit(areaObjects);
     }
 
     private void DrawEsp(Vector2 position, GameObject gameObject)
@@ -201,6 +207,7 @@ public class RadarLogic : IDisposable
         {
             text = obj.Name.TextValue;
         }
+
         return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
     }
 
@@ -210,10 +217,11 @@ public class RadarLogic : IDisposable
         {
             if (configInterface.cfg.Enabled)
             {
+                var time = DateTime.Now;
                 UpdateMobInfo();
-                PluginLog.Debug("Refreshed Mob Info!");
+                PluginLog.Verbose($"Refreshed Mob Info in {(DateTime.Now - time).TotalMilliseconds} ms.");
             }
-
+            
             Thread.Sleep(1000);
         }
     }
@@ -230,11 +238,13 @@ public class RadarLogic : IDisposable
                 nearbyMobs.Add(obj);
                 continue;
             }
+
             if (this.configInterface.cfg.ShowOnlyVisible &&
                 ((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address)->RenderFlags != 0)
             {
                 continue;
             }
+
             switch (obj.ObjectKind)
             {
                 case ObjectKind.Treasure:
@@ -304,10 +314,13 @@ public class RadarLogic : IDisposable
             }
         }
 
-        refreshing = true; // TODO change to mutex off refreshing
-        areaObjects.Clear();
-        areaObjects.AddRange(nearbyMobs);
-        refreshing = false;
+        var old = areaObjects;
+        Monitor.Enter(areaObjects);
+        Monitor.Enter(nearbyMobs);
+        areaObjects = nearbyMobs;
+        Monitor.Exit(areaObjects);
+        old.Clear();
+        Monitor.Exit(old);
     }
 
     public void Dispose()
@@ -315,6 +328,6 @@ public class RadarLogic : IDisposable
         this.pluginInterface.UiBuilder.Draw -= DrawRadar;
         keepRunning = false;
         while (!backgroundLoop.IsCompleted) ;
-        PluginLog.Debug($"Radar Unloaded");
+        PluginLog.Debug("Radar Unloaded");
     }
 }
