@@ -347,7 +347,7 @@ public class RadarLogic : IDisposable
 
     private void CleanupZone()
     {
-        PluginLog.Debug("Clearing");
+        PluginLog.Verbose("Clearing because of condition met.");
         Monitor.Enter(areaObjects);
         areaObjects.Clear();
         Monitor.Exit(areaObjects);
