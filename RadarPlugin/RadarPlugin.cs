@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.Conditions;
+﻿using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
@@ -15,12 +16,14 @@ public sealed class RadarPlugin : IDalamudPlugin
     private PluginUi pluginUi { get; set; }
     private ObjectTable objectTable { get; set; }
     private Condition condition { get; set; }
-    
+    private ClientState clientState { get; set; }
+
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
         CommandManager commandManager,
         ObjectTable objectTable,
-        Condition condition)
+        Condition condition,
+        ClientState clientState)
     {
         pluginInterface.Create<Services>(); // Todo: Remove this
         this.objectTable = objectTable;
@@ -28,7 +31,8 @@ public sealed class RadarPlugin : IDalamudPlugin
         configuration = new Configuration(pluginInterface);
         pluginUi = new PluginUi(pluginInterface, configuration, this.objectTable);
         pluginCommands = new PluginCommands(commandManager, pluginUi);
-        radarLogic = new RadarLogic(pluginInterface, configuration, this.objectTable, this.condition);
+        this.clientState = clientState;
+        radarLogic = new RadarLogic(pluginInterface, configuration, this.objectTable, this.condition, this.clientState);
     }
 
     public void Dispose()

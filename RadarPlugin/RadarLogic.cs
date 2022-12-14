@@ -6,17 +6,14 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
-using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
-using RadarPlugin;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
@@ -32,10 +29,10 @@ public class RadarLogic : IDisposable
     private bool keepRunning { get; set; }
     private ObjectTable objectTable { get; set; }
     private List<GameObject> areaObjects { get; set; }
-    private bool refreshing { get; set; }
+    private ClientState clientState { get; set; }
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
-        Condition condition)
+        Condition condition, ClientState clientState)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -44,21 +41,32 @@ public class RadarLogic : IDisposable
         this.conditionInterface = condition;
 
         // Loads plugin
-        PluginLog.Debug($"Radar Loaded");
+        PluginLog.Debug("Radar Loaded");
         keepRunning = true;
         // TODO: In the future adjust this
+        areaObjects = new List<GameObject>();
+
+        this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += DrawRadar;
         backgroundLoop = Task.Run(BackgroundLoop);
 
-        areaObjects = new List<GameObject>();
+        this.clientState.TerritoryChanged += CleanupZoneTerritoryWrapper;
+        this.clientState.Logout += CleanupZoneLogWrapper;
+        this.clientState.Login += CleanupZoneLogWrapper;
     }
 
     private void DrawRadar()
     {
         if (!configInterface.cfg.Enabled) return;
         if (objectTable.Length == 0) return;
-        if (this.conditionInterface[ConditionFlag.LoggingOut]) return;
-        if (refreshing) return;
+        if (CheckDraw()) return;
+
+        if (!Monitor.TryEnter(areaObjects))
+        {
+            PluginLog.Error("Try Enter Failed. This is not an error");
+            return;
+        }
+
         foreach (var areaObject in areaObjects)
         {
             var p = Services.GameGui.WorldToScreen(areaObject.Position, out var onScreenPosition);
@@ -69,6 +77,17 @@ public class RadarLogic : IDisposable
 
             DrawEsp(onScreenPosition, areaObject);
         }
+
+        Monitor.Exit(areaObjects);
+    }
+
+    /**
+     * Returns true if you should not draww
+     */
+    private bool CheckDraw()
+    {
+        return conditionInterface[ConditionFlag.LoggingOut] || conditionInterface[ConditionFlag.BetweenAreas] ||
+               conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled;
     }
 
     private void DrawEsp(Vector2 position, GameObject gameObject)
@@ -201,6 +220,7 @@ public class RadarLogic : IDisposable
         {
             text = obj.Name.TextValue;
         }
+
         return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
     }
 
@@ -210,8 +230,20 @@ public class RadarLogic : IDisposable
         {
             if (configInterface.cfg.Enabled)
             {
-                UpdateMobInfo();
-                PluginLog.Debug("Refreshed Mob Info!");
+                if (CheckDraw())
+                {
+#if DEBUG
+                    PluginLog.Verbose("Did not update mob info due to check fail.");
+#endif
+                }
+                else
+                {
+                    var time = DateTime.Now;
+                    UpdateMobInfo();
+#if DEBUG 
+                    PluginLog.Verbose($"Refreshed Mob Info in {(DateTime.Now - time).TotalMilliseconds} ms.");
+#endif
+                }
             }
 
             Thread.Sleep(1000);
@@ -221,7 +253,6 @@ public class RadarLogic : IDisposable
     private unsafe void UpdateMobInfo()
     {
         var nearbyMobs = new List<GameObject>();
-
         foreach (var obj in objectTable)
         {
             if (!obj.IsValid()) continue;
@@ -230,11 +261,13 @@ public class RadarLogic : IDisposable
                 nearbyMobs.Add(obj);
                 continue;
             }
+
             if (this.configInterface.cfg.ShowOnlyVisible &&
                 ((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address)->RenderFlags != 0)
             {
                 continue;
             }
+
             switch (obj.ObjectKind)
             {
                 case ObjectKind.Treasure:
@@ -304,17 +337,41 @@ public class RadarLogic : IDisposable
             }
         }
 
-        refreshing = true; // TODO change to mutex off refreshing
+        Monitor.Enter(areaObjects);
         areaObjects.Clear();
         areaObjects.AddRange(nearbyMobs);
-        refreshing = false;
+        Monitor.Exit(areaObjects);
+    }
+
+
+    private void CleanupZoneTerritoryWrapper(object? _, ushort __)
+    {
+        CleanupZone();
+    }
+
+    private void CleanupZone()
+    {
+        PluginLog.Verbose("Clearing because of condition met.");
+        Monitor.Enter(areaObjects);
+        areaObjects.Clear();
+        Monitor.Exit(areaObjects);
+    }
+
+    private void CleanupZoneLogWrapper(object? sender, EventArgs e)
+    {
+        CleanupZone();
     }
 
     public void Dispose()
     {
         this.pluginInterface.UiBuilder.Draw -= DrawRadar;
+        clientState.TerritoryChanged -= CleanupZoneTerritoryWrapper;
+        clientState.Logout -= CleanupZoneLogWrapper;
+        clientState.Login -= CleanupZoneLogWrapper;
         keepRunning = false;
         while (!backgroundLoop.IsCompleted) ;
-        PluginLog.Debug($"Radar Unloaded");
+        Monitor.Enter(areaObjects);
+        Monitor.Exit(areaObjects);
+        PluginLog.Information("Radar Unloaded");
     }
 }
