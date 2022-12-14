@@ -6,17 +6,14 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
-using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiNET;
-using RadarPlugin;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
@@ -32,9 +29,10 @@ public class RadarLogic : IDisposable
     private bool keepRunning { get; set; }
     private ObjectTable objectTable { get; set; }
     private List<GameObject> areaObjects { get; set; }
+    private ClientState clientState { get; set; }
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
-        Condition condition)
+        Condition condition, ClientState clientState)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -46,17 +44,23 @@ public class RadarLogic : IDisposable
         PluginLog.Debug("Radar Loaded");
         keepRunning = true;
         // TODO: In the future adjust this
+        areaObjects = new List<GameObject>();
+
+        this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += DrawRadar;
         backgroundLoop = Task.Run(BackgroundLoop);
 
-        areaObjects = new List<GameObject>();
+        this.clientState.TerritoryChanged += CleanupZoneTerritoryWrapper;
+        this.clientState.Logout += CleanupZoneLogWrapper;
+        this.clientState.Login += CleanupZoneLogWrapper;
     }
 
     private void DrawRadar()
     {
         if (!configInterface.cfg.Enabled) return;
         if (objectTable.Length == 0) return;
-        if (this.conditionInterface[ConditionFlag.LoggingOut]) return;
+        if (CheckDraw()) return;
+
         if (!Monitor.TryEnter(areaObjects))
         {
             PluginLog.Error("Try Enter Failed. This is not an error");
@@ -75,6 +79,15 @@ public class RadarLogic : IDisposable
         }
 
         Monitor.Exit(areaObjects);
+    }
+
+    /**
+     * Returns true if you should not draww
+     */
+    private bool CheckDraw()
+    {
+        return conditionInterface[ConditionFlag.LoggingOut] || conditionInterface[ConditionFlag.BetweenAreas] ||
+               conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled;
     }
 
     private void DrawEsp(Vector2 position, GameObject gameObject)
@@ -217,11 +230,18 @@ public class RadarLogic : IDisposable
         {
             if (configInterface.cfg.Enabled)
             {
-                var time = DateTime.Now;
-                UpdateMobInfo();
-                PluginLog.Verbose($"Refreshed Mob Info in {(DateTime.Now - time).TotalMilliseconds} ms.");
+                if (CheckDraw())
+                {
+                    PluginLog.Verbose("Did not update mob info due to check fail.");
+                }
+                else
+                {
+                    var time = DateTime.Now;
+                    UpdateMobInfo();
+                    PluginLog.Verbose($"Refreshed Mob Info in {(DateTime.Now - time).TotalMilliseconds} ms.");
+                }
             }
-            
+
             Thread.Sleep(1000);
         }
     }
@@ -229,7 +249,6 @@ public class RadarLogic : IDisposable
     private unsafe void UpdateMobInfo()
     {
         var nearbyMobs = new List<GameObject>();
-
         foreach (var obj in objectTable)
         {
             if (!obj.IsValid()) continue;
@@ -314,20 +333,41 @@ public class RadarLogic : IDisposable
             }
         }
 
-        var old = areaObjects;
         Monitor.Enter(areaObjects);
-        Monitor.Enter(nearbyMobs);
-        areaObjects = nearbyMobs;
+        areaObjects.Clear();
+        areaObjects.AddRange(nearbyMobs);
         Monitor.Exit(areaObjects);
-        old.Clear();
-        Monitor.Exit(old);
+    }
+
+
+    private void CleanupZoneTerritoryWrapper(object? _, ushort __)
+    {
+        CleanupZone();
+    }
+
+    private void CleanupZone()
+    {
+        PluginLog.Debug("Clearing");
+        Monitor.Enter(areaObjects);
+        areaObjects.Clear();
+        Monitor.Exit(areaObjects);
+    }
+
+    private void CleanupZoneLogWrapper(object? sender, EventArgs e)
+    {
+        CleanupZone();
     }
 
     public void Dispose()
     {
         this.pluginInterface.UiBuilder.Draw -= DrawRadar;
+        clientState.TerritoryChanged -= CleanupZoneTerritoryWrapper;
+        clientState.Logout -= CleanupZoneLogWrapper;
+        clientState.Login -= CleanupZoneLogWrapper;
         keepRunning = false;
         while (!backgroundLoop.IsCompleted) ;
+        Monitor.Enter(areaObjects);
+        Monitor.Exit(areaObjects);
         PluginLog.Debug("Radar Unloaded");
     }
 }
