@@ -232,13 +232,17 @@ public class RadarLogic : IDisposable
             {
                 if (CheckDraw())
                 {
+#if DEBUG
                     PluginLog.Verbose("Did not update mob info due to check fail.");
+#endif
                 }
                 else
                 {
                     var time = DateTime.Now;
                     UpdateMobInfo();
+#if DEBUG 
                     PluginLog.Verbose($"Refreshed Mob Info in {(DateTime.Now - time).TotalMilliseconds} ms.");
+#endif
                 }
             }
 
@@ -368,6 +372,6 @@ public class RadarLogic : IDisposable
         while (!backgroundLoop.IsCompleted) ;
         Monitor.Enter(areaObjects);
         Monitor.Exit(areaObjects);
-        PluginLog.Debug("Radar Unloaded");
+        PluginLog.Information("Radar Unloaded");
     }
 }
