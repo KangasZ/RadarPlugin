@@ -47,7 +47,7 @@ public class RadarLogic : IDisposable
         areaObjects = new List<GameObject>();
 
         this.clientState = clientState;
-        this.pluginInterface.UiBuilder.Draw += DrawRadar;
+        this.pluginInterface.UiBuilder.Draw += OnTick;
         backgroundLoop = Task.Run(BackgroundLoop);
 
         this.clientState.TerritoryChanged += CleanupZoneTerritoryWrapper;
@@ -55,29 +55,25 @@ public class RadarLogic : IDisposable
         this.clientState.Login += CleanupZoneLogWrapper;
     }
 
-    private void DrawRadar()
+    private void OnTick()
     {
         if (!configInterface.cfg.Enabled) return;
         if (objectTable.Length == 0) return;
         if (CheckDraw()) return;
+        DrawRadar();
+    }
 
+    private void DrawRadar()
+    {
         if (!Monitor.TryEnter(areaObjects))
         {
             PluginLog.Error("Try Enter Failed. This is not an error");
             return;
         }
-
         foreach (var areaObject in areaObjects)
         {
-            var p = Services.GameGui.WorldToScreen(areaObject.Position, out var onScreenPosition);
-            if (!p) continue;
-
-            var tagText = GetText(areaObject);
-            uint color = UInt32.MinValue;
-
-            DrawEsp(onScreenPosition, areaObject);
+            DrawEsp(areaObject);
         }
-
         Monitor.Exit(areaObjects);
     }
 
@@ -87,61 +83,73 @@ public class RadarLogic : IDisposable
     private bool CheckDraw()
     {
         return conditionInterface[ConditionFlag.LoggingOut] || conditionInterface[ConditionFlag.BetweenAreas] ||
-               conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled;
+               conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled ||
+               clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
-    private void DrawEsp(Vector2 position, GameObject gameObject)
+    private void DrawEsp(GameObject gameObject)
     {
+        var visibleOnScreen = Services.GameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
         switch (gameObject)
         {
             // Mobs
             case BattleNpc mob:
                 var npcOpt = configInterface.cfg.NpcOption;
-                if (npcOpt.ShowHealthBar)
+                if (visibleOnScreen)
                 {
-                    DrawHealthCircle(position, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
+                    if (npcOpt.ShowHealthBar)
+                    {
+                        DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
+                    }
+
+                    if (npcOpt.ShowHealthValue)
+                    {
+                        DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
+                    }
+
+                    if (npcOpt.ShowName)
+                    {
+                        var tagText = GetText(gameObject);
+                        DrawName(onScreenPosition, tagText, npcOpt.Color);
+                    }
+
+                    if (npcOpt.ShowDot)
+                    {
+                        DrawDot(onScreenPosition, npcOpt.Color);
+                    }
                 }
 
-                if (npcOpt.ShowHealthValue)
+                if (npcOpt.ShowAggroCircle)
                 {
-                    DrawHealthValue(position, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
-                }
-
-                if (npcOpt.ShowName)
-                {
-                    var tagText = GetText(gameObject);
-                    DrawName(position, tagText, npcOpt.Color);
-                }
-
-                if (npcOpt.ShowDot)
-                {
-                    DrawDot(position, npcOpt.Color);
+                    DrawAggroRadius(gameObject.Position, 10 + (gameObject.HitboxRadius / 2), gameObject.Rotation,
+                        new Vector4(uint.MaxValue));
                 }
 
                 break;
             // Players
             case PlayerCharacter chara:
                 var playerOpt = configInterface.cfg.PlayerOption;
+                if (!visibleOnScreen) break;
                 //var hp = chara.CurrentHp / chara.MaxHp;
                 if (playerOpt.ShowHealthBar)
                 {
-                    DrawHealthCircle(position, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
+                    DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
                 }
 
                 if (playerOpt.ShowHealthValue)
                 {
-                    DrawHealthValue(position, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
+                    DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
                 }
 
                 if (playerOpt.ShowName)
                 {
                     var tagText = GetText(gameObject);
-                    DrawName(position, tagText, playerOpt.Color);
+                    DrawName(onScreenPosition, tagText, playerOpt.Color);
                 }
 
                 if (playerOpt.ShowDot)
                 {
-                    DrawDot(position, playerOpt.Color);
+                    DrawDot(onScreenPosition, playerOpt.Color);
                 }
 
                 break;
@@ -151,16 +159,17 @@ public class RadarLogic : IDisposable
             case Npc npc:
             // Objects
             default:
+                if (!visibleOnScreen) break;
                 var objectOption = configInterface.cfg.ObjectOption;
                 if (objectOption.ShowName)
                 {
                     var tagText = GetText(gameObject);
-                    DrawName(position, tagText, objectOption.Color);
+                    DrawName(onScreenPosition, tagText, objectOption.Color);
                 }
 
                 if (objectOption.ShowDot)
                 {
-                    DrawDot(position, objectOption.Color);
+                    DrawDot(onScreenPosition, objectOption.Color);
                 }
 
                 break;
@@ -205,6 +214,86 @@ public class RadarLogic : IDisposable
         ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
     }
 
+    private void DrawAggroRadius(Vector3 position, float radius, float rotation, Vector4 objectOptionColor)
+    {
+        var opacity = 0xBEFFFFFF;
+        rotation += MathF.PI / 4;
+        var numSegments = 200;
+        var segmentAngle = 2 * MathF.PI / numSegments;
+        var points = new Vector2[numSegments];
+        var onScreens = new bool[numSegments];
+        var seg = 2 * MathF.PI / numSegments;
+        var rot = rotation + 0 * MathF.PI;
+
+        var originPointOnScreen = Services.GameGui.WorldToScreen(
+            new(position.X + radius * MathF.Sin(rot),
+                position.Y,
+                position.Z + radius * MathF.Cos(rot)),
+            out var originPoint);
+
+        for (int i = 0; i < numSegments; i++)
+        {
+            var a = rot - i * segmentAngle;
+            var onScreen = Services.GameGui.WorldToScreen(
+                new(position.X + radius * MathF.Sin(a),
+                    position.Y,
+                    position.Z + radius * MathF.Cos(a)),
+                out var p);
+            points[i] = p;
+            onScreens[i] = onScreen;
+            if (onScreen)
+            {
+                ImGui.GetForegroundDrawList().PathLineTo(p);
+            }
+
+            switch (i)
+            {
+                case 50:
+                    ImGui.GetForegroundDrawList().PathStroke(UtilInfo.Red & opacity, ImDrawFlags.RoundCornersAll, 4f);
+                    for (int j = 0; j <= 50; j++)
+                    {
+                        ImGui.GetForegroundDrawList().PathLineTo(points[j]);
+                    }
+
+                    var centeOnScreen = Services.GameGui.WorldToScreen(
+                        position,
+                        out var centerPosition);
+                    if (centeOnScreen)
+                    {
+                        ImGui.GetForegroundDrawList().PathLineTo(centerPosition);
+                    }
+                    else
+                    {
+                        ImGui.GetForegroundDrawList().PathClear();
+                    }
+
+                    ImGui.GetForegroundDrawList().PathFillConvex(UtilInfo.Red & 0x30FFFFFF);
+                    ImGui.GetForegroundDrawList().PathLineTo(p);
+                    break;
+                case 100:
+                    ImGui.GetForegroundDrawList()
+                        .PathStroke(UtilInfo.Yellow & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                    ImGui.GetForegroundDrawList().PathLineTo(p);
+                    break;
+                case 150:
+                    ImGui.GetForegroundDrawList().PathStroke(UtilInfo.Green & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                    ImGui.GetForegroundDrawList().PathLineTo(p);
+                    break;
+                case 199:
+                    if (originPointOnScreen)
+                    {
+                        ImGui.GetForegroundDrawList().PathLineTo(originPoint);
+                    }
+
+                    ImGui.GetForegroundDrawList()
+                        .PathStroke(UtilInfo.Yellow & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                    break;
+            }
+        }
+
+        ImGui.GetForegroundDrawList().PathClear();
+    }
+
     private string GetText(GameObject obj)
     {
         var text = "";
@@ -240,7 +329,7 @@ public class RadarLogic : IDisposable
                 {
                     var time = DateTime.Now;
                     UpdateMobInfo();
-#if DEBUG 
+#if DEBUG
                     PluginLog.Verbose($"Refreshed Mob Info in {(DateTime.Now - time).TotalMilliseconds} ms.");
 #endif
                 }
@@ -364,7 +453,7 @@ public class RadarLogic : IDisposable
 
     public void Dispose()
     {
-        this.pluginInterface.UiBuilder.Draw -= DrawRadar;
+        pluginInterface.UiBuilder.Draw -= OnTick;
         clientState.TerritoryChanged -= CleanupZoneTerritoryWrapper;
         clientState.Logout -= CleanupZoneLogWrapper;
         clientState.Login -= CleanupZoneLogWrapper;

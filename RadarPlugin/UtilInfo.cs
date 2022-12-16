@@ -9,6 +9,7 @@ public static class UtilInfo
     public static readonly uint Green = 0xFF00FF00;
     public static readonly uint Red = 0xFF0000FF;
     public static readonly uint White = 0xFFFFFFFF;
+    public static readonly uint Yellow = 0xFF00FFFF;
 
     /**
      * What is this used for again?

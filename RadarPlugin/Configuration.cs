@@ -24,6 +24,7 @@ public class Configuration
     {
         public bool ShowHealthBar = true;
         public bool ShowHealthValue = true;
+        public bool ShowAggroCircle = false;
         public Vector4 Color = new(0xff, 0xff, 0xff, 0xff);
     }
 

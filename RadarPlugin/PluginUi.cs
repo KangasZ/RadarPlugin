@@ -214,6 +214,19 @@ public class PluginUi : IDisposable
                 configuration.Save();
             }
 
+            var showNpcAggroCircle = configuration.cfg.NpcOption.ShowAggroCircle;
+            if (ImGui.Checkbox($"Show Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
+            {
+                configuration.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
+                configuration.Save();
+            }
+            
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("WIP WIP WIP\n" +
+                                 "Draws aggro circle.");
+            }
+            
             ImGui.EndChild();
         }
 
