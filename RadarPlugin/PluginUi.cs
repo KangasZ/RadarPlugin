@@ -107,7 +107,7 @@ public class PluginUi : IDisposable
             PluginLog.Debug("Pulling Area Objects");
             CurrentMobsVisible = true;
             areaObjects.Clear();
-            areaObjects.AddRange(objectTable);
+            areaObjects.AddRange(objectTable.Where(x => x.DataId != 0).GroupBy(x => x.DataId).Select(x => x.First()));
         }
     }
 
@@ -483,13 +483,14 @@ public class PluginUi : IDisposable
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
-            ImGui.BeginTable("objecttable", 7, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
             ImGui.TableSetupColumn("DataID");
             ImGui.TableSetupColumn("CurrHP");
             ImGui.TableSetupColumn("Blocked");
             ImGui.TableSetupColumn("Quick Block");
+            ImGui.TableSetupColumn("Color");
             ImGui.TableSetupColumn("Settings");
             ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
@@ -545,7 +546,40 @@ public class PluginUi : IDisposable
                 {
                     ImGui.Text("O");
                 }
-
+                ImGui.TableNextColumn();
+                if (x.DataId != 0)
+                {
+                    var isCustom = configuration.cfg.CustomColorOverride.ContainsKey(x.DataId);
+                    if (ImGui.Checkbox($"##Enabled-{x.Address}", ref isCustom))
+                    {
+                        if (configuration.cfg.CustomColorOverride.ContainsKey(x.DataId))
+                        {
+                            configuration.cfg.CustomColorOverride.Remove(x.DataId);
+                            configuration.Save();
+                        }
+                        else
+                        {
+                            var color = configuration.GetColor(x);
+                            configuration.cfg.CustomColorOverride.Add(x.DataId, color);
+                            configuration.Save();
+                        }
+                    }
+                    if (configuration.cfg.CustomColorOverride.ContainsKey(x.DataId))
+                    {
+                        ImGui.SameLine();
+                        var colorChange = configuration.cfg.CustomColorOverride[x.DataId];
+                        if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+                        {
+                            configuration.cfg.CustomColorOverride[x.DataId] = colorChange;
+                            configuration.Save();
+                        }
+                    }
+                }
+                else
+                {
+                    ImGui.Text("Uneditable (Currently)");
+                }
+                
                 ImGui.TableNextColumn();
                 if (ImGui.Button($"Edit##{x.Address}"))
                 {

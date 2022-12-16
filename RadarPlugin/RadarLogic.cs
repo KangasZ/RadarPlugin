@@ -92,6 +92,7 @@ public class RadarLogic : IDisposable
     private void DrawEsp(GameObject gameObject)
     {
         var visibleOnScreen = Services.GameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
+        var color = configInterface.GetColor(gameObject);
         switch (gameObject)
         {
             // Mobs
@@ -101,23 +102,23 @@ public class RadarLogic : IDisposable
                 {
                     if (npcOpt.ShowHealthBar)
                     {
-                        DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
+                        DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
                     }
 
                     if (npcOpt.ShowHealthValue)
                     {
-                        DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, npcOpt.Color);
+                        DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
                     }
 
                     if (npcOpt.ShowName)
                     {
                         var tagText = GetText(gameObject);
-                        DrawName(onScreenPosition, tagText, npcOpt.Color);
+                        DrawName(onScreenPosition, tagText, color);
                     }
 
                     if (npcOpt.ShowDot)
                     {
-                        DrawDot(onScreenPosition, npcOpt.Color);
+                        DrawDot(onScreenPosition, color);
                     }
                 }
 
@@ -166,12 +167,12 @@ public class RadarLogic : IDisposable
                 if (objectOption.ShowName)
                 {
                     var tagText = GetText(gameObject);
-                    DrawName(onScreenPosition, tagText, objectOption.Color);
+                    DrawName(onScreenPosition, tagText, color);
                 }
 
                 if (objectOption.ShowDot)
                 {
-                    DrawDot(onScreenPosition, objectOption.Color);
+                    DrawDot(onScreenPosition, color);
                 }
 
                 break;
