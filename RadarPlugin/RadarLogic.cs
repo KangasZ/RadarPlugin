@@ -359,6 +359,8 @@ public class RadarLogic : IDisposable
                 continue;
             }
 
+            if (!configInterface.cfg.ShowNameless && String.IsNullOrWhiteSpace(obj.Name.TextValue)) continue;
+
             switch (obj.ObjectKind)
             {
                 case ObjectKind.Treasure:
