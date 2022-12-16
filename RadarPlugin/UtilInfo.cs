@@ -43,18 +43,28 @@ public static class UtilInfo
      */
     public static Dictionary<uint, string> RenameList = new()
     {
+        // Coffers
         {2007358, "Gold Coffer"},
         {802, "Bronze Coffer"},
-        {2007188, "Cairn of Passage"},
         {2007357, "Silver Coffer"},
-        {2009729, "Portal"}, // Eureka Portal,
+        {2007542, "Accursed Hoard"},
+        // Mimics
+        {2006020, "Mimic Coffer"},
+        //Cairn/Beacons
+        {2007187, "Cairn of Return"},
+        {2007188, "Cairn of Passage"},
         {2009507, "Beacon of Passage"},
         {2009506, "Beacon of Return"},
-        {2007542, "Accursed Hoard"},
+        // Traps
         {2007182, "Combustion Trap"},
         {2007183, "Luring Trap"},
         {2007184, "Enervation Trap"},
+        {2007185, "Impeding Trap"},
+        {2007186, "Toad Trap"},
         {2009504, "Otter Trap"},
+        
+        // BA Objects
+        {2009729, "Portal"}, // Eureka Portal,
         {2009726, "Unstable Portal"},
         {2009727, "Stable Portal"}
     };
