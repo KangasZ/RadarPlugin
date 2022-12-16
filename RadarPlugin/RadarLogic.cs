@@ -125,7 +125,7 @@ public class RadarLogic : IDisposable
                 if (npcOpt.ShowAggroCircle)
                 {
                     DrawAggroRadius(gameObject.Position, 10 + gameObject.HitboxRadius, gameObject.Rotation,
-                        new Vector4(uint.MaxValue));
+                        uint.MaxValue);
                 }
 
                 break;
@@ -136,23 +136,23 @@ public class RadarLogic : IDisposable
                 //var hp = chara.CurrentHp / chara.MaxHp;
                 if (playerOpt.ShowHealthBar)
                 {
-                    DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
+                    DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
                 }
 
                 if (playerOpt.ShowHealthValue)
                 {
-                    DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, playerOpt.Color);
+                    DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
                 }
 
                 if (playerOpt.ShowName)
                 {
                     var tagText = GetText(gameObject);
-                    DrawName(onScreenPosition, tagText, playerOpt.Color);
+                    DrawName(onScreenPosition, tagText, color);
                 }
 
                 if (playerOpt.ShowDot)
                 {
-                    DrawDot(onScreenPosition, playerOpt.Color);
+                    DrawDot(onScreenPosition, color);
                 }
 
                 break;
@@ -179,45 +179,44 @@ public class RadarLogic : IDisposable
         }
     }
 
-    private void DrawDot(Vector2 position, Vector4 npcOptColor)
+    private void DrawDot(Vector2 position, uint npcOptColor)
     {
-        ImGui.GetForegroundDrawList().AddCircleFilled(position, 3f, ImGui.ColorConvertFloat4ToU32(npcOptColor), 100);
+        ImGui.GetForegroundDrawList().AddCircleFilled(position, 3f, npcOptColor, 100);
     }
 
-    private void DrawHealthValue(Vector2 position, uint maxHp, uint currHp, Vector4 playerOptColor)
+    private void DrawHealthValue(Vector2 position, uint maxHp, uint currHp, uint playerOptColor)
     {
         var healthText = ((int)(((double)currHp / maxHp) * 100)).ToString();
         var healthTextSize = ImGui.CalcTextSize(healthText);
         ImGui.GetForegroundDrawList().AddText(
             new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
-            ImGui.ColorConvertFloat4ToU32(playerOptColor),
+            playerOptColor,
             healthText);
     }
 
-    private void DrawName(Vector2 position, string tagText, Vector4 objectOptionColor)
+    private void DrawName(Vector2 position, string tagText, uint objectOptionColor)
     {
         var tagTextSize = ImGui.CalcTextSize(tagText);
         ImGui.GetForegroundDrawList().AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
-            ImGui.ColorConvertFloat4ToU32(objectOptionColor),
+            objectOptionColor,
             tagText);
     }
 
 
-    private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, Vector4 playerOptColor)
+    private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, uint playerOptColor)
     {
         const float radius = 13f;
 
         var v1 = (float)currHp / (float)maxHp;
         var aMax = PI * 2.0f;
         var difference = v1 - 1.0f;
-        var colorHealth = ImGui.ColorConvertFloat4ToU32(playerOptColor);
         ImGui.GetForegroundDrawList().PathArcTo(position, radius,
             (-(aMax / 4.0f)) + (aMax / maxHp) * (maxHp - currHp), aMax - (aMax / 4.0f), 200 - 1);
-        ImGui.GetForegroundDrawList().PathStroke(colorHealth, ImDrawFlags.None, 2.0f);
+        ImGui.GetForegroundDrawList().PathStroke(playerOptColor, ImDrawFlags.None, 2.0f);
     }
 
-    private void DrawAggroRadius(Vector3 position, float radius, float rotation, Vector4 objectOptionColor)
+    private void DrawAggroRadius(Vector3 position, float radius, float rotation, uint objectOptionColor)
     {
         var opacity = 0xBEFFFFFF;
         rotation += MathF.PI / 4;
