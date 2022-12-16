@@ -123,7 +123,7 @@ public class RadarLogic : IDisposable
 
                 if (npcOpt.ShowAggroCircle)
                 {
-                    DrawAggroRadius(gameObject.Position, 10 + (gameObject.HitboxRadius / 2), gameObject.Rotation,
+                    DrawAggroRadius(gameObject.Position, 10 + gameObject.HitboxRadius, gameObject.Rotation,
                         new Vector4(uint.MaxValue));
                 }
 
