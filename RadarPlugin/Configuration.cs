@@ -2,7 +2,6 @@
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 
@@ -19,7 +18,7 @@ public class Configuration
 
     public class ObjectOption : ESPOption
     {
-        public Vector4 Color = new(0x00, 0x7e, 0x7e, 0xFF);
+        public uint ColorU = 0xff7e7e00; //new(0x00, 0x7e, 0x7e, 0xFF);
     }
 
     public class NpcOption : ESPOption
@@ -27,7 +26,7 @@ public class Configuration
         public bool ShowHealthBar = true;
         public bool ShowHealthValue = true;
         public bool ShowAggroCircle = false;
-        public Vector4 Color = new(0xff, 0xff, 0xff, 0xff);
+        public uint ColorU = 0xffffffff; //new(0xff, 0xff, 0xff, 0xff);
     }
 
     public class PlayerOption : NpcOption
@@ -36,12 +35,12 @@ public class Configuration
         public new bool ShowHealthBar = false;
         public new bool ShowHealthValue = false;
         public new bool ShowDot = true;
-        public new Vector4 Color = new(0x99, 0x00, 0x99, 0xFF);
+        public new uint ColorU = 0xfff010ff; //new(0x99, 0x00, 0x99, 0xFF);
     }
 
     public class Config : IPluginConfiguration
     {
-        public int Version { get; set; } = 1;
+        public int Version { get; set; } = 0;
         public bool Enabled { get; set; } = true;
         public bool ShowBaDdObjects { get; set; } = true;
         public bool ShowLoot { get; set; } = false;
@@ -58,7 +57,7 @@ public class Configuration
         public PlayerOption PlayerOption { get; set; } = new();
         public ObjectOption ObjectOption { get; set; } = new();
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
-        public Dictionary<uint, Vector4> CustomColorOverride { get; set; } = new Dictionary<uint, Vector4>();
+        public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
     }
 
     public Config cfg;
@@ -72,22 +71,22 @@ public class Configuration
     }
 
 
-    public Vector4 GetColor(GameObject gameObject)
+    public uint GetColor(GameObject gameObject)
     {
-        Vector4 color;
-        if (cfg.CustomColorOverride.ContainsKey(gameObject.DataId))
+        uint color;
+        if (cfg.ColorOverride.ContainsKey(gameObject.DataId))
         {
-            color = cfg.CustomColorOverride[gameObject.DataId];
+            color = cfg.ColorOverride[gameObject.DataId];
         }
         else
         {
             switch (gameObject.ObjectKind)
             {
                 case ObjectKind.Player:
-                    color = cfg.PlayerOption.Color;
+                    color = cfg.PlayerOption.ColorU;
                     break;
                 case ObjectKind.BattleNpc:
-                    color = cfg.NpcOption.Color;
+                    color = cfg.NpcOption.ColorU;
                     break;
                 case ObjectKind.None:
                 case ObjectKind.EventNpc:
@@ -103,14 +102,14 @@ public class Configuration
                 case ObjectKind.Cutscene:
                 case ObjectKind.CardStand:
                 default:
-                    color = cfg.ObjectOption.Color;
+                    color = cfg.ObjectOption.ColorU;
                     break;
             }
         }
 
         return color;
     }
-    
+
     public void Save()
     {
         pluginInterface.SavePluginConfig(cfg);

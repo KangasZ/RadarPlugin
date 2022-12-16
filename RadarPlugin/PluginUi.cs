@@ -146,15 +146,15 @@ public class PluginUi : IDisposable
         {
             ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, 80));
             ImGui.Columns(2, $"##{objectStr}-settings-columns", false);
-            var colorChange = configuration.cfg.ObjectOption.Color;
+            var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.ObjectOption.ColorU);
             if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
             {
-                configuration.cfg.ObjectOption.Color = colorChange;
+                configuration.cfg.ObjectOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
                 configuration.Save();
             }
 
             ImGui.SameLine();
-            ImGui.TextColored(configuration.cfg.ObjectOption.Color, "Curr");
+            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(configuration.cfg.ObjectOption.ColorU), "Curr");
             var showObjectName = configuration.cfg.ObjectOption.ShowName;
             if (ImGui.Checkbox($"Show Name##{objectStr}-settings", ref showObjectName))
             {
@@ -177,15 +177,15 @@ public class PluginUi : IDisposable
         {
             ImGui.BeginChild($"##{npcStr}-radar-tabs-child", new Vector2(0, 80));
             ImGui.Columns(2, $"##{npcStr}-settings-columns", false);
-            var colorChange = configuration.cfg.NpcOption.Color;
+            var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.NpcOption.ColorU);
             if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
             {
-                configuration.cfg.NpcOption.Color = colorChange;
+                configuration.cfg.NpcOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
                 configuration.Save();
             }
 
             ImGui.SameLine();
-            ImGui.TextColored(configuration.cfg.NpcOption.Color, "Current");
+            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(configuration.cfg.NpcOption.ColorU), "Current");
             var showNpcName = configuration.cfg.NpcOption.ShowName;
             if (ImGui.Checkbox($"Show Name##{npcStr}-settings", ref showNpcName))
             {
@@ -236,15 +236,15 @@ public class PluginUi : IDisposable
         {
             ImGui.BeginChild($"##{playerStr}-radar-tabs-child", new Vector2(0, 80));
             ImGui.Columns(2, $"##{playerStr}-settings-columns", false);
-            var colorChange = configuration.cfg.PlayerOption.Color;
+            var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.PlayerOption.ColorU);
             if (ImGui.ColorEdit4($"Color##{playerStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
             {
-                configuration.cfg.PlayerOption.Color = colorChange;
+                configuration.cfg.PlayerOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
                 configuration.Save();
             }
 
             ImGui.SameLine();
-            ImGui.TextColored(configuration.cfg.PlayerOption.Color, "Curr");
+            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(configuration.cfg.PlayerOption.ColorU), "Curr");
             var showPlayerName = configuration.cfg.PlayerOption.ShowName;
             if (ImGui.Checkbox($"Show Name##{playerStr}-settings", ref showPlayerName))
             {
@@ -549,28 +549,28 @@ public class PluginUi : IDisposable
                 ImGui.TableNextColumn();
                 if (x.DataId != 0)
                 {
-                    var isCustom = configuration.cfg.CustomColorOverride.ContainsKey(x.DataId);
+                    var isCustom = configuration.cfg.ColorOverride.ContainsKey(x.DataId);
                     if (ImGui.Checkbox($"##Enabled-{x.Address}", ref isCustom))
                     {
-                        if (configuration.cfg.CustomColorOverride.ContainsKey(x.DataId))
+                        if (configuration.cfg.ColorOverride.ContainsKey(x.DataId))
                         {
-                            configuration.cfg.CustomColorOverride.Remove(x.DataId);
+                            configuration.cfg.ColorOverride.Remove(x.DataId);
                             configuration.Save();
                         }
                         else
                         {
                             var color = configuration.GetColor(x);
-                            configuration.cfg.CustomColorOverride.Add(x.DataId, color);
+                            configuration.cfg.ColorOverride.Add(x.DataId, color);
                             configuration.Save();
                         }
                     }
-                    if (configuration.cfg.CustomColorOverride.ContainsKey(x.DataId))
+                    if (configuration.cfg.ColorOverride.ContainsKey(x.DataId))
                     {
                         ImGui.SameLine();
-                        var colorChange = configuration.cfg.CustomColorOverride[x.DataId];
+                        var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.ColorOverride[x.DataId]);
                         if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
                         {
-                            configuration.cfg.CustomColorOverride[x.DataId] = colorChange;
+                            configuration.cfg.ColorOverride[x.DataId] = ImGui.ColorConvertFloat4ToU32(colorChange);
                             configuration.Save();
                         }
                     }
