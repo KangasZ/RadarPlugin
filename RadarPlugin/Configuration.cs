@@ -53,6 +53,7 @@ public class Configuration
         public bool ShowAreaObjects { get; set; } = false;
         public bool ShowAetherytes { get; set; } = false;
         public bool ShowOnlyVisible { get; set; } = true;
+        public bool ShowNameless { get; set; } = false;
         public NpcOption NpcOption { get; set; } = new();
         public PlayerOption PlayerOption { get; set; } = new();
         public ObjectOption ObjectOption { get; set; } = new();

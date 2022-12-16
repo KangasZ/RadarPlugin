@@ -380,6 +380,19 @@ public class PluginUi : IDisposable
                 "Show only visible mobs.\nYou probably don't want to turn this off.\nMay not remove all invisible entities currently. Use the util window.");
         }
 
+        var showNameless = configuration.cfg.ShowNameless;
+        if (ImGui.Checkbox("Nameless", ref showNameless))
+        {
+            configuration.cfg.ShowNameless = showNameless;
+            configuration.Save();
+        }
+        
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Show nameless mobs.\nYou probably don't want this enabled.");
+        }
+        
         ImGui.EndChild();
     }
 
