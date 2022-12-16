@@ -19,7 +19,7 @@ public class Configuration
 
     public class ObjectOption : ESPOption
     {
-        public uint ColorU = 0xff7e7e00;//new(0x00, 0x7e, 0x7e, 0xFF);
+        public uint ColorU = 0xff7e7e00; //new(0x00, 0x7e, 0x7e, 0xFF);
     }
 
     public class NpcOption : ESPOption
@@ -27,7 +27,7 @@ public class Configuration
         public bool ShowHealthBar = true;
         public bool ShowHealthValue = true;
         public bool ShowAggroCircle = false;
-        public uint ColorU = 0xffffffff;//new(0xff, 0xff, 0xff, 0xff);
+        public uint ColorU = 0xffffffff; //new(0xff, 0xff, 0xff, 0xff);
     }
 
     public class PlayerOption : NpcOption
@@ -36,12 +36,12 @@ public class Configuration
         public new bool ShowHealthBar = false;
         public new bool ShowHealthValue = false;
         public new bool ShowDot = true;
-        public new uint ColorU = 0xff990099;//new(0x99, 0x00, 0x99, 0xFF);
+        public new uint ColorU = 0xfff010ff; //new(0x99, 0x00, 0x99, 0xFF);
     }
 
     public class Config : IPluginConfiguration
     {
-        public int Version { get; set; } = 0; 
+        public int Version { get; set; } = 0;
         public bool Enabled { get; set; } = true;
         public bool ShowBaDdObjects { get; set; } = true;
         public bool ShowLoot { get; set; } = false;
@@ -110,7 +110,7 @@ public class Configuration
 
         return color;
     }
-    
+
     public void Save()
     {
         pluginInterface.SavePluginConfig(cfg);
