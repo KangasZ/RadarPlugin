@@ -72,7 +72,7 @@ public static class UtilInfo
 
     public static uint Color(byte r, byte g, byte b, byte a)
     {
-        var intColor = (a << 24) | (g << 16) | (b << 8) | r;
+        var intColor = (a << 24) | (g << 8) | (b << 16) | r;
         return (uint)intColor;
     }
 }

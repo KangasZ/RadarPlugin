@@ -3,6 +3,8 @@ using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
 
 namespace RadarPlugin;
 
@@ -56,6 +58,7 @@ public class Configuration
         public PlayerOption PlayerOption { get; set; } = new();
         public ObjectOption ObjectOption { get; set; } = new();
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
+        public Dictionary<uint, Vector4> CustomColorOverride { get; set; } = new Dictionary<uint, Vector4>();
     }
 
     public Config cfg;
@@ -68,6 +71,46 @@ public class Configuration
         cfg = this.pluginInterface.GetPluginConfig() as Config ?? new Config();
     }
 
+
+    public Vector4 GetColor(GameObject gameObject)
+    {
+        Vector4 color;
+        if (cfg.CustomColorOverride.ContainsKey(gameObject.DataId))
+        {
+            color = cfg.CustomColorOverride[gameObject.DataId];
+        }
+        else
+        {
+            switch (gameObject.ObjectKind)
+            {
+                case ObjectKind.Player:
+                    color = cfg.PlayerOption.Color;
+                    break;
+                case ObjectKind.BattleNpc:
+                    color = cfg.NpcOption.Color;
+                    break;
+                case ObjectKind.None:
+                case ObjectKind.EventNpc:
+                case ObjectKind.Treasure:
+                case ObjectKind.Aetheryte:
+                case ObjectKind.GatheringPoint:
+                case ObjectKind.EventObj:
+                case ObjectKind.MountType:
+                case ObjectKind.Companion:
+                case ObjectKind.Retainer:
+                case ObjectKind.Area:
+                case ObjectKind.Housing:
+                case ObjectKind.Cutscene:
+                case ObjectKind.CardStand:
+                default:
+                    color = cfg.ObjectOption.Color;
+                    break;
+            }
+        }
+
+        return color;
+    }
+    
     public void Save()
     {
         pluginInterface.SavePluginConfig(cfg);
