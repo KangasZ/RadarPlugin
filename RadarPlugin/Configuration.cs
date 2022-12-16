@@ -18,7 +18,7 @@ public class Configuration
 
     public class ObjectOption : ESPOption
     {
-        public uint ColorU = 0xff7e7e00; //new(0x00, 0x7e, 0x7e, 0xFF);
+        public uint ColorU = 0xffFFFF00; //new(0x00, 0x7e, 0x7e, 0xFF);
     }
 
     public class NpcOption : ESPOption
@@ -35,7 +35,7 @@ public class Configuration
         public new bool ShowHealthBar = false;
         public new bool ShowHealthValue = false;
         public new bool ShowDot = true;
-        public new uint ColorU = 0xfff010ff; //new(0x99, 0x00, 0x99, 0xFF);
+        public new uint ColorU = 0xffff00ff; //new(0x99, 0x00, 0x99, 0xFF);
     }
 
     public class Config : IPluginConfiguration
