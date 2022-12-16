@@ -70,10 +70,12 @@ public class RadarLogic : IDisposable
             PluginLog.Error("Try Enter Failed. This is not an error");
             return;
         }
+
         foreach (var areaObject in areaObjects)
         {
             DrawEsp(areaObject);
         }
+
         Monitor.Exit(areaObjects);
     }
 
