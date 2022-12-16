@@ -125,7 +125,8 @@ public class PluginUi : IDisposable
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
             "    1. Enable type in visiblity\n" +
             "    2. Set display options in settings\n" +
-            "    3. Remove invisible mobs by utility tab\n");
+            "    3. Remove invisible mobs by utility tab\n" +
+            "    4. Bring bugs or feature requests up to author\n");
         ImGui.TextWrapped(
             "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
@@ -214,6 +215,19 @@ public class PluginUi : IDisposable
                 configuration.Save();
             }
 
+            var showNpcAggroCircle = configuration.cfg.NpcOption.ShowAggroCircle;
+            if (ImGui.Checkbox($"Show Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
+            {
+                configuration.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
+                configuration.Save();
+            }
+            
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("WIP WIP WIP\n" +
+                                 "Draws aggro circle.");
+            }
+            
             ImGui.EndChild();
         }
 
