@@ -45,9 +45,39 @@ public static class UtilInfo
     {
         // Coffers
         {2007358, "Gold Coffer"},
-        {802, "Bronze Coffer"},
         {2007357, "Silver Coffer"},
         {2007542, "Accursed Hoard"},
+        
+        // Potd Bronze Coffers
+        {782, "Bronze Coffer"},
+        {783, "Bronze Coffer"},
+        {784, "Bronze Coffer"},
+        {785, "Bronze Coffer"},
+        {786, "Bronze Coffer"},
+        {787, "Bronze Coffer"},
+        {788, "Bronze Coffer"},
+        {789, "Bronze Coffer"},
+        {790, "Bronze Coffer"},
+        {802, "Bronze Coffer"},
+        {803, "Bronze Coffer"},
+        {804, "Bronze Coffer"},
+        {805, "Bronze Coffer"},
+        // Hoh bronze coffers
+        {1036, "Bronze Coffer"},
+        {1037, "Bronze Coffer"},
+        {1038, "Bronze Coffer"},
+        {1039, "Bronze Coffer"},
+        {1040, "Bronze Coffer"},
+        {1041, "Bronze Coffer"},
+        {1042, "Bronze Coffer"},
+        {1043, "Bronze Coffer"},
+        {1044, "Bronze Coffer"},
+        {1045, "Bronze Coffer"},
+        {1046, "Bronze Coffer"},
+        {1047, "Bronze Coffer"},
+        {1048, "Bronze Coffer"},
+        {1049, "Bronze Coffer"},
+
         // Mimics
         {2006020, "Mimic Coffer"},
         //Cairn/Beacons
@@ -56,9 +86,9 @@ public static class UtilInfo
         {2009507, "Beacon of Passage"},
         {2009506, "Beacon of Return"},
         // Traps
-        {2007182, "Combustion Trap"},
+        {2007182, "Landmine"},
         {2007183, "Luring Trap"},
-        {2007184, "Enervation Trap"},
+        {2007184, "Enfeebling Trap"},
         {2007185, "Impeding Trap"},
         {2007186, "Toad Trap"},
         {2009504, "Otter Trap"},

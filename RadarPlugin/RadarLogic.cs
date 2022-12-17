@@ -296,6 +296,9 @@ public class RadarLogic : IDisposable
         ImGui.GetForegroundDrawList().PathClear();
     }
 
+    /**
+     * TODO: Refactor this to be done once per second instead of on each render.
+     */
     private string GetText(GameObject obj)
     {
         var text = "";
@@ -352,14 +355,23 @@ public class RadarLogic : IDisposable
                 nearbyMobs.Add(obj);
                 continue;
             }
-
+            
+            if (configInterface.cfg.ShowBaDdObjects)
+            {
+                if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
+                {
+                    nearbyMobs.Add(obj);
+                    continue;
+                }
+            }
+            
             if (this.configInterface.cfg.ShowOnlyVisible &&
                 ((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address)->RenderFlags != 0)
             {
                 continue;
             }
 
-            if (!configInterface.cfg.ShowNameless && String.IsNullOrWhiteSpace(obj.Name.TextValue)) continue;
+            if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) continue;
 
             switch (obj.ObjectKind)
             {
@@ -384,15 +396,6 @@ public class RadarLogic : IDisposable
                     nearbyMobs.Add(obj);
                     break;
                 case ObjectKind.EventObj:
-                    if (configInterface.cfg.ShowBaDdObjects)
-                    {
-                        if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
-                        {
-                            nearbyMobs.Add(obj);
-                            continue;
-                        }
-                    }
-
                     if (!configInterface.cfg.ShowEvents) continue;
                     nearbyMobs.Add(obj);
                     break;
