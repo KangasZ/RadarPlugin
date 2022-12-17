@@ -90,8 +90,8 @@ public static class UtilInfo
         {2007183, "Luring Trap"},
         {2007184, "Enfeebling Trap"},
         {2007185, "Impeding Trap"},
-        {2007186, "Toad Trap"},
-        {2009504, "Otter Trap"},
+        {2007186, "Toading Trap"},
+        {2009504, "Odder Trap"},
         
         // BA Objects
         {2009729, "Portal"}, // Eureka Portal,
