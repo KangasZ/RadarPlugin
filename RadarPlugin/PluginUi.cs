@@ -318,7 +318,14 @@ public class PluginUi : IDisposable
             configuration.cfg.ShowBaDdObjects = badd;
             configuration.Save();
         }
-
+        
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "This focuses on giving support to eureka and deep dungeons.\n" +
+                "Will display things such as portals, chests, and traps.");
+        }
+        
         ImGui.Separator();
         ImGui.Text("Below this line are things that generally won't be supported");
         ImGui.BeginChild("##visibilitychild");
