@@ -124,7 +124,7 @@ public class RadarLogic : IDisposable
 
                 if (npcOpt.ShowAggroCircle)
                 {
-                    if ((mob.StatusFlags & StatusFlags.WeaponOut) != 0) return;
+                    if (!npcOpt.ShowAggroCircleInCombat && (mob.StatusFlags & StatusFlags.WeaponOut) != 0) return;
                     DrawAggroRadius(gameObject.Position, 10 + gameObject.HitboxRadius, gameObject.Rotation,
                         uint.MaxValue);
                 }

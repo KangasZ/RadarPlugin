@@ -164,14 +164,14 @@ public class PluginUi : IDisposable
         }
         
         var showPlayerName = configuration.cfg.PlayerOption.ShowName;
-        if (ImGui.Checkbox($"Show Name##{playerStr}-settings", ref showPlayerName))
+        if (ImGui.Checkbox($"Name##{playerStr}-settings", ref showPlayerName))
         {
             configuration.cfg.PlayerOption.ShowName = showPlayerName;
             configuration.Save();
         }
 
         var showPlayerDot = configuration.cfg.PlayerOption.ShowDot;
-        if (ImGui.Checkbox($"Show Dot##{playerStr}-settings", ref showPlayerDot))
+        if (ImGui.Checkbox($"Dot##{playerStr}-settings", ref showPlayerDot))
         {
             configuration.cfg.PlayerOption.ShowDot = showPlayerDot;
             configuration.Save();
@@ -186,14 +186,14 @@ public class PluginUi : IDisposable
         
         ImGui.NextColumn();
         var showPlayerHealthBar = configuration.cfg.PlayerOption.ShowHealthBar;
-        if (ImGui.Checkbox($"Show Health Bar##{playerStr}-settings", ref showPlayerHealthBar))
+        if (ImGui.Checkbox($"Health Bar##{playerStr}-settings", ref showPlayerHealthBar))
         {
             configuration.cfg.PlayerOption.ShowHealthBar = showPlayerHealthBar;
             configuration.Save();
         }
 
         var showPlayerHealthValue = configuration.cfg.PlayerOption.ShowHealthValue;
-        if (ImGui.Checkbox($"Show Health Value##{playerStr}-settings", ref showPlayerHealthValue))
+        if (ImGui.Checkbox($"Health Value##{playerStr}-settings", ref showPlayerHealthValue))
         {
             configuration.cfg.PlayerOption.ShowHealthValue = showPlayerHealthValue;
             configuration.Save();
@@ -215,14 +215,14 @@ public class PluginUi : IDisposable
         }
 
         var showNpcName = configuration.cfg.NpcOption.ShowName;
-        if (ImGui.Checkbox($"Show Name##{npcStr}-settings", ref showNpcName))
+        if (ImGui.Checkbox($"Name##{npcStr}-settings", ref showNpcName))
         {
             configuration.cfg.NpcOption.ShowName = showNpcName;
             configuration.Save();
         }
 
         var showNpcDot = configuration.cfg.NpcOption.ShowDot;
-        if (ImGui.Checkbox($"Show Dot##{npcStr}-settings", ref showNpcDot))
+        if (ImGui.Checkbox($"Dot##{npcStr}-settings", ref showNpcDot))
         {
             configuration.cfg.NpcOption.ShowDot = showNpcDot;
             configuration.Save();
@@ -236,30 +236,37 @@ public class PluginUi : IDisposable
         }
         ImGui.NextColumn();
         var showNpcHealthBar = configuration.cfg.NpcOption.ShowHealthBar;
-        if (ImGui.Checkbox($"Show Health Bar##{npcStr}-settings", ref showNpcHealthBar))
+        if (ImGui.Checkbox($"Health Bar##{npcStr}-settings", ref showNpcHealthBar))
         {
             configuration.cfg.NpcOption.ShowHealthBar = showNpcHealthBar;
             configuration.Save();
         }
 
         var showNpcHealthValue = configuration.cfg.NpcOption.ShowHealthValue;
-        if (ImGui.Checkbox($"Show Health Value##{npcStr}-settings", ref showNpcHealthValue))
+        if (ImGui.Checkbox($"Health Value##{npcStr}-settings", ref showNpcHealthValue))
         {
             configuration.cfg.NpcOption.ShowHealthValue = showNpcHealthValue;
             configuration.Save();
         }
-
-        var showNpcAggroCircle = configuration.cfg.NpcOption.ShowAggroCircle;
-        if (ImGui.Checkbox($"Show Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
-        {
-            configuration.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
-            configuration.Save();
-        }
-
+        
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip("WIP WIP WIP\n" +
                              "Draws aggro circle.");
+        }
+        
+        var showNpcAggroCircle = configuration.cfg.NpcOption.ShowAggroCircle;
+        if (ImGui.Checkbox($"Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
+        {
+            configuration.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
+            configuration.Save();
+        }
+        
+        var onlyShowNpcAggroCircleWhenOutOfCombat = configuration.cfg.NpcOption.ShowAggroCircleInCombat;
+        if (ImGui.Checkbox($"Aggro Circle In Combat##{npcStr}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
+        {
+            configuration.cfg.NpcOption.ShowAggroCircleInCombat = onlyShowNpcAggroCircleWhenOutOfCombat;
+            configuration.Save();
         }
 
         ImGui.EndChild();
@@ -279,14 +286,14 @@ public class PluginUi : IDisposable
         }
         
         var showObjectName = configuration.cfg.ObjectOption.ShowName;
-        if (ImGui.Checkbox($"Show Name##{objectStr}-settings", ref showObjectName))
+        if (ImGui.Checkbox($"Name##{objectStr}-settings", ref showObjectName))
         {
             configuration.cfg.ObjectOption.ShowName = showObjectName;
             configuration.Save();
         }
 
         var showObjectDot = configuration.cfg.ObjectOption.ShowDot;
-        if (ImGui.Checkbox($"Show Dot##{objectStr}-settings", ref showObjectDot))
+        if (ImGui.Checkbox($"Dot##{objectStr}-settings", ref showObjectDot))
         {
             configuration.cfg.ObjectOption.ShowDot = showObjectDot;
             configuration.Save();

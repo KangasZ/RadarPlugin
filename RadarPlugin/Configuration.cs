@@ -27,6 +27,7 @@ public class Configuration
         public bool ShowHealthBar = true;
         public bool ShowHealthValue = true;
         public bool ShowAggroCircle = false;
+        public bool ShowAggroCircleInCombat = false;
         public uint ColorU = 0xffffffff; //new(0xff, 0xff, 0xff, 0xff);
     }
 
