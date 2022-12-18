@@ -14,6 +14,7 @@ public class Configuration
     {
         public bool ShowName = true;
         public bool ShowDot = false;
+        public float DotSize = 2.2f;
     }
 
     public class ObjectOption : ESPOption

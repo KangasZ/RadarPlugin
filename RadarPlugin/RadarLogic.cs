@@ -118,12 +118,13 @@ public class RadarLogic : IDisposable
 
                     if (npcOpt.ShowDot)
                     {
-                        DrawDot(onScreenPosition, color);
+                        DrawDot(onScreenPosition, npcOpt.DotSize, color);
                     }
                 }
 
                 if (npcOpt.ShowAggroCircle)
                 {
+                    if ((mob.StatusFlags & StatusFlags.WeaponOut) != 0) return;
                     DrawAggroRadius(gameObject.Position, 10 + gameObject.HitboxRadius, gameObject.Rotation,
                         uint.MaxValue);
                 }
@@ -152,7 +153,7 @@ public class RadarLogic : IDisposable
 
                 if (playerOpt.ShowDot)
                 {
-                    DrawDot(onScreenPosition, color);
+                    DrawDot(onScreenPosition, playerOpt.DotSize, color);
                 }
 
                 break;
@@ -172,16 +173,16 @@ public class RadarLogic : IDisposable
 
                 if (objectOption.ShowDot)
                 {
-                    DrawDot(onScreenPosition, color);
+                    DrawDot(onScreenPosition, objectOption.DotSize, color);
                 }
 
                 break;
         }
     }
 
-    private void DrawDot(Vector2 position, uint npcOptColor)
+    private void DrawDot(Vector2 position, float radius, uint npcOptColor)
     {
-        ImGui.GetForegroundDrawList().AddCircleFilled(position, 3f, npcOptColor, 100);
+        ImGui.GetForegroundDrawList().AddCircleFilled(position, radius, npcOptColor, 100);
     }
 
     private void DrawHealthValue(Vector2 position, uint maxHp, uint currHp, uint playerOptColor)

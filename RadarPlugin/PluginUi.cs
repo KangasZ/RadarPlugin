@@ -9,6 +9,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Utility;
 
 namespace RadarPlugin;
 
@@ -141,141 +142,162 @@ public class PluginUi : IDisposable
     {
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
             "This menu is WIP. Odd things may occur or not be working.");
-        var objectStr = "object";
-        if (ImGui.CollapsingHeader($"Object Settings##radar-{objectStr}-collapsing-header"))
-        {
-            ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, 80));
-            ImGui.Columns(2, $"##{objectStr}-settings-columns", false);
-            var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.ObjectOption.ColorU);
-            if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
-            {
-                configuration.cfg.ObjectOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
-                configuration.Save();
-            }
+        ImGui.BeginChild($"##radar-settings-tabs-child");
+        ImGui.BeginTabBar("radar-3d-settings-tabs");
+        DrawTab("Object##radar-3d-settings-tabs", UtilInfo.White, DrawObjectSettings);
+        DrawTab("NPC##radar-3d-settings-tabs", UtilInfo.White, DrawNpcSettings);
+        DrawTab("Player##radar-3d-settings-tabs", UtilInfo.White, DrawPlayerSettings);
+        ImGui.EndTabBar();
+        ImGui.EndChild();
+    }
 
-            ImGui.SameLine();
-            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(configuration.cfg.ObjectOption.ColorU), "Curr");
-            var showObjectName = configuration.cfg.ObjectOption.ShowName;
-            if (ImGui.Checkbox($"Show Name##{objectStr}-settings", ref showObjectName))
-            {
-                configuration.cfg.ObjectOption.ShowName = showObjectName;
-                configuration.Save();
-            }
-
-            var showObjectDot = configuration.cfg.ObjectOption.ShowDot;
-            if (ImGui.Checkbox($"Show Dot##{objectStr}-settings", ref showObjectDot))
-            {
-                configuration.cfg.ObjectOption.ShowDot = showObjectDot;
-                configuration.Save();
-            }
-
-            ImGui.EndChild();
-        }
-
-        var npcStr = "npc";
-        if (ImGui.CollapsingHeader($"Npc Settings##radar-{npcStr}-collapsing-header"))
-        {
-            ImGui.BeginChild($"##{npcStr}-radar-tabs-child", new Vector2(0, 80));
-            ImGui.Columns(2, $"##{npcStr}-settings-columns", false);
-            var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.NpcOption.ColorU);
-            if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
-            {
-                configuration.cfg.NpcOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
-                configuration.Save();
-            }
-
-            ImGui.SameLine();
-            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(configuration.cfg.NpcOption.ColorU), "Current");
-            var showNpcName = configuration.cfg.NpcOption.ShowName;
-            if (ImGui.Checkbox($"Show Name##{npcStr}-settings", ref showNpcName))
-            {
-                configuration.cfg.NpcOption.ShowName = showNpcName;
-                configuration.Save();
-            }
-
-            var showNpcDot = configuration.cfg.NpcOption.ShowDot;
-            if (ImGui.Checkbox($"Show Dot##{npcStr}-settings", ref showNpcDot))
-            {
-                configuration.cfg.NpcOption.ShowDot = showNpcDot;
-                configuration.Save();
-            }
-
-            ImGui.NextColumn();
-            var showNpcHealthBar = configuration.cfg.NpcOption.ShowHealthBar;
-            if (ImGui.Checkbox($"Show Health Bar##{npcStr}-settings", ref showNpcHealthBar))
-            {
-                configuration.cfg.NpcOption.ShowHealthBar = showNpcHealthBar;
-                configuration.Save();
-            }
-
-            var showNpcHealthValue = configuration.cfg.NpcOption.ShowHealthValue;
-            if (ImGui.Checkbox($"Show Health Value##{npcStr}-settings", ref showNpcHealthValue))
-            {
-                configuration.cfg.NpcOption.ShowHealthValue = showNpcHealthValue;
-                configuration.Save();
-            }
-
-            var showNpcAggroCircle = configuration.cfg.NpcOption.ShowAggroCircle;
-            if (ImGui.Checkbox($"Show Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
-            {
-                configuration.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
-                configuration.Save();
-            }
-            
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("WIP WIP WIP\n" +
-                                 "Draws aggro circle.");
-            }
-            
-            ImGui.EndChild();
-        }
-
+    private void DrawPlayerSettings()
+    {
         var playerStr = "player";
-        if (ImGui.CollapsingHeader($"Player Settings##radar-{playerStr}-collapsing-header"))
+        ImGui.BeginChild($"##{playerStr}-radar-tabs-child", new Vector2(0, 140));
+        ImGui.Columns(2, $"##{playerStr}-settings-columns", false);
+        var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.PlayerOption.ColorU);
+        if (ImGui.ColorEdit4($"Color##{playerStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
         {
-            ImGui.BeginChild($"##{playerStr}-radar-tabs-child", new Vector2(0, 80));
-            ImGui.Columns(2, $"##{playerStr}-settings-columns", false);
-            var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.PlayerOption.ColorU);
-            if (ImGui.ColorEdit4($"Color##{playerStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
-            {
-                configuration.cfg.PlayerOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
-                configuration.Save();
-            }
-
-            ImGui.SameLine();
-            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(configuration.cfg.PlayerOption.ColorU), "Curr");
-            var showPlayerName = configuration.cfg.PlayerOption.ShowName;
-            if (ImGui.Checkbox($"Show Name##{playerStr}-settings", ref showPlayerName))
-            {
-                configuration.cfg.PlayerOption.ShowName = showPlayerName;
-                configuration.Save();
-            }
-
-            var showPlayerDot = configuration.cfg.PlayerOption.ShowDot;
-            if (ImGui.Checkbox($"Show Dot##{playerStr}-settings", ref showPlayerDot))
-            {
-                configuration.cfg.PlayerOption.ShowDot = showPlayerDot;
-                configuration.Save();
-            }
-
-            ImGui.NextColumn();
-            var showPlayerHealthBar = configuration.cfg.PlayerOption.ShowHealthBar;
-            if (ImGui.Checkbox($"Show Health Bar##{playerStr}-settings", ref showPlayerHealthBar))
-            {
-                configuration.cfg.PlayerOption.ShowHealthBar = showPlayerHealthBar;
-                configuration.Save();
-            }
-
-            var showPlayerHealthValue = configuration.cfg.PlayerOption.ShowHealthValue;
-            if (ImGui.Checkbox($"Show Health Value##{playerStr}-settings", ref showPlayerHealthValue))
-            {
-                configuration.cfg.PlayerOption.ShowHealthValue = showPlayerHealthValue;
-                configuration.Save();
-            }
-
-            ImGui.EndChild();
+            configuration.cfg.PlayerOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+            configuration.Save();
         }
+        
+        var showPlayerName = configuration.cfg.PlayerOption.ShowName;
+        if (ImGui.Checkbox($"Show Name##{playerStr}-settings", ref showPlayerName))
+        {
+            configuration.cfg.PlayerOption.ShowName = showPlayerName;
+            configuration.Save();
+        }
+
+        var showPlayerDot = configuration.cfg.PlayerOption.ShowDot;
+        if (ImGui.Checkbox($"Show Dot##{playerStr}-settings", ref showPlayerDot))
+        {
+            configuration.cfg.PlayerOption.ShowDot = showPlayerDot;
+            configuration.Save();
+        }
+        
+        var playerDotSize = configuration.cfg.PlayerOption.DotSize;
+        if (ImGui.SliderFloat($"Dot Size##{playerStr}-settings", ref playerDotSize, UtilInfo.MinDotSize, UtilInfo.MaxDotSize))
+        {
+            configuration.cfg.PlayerOption.DotSize = playerDotSize;
+            configuration.Save();
+        }
+        
+        ImGui.NextColumn();
+        var showPlayerHealthBar = configuration.cfg.PlayerOption.ShowHealthBar;
+        if (ImGui.Checkbox($"Show Health Bar##{playerStr}-settings", ref showPlayerHealthBar))
+        {
+            configuration.cfg.PlayerOption.ShowHealthBar = showPlayerHealthBar;
+            configuration.Save();
+        }
+
+        var showPlayerHealthValue = configuration.cfg.PlayerOption.ShowHealthValue;
+        if (ImGui.Checkbox($"Show Health Value##{playerStr}-settings", ref showPlayerHealthValue))
+        {
+            configuration.cfg.PlayerOption.ShowHealthValue = showPlayerHealthValue;
+            configuration.Save();
+        }
+
+        ImGui.EndChild();
+    }
+
+    private void DrawNpcSettings()
+    {
+        var npcStr = "npc";
+        ImGui.BeginChild($"##{npcStr}-radar-tabs-child", new Vector2(0, 140));
+        ImGui.Columns(2, $"##{npcStr}-settings-columns", false);
+        var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.NpcOption.ColorU);
+        if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+        {
+            configuration.cfg.NpcOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+            configuration.Save();
+        }
+
+        var showNpcName = configuration.cfg.NpcOption.ShowName;
+        if (ImGui.Checkbox($"Show Name##{npcStr}-settings", ref showNpcName))
+        {
+            configuration.cfg.NpcOption.ShowName = showNpcName;
+            configuration.Save();
+        }
+
+        var showNpcDot = configuration.cfg.NpcOption.ShowDot;
+        if (ImGui.Checkbox($"Show Dot##{npcStr}-settings", ref showNpcDot))
+        {
+            configuration.cfg.NpcOption.ShowDot = showNpcDot;
+            configuration.Save();
+        }
+
+        var npcDotSize = configuration.cfg.NpcOption.DotSize;
+        if (ImGui.SliderFloat($"Dot Size##{npcStr}-settings", ref npcDotSize, UtilInfo.MinDotSize, UtilInfo.MaxDotSize))
+        {
+            configuration.cfg.NpcOption.DotSize = npcDotSize;
+            configuration.Save();
+        }
+        ImGui.NextColumn();
+        var showNpcHealthBar = configuration.cfg.NpcOption.ShowHealthBar;
+        if (ImGui.Checkbox($"Show Health Bar##{npcStr}-settings", ref showNpcHealthBar))
+        {
+            configuration.cfg.NpcOption.ShowHealthBar = showNpcHealthBar;
+            configuration.Save();
+        }
+
+        var showNpcHealthValue = configuration.cfg.NpcOption.ShowHealthValue;
+        if (ImGui.Checkbox($"Show Health Value##{npcStr}-settings", ref showNpcHealthValue))
+        {
+            configuration.cfg.NpcOption.ShowHealthValue = showNpcHealthValue;
+            configuration.Save();
+        }
+
+        var showNpcAggroCircle = configuration.cfg.NpcOption.ShowAggroCircle;
+        if (ImGui.Checkbox($"Show Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
+        {
+            configuration.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
+            configuration.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("WIP WIP WIP\n" +
+                             "Draws aggro circle.");
+        }
+
+        ImGui.EndChild();
+    }
+
+    private void DrawObjectSettings()
+    {
+        var objectStr = "object";
+
+        ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, 140));
+        ImGui.Columns(2, $"##{objectStr}-settings-columns", false);
+        var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.ObjectOption.ColorU);
+        if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+        {
+            configuration.cfg.ObjectOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+            configuration.Save();
+        }
+        
+        var showObjectName = configuration.cfg.ObjectOption.ShowName;
+        if (ImGui.Checkbox($"Show Name##{objectStr}-settings", ref showObjectName))
+        {
+            configuration.cfg.ObjectOption.ShowName = showObjectName;
+            configuration.Save();
+        }
+
+        var showObjectDot = configuration.cfg.ObjectOption.ShowDot;
+        if (ImGui.Checkbox($"Show Dot##{objectStr}-settings", ref showObjectDot))
+        {
+            configuration.cfg.ObjectOption.ShowDot = showObjectDot;
+            configuration.Save();
+        }
+        var objectDotSize = configuration.cfg.ObjectOption.DotSize;
+        if (ImGui.SliderFloat($"Dot Size##{objectStr}-settings", ref objectDotSize, UtilInfo.MinDotSize, UtilInfo.MaxDotSize))
+        {
+            configuration.cfg.ObjectOption.DotSize = objectDotSize;
+            configuration.Save();
+        }
+        ImGui.EndChild();
     }
 
     private void DrawVisibilitySettings()
@@ -318,14 +340,14 @@ public class PluginUi : IDisposable
             configuration.cfg.ShowBaDdObjects = badd;
             configuration.Save();
         }
-        
+
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(
                 "This focuses on giving support to eureka and deep dungeons.\n" +
                 "Will display things such as portals, chests, and traps.");
         }
-        
+
         ImGui.Separator();
         ImGui.Text("Below this line are things that generally won't be supported");
         ImGui.BeginChild("##visibilitychild");
@@ -393,13 +415,13 @@ public class PluginUi : IDisposable
             configuration.cfg.ShowNameless = showNameless;
             configuration.Save();
         }
-        
+
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(
                 "Show nameless mobs.\nYou probably don't want this enabled.");
         }
-        
+
         ImGui.EndChild();
     }
 
@@ -566,6 +588,7 @@ public class PluginUi : IDisposable
                 {
                     ImGui.Text("O");
                 }
+
                 ImGui.TableNextColumn();
                 if (x.DataId != 0)
                 {
@@ -584,11 +607,13 @@ public class PluginUi : IDisposable
                             configuration.Save();
                         }
                     }
+
                     if (configuration.cfg.ColorOverride.ContainsKey(x.DataId))
                     {
                         ImGui.SameLine();
                         var colorChange = ImGui.ColorConvertU32ToFloat4(configuration.cfg.ColorOverride[x.DataId]);
-                        if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+                        if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange,
+                                ImGuiColorEditFlags.NoInputs))
                         {
                             configuration.cfg.ColorOverride[x.DataId] = ImGui.ColorConvertFloat4ToU32(colorChange);
                             configuration.Save();
@@ -599,7 +624,7 @@ public class PluginUi : IDisposable
                 {
                     ImGui.Text("Uneditable (Currently)");
                 }
-                
+
                 ImGui.TableNextColumn();
                 if (ImGui.Button($"Edit##{x.Address}"))
                 {

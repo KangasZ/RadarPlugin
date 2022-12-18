@@ -10,6 +10,8 @@ public static class UtilInfo
     public static readonly uint Red = 0xFF0000FF;
     public static readonly uint White = 0xFFFFFFFF;
     public static readonly uint Yellow = 0xFF00FFFF;
+    public static readonly float MinDotSize = 1.2f;
+    public static readonly float MaxDotSize = 3.8f;
 
     /**
      * What is this used for again?
