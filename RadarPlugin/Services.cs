@@ -18,7 +18,7 @@ using Dalamud.Game.Network;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 
-namespace RadarPlugin;
+namespace RadarPlugin.UI;
 
 class Services
 {

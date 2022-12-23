@@ -17,7 +17,7 @@ using ImGuiNET;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
-namespace RadarPlugin;
+namespace RadarPlugin.UI;
 
 public class RadarLogic : IDisposable
 {

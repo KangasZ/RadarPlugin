@@ -1,16 +1,16 @@
 ﻿using System;
 using Dalamud.Game.Command;
 
-namespace RadarPlugin;
+namespace RadarPlugin.UI;
 
 public class PluginCommands : IDisposable
 {
     private CommandManager commandManager;
-    private PluginUi pluginUi;
+    private MainUi mainUi;
     
-    public PluginCommands(CommandManager commandManager, PluginUi pluginUi)
+    public PluginCommands(CommandManager commandManager, MainUi mainUi)
     {
-        this.pluginUi = pluginUi;
+        this.mainUi = mainUi;
         this.commandManager = commandManager;
         this.commandManager.AddHandler("/radar", new CommandInfo(SettingsCommand)
         {
@@ -21,7 +21,7 @@ public class PluginCommands : IDisposable
     
     private void SettingsCommand(string command, string args)
     {
-        pluginUi.OpenUi();
+        mainUi.OpenUi();
     }
     
     public void Dispose()
