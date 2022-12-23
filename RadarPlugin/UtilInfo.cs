@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using Dalamud.Interface.Colors;
 
-namespace RadarPlugin.UI;
+namespace RadarPlugin;
 
 public static class UtilInfo
 {

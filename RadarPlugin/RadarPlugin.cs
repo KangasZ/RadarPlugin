@@ -2,10 +2,10 @@
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
-using Dalamud.IoC;
 using Dalamud.Plugin;
+using RadarPlugin.UI;
 
-namespace RadarPlugin.UI;
+namespace RadarPlugin;
 
 public sealed class RadarPlugin : IDalamudPlugin
 {

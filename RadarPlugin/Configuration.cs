@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 
-namespace RadarPlugin.UI;
+namespace RadarPlugin;
 
 [Serializable]
 public class Configuration

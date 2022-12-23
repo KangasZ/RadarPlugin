@@ -1,8 +1,6 @@
-﻿using Dalamud.Hooking;
-using Dalamud.Logging;
+﻿using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +15,7 @@ using ImGuiNET;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
-namespace RadarPlugin.UI;
+namespace RadarPlugin;
 
 public class RadarLogic : IDisposable
 {

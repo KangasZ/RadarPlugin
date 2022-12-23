@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using ImGuiNET;

@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using ImGuiNET;
 using System.Numerics;
-using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Interface;
-using Dalamud.Interface.Colors;
 using Dalamud.Logging;
 using Dalamud.Plugin;
-using Dalamud.Utility;
 
 namespace RadarPlugin.UI;
 

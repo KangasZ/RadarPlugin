@@ -1,7 +1,8 @@
 ﻿using System;
 using Dalamud.Game.Command;
+using RadarPlugin.UI;
 
-namespace RadarPlugin.UI;
+namespace RadarPlugin;
 
 public class PluginCommands : IDisposable
 {
