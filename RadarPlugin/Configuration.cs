@@ -10,6 +10,17 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class AggroRadiusOptions
+    {
+        public float AggroRadius = 10f;
+        public uint FrontColor = UtilInfo.Red;
+        public uint RearColor = UtilInfo.Green;
+        public uint RightSideColor = UtilInfo.Yellow;
+        public uint LeftSideColor = UtilInfo.Yellow;
+        public uint FrontConeColor = UtilInfo.Red;
+        public uint CircleOpacity = 0xBEFFFFFF;
+        public uint FrontConeOpacity = 0x30FFFFFF;
+    }
     public class ESPOption
     {
         public bool ShowName = true;
@@ -54,8 +65,9 @@ public class Configuration
         public bool ShowEventNpc { get; set; } = false;
         public bool ShowAreaObjects { get; set; } = false;
         public bool ShowAetherytes { get; set; } = false;
-        public bool ShowOnlyVisible { get; set; } = true;
         public bool ShowNameless { get; set; } = false;
+        public bool ShowOnlyVisible { get; set; }= true;
+        public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public NpcOption NpcOption { get; set; } = new();
         public PlayerOption PlayerOption { get; set; } = new();
         public ObjectOption ObjectOption { get; set; } = new();

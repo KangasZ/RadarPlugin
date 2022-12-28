@@ -217,7 +217,7 @@ public class RadarLogic : IDisposable
 
     private void DrawAggroRadius(Vector3 position, float radius, float rotation, uint objectOptionColor)
     {
-        var opacity = 0xBEFFFFFF;
+        var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
         rotation += MathF.PI / 4;
         var numSegments = 200;
         var segmentAngle = 2 * MathF.PI / numSegments;
@@ -250,12 +250,13 @@ public class RadarLogic : IDisposable
             switch (i)
             {
                 case 50:
-                    ImGui.GetForegroundDrawList().PathStroke(UtilInfo.Red & opacity, ImDrawFlags.RoundCornersAll, 4f);
+                    ImGui.GetForegroundDrawList().PathStroke(configInterface.cfg.AggroRadiusOptions.FrontColor & opacity, ImDrawFlags.RoundCornersAll, 4f);
+                    // this forloop should only happen when cone shows (always right now)
                     for (int j = 0; j <= 50; j++)
                     {
                         ImGui.GetForegroundDrawList().PathLineTo(points[j]);
                     }
-
+                    
                     var centeOnScreen = Services.GameGui.WorldToScreen(
                         position,
                         out var centerPosition);
@@ -268,16 +269,16 @@ public class RadarLogic : IDisposable
                         ImGui.GetForegroundDrawList().PathClear();
                     }
 
-                    ImGui.GetForegroundDrawList().PathFillConvex(UtilInfo.Red & 0x30FFFFFF);
+                    ImGui.GetForegroundDrawList().PathFillConvex(configInterface.cfg.AggroRadiusOptions.FrontConeColor & configInterface.cfg.AggroRadiusOptions.FrontConeOpacity);
                     ImGui.GetForegroundDrawList().PathLineTo(p);
                     break;
                 case 100:
                     ImGui.GetForegroundDrawList()
-                        .PathStroke(UtilInfo.Yellow & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                        .PathStroke(configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity, ImDrawFlags.RoundCornersAll, 2f);
                     ImGui.GetForegroundDrawList().PathLineTo(p);
                     break;
                 case 150:
-                    ImGui.GetForegroundDrawList().PathStroke(UtilInfo.Green & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                    ImGui.GetForegroundDrawList().PathStroke(configInterface.cfg.AggroRadiusOptions.RearColor & opacity, ImDrawFlags.RoundCornersAll, 2f);
                     ImGui.GetForegroundDrawList().PathLineTo(p);
                     break;
                 case 199:
@@ -287,7 +288,7 @@ public class RadarLogic : IDisposable
                     }
 
                     ImGui.GetForegroundDrawList()
-                        .PathStroke(UtilInfo.Yellow & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                        .PathStroke(configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity, ImDrawFlags.RoundCornersAll, 2f);
                     break;
             }
         }
