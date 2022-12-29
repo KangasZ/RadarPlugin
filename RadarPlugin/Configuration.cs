@@ -28,7 +28,6 @@ public class Configuration
 
     public class AggroRadiusOptions
     {
-        public float AggroRadius = 10f;
         public uint FrontColor = UtilInfo.Red;
         public uint RearColor = UtilInfo.Green;
         public uint RightSideColor = UtilInfo.Yellow;

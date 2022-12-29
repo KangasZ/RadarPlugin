@@ -3,7 +3,7 @@ using ImGuiNET;
 
 namespace RadarPlugin.UI;
 
-public static class Helpers
+public static class UiHelpers
 {
     public static void DrawTabs(string tabId, params (string label, uint color, Action function)[] tabs)
     {

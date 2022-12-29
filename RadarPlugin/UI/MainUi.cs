@@ -53,7 +53,7 @@ public class MainUi : IDisposable
             ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
                 "Radar Plugin. This is basically a hack. Please use with caution.");
             ImGui.Spacing();
-            Helpers.DrawTabs("radar-settings-tabs",
+            UiHelpers.DrawTabs("radar-settings-tabs",
                 ("General", UtilInfo.White, DrawGeneralSettings),
                 ("Visibility", UtilInfo.Red, DrawVisibilitySettings),
                 ("3-D Settings", UtilInfo.Green, Draw3DRadarSettings),
@@ -104,13 +104,74 @@ public class MainUi : IDisposable
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
             "This menu is WIP. Odd things may occur or not be working.");
         ImGui.BeginChild($"##radar-settings-tabs-child");
-        Helpers.DrawTabs("radar-3d-settings-tabs",
-            ("Deep Dungeons", UtilInfo.White, DrawDeepDungeonSettings),
+        UiHelpers.DrawTabs("radar-3d-settings-tabs",
             ("Object", UtilInfo.White, DrawObjectSettings),
             ("NPC", UtilInfo.White, DrawNpcSettings),
-            ("Player", UtilInfo.White, DrawPlayerSettings)
+            ("Player", UtilInfo.White, DrawPlayerSettings),
+            ("DeepDung", UtilInfo.White, DrawDeepDungeonSettings),
+            ("Aggro Circle", UtilInfo.White, DrawAggroCircleSettings)
         );
         ImGui.EndChild();
+    }
+
+    private void DrawAggroCircleSettings()
+    {
+        var tag = "aggroradiusoptions";
+
+        var frontColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.FrontColor);
+        if (ImGui.ColorEdit4($"Front##{tag}", ref frontColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.AggroRadiusOptions.FrontColor =
+                ImGui.ColorConvertFloat4ToU32(frontColor) | UtilInfo.OpacityMax;
+            configInterface.Save();
+        }
+
+        var rightSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RightSideColor);
+        if (ImGui.ColorEdit4($"Right##{tag}", ref rightSideColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.AggroRadiusOptions.RightSideColor =
+                ImGui.ColorConvertFloat4ToU32(rightSideColor) | UtilInfo.OpacityMax;
+            configInterface.Save();
+        }
+
+        var leftSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.LeftSideColor);
+        if (ImGui.ColorEdit4($"Left##{tag}", ref leftSideColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.AggroRadiusOptions.LeftSideColor =
+                ImGui.ColorConvertFloat4ToU32(leftSideColor) | UtilInfo.OpacityMax;
+            configInterface.Save();
+        }
+
+        var rearColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RearColor);
+        if (ImGui.ColorEdit4($"Rear##{tag}", ref rearColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.AggroRadiusOptions.RearColor =
+                ImGui.ColorConvertFloat4ToU32(rearColor) | UtilInfo.OpacityMax;
+            configInterface.Save();
+        }
+
+        var frontConeColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.FrontConeColor);
+        if (ImGui.ColorEdit4($"Left##{tag}", ref frontConeColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.AggroRadiusOptions.FrontConeColor =
+                ImGui.ColorConvertFloat4ToU32(frontConeColor) | UtilInfo.OpacityMax;
+            configInterface.Save();
+        }
+
+        var circleOpacity = (float)(configInterface.cfg.AggroRadiusOptions.CircleOpacity >> 24) / byte.MaxValue;
+        if (ImGui.DragFloat($"Circle Opacity##{tag}", ref circleOpacity, 0.1f, 0, 1))
+        {
+            configInterface.cfg.AggroRadiusOptions.CircleOpacity = ((uint)(circleOpacity * 255) << 24) | 0x00FFFFFF;
+            configInterface.Save();
+        }
+
+        var coneOpacity = (float)(configInterface.cfg.AggroRadiusOptions.FrontConeOpacity >> 24) / byte.MaxValue;
+        if (ImGui.DragFloat($"Circle Opacity##{tag}", ref coneOpacity, 0.1f, 0, 1))
+        {
+            configInterface.cfg.AggroRadiusOptions.FrontConeOpacity = ((uint)(coneOpacity * 255) << 24) | 0x00FFFFFF;
+            configInterface.Save();
+        }
+
     }
 
     private void DrawDeepDungeonSettings()
@@ -145,60 +206,68 @@ public class MainUi : IDisposable
             configInterface.cfg.DeepDungeonMobTypeColorOptions.EasyMobs = ImGui.ColorConvertFloat4ToU32(easyMobsColor);
             configInterface.Save();
         }
-        
+
         var trapsColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps);
         if (ImGui.ColorEdit4($"Traps##{tag}", ref trapsColor, ImGuiColorEditFlags.NoInputs))
         {
             configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps = ImGui.ColorConvertFloat4ToU32(trapsColor);
             configInterface.Save();
         }
-        
+
         var returnColors = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Return);
         if (ImGui.ColorEdit4($"Returns##{tag}", ref returnColors, ImGuiColorEditFlags.NoInputs))
         {
             configInterface.cfg.DeepDungeonMobTypeColorOptions.Return = ImGui.ColorConvertFloat4ToU32(returnColors);
             configInterface.Save();
         }
-        
+
         var passageColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage);
         if (ImGui.ColorEdit4($"Passages##{tag}", ref passageColor, ImGuiColorEditFlags.NoInputs))
         {
             configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage = ImGui.ColorConvertFloat4ToU32(passageColor);
             configInterface.Save();
         }
-        
-        var goldChestColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest);
+
+        var goldChestColor =
+            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest);
         if (ImGui.ColorEdit4($"Gold Chest##{tag}", ref goldChestColor, ImGuiColorEditFlags.NoInputs))
         {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest = ImGui.ColorConvertFloat4ToU32(goldChestColor);
+            configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest =
+                ImGui.ColorConvertFloat4ToU32(goldChestColor);
             configInterface.Save();
         }
-        
-        var silverChestColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest);
+
+        var silverChestColor =
+            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest);
         if (ImGui.ColorEdit4($"Silver Chest##{tag}", ref silverChestColor, ImGuiColorEditFlags.NoInputs))
         {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest = ImGui.ColorConvertFloat4ToU32(silverChestColor);
+            configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest =
+                ImGui.ColorConvertFloat4ToU32(silverChestColor);
             configInterface.Save();
         }
-        
-        var bronzeChestColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest);
+
+        var bronzeChestColor =
+            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest);
         if (ImGui.ColorEdit4($"Bronze Chest##{tag}", ref bronzeChestColor, ImGuiColorEditFlags.NoInputs))
         {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest = ImGui.ColorConvertFloat4ToU32(bronzeChestColor);
+            configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest =
+                ImGui.ColorConvertFloat4ToU32(bronzeChestColor);
             configInterface.Save();
         }
-        
+
         var mimicColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic);
         if (ImGui.ColorEdit4($"Mimics##{tag}", ref mimicColor, ImGuiColorEditFlags.NoInputs))
         {
             configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic = ImGui.ColorConvertFloat4ToU32(mimicColor);
             configInterface.Save();
         }
-        
-        var accursedHoardColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard);
+
+        var accursedHoardColor =
+            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard);
         if (ImGui.ColorEdit4($"Accursed Hoard##{tag}", ref accursedHoardColor, ImGuiColorEditFlags.NoInputs))
         {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard = ImGui.ColorConvertFloat4ToU32(accursedHoardColor);
+            configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard =
+                ImGui.ColorConvertFloat4ToU32(accursedHoardColor);
             configInterface.Save();
         }
     }

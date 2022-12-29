@@ -18,6 +18,7 @@ public static class UtilInfo
     public const uint Turquoise = 0xffc8d530;
     public const float MinDotSize = 1.2f;
     public const float MaxDotSize = 3.8f;
+    public const uint OpacityMax = 0xff000000;
 
     /**
      * What is this used for again?
