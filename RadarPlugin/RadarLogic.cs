@@ -30,11 +30,11 @@ public class RadarLogic : IDisposable
     private List<(GameObject, uint, string)> areaObjects; // Game object, color, string
     private readonly ClientState clientState;
     private readonly GameGui gameGui;
-    private readonly Helpers helpers;
+    private readonly RadarHelpers radarHelpers;
 
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
-        Condition condition, ClientState clientState, GameGui gameGui, Helpers helpers)
+        Condition condition, ClientState clientState, GameGui gameGui, RadarHelpers radarHelpers)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -42,7 +42,7 @@ public class RadarLogic : IDisposable
         this.configInterface = configuration;
         this.conditionInterface = condition;
         this.gameGui = gameGui;
-        this.helpers = helpers;
+        this.radarHelpers = radarHelpers;
 
         // Loads plugin
         PluginLog.Debug("Radar Loaded");
@@ -333,7 +333,7 @@ public class RadarLogic : IDisposable
             if (!obj.IsValid()) continue;
             if (configInterface.cfg.DebugMode)
             {
-                nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                 continue;
             }
             
@@ -342,7 +342,7 @@ public class RadarLogic : IDisposable
                 // TODO: Check if we need to swap this out with a seperte eureka and potd list
                 if (UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
                 {
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     continue;
                 }
             }
@@ -359,34 +359,34 @@ public class RadarLogic : IDisposable
             {
                 case ObjectKind.Treasure:
                     if (!configInterface.cfg.ShowLoot) continue;
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.Companion:
                     if (!configInterface.cfg.ShowCompanion) continue;
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.Area:
                     if (!configInterface.cfg.ShowAreaObjects) continue;
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.Aetheryte:
                     if (!configInterface.cfg.ShowAetherytes) continue;
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.EventNpc:
                     if (!configInterface.cfg.ShowEventNpc) continue;
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.EventObj:
                     if (!configInterface.cfg.ShowEvents) continue;
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.None:
                     break;
                 case ObjectKind.Player:
                     if (!configInterface.cfg.ShowPlayers) continue;
                     //if (obj is not PlayerCharacter chara) continue;
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.BattleNpc:
                     if (obj is not BattleNpc mob) continue;
@@ -396,7 +396,7 @@ public class RadarLogic : IDisposable
                     if (mob.IsDead) continue;
                     if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
                         configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) continue;
-                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.GatheringPoint:
                     break;

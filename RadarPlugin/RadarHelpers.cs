@@ -6,12 +6,12 @@ using RadarPlugin.Enums;
 
 namespace RadarPlugin;
 
-public class Helpers
+public class RadarHelpers
 {
     private readonly Configuration configInterface;
     private readonly ClientState clientState;
 
-    public Helpers(
+    public RadarHelpers(
         Configuration configInterface,
         ClientState clientState
     )

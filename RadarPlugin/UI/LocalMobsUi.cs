@@ -18,14 +18,17 @@ public class LocalMobsUi : IDisposable
     private readonly Configuration configInterface;
     private readonly ObjectTable objectTable;
     private readonly MobEditUi mobEditUi;
+    private readonly RadarHelpers helpers;
 
     public LocalMobsUi(
         DalamudPluginInterface dalamudPluginInterface,
         Configuration configInterface,
         ObjectTable objectTable,
-        MobEditUi mobEditUi)
+        MobEditUi mobEditUi,
+        RadarHelpers helpers)
     {
         areaObjects = new List<GameObject>();
+        this.helpers = helpers;
         this.mobEditUi = mobEditUi;
         this.configInterface = configInterface;
         this.objectTable = objectTable;
@@ -126,7 +129,7 @@ public class LocalMobsUi : IDisposable
                         }
                         else
                         {
-                            var color = configInterface.GetColor(x);
+                            var color = helpers.GetColor(x);
                             configInterface.cfg.ColorOverride.Add(x.DataId, color);
                             configInterface.Save();
                         }
