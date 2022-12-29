@@ -10,7 +10,7 @@ public class MobEditUi : IDisposable
 {
     private readonly Configuration configInterface;
     private readonly DalamudPluginInterface dalamudPluginInterface;
-    private GameObject localObject { get; set; }
+    private GameObject localObject;
 
     private bool mobEditVisible = false;
 

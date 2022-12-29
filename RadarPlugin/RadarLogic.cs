@@ -21,19 +21,20 @@ namespace RadarPlugin;
 public class RadarLogic : IDisposable
 {
     private const float PI = 3.14159265359f;
-    private DalamudPluginInterface pluginInterface;
+    private readonly DalamudPluginInterface pluginInterface;
     private Configuration configInterface;
-    private Condition conditionInterface;
+    private readonly Condition conditionInterface;
     private Task backgroundLoop;
     private bool keepRunning;
-    private ObjectTable objectTable;
-    private List<GameObject> areaObjects;
-    private ClientState clientState;
-    private GameGui gameGui;
-    
+    private readonly ObjectTable objectTable;
+    private List<(GameObject, uint, string)> areaObjects; // Game object, color, string
+    private readonly ClientState clientState;
+    private readonly GameGui gameGui;
+    private readonly Helpers helpers;
+
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
-        Condition condition, ClientState clientState, GameGui gameGui)
+        Condition condition, ClientState clientState, GameGui gameGui, Helpers helpers)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -41,12 +42,13 @@ public class RadarLogic : IDisposable
         this.configInterface = configuration;
         this.conditionInterface = condition;
         this.gameGui = gameGui;
+        this.helpers = helpers;
 
         // Loads plugin
         PluginLog.Debug("Radar Loaded");
         keepRunning = true;
         // TODO: In the future adjust this
-        areaObjects = new List<GameObject>();
+        areaObjects = new List<(GameObject, uint, string)>();
 
         this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += OnTick;
@@ -75,7 +77,7 @@ public class RadarLogic : IDisposable
 
         foreach (var areaObject in areaObjects)
         {
-            DrawEsp(areaObject);
+            DrawEsp(areaObject.Item1, areaObject.Item2, areaObject.Item3);
         }
 
         Monitor.Exit(areaObjects);
@@ -86,15 +88,15 @@ public class RadarLogic : IDisposable
      */
     private bool CheckDraw()
     {
+
         return conditionInterface[ConditionFlag.LoggingOut] || conditionInterface[ConditionFlag.BetweenAreas] ||
                conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled ||
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
-    private void DrawEsp(GameObject gameObject)
+    private void DrawEsp(GameObject gameObject, uint color, string name)
     {
         var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
-        var color = configInterface.GetColor(gameObject);
         switch (gameObject)
         {
             // Mobs
@@ -114,8 +116,7 @@ public class RadarLogic : IDisposable
 
                     if (npcOpt.ShowName)
                     {
-                        var tagText = GetText(gameObject);
-                        DrawName(onScreenPosition, tagText, color);
+                        DrawName(onScreenPosition, name, color);
                     }
 
                     if (npcOpt.ShowDot)
@@ -149,8 +150,7 @@ public class RadarLogic : IDisposable
 
                 if (playerOpt.ShowName)
                 {
-                    var tagText = GetText(gameObject);
-                    DrawName(onScreenPosition, tagText, color);
+                    DrawName(onScreenPosition, name, color);
                 }
 
                 if (playerOpt.ShowDot)
@@ -169,8 +169,7 @@ public class RadarLogic : IDisposable
                 var objectOption = configInterface.cfg.ObjectOption;
                 if (objectOption.ShowName)
                 {
-                    var tagText = GetText(gameObject);
-                    DrawName(onScreenPosition, tagText, color);
+                    DrawName(onScreenPosition, name, color);
                 }
 
                 if (objectOption.ShowDot)
@@ -300,28 +299,6 @@ public class RadarLogic : IDisposable
         ImGui.GetForegroundDrawList().PathClear();
     }
 
-    /**
-     * TODO: Refactor this to be done once per second instead of on each render.
-     */
-    private string GetText(GameObject obj)
-    {
-        var text = "";
-        if (obj.DataId != 0 && UtilInfo.RenameList.ContainsKey(obj.DataId))
-        {
-            text = UtilInfo.RenameList[obj.DataId];
-        }
-        else if (String.IsNullOrWhiteSpace(obj.Name.TextValue))
-        {
-            text = "''";
-        }
-        else
-        {
-            text = obj.Name.TextValue;
-        }
-
-        return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
-    }
-
     private void BackgroundLoop()
     {
         while (keepRunning)
@@ -350,21 +327,22 @@ public class RadarLogic : IDisposable
 
     private unsafe void UpdateMobInfo()
     {
-        var nearbyMobs = new List<GameObject>();
+        var nearbyMobs = new List<(GameObject, uint, string)>();
         foreach (var obj in objectTable)
         {
             if (!obj.IsValid()) continue;
             if (configInterface.cfg.DebugMode)
             {
-                nearbyMobs.Add(obj);
+                nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                 continue;
             }
             
             if (configInterface.cfg.ShowBaDdObjects)
             {
-                if (UtilInfo.RenameList.ContainsKey(obj.DataId)) // Portal and some potd stuff
+                // TODO: Check if we need to swap this out with a seperte eureka and potd list
+                if (UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
                 {
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     continue;
                 }
             }
@@ -381,34 +359,34 @@ public class RadarLogic : IDisposable
             {
                 case ObjectKind.Treasure:
                     if (!configInterface.cfg.ShowLoot) continue;
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     break;
                 case ObjectKind.Companion:
                     if (!configInterface.cfg.ShowCompanion) continue;
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     break;
                 case ObjectKind.Area:
                     if (!configInterface.cfg.ShowAreaObjects) continue;
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     break;
                 case ObjectKind.Aetheryte:
                     if (!configInterface.cfg.ShowAetherytes) continue;
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     break;
                 case ObjectKind.EventNpc:
                     if (!configInterface.cfg.ShowEventNpc) continue;
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     break;
                 case ObjectKind.EventObj:
                     if (!configInterface.cfg.ShowEvents) continue;
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     break;
                 case ObjectKind.None:
                     break;
                 case ObjectKind.Player:
                     if (!configInterface.cfg.ShowPlayers) continue;
                     //if (obj is not PlayerCharacter chara) continue;
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     break;
                 case ObjectKind.BattleNpc:
                     if (obj is not BattleNpc mob) continue;
@@ -418,7 +396,7 @@ public class RadarLogic : IDisposable
                     if (mob.IsDead) continue;
                     if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
                         configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) continue;
-                    nearbyMobs.Add(obj);
+                    nearbyMobs.Add((obj, helpers.GetColor(obj), helpers.GetText(obj)));
                     break;
                 case ObjectKind.GatheringPoint:
                     break;

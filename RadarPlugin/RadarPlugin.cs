@@ -17,6 +17,7 @@ public sealed class RadarPlugin : IDalamudPlugin
     private MainUi mainUi;
     private MobEditUi mobEditUi;
     private LocalMobsUi localMobsUi;
+    private Helpers helpers;
 
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
@@ -36,7 +37,8 @@ public sealed class RadarPlugin : IDalamudPlugin
         
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi);
-        radarLogic = new RadarLogic(pluginInterface, configInterface, objectTable, condition, clientState, gameGui);
+        helpers = new Helpers(configInterface, clientState);
+        radarLogic = new RadarLogic(pluginInterface, configInterface, objectTable, condition, clientState, gameGui, helpers);
     }
 
     public void Dispose()

@@ -10,6 +10,22 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class DeepDungeonMobTypeColorOptions
+    {
+        public uint Default = UtilInfo.White;
+        public uint SpecialUndead = UtilInfo.Yellow;
+        public uint Auspice = UtilInfo.Green;
+        public uint EasyMobs = UtilInfo.White;
+        public uint Traps = UtilInfo.Red;
+        public uint Return = UtilInfo.Blue;
+        public uint Passage = UtilInfo.Blue;
+        public uint GoldChest = UtilInfo.Gold;
+        public uint SilverChest = UtilInfo.Silver;
+        public uint BronzeChest = UtilInfo.Bronze;
+        public uint Mimic = UtilInfo.Red;
+        public uint AccursedHoard = UtilInfo.Turquoise;
+    }
+
     public class AggroRadiusOptions
     {
         public float AggroRadius = 10f;
@@ -21,6 +37,7 @@ public class Configuration
         public uint CircleOpacity = 0xBEFFFFFF;
         public uint FrontConeOpacity = 0x30FFFFFF;
     }
+
     public class ESPOption
     {
         public bool ShowName = true;
@@ -66,7 +83,8 @@ public class Configuration
         public bool ShowAreaObjects { get; set; } = false;
         public bool ShowAetherytes { get; set; } = false;
         public bool ShowNameless { get; set; } = false;
-        public bool ShowOnlyVisible { get; set; }= true;
+        public bool ShowOnlyVisible { get; set; } = true;
+        public DeepDungeonMobTypeColorOptions DeepDungeonMobTypeColorOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public NpcOption NpcOption { get; set; } = new();
         public PlayerOption PlayerOption { get; set; } = new();
@@ -83,46 +101,6 @@ public class Configuration
     {
         this.pluginInterface = pluginInterface;
         cfg = this.pluginInterface.GetPluginConfig() as Config ?? new Config();
-    }
-
-
-    public uint GetColor(GameObject gameObject)
-    {
-        uint color;
-        if (cfg.ColorOverride.ContainsKey(gameObject.DataId))
-        {
-            color = cfg.ColorOverride[gameObject.DataId];
-        }
-        else
-        {
-            switch (gameObject.ObjectKind)
-            {
-                case ObjectKind.Player:
-                    color = cfg.PlayerOption.ColorU;
-                    break;
-                case ObjectKind.BattleNpc:
-                    color = cfg.NpcOption.ColorU;
-                    break;
-                case ObjectKind.None:
-                case ObjectKind.EventNpc:
-                case ObjectKind.Treasure:
-                case ObjectKind.Aetheryte:
-                case ObjectKind.GatheringPoint:
-                case ObjectKind.EventObj:
-                case ObjectKind.MountType:
-                case ObjectKind.Companion:
-                case ObjectKind.Retainer:
-                case ObjectKind.Area:
-                case ObjectKind.Housing:
-                case ObjectKind.Cutscene:
-                case ObjectKind.CardStand:
-                default:
-                    color = cfg.ObjectOption.ColorU;
-                    break;
-            }
-        }
-
-        return color;
     }
 
     public void Save()

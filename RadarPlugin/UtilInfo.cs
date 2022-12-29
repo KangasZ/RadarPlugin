@@ -7,12 +7,17 @@ namespace RadarPlugin;
 
 public static class UtilInfo
 {
-    public static readonly uint Green = 0xFF00FF00;
-    public static readonly uint Red = 0xFF0000FF;
-    public static readonly uint White = 0xFFFFFFFF;
-    public static readonly uint Yellow = 0xFF00FFFF;
-    public static readonly float MinDotSize = 1.2f;
-    public static readonly float MaxDotSize = 3.8f;
+    public const uint Green = 0xFF00FF00;
+    public const uint Red = 0xFF0000FF;
+    public const uint Blue = 0xFFFF0000;
+    public const uint White = 0xFFFFFFFF;
+    public const uint Gold = 0xFF37AFD4;
+    public const uint Silver = 0xFFc0c0c0;
+    public const uint Yellow = 0xFF00FFFF;
+    public const uint Bronze = 0xFF327FCD;
+    public const uint Turquoise = 0xffc8d530;
+    public const float MinDotSize = 1.2f;
+    public const float MaxDotSize = 3.8f;
 
     /**
      * What is this used for again?
@@ -23,7 +28,7 @@ public static class UtilInfo
         { 8131, new Vector4(1f, 1f, 1f, 1f) } // white - Hydatos Elemental 
     };
 
-    public static HashSet<uint> DeepDungeonMapIds = new()
+    public static HashSet<ushort> DeepDungeonMapIds = new()
     {
         561, 562, 563, 564, 565, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, // POTD
         770, 771, 772, 782, 773, 783, 774, 784, 775, 785 // HOH
