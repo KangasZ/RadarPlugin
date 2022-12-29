@@ -10,6 +10,7 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Gui;
 using Dalamud.Plugin;
 using ImGuiNET;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
@@ -20,23 +21,26 @@ namespace RadarPlugin;
 public class RadarLogic : IDisposable
 {
     private const float PI = 3.14159265359f;
-    private DalamudPluginInterface pluginInterface { get; set; }
-    private Configuration configInterface { get; set; }
-    private Condition conditionInterface { get; set; }
-    private Task backgroundLoop { get; set; }
-    private bool keepRunning { get; set; }
-    private ObjectTable objectTable { get; set; }
-    private List<GameObject> areaObjects { get; set; }
-    private ClientState clientState { get; set; }
+    private DalamudPluginInterface pluginInterface;
+    private Configuration configInterface;
+    private Condition conditionInterface;
+    private Task backgroundLoop;
+    private bool keepRunning;
+    private ObjectTable objectTable;
+    private List<GameObject> areaObjects;
+    private ClientState clientState;
+    private GameGui gameGui;
+    
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
-        Condition condition, ClientState clientState)
+        Condition condition, ClientState clientState, GameGui gameGui)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
         this.pluginInterface = pluginInterface;
         this.configInterface = configuration;
         this.conditionInterface = condition;
+        this.gameGui = gameGui;
 
         // Loads plugin
         PluginLog.Debug("Radar Loaded");
@@ -89,7 +93,7 @@ public class RadarLogic : IDisposable
 
     private void DrawEsp(GameObject gameObject)
     {
-        var visibleOnScreen = Services.GameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
+        var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
         var color = configInterface.GetColor(gameObject);
         switch (gameObject)
         {
@@ -226,7 +230,7 @@ public class RadarLogic : IDisposable
         var seg = 2 * MathF.PI / numSegments;
         var rot = rotation + 0 * MathF.PI;
 
-        var originPointOnScreen = Services.GameGui.WorldToScreen(
+        var originPointOnScreen = gameGui.WorldToScreen(
             new(position.X + radius * MathF.Sin(rot),
                 position.Y,
                 position.Z + radius * MathF.Cos(rot)),
@@ -235,7 +239,7 @@ public class RadarLogic : IDisposable
         for (int i = 0; i < numSegments; i++)
         {
             var a = rot - i * segmentAngle;
-            var onScreen = Services.GameGui.WorldToScreen(
+            var onScreen = gameGui.WorldToScreen(
                 new(position.X + radius * MathF.Sin(a),
                     position.Y,
                     position.Z + radius * MathF.Cos(a)),
@@ -257,7 +261,7 @@ public class RadarLogic : IDisposable
                         ImGui.GetForegroundDrawList().PathLineTo(points[j]);
                     }
                     
-                    var centeOnScreen = Services.GameGui.WorldToScreen(
+                    var centeOnScreen = gameGui.WorldToScreen(
                         position,
                         out var centerPosition);
                     if (centeOnScreen)

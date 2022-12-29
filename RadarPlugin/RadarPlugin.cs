@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui;
 using Dalamud.Plugin;
 using RadarPlugin.UI;
 
@@ -10,44 +11,38 @@ namespace RadarPlugin;
 public sealed class RadarPlugin : IDalamudPlugin
 {
     public string Name => "Radar Plugin";
-    private RadarLogic radarLogic { get; set; }
-    private PluginCommands pluginCommands { get; set; }
-    private Configuration configInterface { get; set; }
-    private MainUi MainUi { get; set; }
-    private MobEditUi mobEditUi { get; set; }
-    private LocalMobsUi localMobsUi { get; set; }
-    private ObjectTable objectTable { get; set; }
-    private Condition condition { get; set; }
-    private ClientState clientState { get; set; }
+    private RadarLogic radarLogic;
+    private PluginCommands pluginCommands;
+    private Configuration configInterface;
+    private MainUi mainUi;
+    private MobEditUi mobEditUi;
+    private LocalMobsUi localMobsUi;
 
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
         CommandManager commandManager,
         ObjectTable objectTable,
         Condition condition,
-        ClientState clientState)
+        ClientState clientState,
+        GameGui gameGui)
     {
         // Services and DI
-        pluginInterface.Create<Services>(); // Todo: Remove this
-        this.objectTable = objectTable;
-        this.condition = condition;
         configInterface = new Configuration(pluginInterface);
         
         // UI
         mobEditUi = new MobEditUi(pluginInterface, configInterface);
         localMobsUi = new LocalMobsUi(pluginInterface, configInterface, objectTable, mobEditUi);
-        MainUi = new MainUi(pluginInterface, configInterface, localMobsUi);
+        mainUi = new MainUi(pluginInterface, configInterface, localMobsUi);
         
         // Command manager
-        pluginCommands = new PluginCommands(commandManager, MainUi);
-        this.clientState = clientState;
-        radarLogic = new RadarLogic(pluginInterface, configInterface, this.objectTable, this.condition, this.clientState);
+        pluginCommands = new PluginCommands(commandManager, mainUi);
+        radarLogic = new RadarLogic(pluginInterface, configInterface, objectTable, condition, clientState, gameGui);
     }
 
     public void Dispose()
     {
         // UI
-        MainUi.Dispose();
+        mainUi.Dispose();
         localMobsUi.Dispose();
         mobEditUi.Dispose();
         

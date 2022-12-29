@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Dalamud.Interface.Colors;
+using RadarPlugin.Enums;
 
 namespace RadarPlugin;
 
@@ -19,7 +20,13 @@ public static class UtilInfo
      */
     public static Dictionary<uint, Vector4> HuntRecolors = new Dictionary<uint, Vector4>()
     {
-        { 8131, new Vector4(1f,1f,1f,1f) } // white - Hydatos Elemental 
+        { 8131, new Vector4(1f, 1f, 1f, 1f) } // white - Hydatos Elemental 
+    };
+
+    public static HashSet<uint> DeepDungeonMapIds = new()
+    {
+        561, 562, 563, 564, 565, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, // POTD
+        770, 771, 772, 782, 773, 783, 774, 784, 775, 785 // HOH
     };
 
     /**
@@ -37,7 +44,7 @@ public static class UtilInfo
         14766, // Infern brand
         14764, // Infern brand 2
     };
-    
+
     /**
      * This list is a dictionary for objects to track along with renames for them
      * KEY: uint representing DATA ID
@@ -46,61 +53,170 @@ public static class UtilInfo
     public static Dictionary<uint, string> RenameList = new()
     {
         // Coffers
-        {2007358, "Gold Coffer"},
-        {2007357, "Silver Coffer"},
-        {2007542, "Accursed Hoard"},
-        
+        { 2007358, "Gold Coffer" },
+        { 2007357, "Silver Coffer" },
+        { 2007542, "Accursed Hoard" },
+
         // Potd Bronze Coffers
-        {782, "Bronze Coffer"},
-        {783, "Bronze Coffer"},
-        {784, "Bronze Coffer"},
-        {785, "Bronze Coffer"},
-        {786, "Bronze Coffer"},
-        {787, "Bronze Coffer"},
-        {788, "Bronze Coffer"},
-        {789, "Bronze Coffer"},
-        {790, "Bronze Coffer"},
-        {802, "Bronze Coffer"},
-        {803, "Bronze Coffer"},
-        {804, "Bronze Coffer"},
-        {805, "Bronze Coffer"},
+        { 782, "Bronze Coffer" },
+        { 783, "Bronze Coffer" },
+        { 784, "Bronze Coffer" },
+        { 785, "Bronze Coffer" },
+        { 786, "Bronze Coffer" },
+        { 787, "Bronze Coffer" },
+        { 788, "Bronze Coffer" },
+        { 789, "Bronze Coffer" },
+        { 790, "Bronze Coffer" },
+        { 802, "Bronze Coffer" },
+        { 803, "Bronze Coffer" },
+        { 804, "Bronze Coffer" },
+        { 805, "Bronze Coffer" },
+
         // Hoh bronze coffers
-        {1036, "Bronze Coffer"},
-        {1037, "Bronze Coffer"},
-        {1038, "Bronze Coffer"},
-        {1039, "Bronze Coffer"},
-        {1040, "Bronze Coffer"},
-        {1041, "Bronze Coffer"},
-        {1042, "Bronze Coffer"},
-        {1043, "Bronze Coffer"},
-        {1044, "Bronze Coffer"},
-        {1045, "Bronze Coffer"},
-        {1046, "Bronze Coffer"},
-        {1047, "Bronze Coffer"},
-        {1048, "Bronze Coffer"},
-        {1049, "Bronze Coffer"},
+        { 1036, "Bronze Coffer" },
+        { 1037, "Bronze Coffer" },
+        { 1038, "Bronze Coffer" },
+        { 1039, "Bronze Coffer" },
+        { 1040, "Bronze Coffer" },
+        { 1041, "Bronze Coffer" },
+        { 1042, "Bronze Coffer" },
+        { 1043, "Bronze Coffer" },
+        { 1044, "Bronze Coffer" },
+        { 1045, "Bronze Coffer" },
+        { 1046, "Bronze Coffer" },
+        { 1047, "Bronze Coffer" },
+        { 1048, "Bronze Coffer" },
+        { 1049, "Bronze Coffer" },
 
         // Mimics
-        {2006020, "Mimic Coffer"},
-        //Cairn/Beacons
-        {2007187, "Cairn of Return"},
-        {2007188, "Cairn of Passage"},
-        {2009507, "Beacon of Passage"},
-        {2009506, "Beacon of Return"},
+        { 2006020, "Mimic Coffer" },
+        { 2566, "Mimic" },
+        { 7392, "Bronze Mimic" },
+        { 7393, "Silver Mimic" },
+        { 7394, "Gold Mimic" },
+
+        //Returns
+        { 2007187, "Cairn of Return" },
+        { 2009506, "Beacon of Return" },
+
+        // Passage
+        { 2007188, "Cairn of Passage" },
+        { 2009507, "Beacon of Passage" },
+
         // Traps
-        {2007182, "Landmine"},
-        {2007183, "Luring Trap"},
-        {2007184, "Enfeebling Trap"},
-        {2007185, "Impeding Trap"},
-        {2007186, "Toading Trap"},
-        {2009504, "Odder Trap"},
-        
+        { 2007182, "Landmine" },
+        { 2007183, "Luring Trap" },
+        { 2007184, "Enfeebling Trap" },
+        { 2007185, "Impeding Trap" },
+        { 2007186, "Toading Trap" },
+        { 2009504, "Odder Trap" },
+
         // BA Objects
-        {2009729, "Portal"}, // Eureka Portal,
-        {2009726, "Unstable Portal"},
-        {2009727, "Stable Portal"}
+        { 2009729, "Portal" }, // Eureka Portal,
+        { 2009726, "Unstable Portal" },
+        { 2009727, "Stable Portal" }
     };
-    
+
+    public static Dictionary<uint, DeepDungeonMobTypes> DeepDungeonMobTypesMap = new()
+    {
+        // Mimics
+        { 2006020, DeepDungeonMobTypes.Mimic },
+        { 2566, DeepDungeonMobTypes.Mimic },
+        { 7392, DeepDungeonMobTypes.Mimic },
+        { 7393, DeepDungeonMobTypes.Mimic },
+        { 7394, DeepDungeonMobTypes.Mimic },
+
+        // Returns
+        { 2007187, DeepDungeonMobTypes.Return },
+        { 2009506, DeepDungeonMobTypes.Return },
+
+        // Passage
+        { 2007188, DeepDungeonMobTypes.Passage },
+        { 2009507, DeepDungeonMobTypes.Passage },
+
+        // Bronze Coffers
+        // Potd Bronze Coffers
+        { 782, DeepDungeonMobTypes.BronzeChest },
+        { 783, DeepDungeonMobTypes.BronzeChest },
+        { 784, DeepDungeonMobTypes.BronzeChest },
+        { 785, DeepDungeonMobTypes.BronzeChest },
+        { 786, DeepDungeonMobTypes.BronzeChest },
+        { 787, DeepDungeonMobTypes.BronzeChest },
+        { 788, DeepDungeonMobTypes.BronzeChest },
+        { 789, DeepDungeonMobTypes.BronzeChest },
+        { 790, DeepDungeonMobTypes.BronzeChest },
+        { 802, DeepDungeonMobTypes.BronzeChest },
+        { 803, DeepDungeonMobTypes.BronzeChest },
+        { 804, DeepDungeonMobTypes.BronzeChest },
+        { 805, DeepDungeonMobTypes.BronzeChest },
+
+        // Hoh bronze coffers
+        { 1036, DeepDungeonMobTypes.BronzeChest },
+        { 1037, DeepDungeonMobTypes.BronzeChest },
+        { 1038, DeepDungeonMobTypes.BronzeChest },
+        { 1039, DeepDungeonMobTypes.BronzeChest },
+        { 1040, DeepDungeonMobTypes.BronzeChest },
+        { 1041, DeepDungeonMobTypes.BronzeChest },
+        { 1042, DeepDungeonMobTypes.BronzeChest },
+        { 1043, DeepDungeonMobTypes.BronzeChest },
+        { 1044, DeepDungeonMobTypes.BronzeChest },
+        { 1045, DeepDungeonMobTypes.BronzeChest },
+        { 1046, DeepDungeonMobTypes.BronzeChest },
+        { 1047, DeepDungeonMobTypes.BronzeChest },
+        { 1048, DeepDungeonMobTypes.BronzeChest },
+        { 1049, DeepDungeonMobTypes.BronzeChest },
+
+        // Coffers
+        { 2007358, DeepDungeonMobTypes.GoldChest },
+        { 2007357, DeepDungeonMobTypes.SilverChest },
+        { 2007542, DeepDungeonMobTypes.AccursedHoard },
+
+        // Traps
+        { 2007182, DeepDungeonMobTypes.Traps },
+        { 2007183, DeepDungeonMobTypes.Traps },
+        { 2007184, DeepDungeonMobTypes.Traps },
+        { 2007185, DeepDungeonMobTypes.Traps },
+        { 2007186, DeepDungeonMobTypes.Traps },
+        { 2009504, DeepDungeonMobTypes.Traps },
+
+        //Easy Mobs
+        { 5041, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
+        { 7610, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+
+        // Auspices
+        { 7396, DeepDungeonMobTypes.Auspice }, // Komainu
+        { 7397, DeepDungeonMobTypes.Auspice }, // Inugami
+        { 7398, DeepDungeonMobTypes.Auspice }, // Senri
+
+        // POTD Specail Undead
+        { 5049, DeepDungeonMobTypes.SpecialUndead },
+        { 5048, DeepDungeonMobTypes.SpecialUndead },
+        { 5047, DeepDungeonMobTypes.SpecialUndead },
+        { 5050, DeepDungeonMobTypes.SpecialUndead },
+        { 5049, DeepDungeonMobTypes.SpecialUndead },
+        { 5052, DeepDungeonMobTypes.SpecialUndead },
+        { 5049, DeepDungeonMobTypes.SpecialUndead },
+        { 5051, DeepDungeonMobTypes.SpecialUndead },
+        { 5049, DeepDungeonMobTypes.SpecialUndead },
+        { 5053, DeepDungeonMobTypes.SpecialUndead },
+        { 5046, DeepDungeonMobTypes.SpecialUndead },
+        { 5290, DeepDungeonMobTypes.SpecialUndead },
+        { 5291, DeepDungeonMobTypes.SpecialUndead },
+        { 5293, DeepDungeonMobTypes.SpecialUndead },
+        { 5292, DeepDungeonMobTypes.SpecialUndead },
+        { 5294, DeepDungeonMobTypes.SpecialUndead },
+        { 5295, DeepDungeonMobTypes.SpecialUndead },
+        { 5296, DeepDungeonMobTypes.SpecialUndead },
+        { 5297, DeepDungeonMobTypes.SpecialUndead },
+        { 5298, DeepDungeonMobTypes.SpecialUndead },
+        { 5283, DeepDungeonMobTypes.SpecialUndead },
+        { 5284, DeepDungeonMobTypes.SpecialUndead },
+        { 5285, DeepDungeonMobTypes.SpecialUndead },
+        { 5286, DeepDungeonMobTypes.SpecialUndead },
+        { 5287, DeepDungeonMobTypes.SpecialUndead },
+        { 5288, DeepDungeonMobTypes.SpecialUndead },
+        { 5289, DeepDungeonMobTypes.SpecialUndead },
+    };
 
     public static uint Color(byte r, byte g, byte b, byte a)
     {
