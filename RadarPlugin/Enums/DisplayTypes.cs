@@ -2,6 +2,7 @@
 
 public enum DisplayTypes
 {
+    Default = -1,
     DotOnly = 0,
     NameOnly = 1,
     DotAndName = 2,

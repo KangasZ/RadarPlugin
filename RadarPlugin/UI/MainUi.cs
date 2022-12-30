@@ -158,14 +158,14 @@ public class MainUi : IDisposable
         }
 
         var circleOpacity = (float)(configInterface.cfg.AggroRadiusOptions.CircleOpacity >> 24) / byte.MaxValue;
-        if (ImGui.DragFloat($"Circle Opacity##{tag}", ref circleOpacity, 0.1f, 0, 1))
+        if (ImGui.DragFloat($"Circle Opacity##{tag}", ref circleOpacity, 0.005f, 0, 1))
         {
             configInterface.cfg.AggroRadiusOptions.CircleOpacity = ((uint)(circleOpacity * 255) << 24) | 0x00FFFFFF;
             configInterface.Save();
         }
 
         var coneOpacity = (float)(configInterface.cfg.AggroRadiusOptions.FrontConeOpacity >> 24) / byte.MaxValue;
-        if (ImGui.DragFloat($"Circle Opacity##{tag}", ref coneOpacity, 0.1f, 0, 1))
+        if (ImGui.DragFloat($"Cone Opacity##{tag}", ref coneOpacity, 0.005f, 0, 1))
         {
             configInterface.cfg.AggroRadiusOptions.FrontConeOpacity = ((uint)(coneOpacity * 255) << 24) | 0x00FFFFFF;
             configInterface.Save();
@@ -273,8 +273,16 @@ public class MainUi : IDisposable
     private void DrawPlayerSettings()
     {
         var playerStr = "player";
-        ImGui.BeginChild($"##{playerStr}-radar-tabs-child", new Vector2(0, 140));
+        ImGui.BeginChild($"##{playerStr}-radar-tabs-child", new Vector2(0, 200));
         ImGui.Columns(2, $"##{playerStr}-settings-columns", false);
+        var displayType = DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{playerStr}", MobType.Character,
+            (int)configInterface.cfg.PlayerOption.DisplayType);
+        if (displayType != DisplayTypes.Default)
+        {
+            configInterface.cfg.PlayerOption.DisplayType = displayType;
+        }
+
+        ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.PlayerOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{playerStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
         {
@@ -282,8 +290,6 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{playerStr}", MobType.Character,
-            configInterface.cfg.NpcOption);
 
         var playerDotSize = configInterface.cfg.PlayerOption.DotSize;
         if (ImGui.SliderFloat($"Dot Size##{playerStr}-settings", ref playerDotSize, UtilInfo.MinDotSize,
@@ -302,8 +308,12 @@ public class MainUi : IDisposable
     private void DrawNpcSettings()
     {
         var npcStr = "npc";
-        ImGui.BeginChild($"##{npcStr}-radar-tabs-child", new Vector2(0, 140));
+        ImGui.BeginChild($"##{npcStr}-radar-tabs-child", new Vector2(0, 200));
         ImGui.Columns(2, $"##{npcStr}-settings-columns", false);
+        var displayType = DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{npcStr}", MobType.Character,
+            (int)configInterface.cfg.NpcOption.DisplayType);
+
+        ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.NpcOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
         {
@@ -311,8 +321,6 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{npcStr}", MobType.Character,
-            configInterface.cfg.NpcOption);
 
         var npcDotSize = configInterface.cfg.NpcOption.DotSize;
         if (ImGui.SliderFloat($"Dot Size##{npcStr}-settings", ref npcDotSize, UtilInfo.MinDotSize, UtilInfo.MaxDotSize))
@@ -321,7 +329,6 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        ImGui.NextColumn();
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip("WIP WIP WIP\n" +
@@ -349,17 +356,18 @@ public class MainUi : IDisposable
     {
         var objectStr = "object";
 
-        ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, 140));
+        ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, 200));
         ImGui.Columns(2, $"##{objectStr}-settings-columns", false);
+
+        var displayType = DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{objectStr}", MobType.Object,
+            (int)configInterface.cfg.ObjectOption.DisplayType);
+        ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.ObjectOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
         {
             configInterface.cfg.ObjectOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
             configInterface.Save();
         }
-
-        DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{objectStr}", MobType.Object,
-            configInterface.cfg.ObjectOption);
 
         var objectDotSize = configInterface.cfg.ObjectOption.DotSize;
         if (ImGui.SliderFloat($"Dot Size##{objectStr}-settings", ref objectDotSize, UtilInfo.MinDotSize,
@@ -497,103 +505,92 @@ public class MainUi : IDisposable
         ImGui.EndChild();
     }
 
-    public void DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, Configuration.ESPOption espOption)
+    public DisplayTypes DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, int currVal)
     {
-        var val = (int)espOption.DisplayType;
+        var val = currVal;
+        ImGui.Text("Display Type");
         switch (mobType)
         {
             case MobType.Object:
-                ImGui.BeginListBox($"##{id}");
-                if (ImGui.ListBox($"Display Type##{id}",
-                        ref val,
-                        new string[]
-                        {
-                            "Dot Only",
-                            "Name Only",
-                            "Dot and Name",
-                        }, 3))
+                ImGui.PushItemWidth(200);
+                var lb = ImGui.ListBox($"##{id}",
+                    ref val,
+                    new string[]
+                    {
+                        "Dot Only",
+                        "Name Only",
+                        "Dot and Name",
+                    }, 3);
+                ImGui.PopItemWidth();
+
+                if (lb)
                 {
                     switch (val)
                     {
                         case 0:
-                            espOption.DisplayType = DisplayTypes.DotOnly;
-                            break;
+                            return DisplayTypes.DotOnly;
                         case 1:
-                            espOption.DisplayType = DisplayTypes.NameOnly;
-                            break;
+                            return DisplayTypes.NameOnly;
                         case 2:
-                            espOption.DisplayType = DisplayTypes.DotAndName;
-                            break;
+                            return DisplayTypes.DotAndName;
                         default:
                             PluginLog.Error("Display Type Selected Is Wrong");
-                            break;
+                            return DisplayTypes.Default;
                     }
-
-                    configInterface.Save();
                 }
 
-                ImGui.EndListBox();
                 break;
             case MobType.Character:
-                ImGui.BeginListBox($"##{id}");
-                if (ImGui.ListBox($"Display Type##{id}",
-                        ref val,
-                        new string[]
-                        {
-                            "Dot Only",
-                            "Name Only",
-                            "Dot and Name",
-                            "Health Bar Only",
-                            "Health Bar And Value",
-                            "Health Bar And Name",
-                            "Health Bar And Value And Name",
-                            "Health Value Only",
-                            "Health Value and Name"
-                        }, 7))
+                ImGui.PushItemWidth(200);
+                var lb2 = ImGui.ListBox($"##{id}",
+                    ref val,
+                    new string[]
+                    {
+                        "Dot Only",
+                        "Name Only",
+                        "Dot and Name",
+                        "Health Bar Only",
+                        "Health Bar And Value",
+                        "Health Bar And Name",
+                        "Health Bar, Value, And Name",
+                        "Health Value Only",
+                        "Health Value and Name"
+                    }, 9);
+                ImGui.PopItemWidth();
+                if (lb2)
                 {
                     switch (val)
                     {
                         case 0:
-                            espOption.DisplayType = DisplayTypes.DotOnly;
-                            break;
+                            return DisplayTypes.DotOnly;
                         case 1:
-                            espOption.DisplayType = DisplayTypes.NameOnly;
-                            break;
+                            return DisplayTypes.NameOnly;
                         case 2:
-                            espOption.DisplayType = DisplayTypes.DotAndName;
-                            break;
+                            return DisplayTypes.DotAndName;
                         case 3:
-                            espOption.DisplayType = DisplayTypes.HealthBarOnly;
-                            break;
+                            return DisplayTypes.HealthBarOnly;
                         case 4:
-                            espOption.DisplayType = DisplayTypes.HealthBarAndValue;
-                            break;
+                            return DisplayTypes.HealthBarAndValue;
                         case 5:
-                            espOption.DisplayType = DisplayTypes.HealthBarAndName;
-                            break;
+                            return DisplayTypes.HealthBarAndName;
                         case 6:
-                            espOption.DisplayType = DisplayTypes.HealthBarAndValueAndName;
-                            break;
+                            return DisplayTypes.HealthBarAndValueAndName;
                         case 7:
-                            espOption.DisplayType = DisplayTypes.HealthValueOnly;
-                            break;
+                            return DisplayTypes.HealthValueOnly;
                         case 8:
-                            espOption.DisplayType = DisplayTypes.HealthValueAndName;
-                            break;
+                            return DisplayTypes.HealthValueAndName;
                         default:
                             PluginLog.Error("Display Type Selected Is Wrong");
-                            break;
+                            return DisplayTypes.Default;
                     }
-
-                    configInterface.Save();
                 }
 
-                ImGui.EndListBox();
                 break;
             default:
                 PluginLog.Error(
                     "Mob Type Is Wrong. This literally should never occur. Please dear god help me if it does.");
                 break;
         }
+        return DisplayTypes.Default;
     }
 }
