@@ -32,7 +32,7 @@ public sealed class RadarPlugin : IDalamudPlugin
         radarHelpers = new RadarHelpers(configInterface, clientState);
 
         // UI
-        mobEditUi = new MobEditUi(pluginInterface, configInterface);
+        mobEditUi = new MobEditUi(pluginInterface, configInterface, radarHelpers);
         localMobsUi = new LocalMobsUi(pluginInterface, configInterface, objectTable, mobEditUi, radarHelpers);
         mainUi = new MainUi(pluginInterface, configInterface, localMobsUi);
         

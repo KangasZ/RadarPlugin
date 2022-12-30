@@ -13,12 +13,14 @@ public class MobEditUi : IDisposable
     private GameObject localObject;
 
     private bool mobEditVisible = false;
+    private readonly RadarHelpers radarHelpers;
 
-    public MobEditUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface)
+    public MobEditUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, RadarHelpers radarHelpers)
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.dalamudPluginInterface.UiBuilder.Draw += DrawMobEditWindow;
+        this.radarHelpers = radarHelpers;
     }
 
     private void DrawMobEditWindow()
@@ -47,6 +49,10 @@ public class MobEditUi : IDisposable
             ImGui.Text("Name");
             ImGui.TableNextColumn();
             ImGui.Text($"{localObject.Name}");
+            ImGui.TableNextColumn();
+            ImGui.Text("Given Name");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{radarHelpers.GetText(localObject)}");
             ImGui.TableNextColumn();
             ImGui.Text("Data ID");
             ImGui.TableNextColumn();
@@ -103,6 +109,8 @@ public class MobEditUi : IDisposable
                     configInterface.Save();
                 }
             }
+            
+            
         }
 
         ImGui.End();

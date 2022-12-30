@@ -3,6 +3,7 @@ using ImGuiNET;
 using System.Numerics;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using RadarPlugin.Enums;
 
 namespace RadarPlugin.UI;
 
@@ -101,8 +102,6 @@ public class MainUi : IDisposable
 
     private void Draw3DRadarSettings()
     {
-        ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
-            "This menu is WIP. Odd things may occur or not be working.");
         ImGui.BeginChild($"##radar-settings-tabs-child");
         UiHelpers.DrawTabs("radar-3d-settings-tabs",
             ("Object", UtilInfo.White, DrawObjectSettings),
@@ -171,7 +170,6 @@ public class MainUi : IDisposable
             configInterface.cfg.AggroRadiusOptions.FrontConeOpacity = ((uint)(coneOpacity * 255) << 24) | 0x00FFFFFF;
             configInterface.Save();
         }
-
     }
 
     private void DrawDeepDungeonSettings()
@@ -284,19 +282,8 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        var showPlayerName = configInterface.cfg.PlayerOption.ShowName;
-        if (ImGui.Checkbox($"Name##{playerStr}-settings", ref showPlayerName))
-        {
-            configInterface.cfg.PlayerOption.ShowName = showPlayerName;
-            configInterface.Save();
-        }
-
-        var showPlayerDot = configInterface.cfg.PlayerOption.ShowDot;
-        if (ImGui.Checkbox($"Dot##{playerStr}-settings", ref showPlayerDot))
-        {
-            configInterface.cfg.PlayerOption.ShowDot = showPlayerDot;
-            configInterface.Save();
-        }
+        DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{playerStr}", MobType.Character,
+            configInterface.cfg.NpcOption);
 
         var playerDotSize = configInterface.cfg.PlayerOption.DotSize;
         if (ImGui.SliderFloat($"Dot Size##{playerStr}-settings", ref playerDotSize, UtilInfo.MinDotSize,
@@ -307,19 +294,7 @@ public class MainUi : IDisposable
         }
 
         ImGui.NextColumn();
-        var showPlayerHealthBar = configInterface.cfg.PlayerOption.ShowHealthBar;
-        if (ImGui.Checkbox($"Health Bar##{playerStr}-settings", ref showPlayerHealthBar))
-        {
-            configInterface.cfg.PlayerOption.ShowHealthBar = showPlayerHealthBar;
-            configInterface.Save();
-        }
 
-        var showPlayerHealthValue = configInterface.cfg.PlayerOption.ShowHealthValue;
-        if (ImGui.Checkbox($"Health Value##{playerStr}-settings", ref showPlayerHealthValue))
-        {
-            configInterface.cfg.PlayerOption.ShowHealthValue = showPlayerHealthValue;
-            configInterface.Save();
-        }
 
         ImGui.EndChild();
     }
@@ -336,19 +311,8 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        var showNpcName = configInterface.cfg.NpcOption.ShowName;
-        if (ImGui.Checkbox($"Name##{npcStr}-settings", ref showNpcName))
-        {
-            configInterface.cfg.NpcOption.ShowName = showNpcName;
-            configInterface.Save();
-        }
-
-        var showNpcDot = configInterface.cfg.NpcOption.ShowDot;
-        if (ImGui.Checkbox($"Dot##{npcStr}-settings", ref showNpcDot))
-        {
-            configInterface.cfg.NpcOption.ShowDot = showNpcDot;
-            configInterface.Save();
-        }
+        DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{npcStr}", MobType.Character,
+            configInterface.cfg.NpcOption);
 
         var npcDotSize = configInterface.cfg.NpcOption.DotSize;
         if (ImGui.SliderFloat($"Dot Size##{npcStr}-settings", ref npcDotSize, UtilInfo.MinDotSize, UtilInfo.MaxDotSize))
@@ -358,20 +322,6 @@ public class MainUi : IDisposable
         }
 
         ImGui.NextColumn();
-        var showNpcHealthBar = configInterface.cfg.NpcOption.ShowHealthBar;
-        if (ImGui.Checkbox($"Health Bar##{npcStr}-settings", ref showNpcHealthBar))
-        {
-            configInterface.cfg.NpcOption.ShowHealthBar = showNpcHealthBar;
-            configInterface.Save();
-        }
-
-        var showNpcHealthValue = configInterface.cfg.NpcOption.ShowHealthValue;
-        if (ImGui.Checkbox($"Health Value##{npcStr}-settings", ref showNpcHealthValue))
-        {
-            configInterface.cfg.NpcOption.ShowHealthValue = showNpcHealthValue;
-            configInterface.Save();
-        }
-
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip("WIP WIP WIP\n" +
@@ -408,19 +358,8 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        var showObjectName = configInterface.cfg.ObjectOption.ShowName;
-        if (ImGui.Checkbox($"Name##{objectStr}-settings", ref showObjectName))
-        {
-            configInterface.cfg.ObjectOption.ShowName = showObjectName;
-            configInterface.Save();
-        }
-
-        var showObjectDot = configInterface.cfg.ObjectOption.ShowDot;
-        if (ImGui.Checkbox($"Dot##{objectStr}-settings", ref showObjectDot))
-        {
-            configInterface.cfg.ObjectOption.ShowDot = showObjectDot;
-            configInterface.Save();
-        }
+        DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{objectStr}", MobType.Object,
+            configInterface.cfg.ObjectOption);
 
         var objectDotSize = configInterface.cfg.ObjectOption.DotSize;
         if (ImGui.SliderFloat($"Dot Size##{objectStr}-settings", ref objectDotSize, UtilInfo.MinDotSize,
@@ -556,5 +495,105 @@ public class MainUi : IDisposable
         }
 
         ImGui.EndChild();
+    }
+
+    public void DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, Configuration.ESPOption espOption)
+    {
+        var val = (int)espOption.DisplayType;
+        switch (mobType)
+        {
+            case MobType.Object:
+                ImGui.BeginListBox($"##{id}");
+                if (ImGui.ListBox($"Display Type##{id}",
+                        ref val,
+                        new string[]
+                        {
+                            "Dot Only",
+                            "Name Only",
+                            "Dot and Name",
+                        }, 3))
+                {
+                    switch (val)
+                    {
+                        case 0:
+                            espOption.DisplayType = DisplayTypes.DotOnly;
+                            break;
+                        case 1:
+                            espOption.DisplayType = DisplayTypes.NameOnly;
+                            break;
+                        case 2:
+                            espOption.DisplayType = DisplayTypes.DotAndName;
+                            break;
+                        default:
+                            PluginLog.Error("Display Type Selected Is Wrong");
+                            break;
+                    }
+
+                    configInterface.Save();
+                }
+
+                ImGui.EndListBox();
+                break;
+            case MobType.Character:
+                ImGui.BeginListBox($"##{id}");
+                if (ImGui.ListBox($"Display Type##{id}",
+                        ref val,
+                        new string[]
+                        {
+                            "Dot Only",
+                            "Name Only",
+                            "Dot and Name",
+                            "Health Bar Only",
+                            "Health Bar And Value",
+                            "Health Bar And Name",
+                            "Health Bar And Value And Name",
+                            "Health Value Only",
+                            "Health Value and Name"
+                        }, 7))
+                {
+                    switch (val)
+                    {
+                        case 0:
+                            espOption.DisplayType = DisplayTypes.DotOnly;
+                            break;
+                        case 1:
+                            espOption.DisplayType = DisplayTypes.NameOnly;
+                            break;
+                        case 2:
+                            espOption.DisplayType = DisplayTypes.DotAndName;
+                            break;
+                        case 3:
+                            espOption.DisplayType = DisplayTypes.HealthBarOnly;
+                            break;
+                        case 4:
+                            espOption.DisplayType = DisplayTypes.HealthBarAndValue;
+                            break;
+                        case 5:
+                            espOption.DisplayType = DisplayTypes.HealthBarAndName;
+                            break;
+                        case 6:
+                            espOption.DisplayType = DisplayTypes.HealthBarAndValueAndName;
+                            break;
+                        case 7:
+                            espOption.DisplayType = DisplayTypes.HealthValueOnly;
+                            break;
+                        case 8:
+                            espOption.DisplayType = DisplayTypes.HealthValueAndName;
+                            break;
+                        default:
+                            PluginLog.Error("Display Type Selected Is Wrong");
+                            break;
+                    }
+
+                    configInterface.Save();
+                }
+
+                ImGui.EndListBox();
+                break;
+            default:
+                PluginLog.Error(
+                    "Mob Type Is Wrong. This literally should never occur. Please dear god help me if it does.");
+                break;
+        }
     }
 }

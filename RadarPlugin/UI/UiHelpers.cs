@@ -1,5 +1,7 @@
 ﻿using System;
+using Dalamud.Logging;
 using ImGuiNET;
+using RadarPlugin.Enums;
 
 namespace RadarPlugin.UI;
 
@@ -22,6 +24,7 @@ public static class UiHelpers
                 ImGui.PopStyleColor();
             }
         }
+
         ImGui.EndTabBar();
     }
 }

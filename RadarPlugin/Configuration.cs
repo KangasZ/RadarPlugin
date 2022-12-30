@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
+using RadarPlugin.Enums;
 
 namespace RadarPlugin;
 
@@ -39,8 +40,7 @@ public class Configuration
 
     public class ESPOption
     {
-        public bool ShowName = true;
-        public bool ShowDot = false;
+        public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public float DotSize = 2.2f;
     }
 
@@ -51,8 +51,7 @@ public class Configuration
 
     public class NpcOption : ESPOption
     {
-        public bool ShowHealthBar = true;
-        public bool ShowHealthValue = true;
+        public new DisplayTypes DisplayType = DisplayTypes.HealthBarAndValueAndName;
         public bool ShowAggroCircle = false;
         public bool ShowAggroCircleInCombat = false;
         public uint ColorU = 0xffffffff; //new(0xff, 0xff, 0xff, 0xff);
@@ -61,9 +60,7 @@ public class Configuration
     public class PlayerOption : NpcOption
     {
         public bool ShowFC = false; // Unused
-        public new bool ShowHealthBar = false;
-        public new bool ShowHealthValue = false;
-        public new bool ShowDot = true;
+        public new DisplayTypes DisplayType = DisplayTypes.DotAndName;
         public new uint ColorU = 0xffff00ff; //new(0x99, 0x00, 0x99, 0xFF);
     }
 

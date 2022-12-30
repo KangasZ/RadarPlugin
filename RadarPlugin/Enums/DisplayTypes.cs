@@ -1,0 +1,14 @@
+﻿namespace RadarPlugin.Enums;
+
+public enum DisplayTypes
+{
+    DotOnly = 0,
+    NameOnly = 1,
+    DotAndName = 2,
+    HealthBarOnly = 3,
+    HealthBarAndValue = 4,
+    HealthBarAndName = 5,
+    HealthBarAndValueAndName = 6,
+    HealthValueOnly = 7,
+    HealthValueAndName = 8,
+}

@@ -13,6 +13,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
 using Dalamud.Plugin;
 using ImGuiNET;
+using RadarPlugin.Enums;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
@@ -88,7 +89,6 @@ public class RadarLogic : IDisposable
      */
     private bool CheckDraw()
     {
-
         return conditionInterface[ConditionFlag.LoggingOut] || conditionInterface[ConditionFlag.BetweenAreas] ||
                conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled ||
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
@@ -104,24 +104,43 @@ public class RadarLogic : IDisposable
                 var npcOpt = configInterface.cfg.NpcOption;
                 if (visibleOnScreen)
                 {
-                    if (npcOpt.ShowHealthBar)
+                    switch (npcOpt.DisplayType)
                     {
-                        DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                    }
-
-                    if (npcOpt.ShowHealthValue)
-                    {
-                        DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                    }
-
-                    if (npcOpt.ShowName)
-                    {
-                        DrawName(onScreenPosition, name, color);
-                    }
-
-                    if (npcOpt.ShowDot)
-                    {
-                        DrawDot(onScreenPosition, npcOpt.DotSize, color);
+                        case DisplayTypes.DotOnly:
+                            DrawDot(onScreenPosition, npcOpt.DotSize, color);
+                            break;
+                        case DisplayTypes.NameOnly:
+                            DrawName(onScreenPosition, name, color);
+                            break;
+                        case DisplayTypes.DotAndName:
+                            DrawDot(onScreenPosition, npcOpt.DotSize, color);
+                            DrawName(onScreenPosition, name, color);
+                            break;
+                        case DisplayTypes.HealthBarOnly:
+                            DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            break;
+                        case DisplayTypes.HealthBarAndValue:
+                            DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            break;
+                        case DisplayTypes.HealthBarAndName:
+                            DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawName(onScreenPosition, name, color);
+                            break;
+                        case DisplayTypes.HealthBarAndValueAndName:
+                            DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawName(onScreenPosition, name, color);
+                            DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            break;
+                        case DisplayTypes.HealthValueOnly:
+                            DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            break;
+                        case DisplayTypes.HealthValueAndName:
+                            DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawName(onScreenPosition, name, color);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
                 }
 
@@ -138,24 +157,43 @@ public class RadarLogic : IDisposable
                 var playerOpt = configInterface.cfg.PlayerOption;
                 if (!visibleOnScreen) break;
                 //var hp = chara.CurrentHp / chara.MaxHp;
-                if (playerOpt.ShowHealthBar)
+                switch (playerOpt.DisplayType)
                 {
-                    DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                }
-
-                if (playerOpt.ShowHealthValue)
-                {
-                    DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                }
-
-                if (playerOpt.ShowName)
-                {
-                    DrawName(onScreenPosition, name, color);
-                }
-
-                if (playerOpt.ShowDot)
-                {
-                    DrawDot(onScreenPosition, playerOpt.DotSize, color);
+                    case DisplayTypes.DotOnly:
+                        DrawDot(onScreenPosition, playerOpt.DotSize, color);
+                        break;
+                    case DisplayTypes.NameOnly:
+                        DrawName(onScreenPosition, name, color);
+                        break;
+                    case DisplayTypes.DotAndName:
+                        DrawDot(onScreenPosition, playerOpt.DotSize, color);
+                        DrawName(onScreenPosition, name, color);
+                        break;
+                    case DisplayTypes.HealthBarOnly:
+                        DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        break;
+                    case DisplayTypes.HealthBarAndValue:
+                        DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        break;
+                    case DisplayTypes.HealthBarAndName:
+                        DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawName(onScreenPosition, name, color);
+                        break;
+                    case DisplayTypes.HealthBarAndValueAndName:
+                        DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawName(onScreenPosition, name, color);
+                        DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        break;
+                    case DisplayTypes.HealthValueOnly:
+                        DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        break;
+                    case DisplayTypes.HealthValueAndName:
+                        DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawName(onScreenPosition, name, color);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 break;
@@ -167,14 +205,20 @@ public class RadarLogic : IDisposable
             default:
                 if (!visibleOnScreen) break;
                 var objectOption = configInterface.cfg.ObjectOption;
-                if (objectOption.ShowName)
+                switch (objectOption.DisplayType)
                 {
-                    DrawName(onScreenPosition, name, color);
-                }
-
-                if (objectOption.ShowDot)
-                {
-                    DrawDot(onScreenPosition, objectOption.DotSize, color);
+                    case DisplayTypes.DotOnly:
+                        DrawDot(onScreenPosition, objectOption.DotSize, color);
+                        break;
+                    case DisplayTypes.NameOnly:
+                        DrawName(onScreenPosition, name, color);
+                        break;
+                    case DisplayTypes.DotAndName:
+                        DrawDot(onScreenPosition, objectOption.DotSize, color);
+                        DrawName(onScreenPosition, name, color);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 break;
@@ -253,13 +297,15 @@ public class RadarLogic : IDisposable
             switch (i)
             {
                 case 50:
-                    ImGui.GetForegroundDrawList().PathStroke(configInterface.cfg.AggroRadiusOptions.FrontColor & opacity, ImDrawFlags.RoundCornersAll, 4f);
+                    ImGui.GetForegroundDrawList()
+                        .PathStroke(configInterface.cfg.AggroRadiusOptions.FrontColor & opacity,
+                            ImDrawFlags.RoundCornersAll, 4f);
                     // this forloop should only happen when cone shows (always right now)
                     for (int j = 0; j <= 50; j++)
                     {
                         ImGui.GetForegroundDrawList().PathLineTo(points[j]);
                     }
-                    
+
                     var centeOnScreen = gameGui.WorldToScreen(
                         position,
                         out var centerPosition);
@@ -272,16 +318,20 @@ public class RadarLogic : IDisposable
                         ImGui.GetForegroundDrawList().PathClear();
                     }
 
-                    ImGui.GetForegroundDrawList().PathFillConvex(configInterface.cfg.AggroRadiusOptions.FrontConeColor & configInterface.cfg.AggroRadiusOptions.FrontConeOpacity);
+                    ImGui.GetForegroundDrawList().PathFillConvex(configInterface.cfg.AggroRadiusOptions.FrontConeColor &
+                                                                 configInterface.cfg.AggroRadiusOptions
+                                                                     .FrontConeOpacity);
                     ImGui.GetForegroundDrawList().PathLineTo(p);
                     break;
                 case 100:
                     ImGui.GetForegroundDrawList()
-                        .PathStroke(configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                        .PathStroke(configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity,
+                            ImDrawFlags.RoundCornersAll, 2f);
                     ImGui.GetForegroundDrawList().PathLineTo(p);
                     break;
                 case 150:
-                    ImGui.GetForegroundDrawList().PathStroke(configInterface.cfg.AggroRadiusOptions.RearColor & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                    ImGui.GetForegroundDrawList().PathStroke(configInterface.cfg.AggroRadiusOptions.RearColor & opacity,
+                        ImDrawFlags.RoundCornersAll, 2f);
                     ImGui.GetForegroundDrawList().PathLineTo(p);
                     break;
                 case 199:
@@ -291,7 +341,8 @@ public class RadarLogic : IDisposable
                     }
 
                     ImGui.GetForegroundDrawList()
-                        .PathStroke(configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity, ImDrawFlags.RoundCornersAll, 2f);
+                        .PathStroke(configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity,
+                            ImDrawFlags.RoundCornersAll, 2f);
                     break;
             }
         }
@@ -336,17 +387,18 @@ public class RadarLogic : IDisposable
                 nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                 continue;
             }
-            
+
             if (configInterface.cfg.ShowBaDdObjects)
             {
                 // TODO: Check if we need to swap this out with a seperte eureka and potd list
-                if (UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
+                if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
+                    UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
                 {
                     nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     continue;
                 }
             }
-            
+
             if (this.configInterface.cfg.ShowOnlyVisible &&
                 ((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address)->RenderFlags != 0)
             {
