@@ -16,8 +16,8 @@ public class Configuration
         public uint Default = UtilInfo.White;
         public uint SpecialUndead = UtilInfo.Yellow;
         public uint Auspice = UtilInfo.Green;
-        public uint EasyMobs = UtilInfo.White;
-        public uint Traps = UtilInfo.Red;
+        public uint EasyMobs = UtilInfo.LightBlue;
+        public uint Traps = UtilInfo.Orange;
         public uint Return = UtilInfo.Blue;
         public uint Passage = UtilInfo.Blue;
         public uint GoldChest = UtilInfo.Gold;

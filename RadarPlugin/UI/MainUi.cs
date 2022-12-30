@@ -13,6 +13,7 @@ public class MainUi : IDisposable
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible = false;
+    private const int ChildHeight = 240;
 
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi)
     {
@@ -107,8 +108,7 @@ public class MainUi : IDisposable
             ("Object", UtilInfo.White, DrawObjectSettings),
             ("NPC", UtilInfo.White, DrawNpcSettings),
             ("Player", UtilInfo.White, DrawPlayerSettings),
-            ("DeepDung", UtilInfo.White, DrawDeepDungeonSettings),
-            ("Aggro Circle", UtilInfo.White, DrawAggroCircleSettings)
+            ("DeepDung", UtilInfo.White, DrawDeepDungeonSettings)
         );
         ImGui.EndChild();
     }
@@ -124,7 +124,23 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(frontColor) | UtilInfo.OpacityMax;
             configInterface.Save();
         }
-
+        ImGui.SameLine();
+        var rearColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RearColor);
+        if (ImGui.ColorEdit4($"Rear##{tag}", ref rearColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.AggroRadiusOptions.RearColor =
+                ImGui.ColorConvertFloat4ToU32(rearColor) | UtilInfo.OpacityMax;
+            configInterface.Save();
+        }
+        var leftSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.LeftSideColor);
+        if (ImGui.ColorEdit4($"Left##{tag}", ref leftSideColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.AggroRadiusOptions.LeftSideColor =
+                ImGui.ColorConvertFloat4ToU32(leftSideColor) | UtilInfo.OpacityMax;
+            configInterface.Save();
+        }
+        ImGui.SameLine();
+        
         var rightSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RightSideColor);
         if (ImGui.ColorEdit4($"Right##{tag}", ref rightSideColor, ImGuiColorEditFlags.NoInputs))
         {
@@ -133,29 +149,6 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        var leftSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.LeftSideColor);
-        if (ImGui.ColorEdit4($"Left##{tag}", ref leftSideColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AggroRadiusOptions.LeftSideColor =
-                ImGui.ColorConvertFloat4ToU32(leftSideColor) | UtilInfo.OpacityMax;
-            configInterface.Save();
-        }
-
-        var rearColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RearColor);
-        if (ImGui.ColorEdit4($"Rear##{tag}", ref rearColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AggroRadiusOptions.RearColor =
-                ImGui.ColorConvertFloat4ToU32(rearColor) | UtilInfo.OpacityMax;
-            configInterface.Save();
-        }
-
-        var frontConeColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.FrontConeColor);
-        if (ImGui.ColorEdit4($"Left##{tag}", ref frontConeColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AggroRadiusOptions.FrontConeColor =
-                ImGui.ColorConvertFloat4ToU32(frontConeColor) | UtilInfo.OpacityMax;
-            configInterface.Save();
-        }
 
         var circleOpacity = (float)(configInterface.cfg.AggroRadiusOptions.CircleOpacity >> 24) / byte.MaxValue;
         if (ImGui.DragFloat($"Circle Opacity##{tag}", ref circleOpacity, 0.005f, 0, 1))
@@ -175,6 +168,8 @@ public class MainUi : IDisposable
     private void DrawDeepDungeonSettings()
     {
         var tag = "deepdungeonmobtypecloroptions";
+        ImGui.BeginChild($"##{tag}-deep-dungeon-settings-child", new Vector2(0, ChildHeight));
+        ImGui.Columns(2, $"##{tag}-settings-columns", false);
         var defaultColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Default);
         if (ImGui.ColorEdit4($"Default##{tag}", ref defaultColor, ImGuiColorEditFlags.NoInputs))
         {
@@ -225,7 +220,7 @@ public class MainUi : IDisposable
             configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage = ImGui.ColorConvertFloat4ToU32(passageColor);
             configInterface.Save();
         }
-
+        ImGui.NextColumn();
         var goldChestColor =
             ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest);
         if (ImGui.ColorEdit4($"Gold Chest##{tag}", ref goldChestColor, ImGuiColorEditFlags.NoInputs))
@@ -268,12 +263,13 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(accursedHoardColor);
             configInterface.Save();
         }
+        ImGui.EndChild();
     }
 
     private void DrawPlayerSettings()
     {
         var playerStr = "player";
-        ImGui.BeginChild($"##{playerStr}-radar-tabs-child", new Vector2(0, 200));
+        ImGui.BeginChild($"##{playerStr}-radar-tabs-child", new Vector2(0, ChildHeight));
         ImGui.Columns(2, $"##{playerStr}-settings-columns", false);
         var displayType = DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{playerStr}", MobType.Character,
             (int)configInterface.cfg.PlayerOption.DisplayType);
@@ -308,11 +304,14 @@ public class MainUi : IDisposable
     private void DrawNpcSettings()
     {
         var npcStr = "npc";
-        ImGui.BeginChild($"##{npcStr}-radar-tabs-child", new Vector2(0, 200));
+        ImGui.BeginChild($"##{npcStr}-radar-tabs-child", new Vector2(0, ChildHeight));
         ImGui.Columns(2, $"##{npcStr}-settings-columns", false);
         var displayType = DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{npcStr}", MobType.Character,
             (int)configInterface.cfg.NpcOption.DisplayType);
-
+        if (displayType != DisplayTypes.Default)
+        {
+            configInterface.cfg.NpcOption.DisplayType = displayType;
+        }
         ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.NpcOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
@@ -329,19 +328,17 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip("WIP WIP WIP\n" +
-                             "Draws aggro circle.");
-        }
-
         var showNpcAggroCircle = configInterface.cfg.NpcOption.ShowAggroCircle;
         if (ImGui.Checkbox($"Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
         {
             configInterface.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
             configInterface.Save();
         }
-
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Draws aggro circle.");
+        }
+        
         var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.NpcOption.ShowAggroCircleInCombat;
         if (ImGui.Checkbox($"Aggro Circle In Combat##{npcStr}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
         {
@@ -349,6 +346,16 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
+        }
+
+        if (configInterface.cfg.NpcOption.ShowAggroCircle)
+        {
+            DrawAggroCircleSettings();
+        }
+        
         ImGui.EndChild();
     }
 
@@ -356,11 +363,15 @@ public class MainUi : IDisposable
     {
         var objectStr = "object";
 
-        ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, 200));
+        ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, ChildHeight));
         ImGui.Columns(2, $"##{objectStr}-settings-columns", false);
 
         var displayType = DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{objectStr}", MobType.Object,
             (int)configInterface.cfg.ObjectOption.DisplayType);
+        if (displayType != DisplayTypes.Default)
+        {
+            configInterface.cfg.ObjectOption.DisplayType = displayType;
+        }
         ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.ObjectOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
@@ -512,7 +523,7 @@ public class MainUi : IDisposable
         switch (mobType)
         {
             case MobType.Object:
-                ImGui.PushItemWidth(200);
+                ImGui.PushItemWidth(175);
                 var lb = ImGui.ListBox($"##{id}",
                     ref val,
                     new string[]
@@ -520,7 +531,7 @@ public class MainUi : IDisposable
                         "Dot Only",
                         "Name Only",
                         "Dot and Name",
-                    }, 3);
+                    }, 3,3);
                 ImGui.PopItemWidth();
 
                 if (lb)
@@ -541,7 +552,7 @@ public class MainUi : IDisposable
 
                 break;
             case MobType.Character:
-                ImGui.PushItemWidth(200);
+                ImGui.PushItemWidth(175);
                 var lb2 = ImGui.ListBox($"##{id}",
                     ref val,
                     new string[]
@@ -555,7 +566,7 @@ public class MainUi : IDisposable
                         "Health Bar, Value, And Name",
                         "Health Value Only",
                         "Health Value and Name"
-                    }, 9);
+                    }, 9,9);
                 ImGui.PopItemWidth();
                 if (lb2)
                 {
