@@ -76,9 +76,10 @@ public class RadarLogic : IDisposable
             return;
         }
 
+        var drawListPtr = ImGui.GetForegroundDrawList();
         foreach (var areaObject in areaObjects)
         {
-            DrawEsp(areaObject.Item1, areaObject.Item2, areaObject.Item3);
+            DrawEsp(drawListPtr, areaObject.Item1, areaObject.Item2, areaObject.Item3);
         }
 
         Monitor.Exit(areaObjects);
@@ -94,7 +95,7 @@ public class RadarLogic : IDisposable
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
-    private void DrawEsp(GameObject gameObject, uint color, string name)
+    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint color, string name)
     {
         var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
         switch (gameObject)
@@ -107,37 +108,37 @@ public class RadarLogic : IDisposable
                     switch (npcOpt.DisplayType)
                     {
                         case DisplayTypes.DotOnly:
-                            DrawDot(onScreenPosition, npcOpt.DotSize, color);
+                            DrawDot(drawListPtr, onScreenPosition, npcOpt.DotSize, color);
                             break;
                         case DisplayTypes.NameOnly:
-                            DrawName(onScreenPosition, name, color);
+                            DrawName(drawListPtr, onScreenPosition, name, color);
                             break;
                         case DisplayTypes.DotAndName:
-                            DrawDot(onScreenPosition, npcOpt.DotSize, color);
-                            DrawName(onScreenPosition, name, color);
+                            DrawDot(drawListPtr, onScreenPosition, npcOpt.DotSize, color);
+                            DrawName(drawListPtr, onScreenPosition, name, color);
                             break;
                         case DisplayTypes.HealthBarOnly:
-                            DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawHealthCircle(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
                             break;
                         case DisplayTypes.HealthBarAndValue:
-                            DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawHealthCircle(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawHealthValue(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
                             break;
                         case DisplayTypes.HealthBarAndName:
-                            DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            DrawName(onScreenPosition, name, color);
+                            DrawHealthCircle(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawName(drawListPtr, onScreenPosition, name, color);
                             break;
                         case DisplayTypes.HealthBarAndValueAndName:
-                            DrawHealthCircle(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            DrawName(onScreenPosition, name, color);
-                            DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawHealthCircle(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawName(drawListPtr, onScreenPosition, name, color);
+                            DrawHealthValue(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
                             break;
                         case DisplayTypes.HealthValueOnly:
-                            DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawHealthValue(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
                             break;
                         case DisplayTypes.HealthValueAndName:
-                            DrawHealthValue(onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            DrawName(onScreenPosition, name, color);
+                            DrawHealthValue(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
+                            DrawName(drawListPtr, onScreenPosition, name, color);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -146,8 +147,8 @@ public class RadarLogic : IDisposable
 
                 if (npcOpt.ShowAggroCircle)
                 {
-                    if (!npcOpt.ShowAggroCircleInCombat && (mob.StatusFlags & StatusFlags.WeaponOut) != 0) return;
-                    DrawAggroRadius(gameObject.Position, 10 + gameObject.HitboxRadius, gameObject.Rotation,
+                    if (!npcOpt.ShowAggroCircleInCombat && (mob.StatusFlags & StatusFlags.InCombat) != 0) return;
+                    DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius, gameObject.Rotation,
                         uint.MaxValue);
                 }
 
@@ -160,37 +161,37 @@ public class RadarLogic : IDisposable
                 switch (playerOpt.DisplayType)
                 {
                     case DisplayTypes.DotOnly:
-                        DrawDot(onScreenPosition, playerOpt.DotSize, color);
+                        DrawDot(drawListPtr, onScreenPosition, playerOpt.DotSize, color);
                         break;
                     case DisplayTypes.NameOnly:
-                        DrawName(onScreenPosition, name, color);
+                        DrawName(drawListPtr, onScreenPosition, name, color);
                         break;
                     case DisplayTypes.DotAndName:
-                        DrawDot(onScreenPosition, playerOpt.DotSize, color);
-                        DrawName(onScreenPosition, name, color);
+                        DrawDot(drawListPtr, onScreenPosition, playerOpt.DotSize, color);
+                        DrawName(drawListPtr, onScreenPosition, name, color);
                         break;
                     case DisplayTypes.HealthBarOnly:
-                        DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawHealthCircle(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
                         break;
                     case DisplayTypes.HealthBarAndValue:
-                        DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawHealthCircle(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawHealthValue(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
                         break;
                     case DisplayTypes.HealthBarAndName:
-                        DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        DrawName(onScreenPosition, name, color);
+                        DrawHealthCircle(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawName(drawListPtr, onScreenPosition, name, color);
                         break;
                     case DisplayTypes.HealthBarAndValueAndName:
-                        DrawHealthCircle(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        DrawName(onScreenPosition, name, color);
-                        DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawHealthCircle(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawName(drawListPtr, onScreenPosition, name, color);
+                        DrawHealthValue(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
                         break;
                     case DisplayTypes.HealthValueOnly:
-                        DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawHealthValue(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
                         break;
                     case DisplayTypes.HealthValueAndName:
-                        DrawHealthValue(onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        DrawName(onScreenPosition, name, color);
+                        DrawHealthValue(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
+                        DrawName(drawListPtr, onScreenPosition, name, color);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -208,14 +209,14 @@ public class RadarLogic : IDisposable
                 switch (objectOption.DisplayType)
                 {
                     case DisplayTypes.DotOnly:
-                        DrawDot(onScreenPosition, objectOption.DotSize, color);
+                        DrawDot(drawListPtr, onScreenPosition, objectOption.DotSize, color);
                         break;
                     case DisplayTypes.NameOnly:
-                        DrawName(onScreenPosition, name, color);
+                        DrawName(drawListPtr, onScreenPosition, name, color);
                         break;
                     case DisplayTypes.DotAndName:
-                        DrawDot(onScreenPosition, objectOption.DotSize, color);
-                        DrawName(onScreenPosition, name, color);
+                        DrawDot(drawListPtr, onScreenPosition, objectOption.DotSize, color);
+                        DrawName(drawListPtr, onScreenPosition, name, color);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -225,44 +226,44 @@ public class RadarLogic : IDisposable
         }
     }
 
-    private void DrawDot(Vector2 position, float radius, uint npcOptColor)
+    private void DrawDot(ImDrawListPtr imDrawListPtr, Vector2 position, float radius, uint npcOptColor)
     {
-        ImGui.GetForegroundDrawList().AddCircleFilled(position, radius, npcOptColor, 100);
+        imDrawListPtr.AddCircleFilled(position, radius, npcOptColor, 100);
     }
 
-    private void DrawHealthValue(Vector2 position, uint maxHp, uint currHp, uint playerOptColor)
+    private void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, uint maxHp, uint currHp, uint playerOptColor)
     {
         var healthText = ((int)(((double)currHp / maxHp) * 100)).ToString();
         var healthTextSize = ImGui.CalcTextSize(healthText);
-        ImGui.GetForegroundDrawList().AddText(
+        imDrawListPtr.AddText(
             new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
             playerOptColor,
             healthText);
     }
 
-    private void DrawName(Vector2 position, string tagText, uint objectOptionColor)
+    private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, string tagText, uint objectOptionColor)
     {
         var tagTextSize = ImGui.CalcTextSize(tagText);
-        ImGui.GetForegroundDrawList().AddText(
+        imDrawListPtr.AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
             objectOptionColor,
             tagText);
     }
 
 
-    private void DrawHealthCircle(Vector2 position, uint maxHp, uint currHp, uint playerOptColor)
+    private void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, uint maxHp, uint currHp, uint playerOptColor)
     {
         const float radius = 13f;
 
         var v1 = (float)currHp / (float)maxHp;
         var aMax = PI * 2.0f;
         var difference = v1 - 1.0f;
-        ImGui.GetForegroundDrawList().PathArcTo(position, radius,
+        imDrawListPtr.PathArcTo(position, radius,
             (-(aMax / 4.0f)) + (aMax / maxHp) * (maxHp - currHp), aMax - (aMax / 4.0f), 200 - 1);
-        ImGui.GetForegroundDrawList().PathStroke(playerOptColor, ImDrawFlags.None, 2.0f);
+        imDrawListPtr.PathStroke(playerOptColor, ImDrawFlags.None, 2.0f);
     }
 
-    private void DrawAggroRadius(Vector3 position, float radius, float rotation, uint objectOptionColor)
+    private void DrawAggroRadius(ImDrawListPtr imDrawListPtr, Vector3 position, float radius, float rotation, uint objectOptionColor)
     {
         var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
         rotation += MathF.PI / 4;
@@ -291,19 +292,19 @@ public class RadarLogic : IDisposable
             onScreens[i] = onScreen;
             if (onScreen)
             {
-                ImGui.GetForegroundDrawList().PathLineTo(p);
+                imDrawListPtr.PathLineTo(p);
             }
 
             switch (i)
             {
                 case 50:
-                    ImGui.GetForegroundDrawList()
+                    imDrawListPtr
                         .PathStroke(configInterface.cfg.AggroRadiusOptions.FrontColor & opacity,
                             ImDrawFlags.RoundCornersAll, 4f);
                     // this forloop should only happen when cone shows (always right now)
                     for (int j = 0; j <= 50; j++)
                     {
-                        ImGui.GetForegroundDrawList().PathLineTo(points[j]);
+                        imDrawListPtr.PathLineTo(points[j]);
                     }
 
                     var centeOnScreen = gameGui.WorldToScreen(
@@ -311,43 +312,43 @@ public class RadarLogic : IDisposable
                         out var centerPosition);
                     if (centeOnScreen)
                     {
-                        ImGui.GetForegroundDrawList().PathLineTo(centerPosition);
+                        imDrawListPtr.PathLineTo(centerPosition);
                     }
                     else
                     {
-                        ImGui.GetForegroundDrawList().PathClear();
+                        imDrawListPtr.PathClear();
                     }
 
-                    ImGui.GetForegroundDrawList().PathFillConvex(configInterface.cfg.AggroRadiusOptions.FrontConeColor &
-                                                                 configInterface.cfg.AggroRadiusOptions
-                                                                     .FrontConeOpacity);
-                    ImGui.GetForegroundDrawList().PathLineTo(p);
+                    imDrawListPtr.PathFillConvex(configInterface.cfg.AggroRadiusOptions.FrontConeColor &
+                                                 configInterface.cfg.AggroRadiusOptions
+                                                     .FrontConeOpacity);
+                    imDrawListPtr.PathLineTo(p);
                     break;
                 case 100:
-                    ImGui.GetForegroundDrawList()
+                    imDrawListPtr
                         .PathStroke(configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity,
                             ImDrawFlags.RoundCornersAll, 2f);
-                    ImGui.GetForegroundDrawList().PathLineTo(p);
+                    imDrawListPtr.PathLineTo(p);
                     break;
                 case 150:
-                    ImGui.GetForegroundDrawList().PathStroke(configInterface.cfg.AggroRadiusOptions.RearColor & opacity,
+                    imDrawListPtr.PathStroke(configInterface.cfg.AggroRadiusOptions.RearColor & opacity,
                         ImDrawFlags.RoundCornersAll, 2f);
-                    ImGui.GetForegroundDrawList().PathLineTo(p);
+                    imDrawListPtr.PathLineTo(p);
                     break;
                 case 199:
                     if (originPointOnScreen)
                     {
-                        ImGui.GetForegroundDrawList().PathLineTo(originPoint);
+                        imDrawListPtr.PathLineTo(originPoint);
                     }
 
-                    ImGui.GetForegroundDrawList()
+                    imDrawListPtr
                         .PathStroke(configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity,
                             ImDrawFlags.RoundCornersAll, 2f);
                     break;
             }
         }
 
-        ImGui.GetForegroundDrawList().PathClear();
+        imDrawListPtr.PathClear();
     }
 
     private void BackgroundLoop()
@@ -404,7 +405,7 @@ public class RadarLogic : IDisposable
             {
                 continue;
             }
-
+            
             if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) continue;
 
             switch (obj.ObjectKind)

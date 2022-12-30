@@ -29,12 +29,15 @@ public class MobEditUi : IDisposable
         {
             return;
         }
-
+        
         var size = new Vector2(600, 300);
         ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible))
         {
+#if DEBUG
+            Dalamud.Utility.Util.ShowObject(localObject);
+#endif
             ImGui.Columns(2);
             var utilIgnored = UtilInfo.DataIdIgnoreList.Contains(localObject.DataId);
             var userIgnored = configInterface.cfg.DataIdIgnoreList.Contains(localObject.DataId);
