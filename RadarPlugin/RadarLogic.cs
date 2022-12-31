@@ -148,8 +148,18 @@ public class RadarLogic : IDisposable
                 if (npcOpt.ShowAggroCircle)
                 {
                     if (!npcOpt.ShowAggroCircleInCombat && (mob.StatusFlags & StatusFlags.InCombat) != 0) return;
-                    DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius, gameObject.Rotation,
-                        uint.MaxValue);
+                    if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
+                    {
+                        DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
+                            gameObject.Rotation,
+                            uint.MaxValue);
+                    }
+                    else
+                    {
+                        DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius,
+                            gameObject.Rotation,
+                            uint.MaxValue);
+                    }
                 }
 
                 break;
@@ -231,7 +241,8 @@ public class RadarLogic : IDisposable
         imDrawListPtr.AddCircleFilled(position, radius, npcOptColor, 100);
     }
 
-    private void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, uint maxHp, uint currHp, uint playerOptColor)
+    private void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, uint maxHp, uint currHp,
+        uint playerOptColor)
     {
         var healthText = ((int)(((double)currHp / maxHp) * 100)).ToString();
         var healthTextSize = ImGui.CalcTextSize(healthText);
@@ -251,7 +262,8 @@ public class RadarLogic : IDisposable
     }
 
 
-    private void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, uint maxHp, uint currHp, uint playerOptColor)
+    private void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, uint maxHp, uint currHp,
+        uint playerOptColor)
     {
         const float radius = 13f;
 
@@ -263,7 +275,8 @@ public class RadarLogic : IDisposable
         imDrawListPtr.PathStroke(playerOptColor, ImDrawFlags.None, 2.0f);
     }
 
-    private void DrawAggroRadius(ImDrawListPtr imDrawListPtr, Vector3 position, float radius, float rotation, uint objectOptionColor)
+    private void DrawAggroRadius(ImDrawListPtr imDrawListPtr, Vector3 position, float radius, float rotation,
+        uint objectOptionColor)
     {
         var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
         rotation += MathF.PI / 4;
@@ -405,7 +418,7 @@ public class RadarLogic : IDisposable
             {
                 continue;
             }
-            
+
             if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) continue;
 
             switch (obj.ObjectKind)

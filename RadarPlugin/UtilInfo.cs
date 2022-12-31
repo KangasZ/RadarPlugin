@@ -22,6 +22,14 @@ public static class UtilInfo
     public const float MaxDotSize = 3.8f;
     public const uint OpacityMax = 0xff000000;
 
+    
+    /**
+     */
+    public static Dictionary<uint, float> AggroDistance = new Dictionary<uint, float>()
+    {
+        { 2566, 16f } // mimic - 16y
+    };
+
     /**
      * What is this used for again?
      * Oh yeah, thats right, it's not (currently)
