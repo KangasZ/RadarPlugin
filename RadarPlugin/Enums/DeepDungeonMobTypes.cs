@@ -13,5 +13,5 @@ public enum DeepDungeonMobTypes
     SilverChest,
     BronzeChest,
     AccursedHoard,
-    Mimic
+    Mimic,
 }

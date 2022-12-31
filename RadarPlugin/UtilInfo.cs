@@ -51,6 +51,7 @@ public static class UtilInfo
         14836, // eastern ewer
         14766, // Infern brand
         14764, // Infern brand 2
+        6388, // Opened traps in potd
     };
 
     /**

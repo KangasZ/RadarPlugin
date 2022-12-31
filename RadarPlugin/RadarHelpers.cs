@@ -49,11 +49,9 @@ public class RadarHelpers
             return configInterface.cfg.ColorOverride[gameObject.DataId];
         }
 
-        if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType))
+        if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId) && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) && gameObject.ObjectKind != ObjectKind.Player)
         {
-            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId))
-            {
-                switch (UtilInfo.DeepDungeonMobTypesMap[gameObject.DataId])
+            switch (UtilInfo.DeepDungeonMobTypesMap[gameObject.DataId])
                 {
                     case DeepDungeonMobTypes.SpecialUndead:
                         return configInterface.cfg.DeepDungeonMobTypeColorOptions.SpecialUndead;
@@ -81,11 +79,8 @@ public class RadarHelpers
                     default:
                         return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
                 }
-            }
-            else
-            {
+
                 return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
-            }
         }
 
         switch (gameObject.ObjectKind)
