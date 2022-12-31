@@ -22,12 +22,12 @@ public static class UtilInfo
     public const float MaxDotSize = 3.8f;
     public const uint OpacityMax = 0xff000000;
 
-    
+
     /**
      */
     public static Dictionary<uint, float> AggroDistance = new Dictionary<uint, float>()
     {
-        { 5832, 16f} //mimic 2
+        { 5832, 16f } //mimic 2
     };
 
     /**
@@ -143,7 +143,8 @@ public static class UtilInfo
         { 7392, DeepDungeonMobTypes.Mimic },
         { 7393, DeepDungeonMobTypes.Mimic },
         { 7394, DeepDungeonMobTypes.Mimic },
-
+        { 5832, DeepDungeonMobTypes.Mimic },
+        
         // Returns
         { 2007187, DeepDungeonMobTypes.Return },
         { 2009506, DeepDungeonMobTypes.Return },
