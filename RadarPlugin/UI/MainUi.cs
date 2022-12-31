@@ -87,10 +87,10 @@ public class MainUi : IDisposable
         }
 
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
-            "    1. Enable type in visiblity\n" +
-            "    2. Set display options in settings\n" +
-            "    3. Remove invisible mobs by utility tab\n" +
-            "    4. Bring bugs or feature requests up to author\n");
+            "    1. Use tabs to customize experience and fix invisible mobs.\n" +
+            "    2. Bring bugs or feature requests up to author\n");
+        ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
+            "Major new update. Please check settings and report bugs.");
         ImGui.TextWrapped(
             "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
