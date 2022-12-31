@@ -18,5 +18,3 @@ This is distributed with the MIT license. I take absolutely no responsibility fo
 
 Under no circumstance is this plugin designed to assist any PvP-centric modes. I will not condone nor support this activity.
 
-## Examples
-Removed for now.
