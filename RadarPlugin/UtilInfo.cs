@@ -27,7 +27,7 @@ public static class UtilInfo
      */
     public static Dictionary<uint, float> AggroDistance = new Dictionary<uint, float>()
     {
-        { 2566, 16f } // mimic - 16y
+        { 5832, 16f} //mimic 2
     };
 
     /**
@@ -108,6 +108,7 @@ public static class UtilInfo
         // Mimics
         { 2006020, "Mimic Coffer" },
         { 2566, "Mimic" },
+        { 5832, "Mimic" },
         { 7392, "Bronze Mimic" },
         { 7393, "Silver Mimic" },
         { 7394, "Gold Mimic" },
