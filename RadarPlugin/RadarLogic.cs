@@ -14,6 +14,7 @@ using Dalamud.Game.Gui;
 using Dalamud.Plugin;
 using ImGuiNET;
 using RadarPlugin.Enums;
+using RadarPlugin.UI;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
@@ -79,7 +80,12 @@ public class RadarLogic : IDisposable
         var drawListPtr = ImGui.GetForegroundDrawList();
         foreach (var areaObject in areaObjects)
         {
-            DrawEsp(drawListPtr, areaObject.Item1, areaObject.Item2, areaObject.Item3);
+            var displayType = radarHelpers.GetDisplayType(areaObject.Item1);
+            var dotSize = radarHelpers.GetDotSize(areaObject.Item1);
+            var drawAggroCircleBools = radarHelpers.GetAggroCircleBools(areaObject.Item1);
+            var drawDistance = radarHelpers.GetDistance(areaObject.Item1);
+            DrawEsp(drawListPtr, areaObject.Item1, areaObject.Item2, areaObject.Item3, displayType, dotSize,
+                drawAggroCircleBools.Item1, drawAggroCircleBools.Item2, drawDistance);
         }
 
         Monitor.Exit(areaObjects);
@@ -95,144 +101,77 @@ public class RadarLogic : IDisposable
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
-    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint color, string name)
+    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint color, string name,
+        DisplayTypes displayTypes, float dotSize, bool drawAggroCircle, bool drawAggroCircleInCombat, bool drawDistance)
     {
         var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
-        switch (gameObject)
+        if (visibleOnScreen)
         {
-            // Mobs
-            case BattleNpc mob:
-                var npcOpt = configInterface.cfg.NpcOption;
-                if (visibleOnScreen)
-                {
-                    switch (npcOpt.DisplayType)
-                    {
-                        case DisplayTypes.DotOnly:
-                            DrawDot(drawListPtr, onScreenPosition, npcOpt.DotSize, color);
-                            break;
-                        case DisplayTypes.NameOnly:
-                            DrawName(drawListPtr, onScreenPosition, name, color);
-                            break;
-                        case DisplayTypes.DotAndName:
-                            DrawDot(drawListPtr, onScreenPosition, npcOpt.DotSize, color);
-                            DrawName(drawListPtr, onScreenPosition, name, color);
-                            break;
-                        case DisplayTypes.HealthBarOnly:
-                            DrawHealthCircle(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            break;
-                        case DisplayTypes.HealthBarAndValue:
-                            DrawHealthCircle(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            DrawHealthValue(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            break;
-                        case DisplayTypes.HealthBarAndName:
-                            DrawHealthCircle(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            DrawName(drawListPtr, onScreenPosition, name, color);
-                            break;
-                        case DisplayTypes.HealthBarAndValueAndName:
-                            DrawHealthCircle(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            DrawName(drawListPtr, onScreenPosition, name, color);
-                            DrawHealthValue(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            break;
-                        case DisplayTypes.HealthValueOnly:
-                            DrawHealthValue(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            break;
-                        case DisplayTypes.HealthValueAndName:
-                            DrawHealthValue(drawListPtr, onScreenPosition, mob.MaxHp, mob.CurrentHp, color);
-                            DrawName(drawListPtr, onScreenPosition, name, color);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                }
+            switch (displayTypes)
+            {
+                case DisplayTypes.DotOnly:
+                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
+                    break;
+                case DisplayTypes.NameOnly:
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    break;
+                case DisplayTypes.DotAndName:
+                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    break;
+                case DisplayTypes.HealthBarOnly:
+                    DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+                    break;
+                case DisplayTypes.HealthBarAndValue:
+                    DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
+                    break;
+                case DisplayTypes.HealthBarAndName:
+                    DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    break;
+                case DisplayTypes.HealthBarAndValueAndName:
+                    DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
+                    break;
+                case DisplayTypes.HealthValueOnly:
+                    DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
+                    break;
+                case DisplayTypes.HealthValueAndName:
+                    DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        else if (configInterface.cfg.ShowOffScreen)
+        {
+            UiHelpers.GetBorderClampedVector2(onScreenPosition,
+                new Vector2(configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge,
+                    configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge), out var clampedPos);
+            var mainViewport3 = ImGui.GetMainViewport();
+            var center2 = mainViewport3.GetCenter();
+            var rotation = clampedPos - center2;
+            drawListPtr.DrawArrow(clampedPos, configInterface.cfg.OffScreenObjectsOptions.Size, color, rotation, configInterface.cfg.OffScreenObjectsOptions.Thickness);
+        }
 
-                if (npcOpt.ShowAggroCircle)
-                {
-                    if (!npcOpt.ShowAggroCircleInCombat && (mob.StatusFlags & StatusFlags.InCombat) != 0) return;
-                    if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
-                    {
-                        DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
-                            gameObject.Rotation,
-                            uint.MaxValue);
-                    }
-                    else
-                    {
-                        DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius,
-                            gameObject.Rotation,
-                            uint.MaxValue);
-                    }
-                }
-
-                break;
-            // Players
-            case PlayerCharacter chara:
-                var playerOpt = configInterface.cfg.PlayerOption;
-                if (!visibleOnScreen) break;
-                //var hp = chara.CurrentHp / chara.MaxHp;
-                switch (playerOpt.DisplayType)
-                {
-                    case DisplayTypes.DotOnly:
-                        DrawDot(drawListPtr, onScreenPosition, playerOpt.DotSize, color);
-                        break;
-                    case DisplayTypes.NameOnly:
-                        DrawName(drawListPtr, onScreenPosition, name, color);
-                        break;
-                    case DisplayTypes.DotAndName:
-                        DrawDot(drawListPtr, onScreenPosition, playerOpt.DotSize, color);
-                        DrawName(drawListPtr, onScreenPosition, name, color);
-                        break;
-                    case DisplayTypes.HealthBarOnly:
-                        DrawHealthCircle(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        break;
-                    case DisplayTypes.HealthBarAndValue:
-                        DrawHealthCircle(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        DrawHealthValue(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        break;
-                    case DisplayTypes.HealthBarAndName:
-                        DrawHealthCircle(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        DrawName(drawListPtr, onScreenPosition, name, color);
-                        break;
-                    case DisplayTypes.HealthBarAndValueAndName:
-                        DrawHealthCircle(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        DrawName(drawListPtr, onScreenPosition, name, color);
-                        DrawHealthValue(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        break;
-                    case DisplayTypes.HealthValueOnly:
-                        DrawHealthValue(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        break;
-                    case DisplayTypes.HealthValueAndName:
-                        DrawHealthValue(drawListPtr, onScreenPosition, chara.MaxHp, chara.CurrentHp, color);
-                        DrawName(drawListPtr, onScreenPosition, name, color);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                break;
-            // Event Objects
-            case EventObj chara:
-            // Npcs
-            case Npc npc:
-            // Objects
-            default:
-                if (!visibleOnScreen) break;
-                var objectOption = configInterface.cfg.ObjectOption;
-                switch (objectOption.DisplayType)
-                {
-                    case DisplayTypes.DotOnly:
-                        DrawDot(drawListPtr, onScreenPosition, objectOption.DotSize, color);
-                        break;
-                    case DisplayTypes.NameOnly:
-                        DrawName(drawListPtr, onScreenPosition, name, color);
-                        break;
-                    case DisplayTypes.DotAndName:
-                        DrawDot(drawListPtr, onScreenPosition, objectOption.DotSize, color);
-                        DrawName(drawListPtr, onScreenPosition, name, color);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                break;
+        if (drawAggroCircle && gameObject is BattleNpc npc2)
+        {
+            if (!drawAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
+            if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
+            {
+                DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
+                    gameObject.Rotation,
+                    uint.MaxValue);
+            }
+            else
+            {
+                DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius,
+                    gameObject.Rotation,
+                    uint.MaxValue);
+            }
         }
     }
 
@@ -241,10 +180,11 @@ public class RadarLogic : IDisposable
         imDrawListPtr.AddCircleFilled(position, radius, npcOptColor, 100);
     }
 
-    private void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, uint maxHp, uint currHp,
+    private void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
         uint playerOptColor)
     {
-        var healthText = ((int)(((double)currHp / maxHp) * 100)).ToString();
+        if (gameObject is not BattleNpc npc) return;
+        var healthText = ((int)(((double)npc.CurrentHp / npc.MaxHp) * 100)).ToString();
         var healthTextSize = ImGui.CalcTextSize(healthText);
         imDrawListPtr.AddText(
             new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
@@ -252,8 +192,17 @@ public class RadarLogic : IDisposable
             healthText);
     }
 
-    private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, string tagText, uint objectOptionColor)
+    private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, string tagText, uint objectOptionColor,
+        GameObject gameObject, bool drawDistance)
     {
+        if (drawDistance)
+        {
+            tagText += " ";
+            if (clientState.LocalPlayer != null)
+                tagText += gameObject.Position.Distance2D(clientState.LocalPlayer.Position).ToString("0.0");
+            tagText += "m";
+        }
+
         var tagTextSize = ImGui.CalcTextSize(tagText);
         imDrawListPtr.AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
@@ -262,16 +211,17 @@ public class RadarLogic : IDisposable
     }
 
 
-    private void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, uint maxHp, uint currHp,
+    private void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
         uint playerOptColor)
     {
         const float radius = 13f;
+        if (gameObject is not BattleNpc npc) return;
 
-        var v1 = (float)currHp / (float)maxHp;
+        var v1 = (float)npc.CurrentHp / (float)npc.MaxHp;
         var aMax = PI * 2.0f;
         var difference = v1 - 1.0f;
         imDrawListPtr.PathArcTo(position, radius,
-            (-(aMax / 4.0f)) + (aMax / maxHp) * (maxHp - currHp), aMax - (aMax / 4.0f), 200 - 1);
+            (-(aMax / 4.0f)) + (aMax / npc.MaxHp) * (npc.MaxHp - npc.CurrentHp), aMax - (aMax / 4.0f), 200 - 1);
         imDrawListPtr.PathStroke(playerOptColor, ImDrawFlags.None, 2.0f);
     }
 
@@ -399,6 +349,16 @@ public class RadarLogic : IDisposable
             if (configInterface.cfg.DebugMode)
             {
                 nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
+                continue;
+            }
+
+            if (clientState.LocalPlayer != null && obj.Address == clientState.LocalPlayer.Address)
+            {
+                if (configInterface.cfg.ShowYOU)
+                {
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
+                }
+
                 continue;
             }
 

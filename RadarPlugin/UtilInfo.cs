@@ -60,6 +60,11 @@ public static class UtilInfo
         14766, // Infern brand
         14764, // Infern brand 2
         6388, // Opened traps in potd
+        9823, // Owain
+        9822, // munderg
+        9841, //owain
+        9824, //owain
+        9768, // Av?
     };
 
     /**
@@ -130,6 +135,7 @@ public static class UtilInfo
         { 2009504, "Odder Trap" },
 
         // BA Objects
+        { 2009728, "Trap" }, // Eureka Portal,
         { 2009729, "Portal" }, // Eureka Portal,
         { 2009726, "Unstable Portal" },
         { 2009727, "Stable Portal" }
@@ -144,7 +150,7 @@ public static class UtilInfo
         { 7393, DeepDungeonMobTypes.Mimic },
         { 7394, DeepDungeonMobTypes.Mimic },
         { 5832, DeepDungeonMobTypes.Mimic },
-        
+
         // Returns
         { 2007187, DeepDungeonMobTypes.Return },
         { 2009506, DeepDungeonMobTypes.Return },
@@ -238,5 +244,10 @@ public static class UtilInfo
     {
         var intColor = (a << 24) | (g << 8) | (b << 16) | r;
         return (uint)intColor;
+    }
+
+    public static float Distance2D(this Vector3 v, Vector3 v2)
+    {
+        return new Vector2(v.X - v2.X, v.Z - v2.Z).Length();
     }
 }

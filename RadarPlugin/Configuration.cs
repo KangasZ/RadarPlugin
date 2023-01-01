@@ -11,6 +11,12 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class OffScreenObjectsOptions
+    {
+        public float Thickness = 2.2f;
+        public float DistanceFromEdge = 15f;
+        public float Size = 6.0f;
+    }
     public class DeepDungeonMobTypeColorOptions
     {
         public uint Default = UtilInfo.White;
@@ -42,6 +48,7 @@ public class Configuration
     {
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public float DotSize = 2.2f;
+        public bool DrawDistance = false;
     }
 
     public class ObjectOption : ESPOption
@@ -80,6 +87,9 @@ public class Configuration
         public bool ShowAetherytes { get; set; } = false;
         public bool ShowNameless { get; set; } = false;
         public bool ShowOnlyVisible { get; set; } = true;
+        public bool ShowYOU { get; set; } = false;
+        public bool ShowOffScreen { get; set; } = true;
+        public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
         public DeepDungeonMobTypeColorOptions DeepDungeonMobTypeColorOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public NpcOption NpcOption { get; set; } = new();
