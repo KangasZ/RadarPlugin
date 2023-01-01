@@ -42,6 +42,7 @@ public class Configuration
     {
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public float DotSize = 2.2f;
+        public bool DrawDistance = false;
     }
 
     public class ObjectOption : ESPOption
@@ -80,6 +81,7 @@ public class Configuration
         public bool ShowAetherytes { get; set; } = false;
         public bool ShowNameless { get; set; } = false;
         public bool ShowOnlyVisible { get; set; } = true;
+        public bool ShowYOU { get; set; } = false;
         public DeepDungeonMobTypeColorOptions DeepDungeonMobTypeColorOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public NpcOption NpcOption { get; set; } = new();

@@ -49,38 +49,40 @@ public class RadarHelpers
             return configInterface.cfg.ColorOverride[gameObject.DataId];
         }
 
-        if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId) && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) && gameObject.ObjectKind != ObjectKind.Player)
+        if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId) &&
+            UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+            gameObject.ObjectKind != ObjectKind.Player)
         {
             switch (UtilInfo.DeepDungeonMobTypesMap[gameObject.DataId])
-                {
-                    case DeepDungeonMobTypes.SpecialUndead:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.SpecialUndead;
-                    case DeepDungeonMobTypes.Auspice:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.Auspice;
-                    case DeepDungeonMobTypes.EasyMobs:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.EasyMobs;
-                    case DeepDungeonMobTypes.Traps:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps;
-                    case DeepDungeonMobTypes.Return:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.Return;
-                    case DeepDungeonMobTypes.Passage:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage;
-                    case DeepDungeonMobTypes.GoldChest:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest;
-                    case DeepDungeonMobTypes.SilverChest:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest;
-                    case DeepDungeonMobTypes.BronzeChest:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest;
-                    case DeepDungeonMobTypes.AccursedHoard:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard;
-                    case DeepDungeonMobTypes.Mimic:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic;
-                    case DeepDungeonMobTypes.Default:
-                    default:
-                        return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
-                }
+            {
+                case DeepDungeonMobTypes.SpecialUndead:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.SpecialUndead;
+                case DeepDungeonMobTypes.Auspice:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Auspice;
+                case DeepDungeonMobTypes.EasyMobs:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.EasyMobs;
+                case DeepDungeonMobTypes.Traps:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps;
+                case DeepDungeonMobTypes.Return:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Return;
+                case DeepDungeonMobTypes.Passage:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage;
+                case DeepDungeonMobTypes.GoldChest:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest;
+                case DeepDungeonMobTypes.SilverChest:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest;
+                case DeepDungeonMobTypes.BronzeChest:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest;
+                case DeepDungeonMobTypes.AccursedHoard:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard;
+                case DeepDungeonMobTypes.Mimic:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic;
+                case DeepDungeonMobTypes.Default:
+                default:
+                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
+            }
 
-                return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
+            return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
         }
 
         switch (gameObject.ObjectKind)
@@ -106,4 +108,106 @@ public class RadarHelpers
                 return configInterface.cfg.ObjectOption.ColorU;
         }
     }
+
+    public DisplayTypes GetDisplayType(GameObject areaObject)
+    {
+        switch (areaObject.ObjectKind)
+        {
+            case ObjectKind.Player:
+                return configInterface.cfg.PlayerOption.DisplayType;
+            case ObjectKind.BattleNpc:
+                return configInterface.cfg.NpcOption.DisplayType;
+            case ObjectKind.None:
+            case ObjectKind.EventNpc:
+            case ObjectKind.Treasure:
+            case ObjectKind.Aetheryte:
+            case ObjectKind.GatheringPoint:
+            case ObjectKind.EventObj:
+            case ObjectKind.MountType:
+            case ObjectKind.Companion:
+            case ObjectKind.Retainer:
+            case ObjectKind.Area:
+            case ObjectKind.Housing:
+            case ObjectKind.Cutscene:
+            case ObjectKind.CardStand:
+            default:
+                return configInterface.cfg.ObjectOption.DisplayType;
+        }
+    }
+
+    public float GetDotSize(GameObject areaObjectItem1)
+    {
+        switch (areaObjectItem1.ObjectKind)
+        {
+            case ObjectKind.Player:
+                return configInterface.cfg.PlayerOption.DotSize;
+            case ObjectKind.BattleNpc:
+                return configInterface.cfg.NpcOption.DotSize;
+            case ObjectKind.None:
+            case ObjectKind.EventNpc:
+            case ObjectKind.Treasure:
+            case ObjectKind.Aetheryte:
+            case ObjectKind.GatheringPoint:
+            case ObjectKind.EventObj:
+            case ObjectKind.MountType:
+            case ObjectKind.Companion:
+            case ObjectKind.Retainer:
+            case ObjectKind.Area:
+            case ObjectKind.Housing:
+            case ObjectKind.Cutscene:
+            case ObjectKind.CardStand:
+            default:
+                return configInterface.cfg.ObjectOption.DotSize;
+        }
+    }
+
+    public (bool, bool) GetAggroCircleBools(GameObject areaObjectItem1)
+    {
+        switch (areaObjectItem1.ObjectKind)
+        {
+            case ObjectKind.BattleNpc:
+                return (configInterface.cfg.NpcOption.ShowAggroCircle, configInterface.cfg.NpcOption.ShowAggroCircle);
+            case ObjectKind.Player:
+            case ObjectKind.None:
+            case ObjectKind.EventNpc:
+            case ObjectKind.Treasure:
+            case ObjectKind.Aetheryte:
+            case ObjectKind.GatheringPoint:
+            case ObjectKind.EventObj:
+            case ObjectKind.MountType:
+            case ObjectKind.Companion:
+            case ObjectKind.Retainer:
+            case ObjectKind.Area:
+            case ObjectKind.Housing:
+            case ObjectKind.Cutscene:
+            case ObjectKind.CardStand:
+            default:
+                return (false, false);
+        }
+    }
+
+    public bool GetDistance(GameObject areaObjectItem1)
+    {
+        switch (areaObjectItem1.ObjectKind)
+        {
+            case ObjectKind.Player:
+                return configInterface.cfg.PlayerOption.DrawDistance;
+            case ObjectKind.BattleNpc:
+                return configInterface.cfg.NpcOption.DrawDistance;
+            case ObjectKind.None:
+            case ObjectKind.EventNpc:
+            case ObjectKind.Treasure:
+            case ObjectKind.Aetheryte:
+            case ObjectKind.GatheringPoint:
+            case ObjectKind.EventObj:
+            case ObjectKind.MountType:
+            case ObjectKind.Companion:
+            case ObjectKind.Retainer:
+            case ObjectKind.Area:
+            case ObjectKind.Housing:
+            case ObjectKind.Cutscene:
+            case ObjectKind.CardStand:
+            default:
+                return configInterface.cfg.ObjectOption.DrawDistance;
+        }    }
 }

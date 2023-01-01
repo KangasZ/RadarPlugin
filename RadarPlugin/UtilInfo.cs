@@ -144,7 +144,7 @@ public static class UtilInfo
         { 7393, DeepDungeonMobTypes.Mimic },
         { 7394, DeepDungeonMobTypes.Mimic },
         { 5832, DeepDungeonMobTypes.Mimic },
-        
+
         // Returns
         { 2007187, DeepDungeonMobTypes.Return },
         { 2009506, DeepDungeonMobTypes.Return },
@@ -238,5 +238,10 @@ public static class UtilInfo
     {
         var intColor = (a << 24) | (g << 8) | (b << 16) | r;
         return (uint)intColor;
+    }
+
+    public static float Distance2D(this Vector3 v, Vector3 v2)
+    {
+        return new Vector2(v.X - v2.X, v.Z - v2.Z).Length();
     }
 }

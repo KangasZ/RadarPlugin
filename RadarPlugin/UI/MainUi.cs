@@ -47,7 +47,7 @@ public class MainUi : IDisposable
             return;
         }
 
-        var size = new Vector2(405, 365);
+        var size = new Vector2(405, 400);
         ImGui.SetNextWindowSize(size); //, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible, ImGuiWindowFlags.NoResize))
@@ -124,6 +124,7 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(frontColor) | UtilInfo.OpacityMax;
             configInterface.Save();
         }
+
         ImGui.SameLine();
         var rearColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RearColor);
         if (ImGui.ColorEdit4($"Rear##{tag}", ref rearColor, ImGuiColorEditFlags.NoInputs))
@@ -132,6 +133,7 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(rearColor) | UtilInfo.OpacityMax;
             configInterface.Save();
         }
+
         var leftSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.LeftSideColor);
         if (ImGui.ColorEdit4($"Left##{tag}", ref leftSideColor, ImGuiColorEditFlags.NoInputs))
         {
@@ -139,8 +141,9 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(leftSideColor) | UtilInfo.OpacityMax;
             configInterface.Save();
         }
+
         ImGui.SameLine();
-        
+
         var rightSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RightSideColor);
         if (ImGui.ColorEdit4($"Right##{tag}", ref rightSideColor, ImGuiColorEditFlags.NoInputs))
         {
@@ -220,6 +223,7 @@ public class MainUi : IDisposable
             configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage = ImGui.ColorConvertFloat4ToU32(passageColor);
             configInterface.Save();
         }
+
         ImGui.NextColumn();
         var goldChestColor =
             ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest);
@@ -263,6 +267,7 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(accursedHoardColor);
             configInterface.Save();
         }
+
         ImGui.EndChild();
     }
 
@@ -295,6 +300,13 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
+        var showDistance = configInterface.cfg.PlayerOption.DrawDistance;
+        if (ImGui.Checkbox($"Append Distance to Name##{playerStr}-distance", ref showDistance))
+        {
+            configInterface.cfg.PlayerOption.DrawDistance = showDistance;
+            configInterface.Save();
+        }
+
         ImGui.NextColumn();
 
 
@@ -312,6 +324,7 @@ public class MainUi : IDisposable
         {
             configInterface.cfg.NpcOption.DisplayType = displayType;
         }
+
         ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.NpcOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
@@ -328,17 +341,25 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
+        var showDistance = configInterface.cfg.NpcOption.DrawDistance;
+        if (ImGui.Checkbox($"Append Distance to Name##{npcStr}-distance", ref showDistance))
+        {
+            configInterface.cfg.NpcOption.DrawDistance = showDistance;
+            configInterface.Save();
+        }
+
         var showNpcAggroCircle = configInterface.cfg.NpcOption.ShowAggroCircle;
         if (ImGui.Checkbox($"Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
         {
             configInterface.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
             configInterface.Save();
         }
+
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip("Draws aggro circle.");
         }
-        
+
         var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.NpcOption.ShowAggroCircleInCombat;
         if (ImGui.Checkbox($"Aggro Circle In Combat##{npcStr}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
         {
@@ -348,14 +369,15 @@ public class MainUi : IDisposable
 
         if (ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip("If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
+            ImGui.SetTooltip(
+                "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
         }
 
         if (configInterface.cfg.NpcOption.ShowAggroCircle)
         {
             DrawAggroCircleSettings();
         }
-        
+
         ImGui.EndChild();
     }
 
@@ -372,6 +394,7 @@ public class MainUi : IDisposable
         {
             configInterface.cfg.ObjectOption.DisplayType = displayType;
         }
+
         ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.ObjectOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
@@ -385,6 +408,13 @@ public class MainUi : IDisposable
                 UtilInfo.MaxDotSize))
         {
             configInterface.cfg.ObjectOption.DotSize = objectDotSize;
+            configInterface.Save();
+        }
+
+        var showDistance = configInterface.cfg.ObjectOption.DrawDistance;
+        if (ImGui.Checkbox($"Append Distance to Name##{objectStr}-distance", ref showDistance))
+        {
+            configInterface.cfg.ObjectOption.DrawDistance = showDistance;
             configInterface.Save();
         }
 
@@ -465,6 +495,19 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
+        var you = configInterface.cfg.ShowYOU;
+        if (ImGui.Checkbox("Your Player", ref you))
+        {
+            configInterface.cfg.ShowYOU = you;
+            configInterface.Save();
+        }
+        
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Will show your player character if enabled. Takes player settings.");
+        }
+        
         var objHideList = configInterface.cfg.DebugMode;
         if (ImGui.Checkbox("Debug Mode", ref objHideList))
         {
@@ -531,7 +574,7 @@ public class MainUi : IDisposable
                         "Dot Only",
                         "Name Only",
                         "Dot and Name",
-                    }, 3,3);
+                    }, 3, 3);
                 ImGui.PopItemWidth();
 
                 if (lb)
@@ -566,7 +609,7 @@ public class MainUi : IDisposable
                         "Health Bar, Value, And Name",
                         "Health Value Only",
                         "Health Value and Name"
-                    }, 9,9);
+                    }, 9, 9);
                 ImGui.PopItemWidth();
                 if (lb2)
                 {
@@ -602,6 +645,7 @@ public class MainUi : IDisposable
                     "Mob Type Is Wrong. This literally should never occur. Please dear god help me if it does.");
                 break;
         }
+
         return DisplayTypes.Default;
     }
 }
