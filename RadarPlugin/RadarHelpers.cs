@@ -166,7 +166,7 @@ public class RadarHelpers
         switch (areaObjectItem1.ObjectKind)
         {
             case ObjectKind.BattleNpc:
-                return (configInterface.cfg.NpcOption.ShowAggroCircle, configInterface.cfg.NpcOption.ShowAggroCircle);
+                return (configInterface.cfg.NpcOption.ShowAggroCircle, configInterface.cfg.NpcOption.ShowAggroCircleInCombat);
             case ObjectKind.Player:
             case ObjectKind.None:
             case ObjectKind.EventNpc:
