@@ -14,6 +14,7 @@ using Dalamud.Game.Gui;
 using Dalamud.Plugin;
 using ImGuiNET;
 using RadarPlugin.Enums;
+using RadarPlugin.UI;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
@@ -144,6 +145,15 @@ public class RadarLogic : IDisposable
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+        else
+        {
+            UiHelpers.GetBorderClampedVector2(onScreenPosition, new Vector2(10, 10), out var clampedPos);
+            var mainViewport3 = ImGui.GetMainViewport();
+            Vector2 center2 = (mainViewport3 ).GetCenter();
+            Vector2 rotation = clampedPos - center2;
+            float thickness = 2f;
+            drawListPtr.DrawArrow(clampedPos, 5f, color, rotation, thickness);
         }
 
         if (drawAggroCircle && gameObject is BattleNpc npc2)
@@ -346,7 +356,8 @@ public class RadarLogic : IDisposable
                 if (configInterface.cfg.ShowYOU)
                 {
                     nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                } 
+                }
+
                 continue;
             }
 
