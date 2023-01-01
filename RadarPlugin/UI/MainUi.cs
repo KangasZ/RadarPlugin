@@ -108,10 +108,42 @@ public class MainUi : IDisposable
             ("Object", UtilInfo.White, DrawObjectSettings),
             ("NPC", UtilInfo.White, DrawNpcSettings),
             ("Player", UtilInfo.White, DrawPlayerSettings),
-            ("DeepDung", UtilInfo.White, DrawDeepDungeonSettings)
+            ("Deep Dungeon", UtilInfo.White, DrawDeepDungeonSettings),
+            ("Off Screen Objects", UtilInfo.White, DrawOffScreenObjectSettings)
+
         );
         ImGui.EndChild();
     }
+
+    private void DrawOffScreenObjectSettings()
+    {
+        var id = "##offscreenobjectssettings";
+        ImGui.BeginChild($"{id}-child", new Vector2(0, ChildHeight));
+
+
+        var distanceFromEdge = configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge;
+        if (ImGui.DragFloat($"Distance From Edge{id}", ref distanceFromEdge, 0.2f, 2f, 40f))
+        {
+            configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge = distanceFromEdge;
+            configInterface.Save();
+        }
+        
+        var size = configInterface.cfg.OffScreenObjectsOptions.Size;
+        if (ImGui.DragFloat($"Size{id}", ref size, 0.1f, 2f, 20f))
+        {
+            configInterface.cfg.OffScreenObjectsOptions.Size = size;
+            configInterface.Save();
+        }
+
+        var thickness = configInterface.cfg.OffScreenObjectsOptions.Thickness;
+        if (ImGui.DragFloat($"Thickness{id}", ref thickness, 0.1f, 0.4f, 20f))
+        {
+            configInterface.cfg.OffScreenObjectsOptions.Thickness = thickness;
+            configInterface.Save();
+        }
+        
+        ImGui.NextColumn();
+        ImGui.EndChild();    }
 
     private void DrawAggroCircleSettings()
     {
@@ -308,8 +340,6 @@ public class MainUi : IDisposable
         }
 
         ImGui.NextColumn();
-
-
         ImGui.EndChild();
     }
 
@@ -423,6 +453,8 @@ public class MainUi : IDisposable
 
     private void DrawVisibilitySettings()
     {
+        ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 120));
+        ImGui.Columns(2, $"##visiblitygeneralsettings-settings-columns", false);
         var enemyShow = configInterface.cfg.ShowEnemies;
         if (ImGui.Checkbox("Enemies", ref enemyShow))
         {
@@ -468,7 +500,47 @@ public class MainUi : IDisposable
                 "This focuses on giving support to eureka and deep dungeons.\n" +
                 "Will display things such as portals, chests, and traps.");
         }
+        ImGui.NextColumn();
+        var onlyVisible = configInterface.cfg.ShowOnlyVisible;
+        if (ImGui.Checkbox("Only Visible", ref onlyVisible))
+        {
+            configInterface.cfg.ShowOnlyVisible = onlyVisible;
+            configInterface.Save();
+        }
 
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Show only visible mobs.\nYou probably don't want to turn this off.\nMay not remove all invisible entities currently. Use the util window.");
+        }
+        
+        var you = configInterface.cfg.ShowYOU;
+        if (ImGui.Checkbox("Your Player", ref you))
+        {
+            configInterface.cfg.ShowYOU = you;
+            configInterface.Save();
+        }
+        
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Will show your player character if enabled. Takes player settings.");
+        }
+        
+        var showOffScreen = configInterface.cfg.ShowOffScreen;
+        if (ImGui.Checkbox("Show Offscreen Objects", ref showOffScreen))
+        {
+            configInterface.cfg.ShowOffScreen = showOffScreen;
+            configInterface.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Show an arrow to the offscreen enemies.");
+        }
+        
+        ImGui.EndChild();
         ImGui.Separator();
         ImGui.Text("Below this line are things that generally won't be supported");
         ImGui.BeginChild("##visibilitychild");
@@ -494,19 +566,6 @@ public class MainUi : IDisposable
             configInterface.cfg.ShowEvents = events;
             configInterface.Save();
         }
-
-        var you = configInterface.cfg.ShowYOU;
-        if (ImGui.Checkbox("Your Player", ref you))
-        {
-            configInterface.cfg.ShowYOU = you;
-            configInterface.Save();
-        }
-        
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Will show your player character if enabled. Takes player settings.");
-        }
         
         var objHideList = configInterface.cfg.DebugMode;
         if (ImGui.Checkbox("Debug Mode", ref objHideList))
@@ -529,19 +588,7 @@ public class MainUi : IDisposable
             configInterface.cfg.ShowAetherytes = showAetherytes;
             configInterface.Save();
         }
-
-        var onlyVisible = configInterface.cfg.ShowOnlyVisible;
-        if (ImGui.Checkbox("Only Visible", ref onlyVisible))
-        {
-            configInterface.cfg.ShowOnlyVisible = onlyVisible;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Show only visible mobs.\nYou probably don't want to turn this off.\nMay not remove all invisible entities currently. Use the util window.");
-        }
+        
 
         var showNameless = configInterface.cfg.ShowNameless;
         if (ImGui.Checkbox("Nameless", ref showNameless))

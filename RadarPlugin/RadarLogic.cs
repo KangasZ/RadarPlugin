@@ -146,14 +146,15 @@ public class RadarLogic : IDisposable
                     throw new ArgumentOutOfRangeException();
             }
         }
-        else
+        else if (configInterface.cfg.ShowOffScreen)
         {
-            UiHelpers.GetBorderClampedVector2(onScreenPosition, new Vector2(10, 10), out var clampedPos);
+            UiHelpers.GetBorderClampedVector2(onScreenPosition,
+                new Vector2(configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge,
+                    configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge), out var clampedPos);
             var mainViewport3 = ImGui.GetMainViewport();
-            Vector2 center2 = (mainViewport3 ).GetCenter();
-            Vector2 rotation = clampedPos - center2;
-            float thickness = 2f;
-            drawListPtr.DrawArrow(clampedPos, 5f, color, rotation, thickness);
+            var center2 = mainViewport3.GetCenter();
+            var rotation = clampedPos - center2;
+            drawListPtr.DrawArrow(clampedPos, configInterface.cfg.OffScreenObjectsOptions.Size, color, rotation, configInterface.cfg.OffScreenObjectsOptions.Thickness);
         }
 
         if (drawAggroCircle && gameObject is BattleNpc npc2)
