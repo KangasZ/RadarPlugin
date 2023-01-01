@@ -98,7 +98,7 @@ public class MainUi : IDisposable
             "Note 2: Entities that are not on the client are not viewable. For instance, deep dungeon traps are not visible until you unveil them.");
         ImGui.Spacing();
         ImGui.TextWrapped(
-            "Note 2: Invisible mobs can / will be shown. Use the Utility tab to remove these. This is kinda being worked on but does not have an easy solution.");
+            "Note 2: Invisible mobs may be shown. Use the Utility tab to remove these. This is kinda being worked on but does not have an easy solution.");
     }
 
     private void Draw3DRadarSettings()
