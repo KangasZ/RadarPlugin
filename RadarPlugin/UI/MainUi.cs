@@ -47,7 +47,7 @@ public class MainUi : IDisposable
             return;
         }
 
-        var size = new Vector2(405, 365);
+        var size = new Vector2(405, 400);
         ImGui.SetNextWindowSize(size); //, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible, ImGuiWindowFlags.NoResize))
@@ -98,7 +98,7 @@ public class MainUi : IDisposable
             "Note 2: Entities that are not on the client are not viewable. For instance, deep dungeon traps are not visible until you unveil them.");
         ImGui.Spacing();
         ImGui.TextWrapped(
-            "Note 2: Invisible mobs can / will be shown. Use the Utility tab to remove these. This is kinda being worked on but does not have an easy solution.");
+            "Note 2: Invisible mobs may be shown. Use the Utility tab to remove these. This is kinda being worked on but does not have an easy solution.");
     }
 
     private void Draw3DRadarSettings()
@@ -108,10 +108,42 @@ public class MainUi : IDisposable
             ("Object", UtilInfo.White, DrawObjectSettings),
             ("NPC", UtilInfo.White, DrawNpcSettings),
             ("Player", UtilInfo.White, DrawPlayerSettings),
-            ("DeepDung", UtilInfo.White, DrawDeepDungeonSettings)
+            ("Deep Dungeon", UtilInfo.White, DrawDeepDungeonSettings),
+            ("Off Screen Objects", UtilInfo.White, DrawOffScreenObjectSettings)
+
         );
         ImGui.EndChild();
     }
+
+    private void DrawOffScreenObjectSettings()
+    {
+        var id = "##offscreenobjectssettings";
+        ImGui.BeginChild($"{id}-child", new Vector2(0, ChildHeight));
+
+
+        var distanceFromEdge = configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge;
+        if (ImGui.DragFloat($"Distance From Edge{id}", ref distanceFromEdge, 0.2f, 2f, 40f))
+        {
+            configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge = distanceFromEdge;
+            configInterface.Save();
+        }
+        
+        var size = configInterface.cfg.OffScreenObjectsOptions.Size;
+        if (ImGui.DragFloat($"Size{id}", ref size, 0.1f, 2f, 20f))
+        {
+            configInterface.cfg.OffScreenObjectsOptions.Size = size;
+            configInterface.Save();
+        }
+
+        var thickness = configInterface.cfg.OffScreenObjectsOptions.Thickness;
+        if (ImGui.DragFloat($"Thickness{id}", ref thickness, 0.1f, 0.4f, 20f))
+        {
+            configInterface.cfg.OffScreenObjectsOptions.Thickness = thickness;
+            configInterface.Save();
+        }
+        
+        ImGui.NextColumn();
+        ImGui.EndChild();    }
 
     private void DrawAggroCircleSettings()
     {
@@ -124,6 +156,7 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(frontColor) | UtilInfo.OpacityMax;
             configInterface.Save();
         }
+
         ImGui.SameLine();
         var rearColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RearColor);
         if (ImGui.ColorEdit4($"Rear##{tag}", ref rearColor, ImGuiColorEditFlags.NoInputs))
@@ -132,6 +165,7 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(rearColor) | UtilInfo.OpacityMax;
             configInterface.Save();
         }
+
         var leftSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.LeftSideColor);
         if (ImGui.ColorEdit4($"Left##{tag}", ref leftSideColor, ImGuiColorEditFlags.NoInputs))
         {
@@ -139,8 +173,9 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(leftSideColor) | UtilInfo.OpacityMax;
             configInterface.Save();
         }
+
         ImGui.SameLine();
-        
+
         var rightSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RightSideColor);
         if (ImGui.ColorEdit4($"Right##{tag}", ref rightSideColor, ImGuiColorEditFlags.NoInputs))
         {
@@ -220,6 +255,7 @@ public class MainUi : IDisposable
             configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage = ImGui.ColorConvertFloat4ToU32(passageColor);
             configInterface.Save();
         }
+
         ImGui.NextColumn();
         var goldChestColor =
             ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest);
@@ -263,6 +299,7 @@ public class MainUi : IDisposable
                 ImGui.ColorConvertFloat4ToU32(accursedHoardColor);
             configInterface.Save();
         }
+
         ImGui.EndChild();
     }
 
@@ -295,9 +332,14 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
+        var showDistance = configInterface.cfg.PlayerOption.DrawDistance;
+        if (ImGui.Checkbox($"Append Distance to Name##{playerStr}-distance", ref showDistance))
+        {
+            configInterface.cfg.PlayerOption.DrawDistance = showDistance;
+            configInterface.Save();
+        }
+
         ImGui.NextColumn();
-
-
         ImGui.EndChild();
     }
 
@@ -312,6 +354,7 @@ public class MainUi : IDisposable
         {
             configInterface.cfg.NpcOption.DisplayType = displayType;
         }
+
         ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.NpcOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
@@ -328,17 +371,25 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
+        var showDistance = configInterface.cfg.NpcOption.DrawDistance;
+        if (ImGui.Checkbox($"Append Distance to Name##{npcStr}-distance", ref showDistance))
+        {
+            configInterface.cfg.NpcOption.DrawDistance = showDistance;
+            configInterface.Save();
+        }
+
         var showNpcAggroCircle = configInterface.cfg.NpcOption.ShowAggroCircle;
         if (ImGui.Checkbox($"Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
         {
             configInterface.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
             configInterface.Save();
         }
+
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip("Draws aggro circle.");
         }
-        
+
         var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.NpcOption.ShowAggroCircleInCombat;
         if (ImGui.Checkbox($"Aggro Circle In Combat##{npcStr}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
         {
@@ -348,14 +399,15 @@ public class MainUi : IDisposable
 
         if (ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip("If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
+            ImGui.SetTooltip(
+                "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
         }
 
         if (configInterface.cfg.NpcOption.ShowAggroCircle)
         {
             DrawAggroCircleSettings();
         }
-        
+
         ImGui.EndChild();
     }
 
@@ -372,6 +424,7 @@ public class MainUi : IDisposable
         {
             configInterface.cfg.ObjectOption.DisplayType = displayType;
         }
+
         ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.ObjectOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
@@ -388,11 +441,20 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
+        var showDistance = configInterface.cfg.ObjectOption.DrawDistance;
+        if (ImGui.Checkbox($"Append Distance to Name##{objectStr}-distance", ref showDistance))
+        {
+            configInterface.cfg.ObjectOption.DrawDistance = showDistance;
+            configInterface.Save();
+        }
+
         ImGui.EndChild();
     }
 
     private void DrawVisibilitySettings()
     {
+        ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 120));
+        ImGui.Columns(2, $"##visiblitygeneralsettings-settings-columns", false);
         var enemyShow = configInterface.cfg.ShowEnemies;
         if (ImGui.Checkbox("Enemies", ref enemyShow))
         {
@@ -438,7 +500,47 @@ public class MainUi : IDisposable
                 "This focuses on giving support to eureka and deep dungeons.\n" +
                 "Will display things such as portals, chests, and traps.");
         }
+        ImGui.NextColumn();
+        var onlyVisible = configInterface.cfg.ShowOnlyVisible;
+        if (ImGui.Checkbox("Only Visible", ref onlyVisible))
+        {
+            configInterface.cfg.ShowOnlyVisible = onlyVisible;
+            configInterface.Save();
+        }
 
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Show only visible mobs.\nYou probably don't want to turn this off.\nMay not remove all invisible entities currently. Use the util window.");
+        }
+        
+        var you = configInterface.cfg.ShowYOU;
+        if (ImGui.Checkbox("Your Player", ref you))
+        {
+            configInterface.cfg.ShowYOU = you;
+            configInterface.Save();
+        }
+        
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Will show your player character if enabled. Takes player settings.");
+        }
+        
+        var showOffScreen = configInterface.cfg.ShowOffScreen;
+        if (ImGui.Checkbox("Show Offscreen Objects", ref showOffScreen))
+        {
+            configInterface.cfg.ShowOffScreen = showOffScreen;
+            configInterface.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Show an arrow to the offscreen enemies.");
+        }
+        
+        ImGui.EndChild();
         ImGui.Separator();
         ImGui.Text("Below this line are things that generally won't be supported");
         ImGui.BeginChild("##visibilitychild");
@@ -464,7 +566,7 @@ public class MainUi : IDisposable
             configInterface.cfg.ShowEvents = events;
             configInterface.Save();
         }
-
+        
         var objHideList = configInterface.cfg.DebugMode;
         if (ImGui.Checkbox("Debug Mode", ref objHideList))
         {
@@ -486,19 +588,7 @@ public class MainUi : IDisposable
             configInterface.cfg.ShowAetherytes = showAetherytes;
             configInterface.Save();
         }
-
-        var onlyVisible = configInterface.cfg.ShowOnlyVisible;
-        if (ImGui.Checkbox("Only Visible", ref onlyVisible))
-        {
-            configInterface.cfg.ShowOnlyVisible = onlyVisible;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Show only visible mobs.\nYou probably don't want to turn this off.\nMay not remove all invisible entities currently. Use the util window.");
-        }
+        
 
         var showNameless = configInterface.cfg.ShowNameless;
         if (ImGui.Checkbox("Nameless", ref showNameless))
@@ -531,7 +621,7 @@ public class MainUi : IDisposable
                         "Dot Only",
                         "Name Only",
                         "Dot and Name",
-                    }, 3,3);
+                    }, 3, 3);
                 ImGui.PopItemWidth();
 
                 if (lb)
@@ -566,7 +656,7 @@ public class MainUi : IDisposable
                         "Health Bar, Value, And Name",
                         "Health Value Only",
                         "Health Value and Name"
-                    }, 9,9);
+                    }, 9, 9);
                 ImGui.PopItemWidth();
                 if (lb2)
                 {
@@ -602,6 +692,7 @@ public class MainUi : IDisposable
                     "Mob Type Is Wrong. This literally should never occur. Please dear god help me if it does.");
                 break;
         }
+
         return DisplayTypes.Default;
     }
 }
