@@ -73,10 +73,11 @@ public class RadarLogic : IDisposable
     {
         if (!Monitor.TryEnter(areaObjects))
         {
-            PluginLog.Error("Try Enter Failed. This is not an error");
+            PluginLog.Error("Try Enter Failed. This is not necessarily error");
             return;
         }
-
+        var width = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+        var height = ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
         var drawListPtr = ImGui.GetForegroundDrawList();
         foreach (var areaObject in areaObjects)
         {
