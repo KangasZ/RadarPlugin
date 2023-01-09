@@ -122,7 +122,7 @@ public class MainUi : IDisposable
 
 
         var distanceFromEdge = configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge;
-        if (ImGui.DragFloat($"Distance From Edge{id}", ref distanceFromEdge, 0.2f, 2f, 40f))
+        if (ImGui.DragFloat($"Distance From Edge{id}", ref distanceFromEdge, 0.2f, 2f, 80f))
         {
             configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge = distanceFromEdge;
             configInterface.Save();
@@ -440,6 +440,7 @@ public class MainUi : IDisposable
             configInterface.cfg.ObjectOption.DotSize = objectDotSize;
             configInterface.Save();
         }
+
 
         var showDistance = configInterface.cfg.ObjectOption.DrawDistance;
         if (ImGui.Checkbox($"Append Distance to Name##{objectStr}-distance", ref showDistance))

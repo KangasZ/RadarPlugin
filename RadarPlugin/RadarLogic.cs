@@ -76,9 +76,10 @@ public class RadarLogic : IDisposable
             PluginLog.Error("Try Enter Failed. This is not necessarily error");
             return;
         }
+
         var width = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
         var height = ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
-        var drawListPtr = ImGui.GetForegroundDrawList();
+        var drawListPtr = ImGui.GetBackgroundDrawList();
         foreach (var areaObject in areaObjects)
         {
             var displayType = radarHelpers.GetDisplayType(areaObject.Item1);
@@ -155,7 +156,8 @@ public class RadarLogic : IDisposable
             var mainViewport3 = ImGui.GetMainViewport();
             var center2 = mainViewport3.GetCenter();
             var rotation = clampedPos - center2;
-            drawListPtr.DrawArrow(clampedPos, configInterface.cfg.OffScreenObjectsOptions.Size, color, rotation, configInterface.cfg.OffScreenObjectsOptions.Thickness);
+            drawListPtr.DrawArrow(clampedPos, configInterface.cfg.OffScreenObjectsOptions.Size, color, rotation,
+                configInterface.cfg.OffScreenObjectsOptions.Thickness);
         }
 
         if (drawAggroCircle && gameObject is BattleNpc npc2)

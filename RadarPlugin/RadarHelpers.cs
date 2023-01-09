@@ -166,7 +166,8 @@ public class RadarHelpers
         switch (areaObjectItem1.ObjectKind)
         {
             case ObjectKind.BattleNpc:
-                return (configInterface.cfg.NpcOption.ShowAggroCircle, configInterface.cfg.NpcOption.ShowAggroCircleInCombat);
+                return (configInterface.cfg.NpcOption.ShowAggroCircle,
+                    configInterface.cfg.NpcOption.ShowAggroCircleInCombat);
             case ObjectKind.Player:
             case ObjectKind.None:
             case ObjectKind.EventNpc:
@@ -209,5 +210,6 @@ public class RadarHelpers
             case ObjectKind.CardStand:
             default:
                 return configInterface.cfg.ObjectOption.DrawDistance;
-        }    }
+        }
+    }
 }
