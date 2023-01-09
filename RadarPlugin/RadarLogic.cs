@@ -82,12 +82,8 @@ public class RadarLogic : IDisposable
         var drawListPtr = ImGui.GetBackgroundDrawList();
         foreach (var areaObject in areaObjects)
         {
-            var displayType = radarHelpers.GetDisplayType(areaObject.Item1);
-            var dotSize = radarHelpers.GetDotSize(areaObject.Item1);
-            var drawAggroCircleBools = radarHelpers.GetAggroCircleBools(areaObject.Item1);
-            var drawDistance = radarHelpers.GetDistance(areaObject.Item1);
-            DrawEsp(drawListPtr, areaObject.Item1, areaObject.Item2, areaObject.Item3, displayType, dotSize,
-                drawAggroCircleBools.Item1, drawAggroCircleBools.Item2, drawDistance);
+            var espOption = radarHelpers.GetParams(areaObject.Item1);
+            DrawEsp(drawListPtr, areaObject.Item1, areaObject.Item2, areaObject.Item3, espOption);
         }
 
         Monitor.Exit(areaObjects);
@@ -104,22 +100,22 @@ public class RadarLogic : IDisposable
     }
 
     private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint color, string name,
-        DisplayTypes displayTypes, float dotSize, bool drawAggroCircle, bool drawAggroCircleInCombat, bool drawDistance)
+        Configuration.ESPOption espOption)
     {
         var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
         if (visibleOnScreen)
         {
-            switch (displayTypes)
+            switch (espOption.DisplayType)
             {
                 case DisplayTypes.DotOnly:
-                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
+                    DrawDot(drawListPtr, onScreenPosition, espOption.DotSize, color);
                     break;
                 case DisplayTypes.NameOnly:
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.DotAndName:
-                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    DrawDot(drawListPtr, onScreenPosition, espOption.DotSize, color);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.HealthBarOnly:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
@@ -130,11 +126,11 @@ public class RadarLogic : IDisposable
                     break;
                 case DisplayTypes.HealthBarAndName:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.HealthBarAndValueAndName:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
                     break;
                 case DisplayTypes.HealthValueOnly:
@@ -142,7 +138,7 @@ public class RadarLogic : IDisposable
                     break;
                 case DisplayTypes.HealthValueAndName:
                     DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, drawDistance);
+                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -160,9 +156,9 @@ public class RadarLogic : IDisposable
                 configInterface.cfg.OffScreenObjectsOptions.Thickness);
         }
 
-        if (drawAggroCircle && gameObject is BattleNpc npc2)
+        if (espOption.ShowAggroCircle && gameObject is BattleNpc npc2)
         {
-            if (!drawAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
+            if (!espOption.ShowAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
             if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
             {
                 DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
@@ -349,6 +345,7 @@ public class RadarLogic : IDisposable
         foreach (var obj in objectTable)
         {
             if (!obj.IsValid()) continue;
+            var espOption = radarHelpers.GetParams(obj);
             if (configInterface.cfg.DebugMode)
             {
                 nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
@@ -383,7 +380,6 @@ public class RadarLogic : IDisposable
             }
 
             if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) continue;
-
             switch (obj.ObjectKind)
             {
                 case ObjectKind.Treasure:
