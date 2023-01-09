@@ -449,6 +449,7 @@ public class RadarLogic : IDisposable
 
     private void CleanupZoneTerritoryWrapper(object? _, ushort __)
     {
+        PluginLog.Debug($"New Territory: {clientState.TerritoryType}");
         CleanupZone();
     }
 

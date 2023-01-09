@@ -26,7 +26,8 @@ public class RadarHelpers
     public string GetText(GameObject obj)
     {
         var text = "";
-        if (obj.DataId != 0 && UtilInfo.RenameList.ContainsKey(obj.DataId))
+        if (obj.DataId != 0 && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+            UtilInfo.RenameList.ContainsKey(obj.DataId))
         {
             text = UtilInfo.RenameList[obj.DataId];
         }
@@ -106,7 +107,8 @@ public class RadarHelpers
             case ObjectKind.CardStand:
             default:
                 return configInterface.cfg.ObjectOption.ColorU;
-        }    }
+        }
+    }
 
     public Configuration.ESPOption GetParams(GameObject areaObject)
     {
