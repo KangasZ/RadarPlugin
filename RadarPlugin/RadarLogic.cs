@@ -95,7 +95,7 @@ public class RadarLogic : IDisposable
     private bool CheckDraw()
     {
         return conditionInterface[ConditionFlag.LoggingOut] || conditionInterface[ConditionFlag.BetweenAreas] ||
-               conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled || conditionInterface[ConditionFlag.PvPDisplayActive] ||
+               conditionInterface[ConditionFlag.BetweenAreas51] || clientState.IsPvP ||
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
@@ -373,8 +373,8 @@ public class RadarLogic : IDisposable
                 }
             }
 
-            if (this.configInterface.cfg.ShowOnlyVisible &&
-                ((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address)->RenderFlags != 0)
+            var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
+            if (this.configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
             {
                 continue;
             }
