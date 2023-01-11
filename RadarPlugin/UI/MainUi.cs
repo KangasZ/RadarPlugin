@@ -90,7 +90,7 @@ public class MainUi : IDisposable
             "    1. Use tabs to customize experience and fix invisible mobs.\n" +
             "    2. Bring bugs or feature requests up to author\n");
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "v1.4.0.0: Another change in config structure. May or may not destroy some old config.");
+            "v1.4.0.0: Another change in config structure.\nMay or may not destroy some old config.");
         ImGui.TextWrapped(
             "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
