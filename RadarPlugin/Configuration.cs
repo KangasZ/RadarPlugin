@@ -2,6 +2,7 @@
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using RadarPlugin.Enums;
@@ -17,6 +18,7 @@ public class Configuration
         public float DistanceFromEdge = 15f;
         public float Size = 6.0f;
     }
+
     public class DeepDungeonMobTypeColorOptions
     {
         public uint Default = UtilInfo.White;
@@ -46,29 +48,28 @@ public class Configuration
 
     public class ESPOption
     {
+        public ESPOption()
+        {
+        }
+        // Copy Constructor
+        public ESPOption(ESPOption espOption)
+        {
+            DisplayType = espOption.DisplayType;
+            DotSize = espOption.DotSize;
+            ColorU = espOption.ColorU;
+            ShowAggroCircle = espOption.ShowAggroCircle;
+            ShowAggroCircleInCombat = espOption.ShowAggroCircleInCombat;
+            ShowFC = espOption.ShowFC;
+            DrawDistance = espOption.DrawDistance;
+        }
+
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public float DotSize = 2.2f;
-        public bool DrawDistance = false;
-    }
-
-    public class ObjectOption : ESPOption
-    {
-        public uint ColorU = 0xffFFFF00; //new(0x00, 0x7e, 0x7e, 0xFF);
-    }
-
-    public class NpcOption : ESPOption
-    {
-        public new DisplayTypes DisplayType = DisplayTypes.HealthBarAndValueAndName;
+        public uint ColorU = 0xffffffff;
         public bool ShowAggroCircle = false;
         public bool ShowAggroCircleInCombat = false;
-        public uint ColorU = 0xffffffff; //new(0xff, 0xff, 0xff, 0xff);
-    }
-
-    public class PlayerOption : NpcOption
-    {
         public bool ShowFC = false; // Unused
-        public new DisplayTypes DisplayType = DisplayTypes.DotAndName;
-        public new uint ColorU = 0xffff00ff; //new(0x99, 0x00, 0x99, 0xFF);
+        public bool DrawDistance = false;
     }
 
     public class Config : IPluginConfiguration
@@ -92,9 +93,9 @@ public class Configuration
         public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
         public DeepDungeonMobTypeColorOptions DeepDungeonMobTypeColorOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
-        public NpcOption NpcOption { get; set; } = new();
-        public PlayerOption PlayerOption { get; set; } = new();
-        public ObjectOption ObjectOption { get; set; } = new();
+        public ESPOption NpcOption { get; set; } = new(mobOptDefault);
+        public ESPOption PlayerOption { get; set; } = new(playerOptDefault);
+        public ESPOption ObjectOption { get; set; } = new(objectOptDefault);
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
     }
@@ -102,6 +103,39 @@ public class Configuration
     public Config cfg;
 
     [NonSerialized] private DalamudPluginInterface pluginInterface;
+
+    [NonSerialized] private static readonly ESPOption playerOptDefault = new ESPOption
+    {
+        ColorU = 0xffff00ff,
+        DisplayType = DisplayTypes.DotAndName,
+        DotSize = 2.2f,
+        ShowAggroCircle = false,
+        ShowAggroCircleInCombat = false,
+        ShowFC = false,
+        DrawDistance = false
+    };
+
+    [NonSerialized] private static readonly ESPOption objectOptDefault = new ESPOption
+    {
+        ColorU = 0xffFFFF00,
+        DisplayType = DisplayTypes.NameOnly,
+        DotSize = 2.2f,
+        ShowAggroCircle = false,
+        ShowAggroCircleInCombat = false,
+        ShowFC = false,
+        DrawDistance = false
+    };
+
+    [NonSerialized] private static readonly ESPOption mobOptDefault = new ESPOption
+    {
+        ColorU = 0xffffffff,
+        DisplayType = DisplayTypes.HealthBarAndValueAndName,
+        DotSize = 2.2f,
+        ShowAggroCircle = false,
+        ShowAggroCircleInCombat = false,
+        ShowFC = false,
+        DrawDistance = false
+    };
 
     public Configuration(DalamudPluginInterface pluginInterface)
     {

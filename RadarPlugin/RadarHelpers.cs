@@ -26,7 +26,8 @@ public class RadarHelpers
     public string GetText(GameObject obj)
     {
         var text = "";
-        if (obj.DataId != 0 && UtilInfo.RenameList.ContainsKey(obj.DataId))
+        if (obj.DataId != 0 && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+            UtilInfo.RenameList.ContainsKey(obj.DataId))
         {
             text = UtilInfo.RenameList[obj.DataId];
         }
@@ -109,14 +110,14 @@ public class RadarHelpers
         }
     }
 
-    public DisplayTypes GetDisplayType(GameObject areaObject)
+    public Configuration.ESPOption GetParams(GameObject areaObject)
     {
         switch (areaObject.ObjectKind)
         {
             case ObjectKind.Player:
-                return configInterface.cfg.PlayerOption.DisplayType;
+                return configInterface.cfg.PlayerOption;
             case ObjectKind.BattleNpc:
-                return configInterface.cfg.NpcOption.DisplayType;
+                return configInterface.cfg.NpcOption;
             case ObjectKind.None:
             case ObjectKind.EventNpc:
             case ObjectKind.Treasure:
@@ -131,83 +132,7 @@ public class RadarHelpers
             case ObjectKind.Cutscene:
             case ObjectKind.CardStand:
             default:
-                return configInterface.cfg.ObjectOption.DisplayType;
+                return configInterface.cfg.ObjectOption;
         }
     }
-
-    public float GetDotSize(GameObject areaObjectItem1)
-    {
-        switch (areaObjectItem1.ObjectKind)
-        {
-            case ObjectKind.Player:
-                return configInterface.cfg.PlayerOption.DotSize;
-            case ObjectKind.BattleNpc:
-                return configInterface.cfg.NpcOption.DotSize;
-            case ObjectKind.None:
-            case ObjectKind.EventNpc:
-            case ObjectKind.Treasure:
-            case ObjectKind.Aetheryte:
-            case ObjectKind.GatheringPoint:
-            case ObjectKind.EventObj:
-            case ObjectKind.MountType:
-            case ObjectKind.Companion:
-            case ObjectKind.Retainer:
-            case ObjectKind.Area:
-            case ObjectKind.Housing:
-            case ObjectKind.Cutscene:
-            case ObjectKind.CardStand:
-            default:
-                return configInterface.cfg.ObjectOption.DotSize;
-        }
-    }
-
-    public (bool, bool) GetAggroCircleBools(GameObject areaObjectItem1)
-    {
-        switch (areaObjectItem1.ObjectKind)
-        {
-            case ObjectKind.BattleNpc:
-                return (configInterface.cfg.NpcOption.ShowAggroCircle, configInterface.cfg.NpcOption.ShowAggroCircleInCombat);
-            case ObjectKind.Player:
-            case ObjectKind.None:
-            case ObjectKind.EventNpc:
-            case ObjectKind.Treasure:
-            case ObjectKind.Aetheryte:
-            case ObjectKind.GatheringPoint:
-            case ObjectKind.EventObj:
-            case ObjectKind.MountType:
-            case ObjectKind.Companion:
-            case ObjectKind.Retainer:
-            case ObjectKind.Area:
-            case ObjectKind.Housing:
-            case ObjectKind.Cutscene:
-            case ObjectKind.CardStand:
-            default:
-                return (false, false);
-        }
-    }
-
-    public bool GetDistance(GameObject areaObjectItem1)
-    {
-        switch (areaObjectItem1.ObjectKind)
-        {
-            case ObjectKind.Player:
-                return configInterface.cfg.PlayerOption.DrawDistance;
-            case ObjectKind.BattleNpc:
-                return configInterface.cfg.NpcOption.DrawDistance;
-            case ObjectKind.None:
-            case ObjectKind.EventNpc:
-            case ObjectKind.Treasure:
-            case ObjectKind.Aetheryte:
-            case ObjectKind.GatheringPoint:
-            case ObjectKind.EventObj:
-            case ObjectKind.MountType:
-            case ObjectKind.Companion:
-            case ObjectKind.Retainer:
-            case ObjectKind.Area:
-            case ObjectKind.Housing:
-            case ObjectKind.Cutscene:
-            case ObjectKind.CardStand:
-            default:
-                return configInterface.cfg.ObjectOption.DrawDistance;
-        }    }
 }

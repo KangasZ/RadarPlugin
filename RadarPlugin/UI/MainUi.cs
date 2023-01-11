@@ -53,7 +53,7 @@ public class MainUi : IDisposable
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible, ImGuiWindowFlags.NoResize))
         {
             ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
-                "Radar Plugin. This is basically a hack. Please use with caution.");
+                "Radar Plugin.");
             ImGui.Spacing();
             UiHelpers.DrawTabs("radar-settings-tabs",
                 ("General", UtilInfo.White, DrawGeneralSettings),
@@ -90,7 +90,7 @@ public class MainUi : IDisposable
             "    1. Use tabs to customize experience and fix invisible mobs.\n" +
             "    2. Bring bugs or feature requests up to author\n");
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "Major new update. Please check settings and report bugs.");
+            "v1.4.0.0: Another change in config structure.\nMay or may not destroy some old config.");
         ImGui.TextWrapped(
             "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
@@ -122,7 +122,7 @@ public class MainUi : IDisposable
 
 
         var distanceFromEdge = configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge;
-        if (ImGui.DragFloat($"Distance From Edge{id}", ref distanceFromEdge, 0.2f, 2f, 40f))
+        if (ImGui.DragFloat($"Distance From Edge{id}", ref distanceFromEdge, 0.2f, 2f, 80f))
         {
             configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge = distanceFromEdge;
             configInterface.Save();
@@ -440,6 +440,7 @@ public class MainUi : IDisposable
             configInterface.cfg.ObjectOption.DotSize = objectDotSize;
             configInterface.Save();
         }
+
 
         var showDistance = configInterface.cfg.ObjectOption.DrawDistance;
         if (ImGui.Checkbox($"Append Distance to Name##{objectStr}-distance", ref showDistance))

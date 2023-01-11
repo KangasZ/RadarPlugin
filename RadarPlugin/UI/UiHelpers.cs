@@ -36,13 +36,13 @@ public static class UiHelpers
         Vector2 clampSize,
         out Vector2 clampedPos)
     {
-        ImGuiViewportPtr mainViewport = ImGuiHelpers.MainViewport;
-        Vector2 center = mainViewport.GetCenter();
-        Vector2 vector2_1 = mainViewport.Pos + clampSize;
-        Vector2 vector2_2 = mainViewport.Pos + new Vector2((mainViewport).Size.X - clampSize.X, clampSize.Y);
-        Vector2 vector2_3 = mainViewport.Pos + new Vector2(clampSize.X, (mainViewport).Size.Y - clampSize.Y);
-        Vector2 vector2_4 = mainViewport.Pos + (mainViewport).Size -
-                            clampSize;
+        var mainViewport = ImGuiHelpers.MainViewport;
+        var center = mainViewport.GetCenter();
+        var vector2_1 = mainViewport.Pos + clampSize;
+        var vector2_2 = mainViewport.Pos + new Vector2((mainViewport).Size.X - clampSize.X, clampSize.Y);
+        var vector2_3 = mainViewport.Pos + new Vector2(clampSize.X, (mainViewport).Size.Y - clampSize.Y);
+        var vector2_4 = mainViewport.Pos + (mainViewport).Size -
+                        clampSize;
         bool lines_intersect;
         bool segmentsIntersect1;
         Vector2 intersection1;
@@ -95,12 +95,12 @@ public static class UiHelpers
         out Vector2 closeP1,
         out Vector2 closeP2)
     {
-        float num1 = p2.X - p1.X;
-        float num2 = p2.Y - p1.Y;
-        float num3 = p4.X - p3.X;
-        float num4 = p4.Y - p3.Y;
-        float num5 = (float)((double)num2 * (double)num3 - (double)num1 * (double)num4);
-        float f = (float)(((double)p1.X - (double)p3.X) * (double)num4 + ((double)p3.Y - (double)p1.Y) * (double)num3) /
+        var num1 = p2.X - p1.X;
+        var num2 = p2.Y - p1.Y;
+        var num3 = p4.X - p3.X;
+        var num4 = p4.Y - p3.Y;
+        var num5 = (float)((double)num2 * (double)num3 - (double)num1 * (double)num4);
+        var f = (float)(((double)p1.X - (double)p3.X) * (double)num4 + ((double)p3.Y - (double)p1.Y) * (double)num3) /
                   num5;
         if (float.IsInfinity(f))
         {

@@ -42,7 +42,8 @@ public static class UtilInfo
     public static HashSet<ushort> DeepDungeonMapIds = new()
     {
         561, 562, 563, 564, 565, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, // POTD
-        770, 771, 772, 782, 773, 783, 774, 784, 775, 785 // HOH
+        770, 771, 772, 782, 773, 783, 774, 784, 775, 785, // HOH
+        732, 763, 795, 827 // Eureka (in order)
     };
 
     /**
