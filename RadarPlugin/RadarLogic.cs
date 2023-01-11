@@ -95,7 +95,7 @@ public class RadarLogic : IDisposable
     private bool CheckDraw()
     {
         return conditionInterface[ConditionFlag.LoggingOut] || conditionInterface[ConditionFlag.BetweenAreas] ||
-               conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled ||
+               conditionInterface[ConditionFlag.BetweenAreas51] || !configInterface.cfg.Enabled || conditionInterface[ConditionFlag.PvPDisplayActive] ||
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
