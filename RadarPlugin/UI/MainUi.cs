@@ -313,6 +313,7 @@ public class MainUi : IDisposable
         if (displayType != DisplayTypes.Default)
         {
             configInterface.cfg.PlayerOption.DisplayType = displayType;
+            configInterface.Save();
         }
 
         ImGui.NextColumn();
@@ -353,6 +354,7 @@ public class MainUi : IDisposable
         if (displayType != DisplayTypes.Default)
         {
             configInterface.cfg.NpcOption.DisplayType = displayType;
+            configInterface.Save();
         }
 
         ImGui.NextColumn();
@@ -423,6 +425,7 @@ public class MainUi : IDisposable
         if (displayType != DisplayTypes.Default)
         {
             configInterface.cfg.ObjectOption.DisplayType = displayType;
+            configInterface.Save();
         }
 
         ImGui.NextColumn();
