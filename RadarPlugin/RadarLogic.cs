@@ -416,7 +416,7 @@ public class RadarLogic : IDisposable
                 case ObjectKind.BattleNpc:
                     if (obj is not BattleNpc mob) continue;
                     if (!configInterface.cfg.ShowEnemies) continue;
-                    if (!clientstructobj->GetIsTargetable()) continue;
+                    //if (!clientstructobj->GetIsTargetable()) continue;
                     //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
                     if (mob.IsDead) continue;
