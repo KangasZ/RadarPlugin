@@ -242,6 +242,23 @@ public class RadarLogic : IDisposable
                 position.Z + radius * MathF.Cos(rot)),
             out var originPoint);
 
+        var thickness = 2f;
+
+        //todo: handle CONE
+        //todo: shove opacity into color 
+        var frontColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
+        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI / 2, radius, frontColor,
+            thickness, 50);
+        var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity;
+        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI / 2, MathF.PI / 2, radius,
+            rightColor, thickness, 50);
+        var backColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
+        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI, MathF.PI / 2, radius,
+            backColor, thickness, 50);
+        var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity;
+        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + (MathF.PI*1.5f), MathF.PI / 2, radius,
+            leftColor, thickness, 50);
+
         for (int i = 0; i < numSegments; i++)
         {
             var a = rot - i * segmentAngle;
@@ -311,6 +328,28 @@ public class RadarLogic : IDisposable
         }
 
         imDrawListPtr.PathClear();
+    }
+
+    private void DrawArcAtCenterPointFromRotations(ImDrawListPtr imDrawListPtr, Vector3 originPosition,
+        float rotationStart, float totalRotationCw, float radius, uint color, float thickness, int numSegments)
+    {
+        var rotationPerSegment = totalRotationCw / numSegments;
+
+        for (var i = 0; i < numSegments; i++)
+        {
+            var currentRotation = rotationStart - i * rotationPerSegment;
+            var xValue = radius * MathF.Sin(currentRotation);
+            var yValue = radius * MathF.Cos(currentRotation);
+            var isOnScreen = gameGui.WorldToScreen(
+                new Vector3(originPosition.X + xValue,
+                    originPosition.Y,
+                    originPosition.Z + yValue),
+                out var segmentVectorOnCircle);
+            if (!isOnScreen) continue;
+            imDrawListPtr.PathLineTo(segmentVectorOnCircle);
+        }
+
+        imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
     }
 
     private void BackgroundLoop()
