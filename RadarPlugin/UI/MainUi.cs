@@ -13,7 +13,7 @@ public class MainUi : IDisposable
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible = false;
-    private const int ChildHeight = 240;
+    private const int ChildHeight = 280;
 
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi)
     {
@@ -356,7 +356,21 @@ public class MainUi : IDisposable
             configInterface.cfg.NpcOption.DisplayType = displayType;
             configInterface.Save();
         }
-
+        
+        var HitboxEnabled = configInterface.cfg.HitboxOptions.HitboxEnabled;
+        if (ImGui.Checkbox($"Show Hitbox##{npcStr}-hitbox", ref HitboxEnabled))
+        {
+            configInterface.cfg.HitboxOptions.HitboxEnabled = HitboxEnabled;
+            configInterface.Save();
+        }
+        
+        var hitboxColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.HitboxOptions.HitboxColor);
+        if (ImGui.ColorEdit4($"Color##{npcStr}-hitbox-color", ref hitboxColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.HitboxOptions.HitboxColor = ImGui.ColorConvertFloat4ToU32(hitboxColor);
+            configInterface.Save();
+        }
+        
         ImGui.NextColumn();
         var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.NpcOption.ColorU);
         if (ImGui.ColorEdit4($"Color##{npcStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))

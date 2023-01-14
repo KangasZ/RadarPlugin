@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Utility;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin;
@@ -12,6 +13,12 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class HitboxOptions
+    {
+        public bool HitboxEnabled = false;
+        public uint HitboxColor = UtilInfo.Turquoise;
+    }
+    
     public class OffScreenObjectsOptions
     {
         public float Thickness = 2.2f;
@@ -98,6 +105,7 @@ public class Configuration
         public ESPOption ObjectOption { get; set; } = new(objectOptDefault);
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
+        public HitboxOptions HitboxOptions { get; set; } = new();
     }
 
     public Config cfg;
