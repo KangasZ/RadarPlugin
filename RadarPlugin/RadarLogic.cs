@@ -186,13 +186,12 @@ public class RadarLogic : IDisposable
     private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius, uint color)
     {
         var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
-        var numSegments = 200;
 
         var thickness = 2f;
 
         //todo: handle CONE
         //todo: shove opacity into color 
-        DrawArcAtCenterPointFromRotations(drawListPtr, gameObjectPosition, 0, 2*MathF.PI, gameObjectHitboxRadius, color, thickness, 50);
+        DrawArcAtCenterPointFromRotations(drawListPtr, gameObjectPosition, 0, 2*MathF.PI, gameObjectHitboxRadius, color, thickness, 400);
     }
 
     private void DrawDot(ImDrawListPtr imDrawListPtr, Vector2 position, float radius, uint npcOptColor)
@@ -250,7 +249,7 @@ public class RadarLogic : IDisposable
     {
         var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
         rotation += MathF.PI / 4;
-        var numSegments = 200;
+        var numSegments = 100;
 
         var thickness = 2f;
 
@@ -258,16 +257,16 @@ public class RadarLogic : IDisposable
         //todo: shove opacity into color 
         var frontColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
         DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI / 2, radius, frontColor,
-            thickness, 50);
+            thickness, numSegments);
         var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity;
         DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI / 2, MathF.PI / 2, radius,
-            rightColor, thickness, 50);
+            rightColor, thickness, numSegments);
         var backColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
         DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI, MathF.PI / 2, radius,
-            backColor, thickness, 50);
+            backColor, thickness, numSegments);
         var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity;
         DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + (MathF.PI * 1.5f), MathF.PI / 2, radius,
-            leftColor, thickness, 50);
+            leftColor, thickness, numSegments);
         var coneColor = configInterface.cfg.AggroRadiusOptions.FrontConeColor &
                         configInterface.cfg.AggroRadiusOptions.FrontConeOpacity;
         DrawConeAtCenterPointFromRotation(imDrawListPtr, position, rotation, MathF.PI / 2, radius, coneColor, 50);
@@ -291,10 +290,13 @@ public class RadarLogic : IDisposable
                     originPosition.Y,
                     originPosition.Z + yValue),
                 out segmentVectorOnCircle);
-            if (!isOnScreen) continue;
+            if (!isOnScreen)
+            {
+                imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
+                continue;
+            }
             imDrawListPtr.PathLineTo(segmentVectorOnCircle);
         }
-
         imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
     }
 
