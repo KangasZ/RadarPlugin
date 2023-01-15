@@ -13,7 +13,7 @@ public class MainUi : IDisposable
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible = false;
-    private const int ChildHeight = 240;
+    private const int ChildHeight = 280;
 
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi)
     {
@@ -109,25 +109,52 @@ public class MainUi : IDisposable
             ("NPC", UtilInfo.White, DrawNpcSettings),
             ("Player", UtilInfo.White, DrawPlayerSettings),
             ("Deep Dungeon", UtilInfo.White, DrawDeepDungeonSettings),
-            ("Off Screen Objects", UtilInfo.White, DrawOffScreenObjectSettings)
-
+            ("Misc.", UtilInfo.White, ShowMiscSettings)
         );
         ImGui.EndChild();
     }
 
-    private void DrawOffScreenObjectSettings()
+    private void ShowMiscSettings()
     {
         var id = "##offscreenobjectssettings";
         ImGui.BeginChild($"{id}-child", new Vector2(0, ChildHeight));
+        
+        ImGui.Separator();
+        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
+        ImGui.Text("Hitbox Options");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        var hitboxEnabled = configInterface.cfg.HitboxOptions.HitboxEnabled;
+        if (ImGui.Checkbox($"Show Hitbox{id}-hitbox", ref hitboxEnabled))
+        {
+            configInterface.cfg.HitboxOptions.HitboxEnabled = hitboxEnabled;
+            configInterface.Save();
+        }
 
-
+        var hitboxColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.HitboxOptions.HitboxColor);
+        if (ImGui.ColorEdit4($"Color{id}-hitbox-color", ref hitboxColor, ImGuiColorEditFlags.NoInputs))
+        {
+            configInterface.cfg.HitboxOptions.HitboxColor = ImGui.ColorConvertFloat4ToU32(hitboxColor);
+            configInterface.Save();
+        }
+        ImGui.Separator();
+        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
+        ImGui.Text("Aggro Radius Options");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        DrawAggroCircleSettings();
+        
+        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
+        ImGui.Text("Off Screen Objects Settings");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
         var distanceFromEdge = configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge;
         if (ImGui.DragFloat($"Distance From Edge{id}", ref distanceFromEdge, 0.2f, 2f, 80f))
         {
             configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge = distanceFromEdge;
             configInterface.Save();
         }
-        
+
         var size = configInterface.cfg.OffScreenObjectsOptions.Size;
         if (ImGui.DragFloat($"Size{id}", ref size, 0.1f, 2f, 20f))
         {
@@ -141,14 +168,38 @@ public class MainUi : IDisposable
             configInterface.cfg.OffScreenObjectsOptions.Thickness = thickness;
             configInterface.Save();
         }
-        
-        ImGui.NextColumn();
-        ImGui.EndChild();    }
+        ImGui.EndChild();
+    }
 
     private void DrawAggroCircleSettings()
     {
         var tag = "aggroradiusoptions";
 
+        var showNpcAggroCircle = configInterface.cfg.NpcOption.ShowAggroCircle;
+        if (ImGui.Checkbox($"Aggro Circle##{tag}-settings", ref showNpcAggroCircle))
+        {
+            configInterface.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
+            configInterface.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Draws aggro circle.");
+        }
+
+        var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.NpcOption.ShowAggroCircleInCombat;
+        if (ImGui.Checkbox($"Aggro Circle In Combat##{tag}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
+        {
+            configInterface.cfg.NpcOption.ShowAggroCircleInCombat = onlyShowNpcAggroCircleWhenOutOfCombat;
+            configInterface.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
+        }
+        
         var frontColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.FrontColor);
         if (ImGui.ColorEdit4($"Front##{tag}", ref frontColor, ImGuiColorEditFlags.NoInputs))
         {
@@ -380,36 +431,6 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        var showNpcAggroCircle = configInterface.cfg.NpcOption.ShowAggroCircle;
-        if (ImGui.Checkbox($"Aggro Circle##{npcStr}-settings", ref showNpcAggroCircle))
-        {
-            configInterface.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip("Draws aggro circle.");
-        }
-
-        var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.NpcOption.ShowAggroCircleInCombat;
-        if (ImGui.Checkbox($"Aggro Circle In Combat##{npcStr}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
-        {
-            configInterface.cfg.NpcOption.ShowAggroCircleInCombat = onlyShowNpcAggroCircleWhenOutOfCombat;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
-        }
-
-        if (configInterface.cfg.NpcOption.ShowAggroCircle)
-        {
-            DrawAggroCircleSettings();
-        }
-
         ImGui.EndChild();
     }
 
@@ -504,6 +525,7 @@ public class MainUi : IDisposable
                 "This focuses on giving support to eureka and deep dungeons.\n" +
                 "Will display things such as portals, chests, and traps.");
         }
+
         ImGui.NextColumn();
         var onlyVisible = configInterface.cfg.ShowOnlyVisible;
         if (ImGui.Checkbox("Only Visible", ref onlyVisible))
@@ -517,20 +539,20 @@ public class MainUi : IDisposable
             ImGui.SetTooltip(
                 "Show only visible mobs.\nYou probably don't want to turn this off.\nMay not remove all invisible entities currently. Use the util window.");
         }
-        
+
         var you = configInterface.cfg.ShowYOU;
         if (ImGui.Checkbox("Your Player", ref you))
         {
             configInterface.cfg.ShowYOU = you;
             configInterface.Save();
         }
-        
+
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(
                 "Will show your player character if enabled. Takes player settings.");
         }
-        
+
         var showOffScreen = configInterface.cfg.ShowOffScreen;
         if (ImGui.Checkbox("Show Offscreen Objects", ref showOffScreen))
         {
@@ -543,7 +565,7 @@ public class MainUi : IDisposable
             ImGui.SetTooltip(
                 "Show an arrow to the offscreen enemies.");
         }
-        
+
         ImGui.EndChild();
         ImGui.Separator();
         ImGui.Text("Below this line are things that generally won't be supported");
@@ -570,7 +592,7 @@ public class MainUi : IDisposable
             configInterface.cfg.ShowEvents = events;
             configInterface.Save();
         }
-        
+
         var objHideList = configInterface.cfg.DebugMode;
         if (ImGui.Checkbox("Debug Mode", ref objHideList))
         {
@@ -592,7 +614,7 @@ public class MainUi : IDisposable
             configInterface.cfg.ShowAetherytes = showAetherytes;
             configInterface.Save();
         }
-        
+
 
         var showNameless = configInterface.cfg.ShowNameless;
         if (ImGui.Checkbox("Nameless", ref showNameless))

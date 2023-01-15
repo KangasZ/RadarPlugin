@@ -156,22 +156,42 @@ public class RadarLogic : IDisposable
                 configInterface.cfg.OffScreenObjectsOptions.Thickness);
         }
 
-        if (espOption.ShowAggroCircle && gameObject is BattleNpc npc2)
+        if (gameObject is BattleNpc npc2)
         {
-            if (!espOption.ShowAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
-            if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
+            if (espOption.ShowAggroCircle)
             {
-                DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
-                    gameObject.Rotation,
-                    uint.MaxValue);
+                if (!espOption.ShowAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
+                if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
+                {
+                    DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
+                        gameObject.Rotation,
+                        uint.MaxValue);
+                }
+                else
+                {
+                    DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius,
+                        gameObject.Rotation,
+                        uint.MaxValue);
+                }
             }
-            else
+
+            if (configInterface.cfg.HitboxOptions.HitboxEnabled)
             {
-                DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius,
-                    gameObject.Rotation,
-                    uint.MaxValue);
+                DrawHitbox(drawListPtr, gameObject.Position, gameObject.HitboxRadius,
+                    configInterface.cfg.HitboxOptions.HitboxColor);
             }
         }
+    }
+
+    private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius, uint color)
+    {
+        var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
+
+        var thickness = 2f;
+
+        //todo: handle CONE
+        //todo: shove opacity into color 
+        DrawArcAtCenterPointFromRotations(drawListPtr, gameObjectPosition, 0, 2*MathF.PI, gameObjectHitboxRadius, color, thickness, 400);
     }
 
     private void DrawDot(ImDrawListPtr imDrawListPtr, Vector2 position, float radius, uint npcOptColor)
@@ -229,88 +249,83 @@ public class RadarLogic : IDisposable
     {
         var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
         rotation += MathF.PI / 4;
-        var numSegments = 200;
-        var segmentAngle = 2 * MathF.PI / numSegments;
-        var points = new Vector2[numSegments];
-        var onScreens = new bool[numSegments];
-        var seg = 2 * MathF.PI / numSegments;
-        var rot = rotation + 0 * MathF.PI;
+        var numSegments = 100;
 
-        var originPointOnScreen = gameGui.WorldToScreen(
-            new(position.X + radius * MathF.Sin(rot),
-                position.Y,
-                position.Z + radius * MathF.Cos(rot)),
-            out var originPoint);
+        var thickness = 2f;
 
-        for (int i = 0; i < numSegments; i++)
-        {
-            var a = rot - i * segmentAngle;
-            var onScreen = gameGui.WorldToScreen(
-                new(position.X + radius * MathF.Sin(a),
-                    position.Y,
-                    position.Z + radius * MathF.Cos(a)),
-                out var p);
-            points[i] = p;
-            onScreens[i] = onScreen;
-            if (onScreen)
-            {
-                imDrawListPtr.PathLineTo(p);
-            }
-
-            switch (i)
-            {
-                case 50:
-                    imDrawListPtr
-                        .PathStroke(configInterface.cfg.AggroRadiusOptions.FrontColor & opacity,
-                            ImDrawFlags.RoundCornersAll, 4f);
-                    // this forloop should only happen when cone shows (always right now)
-                    for (int j = 0; j <= 50; j++)
-                    {
-                        imDrawListPtr.PathLineTo(points[j]);
-                    }
-
-                    var centeOnScreen = gameGui.WorldToScreen(
-                        position,
-                        out var centerPosition);
-                    if (centeOnScreen)
-                    {
-                        imDrawListPtr.PathLineTo(centerPosition);
-                    }
-                    else
-                    {
-                        imDrawListPtr.PathClear();
-                    }
-
-                    imDrawListPtr.PathFillConvex(configInterface.cfg.AggroRadiusOptions.FrontConeColor &
-                                                 configInterface.cfg.AggroRadiusOptions
-                                                     .FrontConeOpacity);
-                    imDrawListPtr.PathLineTo(p);
-                    break;
-                case 100:
-                    imDrawListPtr
-                        .PathStroke(configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity,
-                            ImDrawFlags.RoundCornersAll, 2f);
-                    imDrawListPtr.PathLineTo(p);
-                    break;
-                case 150:
-                    imDrawListPtr.PathStroke(configInterface.cfg.AggroRadiusOptions.RearColor & opacity,
-                        ImDrawFlags.RoundCornersAll, 2f);
-                    imDrawListPtr.PathLineTo(p);
-                    break;
-                case 199:
-                    if (originPointOnScreen)
-                    {
-                        imDrawListPtr.PathLineTo(originPoint);
-                    }
-
-                    imDrawListPtr
-                        .PathStroke(configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity,
-                            ImDrawFlags.RoundCornersAll, 2f);
-                    break;
-            }
-        }
+        //todo: handle CONE
+        //todo: shove opacity into color 
+        var frontColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
+        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI / 2, radius, frontColor,
+            thickness, numSegments);
+        var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity;
+        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI / 2, MathF.PI / 2, radius,
+            rightColor, thickness, numSegments);
+        var backColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
+        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI, MathF.PI / 2, radius,
+            backColor, thickness, numSegments);
+        var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity;
+        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + (MathF.PI * 1.5f), MathF.PI / 2, radius,
+            leftColor, thickness, numSegments);
+        var coneColor = configInterface.cfg.AggroRadiusOptions.FrontConeColor &
+                        configInterface.cfg.AggroRadiusOptions.FrontConeOpacity;
+        DrawConeAtCenterPointFromRotation(imDrawListPtr, position, rotation, MathF.PI / 2, radius, coneColor, 50);
 
         imDrawListPtr.PathClear();
+    }
+
+    private void DrawArcAtCenterPointFromRotations(ImDrawListPtr imDrawListPtr, Vector3 originPosition,
+        float rotationStart, float totalRotationCw, float radius, uint color, float thickness, int numSegments)
+    {
+        var rotationPerSegment = totalRotationCw / numSegments;
+        Vector2 segmentVectorOnCircle;
+        bool isOnScreen;
+        for (var i = 0; i <= numSegments; i++)
+        {
+            var currentRotation = rotationStart - i * rotationPerSegment;
+            var xValue = radius * MathF.Sin(currentRotation);
+            var yValue = radius * MathF.Cos(currentRotation);
+            isOnScreen = gameGui.WorldToScreen(
+                new Vector3(originPosition.X + xValue,
+                    originPosition.Y,
+                    originPosition.Z + yValue),
+                out segmentVectorOnCircle);
+            if (!isOnScreen)
+            {
+                imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
+                continue;
+            }
+            imDrawListPtr.PathLineTo(segmentVectorOnCircle);
+        }
+        imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
+    }
+
+    private void DrawConeAtCenterPointFromRotation(ImDrawListPtr imDrawListPtr, Vector3 originPosition,
+        float rotationStart, float totalRotationCw, float radius, uint color, int numSegments)
+    {
+        var rotationPerSegment = totalRotationCw / numSegments;
+        var originOnScreen = gameGui.WorldToScreen(
+            new Vector3(originPosition.X,
+                originPosition.Y,
+                originPosition.Z),
+            out var originPositionOnScreen);
+        if (!originOnScreen) return;
+        imDrawListPtr.PathLineTo(originPositionOnScreen);
+        for (var i = 0; i <= numSegments; i++)
+        {
+            var currentRotation = rotationStart - i * rotationPerSegment;
+            var xValue = radius * MathF.Sin(currentRotation);
+            var yValue = radius * MathF.Cos(currentRotation);
+            var isOnScreen = gameGui.WorldToScreen(
+                new Vector3(originPosition.X + xValue,
+                    originPosition.Y,
+                    originPosition.Z + yValue),
+                out var segmentVectorOnCircle);
+            //if (!isOnScreen) continue;
+            imDrawListPtr.PathLineTo(segmentVectorOnCircle);
+        }
+
+        imDrawListPtr.PathFillConvex(color);
     }
 
     private void BackgroundLoop()
