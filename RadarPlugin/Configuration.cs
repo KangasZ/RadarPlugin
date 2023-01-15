@@ -2,10 +2,6 @@
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Utility;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin;
