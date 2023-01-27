@@ -622,13 +622,24 @@ public class MainUi : IDisposable
             configInterface.cfg.ShowNameless = showNameless;
             configInterface.Save();
         }
-
+        
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(
                 "Show nameless mobs.\nYou probably don't want this enabled.");
         }
 
+        var showCardStand = configInterface.cfg.ShowCardStand;
+        if (ImGui.Checkbox("Card Stand", ref showCardStand))
+        {
+            configInterface.cfg.ShowCardStand = showCardStand;
+            configInterface.Save();
+        }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Show card stand. This includes island sanctuary stuff (mostly).");
+        }
         ImGui.EndChild();
     }
 

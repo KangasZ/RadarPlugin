@@ -425,7 +425,6 @@ public class RadarLogic : IDisposable
                     break;
                 case ObjectKind.Player:
                     if (!configInterface.cfg.ShowPlayers) continue;
-                    //if (obj is not PlayerCharacter chara) continue;
                     nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.BattleNpc:
@@ -450,6 +449,8 @@ public class RadarLogic : IDisposable
                 case ObjectKind.Cutscene:
                     break;
                 case ObjectKind.CardStand:
+                    if (!configInterface.cfg.ShowCardStand) continue;
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 default:
                     break;

@@ -89,6 +89,7 @@ public class Configuration
         public bool ShowEventNpc { get; set; } = false;
         public bool ShowAreaObjects { get; set; } = false;
         public bool ShowAetherytes { get; set; } = false;
+        public bool ShowCardStand { get; set; } = false;
         public bool ShowNameless { get; set; } = false;
         public bool ShowOnlyVisible { get; set; } = true;
         public bool ShowYOU { get; set; } = false;
