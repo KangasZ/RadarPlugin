@@ -159,7 +159,7 @@ public class RadarHelpers
                 return configInterface.cfg.CardStandOption;
             case ObjectKind.None:
             default:
-                return configInterface.cfg.ObjectOption;
+                return configInterface.cfg.TreasureOption;
         }
     }
 }

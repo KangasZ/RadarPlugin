@@ -467,46 +467,44 @@ public class MainUi : IDisposable
 
     private void DrawObjectSettings()
     {
-        var objectStr = "object";
-
-        ImGui.BeginChild($"##{objectStr}-radar-tabs-child", new Vector2(0, ChildHeight));
-        ImGui.Columns(2, $"##{objectStr}-settings-columns", false);
-
-        var displayType = DrawDisplayTypesEnumListBox("Display Type", $"##display-type-{objectStr}", MobType.Object,
-            (int)configInterface.cfg.ObjectOption.DisplayType);
-        if (displayType != DisplayTypes.Default)
-        {
-            configInterface.cfg.ObjectOption.DisplayType = displayType;
-            configInterface.Save();
-        }
-
-        ImGui.NextColumn();
-        var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.ObjectOption.ColorU);
-        if (ImGui.ColorEdit4($"Color##{objectStr}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.ObjectOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
-            configInterface.Save();
-        }
-
-        var objectDotSize = configInterface.cfg.ObjectOption.DotSize;
-        if (ImGui.SliderFloat($"Dot Size##{objectStr}-settings", ref objectDotSize, UtilInfo.MinDotSize,
-                UtilInfo.MaxDotSize))
-        {
-            configInterface.cfg.ObjectOption.DotSize = objectDotSize;
-            configInterface.Save();
-        }
-
-
-        var showDistance = configInterface.cfg.ObjectOption.DrawDistance;
-        if (ImGui.Checkbox($"Append Distance to Name##{objectStr}-distance", ref showDistance))
-        {
-            configInterface.cfg.ObjectOption.DrawDistance = showDistance;
-            configInterface.Save();
-        }
-
-        ImGui.EndChild();
+        DrawTypeSettings(configInterface.cfg.TreasureOption, "Loot", MobType.Object);
+        
     }
 
+    private void DrawTypeSettings(Configuration.ESPOption option, string id, MobType mobType)
+    {
+        var displayType = DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType,
+            (int)option.DisplayType);
+        if (displayType != DisplayTypes.Default)
+        {
+            option.DisplayType = displayType;
+            configInterface.Save();
+        }
+        
+        var colorChange = ImGui.ColorConvertU32ToFloat4(option.ColorU);
+        if (ImGui.ColorEdit4($"Color##{id}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+        {
+            option.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+            configInterface.Save();
+        }
+
+        var objectDotSize = option.DotSize;
+        if (ImGui.SliderFloat($"Dot Size##{id}-dot-size", ref objectDotSize, UtilInfo.MinDotSize,
+                UtilInfo.MaxDotSize))
+        {
+            option.DotSize = objectDotSize;
+            configInterface.Save();
+        }
+
+
+        var showDistance = option.DrawDistance;
+        if (ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref showDistance))
+        {
+            option.DrawDistance = showDistance;
+            configInterface.Save();
+        }
+    }
+    
     private void DrawVisibilitySettings()
     {
         UiHelpers.DrawTabs("radar-visibility-tabs",
@@ -839,7 +837,7 @@ public class MainUi : IDisposable
         {
             case MobType.Object:
                 ImGui.PushItemWidth(175);
-                var lb = ImGui.ListBox($"##{id}",
+                var lb = ImGui.Combo($"##{id}",
                     ref val,
                     new string[]
                     {
@@ -868,7 +866,7 @@ public class MainUi : IDisposable
                 break;
             case MobType.Character:
                 ImGui.PushItemWidth(175);
-                var lb2 = ImGui.ListBox($"##{id}",
+                var lb2 = ImGui.Combo($"##{id}",
                     ref val,
                     new string[]
                     {
