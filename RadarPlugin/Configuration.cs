@@ -90,6 +90,11 @@ public class Configuration
         public bool ShowAreaObjects { get; set; } = false;
         public bool ShowAetherytes { get; set; } = false;
         public bool ShowCardStand { get; set; } = false;
+        public bool ShowGatheringPoint { get; set; } = false;
+        public bool ShowMountType { get; set; } = false;
+        public bool ShowRetainer { get; set; } = false;
+        public bool ShowHousing { get; set; } = false;
+        public bool ShowCutscene { get; set; } = false;
         public bool ShowNameless { get; set; } = false;
         public bool ShowOnlyVisible { get; set; } = true;
         public bool ShowYOU { get; set; } = false;
@@ -100,6 +105,19 @@ public class Configuration
         public ESPOption NpcOption { get; set; } = new(mobOptDefault);
         public ESPOption PlayerOption { get; set; } = new(playerOptDefault);
         public ESPOption ObjectOption { get; set; } = new(objectOptDefault);
+        public ESPOption TreasureOption { get; set; } = new(objectOptDefault);
+        public ESPOption CompanionOption { get; set; } = new(objectOptDefault);
+        public ESPOption AreaOption { get; set; } = new(objectOptDefault);
+        public ESPOption AetheryteOption { get; set; } = new(objectOptDefault);
+        public ESPOption EventNpcOption { get; set; } = new(objectOptDefault);
+        public ESPOption EventObjOption { get; set; } = new(objectOptDefault);
+        public ESPOption GatheringPointOption { get; set; } = new(objectOptDefault);
+        public ESPOption MountOption { get; set; } = new(objectOptDefault);
+        public ESPOption RetainerOption { get; set; } = new(objectOptDefault);
+        public ESPOption HousingOption { get; set; } = new(objectOptDefault);
+        public ESPOption CutsceneOption { get; set; } = new(objectOptDefault);
+        public ESPOption CardStandOption { get; set; } = new(objectOptDefault);
+
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
         public HitboxOptions HitboxOptions { get; set; } = new();

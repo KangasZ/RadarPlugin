@@ -183,7 +183,8 @@ public class RadarLogic : IDisposable
         }
     }
 
-    private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius, uint color)
+    private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius,
+        uint color)
     {
         var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
 
@@ -191,7 +192,8 @@ public class RadarLogic : IDisposable
 
         //todo: handle CONE
         //todo: shove opacity into color 
-        DrawArcAtCenterPointFromRotations(drawListPtr, gameObjectPosition, 0, 2*MathF.PI, gameObjectHitboxRadius, color, thickness, 400);
+        DrawArcAtCenterPointFromRotations(drawListPtr, gameObjectPosition, 0, 2 * MathF.PI, gameObjectHitboxRadius,
+            color, thickness, 400);
     }
 
     private void DrawDot(ImDrawListPtr imDrawListPtr, Vector2 position, float radius, uint npcOptColor)
@@ -295,8 +297,10 @@ public class RadarLogic : IDisposable
                 imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
                 continue;
             }
+
             imDrawListPtr.PathLineTo(segmentVectorOnCircle);
         }
+
         imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
     }
 
@@ -428,8 +432,8 @@ public class RadarLogic : IDisposable
                     nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.BattleNpc:
-                    if (obj is not BattleNpc mob) continue;
                     if (!configInterface.cfg.ShowEnemies) continue;
+                    if (obj is not BattleNpc mob) continue;
                     //if (!clientstructobj->GetIsTargetable()) continue;
                     //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
                     if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
@@ -439,14 +443,24 @@ public class RadarLogic : IDisposable
                     nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.GatheringPoint:
+                    if (!configInterface.cfg.ShowGatheringPoint) continue;
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.MountType:
+                    if (!configInterface.cfg.ShowMountType) continue;
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.Retainer:
+                    if (!configInterface.cfg.ShowRetainer) continue;
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.Housing:
+                    if (!configInterface.cfg.ShowHousing) continue;
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.Cutscene:
+                    if (!configInterface.cfg.ShowCutscene) continue;
+                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
                     break;
                 case ObjectKind.CardStand:
                     if (!configInterface.cfg.ShowCardStand) continue;

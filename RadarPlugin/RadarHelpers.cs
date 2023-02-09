@@ -45,11 +45,13 @@ public class RadarHelpers
 
     public uint GetColor(GameObject gameObject)
     {
+        // Override over all
         if (configInterface.cfg.ColorOverride.ContainsKey(gameObject.DataId))
         {
             return configInterface.cfg.ColorOverride[gameObject.DataId];
         }
 
+        // If Deep Dungeon
         if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId) &&
             UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
             gameObject.ObjectKind != ObjectKind.Player)
@@ -86,25 +88,38 @@ public class RadarHelpers
             return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
         }
 
+        // Finally if nothing else
         switch (gameObject.ObjectKind)
         {
             case ObjectKind.Player:
                 return configInterface.cfg.PlayerOption.ColorU;
             case ObjectKind.BattleNpc:
                 return configInterface.cfg.NpcOption.ColorU;
-            case ObjectKind.None:
             case ObjectKind.EventNpc:
+                return configInterface.cfg.EventNpcOption.ColorU;
             case ObjectKind.Treasure:
+                return configInterface.cfg.TreasureOption.ColorU;
             case ObjectKind.Aetheryte:
+                return configInterface.cfg.AetheryteOption.ColorU;
             case ObjectKind.GatheringPoint:
+                return configInterface.cfg.GatheringPointOption.ColorU;
             case ObjectKind.EventObj:
+                return configInterface.cfg.EventObjOption.ColorU;
             case ObjectKind.MountType:
+                return configInterface.cfg.MountOption.ColorU;
             case ObjectKind.Companion:
+                return configInterface.cfg.CompanionOption.ColorU;
             case ObjectKind.Retainer:
+                return configInterface.cfg.RetainerOption.ColorU;
             case ObjectKind.Area:
+                return configInterface.cfg.AreaOption.ColorU;
             case ObjectKind.Housing:
+                return configInterface.cfg.HousingOption.ColorU;
             case ObjectKind.Cutscene:
+                return configInterface.cfg.CutsceneOption.ColorU;
             case ObjectKind.CardStand:
+                return configInterface.cfg.CardStandOption.ColorU;
+            case ObjectKind.None:
             default:
                 return configInterface.cfg.ObjectOption.ColorU;
         }
@@ -118,21 +133,33 @@ public class RadarHelpers
                 return configInterface.cfg.PlayerOption;
             case ObjectKind.BattleNpc:
                 return configInterface.cfg.NpcOption;
-            case ObjectKind.None:
             case ObjectKind.EventNpc:
+                return configInterface.cfg.EventNpcOption;
             case ObjectKind.Treasure:
+                return configInterface.cfg.TreasureOption;
             case ObjectKind.Aetheryte:
+                return configInterface.cfg.AetheryteOption;
             case ObjectKind.GatheringPoint:
+                return configInterface.cfg.GatheringPointOption;
             case ObjectKind.EventObj:
+                return configInterface.cfg.EventObjOption;
             case ObjectKind.MountType:
+                return configInterface.cfg.MountOption;
             case ObjectKind.Companion:
+                return configInterface.cfg.CompanionOption;
             case ObjectKind.Retainer:
+                return configInterface.cfg.RetainerOption;
             case ObjectKind.Area:
+                return configInterface.cfg.AreaOption;
             case ObjectKind.Housing:
+                return configInterface.cfg.HousingOption;
             case ObjectKind.Cutscene:
+                return configInterface.cfg.CutsceneOption;
             case ObjectKind.CardStand:
+                return configInterface.cfg.CardStandOption;
+            case ObjectKind.None:
             default:
-                return configInterface.cfg.ObjectOption;
+                return configInterface.cfg.TreasureOption;
         }
     }
 }
