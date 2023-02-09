@@ -421,11 +421,7 @@ public class MainUi : IDisposable
 
     private void DrawTypeSettings(Configuration.ESPOption option, string id, MobType mobType)
     {
-        ImGui.Separator();
-        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
-        ImGui.Text($"{id} Options");
-        ImGui.PopStyleColor();
-        ImGui.Separator();
+        DrawSeperator($"{id} Options", UtilInfo.Red);
         ImGui.BeginChild($"##radar-settings-tabs-child-{id}", new Vector2(0, 75));
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
         
