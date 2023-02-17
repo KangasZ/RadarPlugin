@@ -20,6 +20,87 @@ public class RadarHelpers
         this.configInterface = configInterface;
     }
 
+
+    public unsafe bool ShouldRender(GameObject obj)
+    {
+        if (configInterface.cfg.DebugMode)
+        {
+            return true;
+        }
+
+        if (clientState.LocalPlayer != null && obj.Address == clientState.LocalPlayer.Address)
+        {
+            return configInterface.cfg.ShowYOU;
+        }
+
+        if (configInterface.cfg.ShowBaDdObjects)
+        {
+            // TODO: Check if we need to swap this out with a seperte eureka and potd list
+            if (UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) && (
+                    UtilInfo.RenameList.ContainsKey(obj.DataId) ||
+                    UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
+            {
+                return true;
+            }
+        }
+
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
+        if (this.configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
+        {
+            return false;
+        }
+
+        if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+        switch (obj.ObjectKind)
+        {
+            case ObjectKind.Treasure:
+                return configInterface.cfg.ShowLoot;
+            case ObjectKind.Companion:
+                return configInterface.cfg.ShowCompanion;
+            case ObjectKind.Area:
+                return configInterface.cfg.ShowAreaObjects;
+            case ObjectKind.Aetheryte:
+                return configInterface.cfg.ShowAetherytes;
+            case ObjectKind.EventNpc:
+                return configInterface.cfg.ShowEventNpc;
+            case ObjectKind.EventObj:
+                return configInterface.cfg.ShowEvents;
+            case ObjectKind.None:
+                break;
+            case ObjectKind.Player:
+                return configInterface.cfg.ShowPlayers;
+            case ObjectKind.BattleNpc:
+                if (!configInterface.cfg.ShowEnemies) return false;
+                if (obj is not BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
+                    return false; // This should never trigger
+                //if (!clientstructobj->GetIsTargetable()) continue;
+                //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
+                if (mob.IsDead) return false;
+                if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
+                    configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) return false;
+                return true;
+                break;
+            case ObjectKind.GatheringPoint:
+                return configInterface.cfg.ShowGatheringPoint;
+                break;
+            case ObjectKind.MountType:
+                return configInterface.cfg.ShowMountType;
+            case ObjectKind.Retainer:
+                return configInterface.cfg.ShowRetainer;
+            case ObjectKind.Housing:
+                return configInterface.cfg.ShowHousing;
+            case ObjectKind.Cutscene:
+                return configInterface.cfg.ShowCutscene;
+            case ObjectKind.CardStand:
+                return configInterface.cfg.ShowCardStand;
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+
     /**
      * TODO: Refactor this to be done once per second instead of on each render.
      */
