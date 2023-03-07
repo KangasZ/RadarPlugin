@@ -122,6 +122,8 @@ public class MainUi : IDisposable
     private void Draw3DRadarSettings()
     {
         ImGui.BeginChild($"##radar-settings-tabs-child");
+        ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
+            "THE ENABLED BUTTONS DO NOT HAVE ANY USE HERE");
         UiHelpers.DrawTabs("radar-3d-settings-tabs",
             ("Players and Npcs", UtilInfo.White, DrawPlayerNpcSettings),
             ("Objects", UtilInfo.White, DrawObjectSettings),
