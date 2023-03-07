@@ -42,7 +42,8 @@ public static class UtilInfo
     {
         561, 562, 563, 564, 565, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, // POTD
         770, 771, 772, 782, 773, 783, 774, 784, 775, 785, // HOH
-        732, 763, 795, 827 // Eureka (in order)
+        732, 763, 795, 827, // Eureka (in order)
+        1099, // Orthos in order
     };
 
     /**
@@ -110,6 +111,9 @@ public static class UtilInfo
         { 1048, "Bronze Coffer" },
         { 1049, "Bronze Coffer" },
 
+        // Eureka Orthos Bronze Coffers
+        { 1541, "Bronze Coffer" },
+
         // Mimics
         { 2006020, "Mimic Coffer" },
         { 2566, "Mimic" },
@@ -133,6 +137,7 @@ public static class UtilInfo
         { 2007185, "Impeding Trap" },
         { 2007186, "Toading Trap" },
         { 2009504, "Odder Trap" },
+        { 2013284, "Owlet Trap" },
 
         // BA Objects
         { 2009728, "Trap" }, // Eureka Portal,
@@ -154,10 +159,12 @@ public static class UtilInfo
         // Returns
         { 2007187, DeepDungeonMobTypes.Return },
         { 2009506, DeepDungeonMobTypes.Return },
+        { 2013286, DeepDungeonMobTypes.Return },
 
         // Passage
         { 2007188, DeepDungeonMobTypes.Passage },
         { 2009507, DeepDungeonMobTypes.Passage },
+        { 2013287, DeepDungeonMobTypes.Passage },
 
         // Bronze Coffers
         // Potd Bronze Coffers
@@ -191,6 +198,9 @@ public static class UtilInfo
         { 1048, DeepDungeonMobTypes.BronzeChest },
         { 1049, DeepDungeonMobTypes.BronzeChest },
 
+        // Eureka Orthos Bronze Coffers
+        { 1541, DeepDungeonMobTypes.BronzeChest },
+
         // Coffers
         { 2007358, DeepDungeonMobTypes.GoldChest },
         { 2007357, DeepDungeonMobTypes.SilverChest },
@@ -203,6 +213,7 @@ public static class UtilInfo
         { 2007185, DeepDungeonMobTypes.Traps },
         { 2007186, DeepDungeonMobTypes.Traps },
         { 2009504, DeepDungeonMobTypes.Traps },
+        { 2013284, DeepDungeonMobTypes.Traps },
 
         //Easy Mobs
         { 5041, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi

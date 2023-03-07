@@ -1,6 +1,7 @@
 ﻿using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -358,118 +359,21 @@ public class RadarLogic : IDisposable
         }
     }
 
-    private unsafe void UpdateMobInfo()
+    private void UpdateMobInfo()
     {
-        var nearbyMobs = new List<(GameObject, uint, string)>();
-        foreach (var obj in objectTable)
-        {
-            if (!obj.IsValid()) continue;
-            var espOption = radarHelpers.GetParams(obj);
-            if (configInterface.cfg.DebugMode)
-            {
-                nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                continue;
-            }
-
-            if (clientState.LocalPlayer != null && obj.Address == clientState.LocalPlayer.Address)
-            {
-                if (configInterface.cfg.ShowYOU)
-                {
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                }
-
-                continue;
-            }
-
-            if (configInterface.cfg.ShowBaDdObjects)
-            {
-                // TODO: Check if we need to swap this out with a seperte eureka and potd list
-                if (UtilInfo.RenameList.ContainsKey(obj.DataId) ||
-                    UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
-                {
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    continue;
-                }
-            }
-
-            var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
-            if (this.configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
-            {
-                continue;
-            }
-
-            if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) continue;
-            switch (obj.ObjectKind)
-            {
-                case ObjectKind.Treasure:
-                    if (!configInterface.cfg.ShowLoot) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.Companion:
-                    if (!configInterface.cfg.ShowCompanion) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.Area:
-                    if (!configInterface.cfg.ShowAreaObjects) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.Aetheryte:
-                    if (!configInterface.cfg.ShowAetherytes) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.EventNpc:
-                    if (!configInterface.cfg.ShowEventNpc) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.EventObj:
-                    if (!configInterface.cfg.ShowEvents) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.None:
-                    break;
-                case ObjectKind.Player:
-                    if (!configInterface.cfg.ShowPlayers) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.BattleNpc:
-                    if (!configInterface.cfg.ShowEnemies) continue;
-                    if (obj is not BattleNpc mob) continue;
-                    //if (!clientstructobj->GetIsTargetable()) continue;
-                    //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-                    if (mob.BattleNpcKind != BattleNpcSubKind.Enemy) continue;
-                    if (mob.IsDead) continue;
-                    if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
-                        configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.GatheringPoint:
-                    if (!configInterface.cfg.ShowGatheringPoint) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.MountType:
-                    if (!configInterface.cfg.ShowMountType) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.Retainer:
-                    if (!configInterface.cfg.ShowRetainer) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.Housing:
-                    if (!configInterface.cfg.ShowHousing) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.Cutscene:
-                    if (!configInterface.cfg.ShowCutscene) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                case ObjectKind.CardStand:
-                    if (!configInterface.cfg.ShowCardStand) continue;
-                    nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-                    break;
-                default:
-                    break;
-            }
-        }
+        var nearbyMobs = objectTable
+            .Where(obj => obj.IsValid() && radarHelpers.ShouldRender(obj))
+            .Select(obj => (obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj))).ToList();
+        /*
+         *foreach (var obj in objectTable)
+         *{
+         *  if (!obj.IsValid()) continue;
+         *  if (radarHelpers.ShouldRender(obj))
+         *  {
+         *      nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
+         *  }
+         *}
+         */
 
         Monitor.Enter(areaObjects);
         areaObjects.Clear();

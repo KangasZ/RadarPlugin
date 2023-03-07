@@ -1,6 +1,7 @@
 ﻿using System;
 using ImGuiNET;
 using System.Numerics;
+using Dalamud.Game.ClientState;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using RadarPlugin.Enums;
@@ -13,10 +14,13 @@ public class MainUi : IDisposable
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible = false;
+    private readonly ClientState clientState;
     private const int ChildHeight = 280;
 
-    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi)
+    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi,
+        ClientState clientState)
     {
+        this.clientState = clientState;
         this.localMobsUi = localMobsUi;
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
@@ -55,7 +59,8 @@ public class MainUi : IDisposable
             UiHelpers.DrawTabs("radar-settings-tabs",
                 ("General", UtilInfo.White, DrawGeneralSettings),
                 ("Visibility", UtilInfo.Red, DrawVisibilitySettings),
-                ("3-D Settings", UtilInfo.Green, Draw3DRadarSettings),
+                ("Overworld", UtilInfo.Green, Draw3DRadarSettings),
+                ("Deep Dungeon", UtilInfo.Yellow, DrawDeepDungeonVisibilitySettings),
                 ("Utility", UtilInfo.White, DrawUtilityTab)
             );
         }
@@ -65,6 +70,7 @@ public class MainUi : IDisposable
 
     private void DrawUtilityTab()
     {
+        ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         if (ImGui.Button("Load Current Objects"))
         {
             PluginLog.Debug("Pulling Area Objects");
@@ -97,12 +103,12 @@ public class MainUi : IDisposable
                 "Will display things such as portals, chests, and traps.");
         }
 
+        ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
+            "v1.5.1.0: Deep dungeon config may be overwritten.");
 
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
             "    1. Use tabs to customize experience and fix invisible mobs.\n" +
             "    2. Bring bugs or feature requests up to author\n");
-        ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "v1.4.0.0: Another change in config structure.\nMay or may not destroy some old config.");
         ImGui.TextWrapped(
             "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
@@ -116,11 +122,12 @@ public class MainUi : IDisposable
     private void Draw3DRadarSettings()
     {
         ImGui.BeginChild($"##radar-settings-tabs-child");
+        ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
+            "THE ENABLED BUTTONS DO NOT HAVE ANY USE HERE");
         UiHelpers.DrawTabs("radar-3d-settings-tabs",
             ("Players and Npcs", UtilInfo.White, DrawPlayerNpcSettings),
             ("Objects", UtilInfo.White, DrawObjectSettings),
-            ("Misc", UtilInfo.White, DrawMiscSettings),
-            ("Generic", UtilInfo.White, ShowMiscSettings)
+            ("Misc", UtilInfo.White, DrawMiscSettings)
         );
         ImGui.EndChild();
     }
@@ -128,10 +135,52 @@ public class MainUi : IDisposable
     private void DrawVisibilitySettings()
     {
         UiHelpers.DrawTabs("radar-visibility-tabs",
-            ("General Visibility", UtilInfo.White, DrawGeneralVisibilitySettings),
-            ("Deep Dungeon Visibility", UtilInfo.Red, DrawDeepDungeonVisibilitySettings),
+            ("Overworld", UtilInfo.Green, DrawGeneralVisibilitySettings),
+            ("Deep Dungeons", UtilInfo.Yellow, DrawDeepDungeonOverviewSettings),
+            ("Additional Features", UtilInfo.White, ShowMiscSettings),
             ("Advanced Visibility", UtilInfo.White, DrawAdvancedVisibilitySettings)
         );
+    }
+
+    private void DrawDeepDungeonOverviewSettings()
+    {
+        DrawSeperator($"Enemies Options", UtilInfo.Red);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Auspice");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic");
+        
+        DrawSeperator($"Loot Options", UtilInfo.Red);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard");
+
+        
+        DrawSeperator($"DD Specific Options", UtilInfo.Red);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage");
+    }
+
+    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag)
+    {
+        var color = ImGui.ColorConvertU32ToFloat4(espOption.ColorU);
+        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-{tag}", ref color,
+                ImGuiColorEditFlags.NoInputs))
+        {
+            espOption.ColorU = ImGui.ColorConvertFloat4ToU32(color);
+            configInterface.Save();
+        }
+
+        ImGui.SameLine();
+        var enabled = espOption.Enabled;
+        if (ImGui.Checkbox($"{tag}##enabled-{tag}", ref enabled))
+        {
+            espOption.Enabled = enabled;
+            configInterface.Save();
+        }
+        
     }
 
     private void ShowMiscSettings()
@@ -288,110 +337,37 @@ public class MainUi : IDisposable
 
     private void DrawDeepDungeonVisibilitySettings()
     {
-        var tag = "deepdungeonmobtypecloroptions";
-        ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "This is only color, currently!\n" +
-            "Any other settings will inherit from the default config!\n" +
-            "If you want to disable a specific custom category,\nset the opacity to 0.\n" +
-            "This can be done in the A (alpha) in the RGBA selector.");
-        ImGui.BeginChild($"##{tag}-deep-dungeon-settings-child", new Vector2(0, ChildHeight));
-        ImGui.Columns(2, $"##{tag}-settings-columns", false);
-        var defaultColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Default);
-        if (ImGui.ColorEdit4($"Default##{tag}", ref defaultColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Default = ImGui.ColorConvertFloat4ToU32(defaultColor);
-            configInterface.Save();
-        }
-
-        var specialUndeadColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.SpecialUndead);
-        if (ImGui.ColorEdit4($"Special Undead##{tag}", ref specialUndeadColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.SpecialUndead =
-                ImGui.ColorConvertFloat4ToU32(specialUndeadColor);
-            configInterface.Save();
-        }
-
-        var auspiceColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Auspice);
-        if (ImGui.ColorEdit4($"Auspice##{tag}", ref auspiceColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Auspice = ImGui.ColorConvertFloat4ToU32(auspiceColor);
-            configInterface.Save();
-        }
-
-        var easyMobsColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.EasyMobs);
-        if (ImGui.ColorEdit4($"Easy Mobs##{tag}", ref easyMobsColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.EasyMobs = ImGui.ColorConvertFloat4ToU32(easyMobsColor);
-            configInterface.Save();
-        }
-
-        var trapsColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps);
-        if (ImGui.ColorEdit4($"Traps##{tag}", ref trapsColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps = ImGui.ColorConvertFloat4ToU32(trapsColor);
-            configInterface.Save();
-        }
-
-        var returnColors = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Return);
-        if (ImGui.ColorEdit4($"Returns##{tag}", ref returnColors, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Return = ImGui.ColorConvertFloat4ToU32(returnColors);
-            configInterface.Save();
-        }
-
-        var passageColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage);
-        if (ImGui.ColorEdit4($"Passages##{tag}", ref passageColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage = ImGui.ColorConvertFloat4ToU32(passageColor);
-            configInterface.Save();
-        }
-
-        ImGui.NextColumn();
-        var goldChestColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest);
-        if (ImGui.ColorEdit4($"Gold Chest##{tag}", ref goldChestColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest =
-                ImGui.ColorConvertFloat4ToU32(goldChestColor);
-            configInterface.Save();
-        }
-
-        var silverChestColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest);
-        if (ImGui.ColorEdit4($"Silver Chest##{tag}", ref silverChestColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest =
-                ImGui.ColorConvertFloat4ToU32(silverChestColor);
-            configInterface.Save();
-        }
-
-        var bronzeChestColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest);
-        if (ImGui.ColorEdit4($"Bronze Chest##{tag}", ref bronzeChestColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest =
-                ImGui.ColorConvertFloat4ToU32(bronzeChestColor);
-            configInterface.Save();
-        }
-
-        var mimicColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic);
-        if (ImGui.ColorEdit4($"Mimics##{tag}", ref mimicColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic = ImGui.ColorConvertFloat4ToU32(mimicColor);
-            configInterface.Save();
-        }
-
-        var accursedHoardColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard);
-        if (ImGui.ColorEdit4($"Accursed Hoard##{tag}", ref accursedHoardColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard =
-                ImGui.ColorConvertFloat4ToU32(accursedHoardColor);
-            configInterface.Save();
-        }
-
+        ImGui.BeginChild($"##radar-deep-dungeon-settings-tabs-child");
+        UiHelpers.DrawTabs("radar-deep-dungeons-3d-settings-tabs",
+            ("Mobs", UtilInfo.White, DrawDDMobSettings),
+            ("Loot", UtilInfo.White, DrawDDLootSettings),
+            ("DD Specific", UtilInfo.White, DrawDDEntitiesSettings)
+        );
         ImGui.EndChild();
+    }
+
+    private void DrawDDEntitiesSettings()
+    {
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", MobType.Object);
+    }
+
+    private void DrawDDLootSettings()
+    {
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard", MobType.Object);
+    }
+
+    private void DrawDDMobSettings()
+    {
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
+            MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Auspice", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
     }
 
     private void DrawPlayerNpcSettings()
@@ -422,16 +398,16 @@ public class MainUi : IDisposable
     private void DrawTypeSettings(Configuration.ESPOption option, string id, MobType mobType)
     {
         DrawSeperator($"{id} Options", UtilInfo.Red);
-        ImGui.BeginChild($"##radar-settings-tabs-child-{id}", new Vector2(0, 75));
+        ImGui.BeginChild($"##radar-settings-tabs-child-{id}", new Vector2(0, 78));
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
         
-        var colorChange = ImGui.ColorConvertU32ToFloat4(option.ColorU);
-        if (ImGui.ColorEdit4($"Color##{id}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+        var enabled = option.Enabled;
+        if (ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref enabled))
         {
-            option.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+            option.Enabled = enabled;
             configInterface.Save();
         }
-        
+
         var displayType = DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType,
             (int)option.DisplayType);
         if (displayType != DisplayTypes.Default)
@@ -439,8 +415,15 @@ public class MainUi : IDisposable
             option.DisplayType = displayType;
             configInterface.Save();
         }
-        
+
         ImGui.NextColumn();
+        var colorChange = ImGui.ColorConvertU32ToFloat4(option.ColorU);
+        if (ImGui.ColorEdit4($"Color##{id}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
+        {
+            option.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+            configInterface.Save();
+        }
+        
         var objectDotSize = option.DotSize;
         if (ImGui.SliderFloat($"Dot Size##{id}-dot-size", ref objectDotSize, UtilInfo.MinDotSize,
                 UtilInfo.MaxDotSize))
@@ -456,6 +439,7 @@ public class MainUi : IDisposable
             option.DrawDistance = showDistance;
             configInterface.Save();
         }
+
         ImGui.EndChild();
     }
 
@@ -506,7 +490,6 @@ public class MainUi : IDisposable
     private void DrawGeneralVisibilitySettings()
     {
         ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
-
 
         DrawSeperator("Players and Npcs", UtilInfo.Red);
 
@@ -780,7 +763,7 @@ public class MainUi : IDisposable
             ImGui.SetTooltip(
                 "Shows mounts. Gets a little cluttered");
         }
-        
+
         ImGui.EndChild();
     }
 
@@ -792,7 +775,7 @@ public class MainUi : IDisposable
         ImGui.PopStyleColor();
         ImGui.Separator();
     }
-    
+
     public DisplayTypes DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, int currVal)
     {
         var val = currVal;

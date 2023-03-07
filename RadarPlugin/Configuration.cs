@@ -38,6 +38,21 @@ public class Configuration
         public uint AccursedHoard = UtilInfo.Turquoise;
     }
 
+    public class DeepDungeonOptions
+    {
+        public ESPOption SpecialUndeadOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Yellow};
+        public ESPOption AuspiceOption { get; set; } = new(mobOptDefault)  { ColorU = UtilInfo.Green};
+        public ESPOption EasyMobOption { get; set; } = new(mobOptDefault)  { ColorU = UtilInfo.LightBlue};
+        public ESPOption TrapOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Orange};
+        public ESPOption ReturnOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Blue };
+        public ESPOption PassageOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Blue};
+        public ESPOption GoldChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Gold};
+        public ESPOption SilverChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Silver};
+        public ESPOption BronzeChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Bronze};
+        public ESPOption MimicOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Red};
+        public ESPOption AccursedHoardOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Turquoise};
+    }
+
     public class AggroRadiusOptions
     {
         public uint FrontColor = UtilInfo.Red;
@@ -57,6 +72,7 @@ public class Configuration
         // Copy Constructor
         public ESPOption(ESPOption espOption)
         {
+            Enabled = espOption.Enabled;
             DisplayType = espOption.DisplayType;
             DotSize = espOption.DotSize;
             ColorU = espOption.ColorU;
@@ -66,6 +82,7 @@ public class Configuration
             DrawDistance = espOption.DrawDistance;
         }
 
+        public bool Enabled = true;
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public float DotSize = 2.2f;
         public uint ColorU = 0xffffffff;
@@ -100,7 +117,7 @@ public class Configuration
         public bool ShowYOU { get; set; } = false;
         public bool ShowOffScreen { get; set; } = true;
         public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
-        public DeepDungeonMobTypeColorOptions DeepDungeonMobTypeColorOptions { get; set; } = new();
+        public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public ESPOption NpcOption { get; set; } = new(mobOptDefault);
         public ESPOption PlayerOption { get; set; } = new(playerOptDefault);
@@ -117,7 +134,6 @@ public class Configuration
         public ESPOption HousingOption { get; set; } = new(objectOptDefault);
         public ESPOption CutsceneOption { get; set; } = new(objectOptDefault);
         public ESPOption CardStandOption { get; set; } = new(objectOptDefault);
-
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
         public HitboxOptions HitboxOptions { get; set; } = new();
@@ -129,6 +145,7 @@ public class Configuration
 
     [NonSerialized] private static readonly ESPOption playerOptDefault = new ESPOption
     {
+        Enabled = true,
         ColorU = 0xffff00ff,
         DisplayType = DisplayTypes.DotAndName,
         DotSize = 2.2f,
@@ -140,6 +157,7 @@ public class Configuration
 
     [NonSerialized] private static readonly ESPOption objectOptDefault = new ESPOption
     {
+        Enabled = true,
         ColorU = 0xffFFFF00,
         DisplayType = DisplayTypes.NameOnly,
         DotSize = 2.2f,
@@ -151,6 +169,7 @@ public class Configuration
 
     [NonSerialized] private static readonly ESPOption mobOptDefault = new ESPOption
     {
+        Enabled = true,
         ColorU = 0xffffffff,
         DisplayType = DisplayTypes.HealthBarAndValueAndName,
         DotSize = 2.2f,
