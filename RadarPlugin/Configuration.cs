@@ -82,7 +82,7 @@ public class Configuration
             DrawDistance = espOption.DrawDistance;
         }
 
-        public bool Enabled = false;
+        public bool Enabled = true;
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public float DotSize = 2.2f;
         public uint ColorU = 0xffffffff;
