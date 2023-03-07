@@ -59,8 +59,8 @@ public class MainUi : IDisposable
             UiHelpers.DrawTabs("radar-settings-tabs",
                 ("General", UtilInfo.White, DrawGeneralSettings),
                 ("Visibility", UtilInfo.Red, DrawVisibilitySettings),
-                ("Overworld Settings", UtilInfo.Green, Draw3DRadarSettings),
-                ("Deep Dungeon Settings", UtilInfo.Yellow, DrawDeepDungeonVisibilitySettings),
+                ("Overworld", UtilInfo.Green, Draw3DRadarSettings),
+                ("Deep Dungeon", UtilInfo.Yellow, DrawDeepDungeonVisibilitySettings),
                 ("Utility", UtilInfo.White, DrawUtilityTab)
             );
         }
