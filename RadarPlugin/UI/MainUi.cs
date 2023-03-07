@@ -1,6 +1,7 @@
 ﻿using System;
 using ImGuiNET;
 using System.Numerics;
+using Dalamud.Game.ClientState;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using RadarPlugin.Enums;
@@ -13,10 +14,12 @@ public class MainUi : IDisposable
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible = false;
+    private readonly ClientState clientState;
     private const int ChildHeight = 280;
 
-    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi)
+    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi, ClientState clientState)
     {
+        this.clientState = clientState;
         this.localMobsUi = localMobsUi;
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
@@ -55,7 +58,8 @@ public class MainUi : IDisposable
             UiHelpers.DrawTabs("radar-settings-tabs",
                 ("General", UtilInfo.White, DrawGeneralSettings),
                 ("Visibility", UtilInfo.Red, DrawVisibilitySettings),
-                ("3-D Settings", UtilInfo.Green, Draw3DRadarSettings),
+                ("Overworld Settings", UtilInfo.Green, Draw3DRadarSettings),
+                ("Deep Dungeon Settings", UtilInfo.Green, DrawDeepDungeonVisibilitySettings),
                 ("Utility", UtilInfo.White, DrawUtilityTab)
             );
         }
@@ -65,6 +69,7 @@ public class MainUi : IDisposable
 
     private void DrawUtilityTab()
     {
+        ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         if (ImGui.Button("Load Current Objects"))
         {
             PluginLog.Debug("Pulling Area Objects");
@@ -96,13 +101,12 @@ public class MainUi : IDisposable
                 "This focuses on giving support to eureka and deep dungeons.\n" +
                 "Will display things such as portals, chests, and traps.");
         }
-
-
+        ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
+            "v1.5.1.0: Deep dungeon config may be overwritten.");
+        
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
             "    1. Use tabs to customize experience and fix invisible mobs.\n" +
             "    2. Bring bugs or feature requests up to author\n");
-        ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "v1.4.0.0: Another change in config structure.\nMay or may not destroy some old config.");
         ImGui.TextWrapped(
             "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
@@ -119,8 +123,7 @@ public class MainUi : IDisposable
         UiHelpers.DrawTabs("radar-3d-settings-tabs",
             ("Players and Npcs", UtilInfo.White, DrawPlayerNpcSettings),
             ("Objects", UtilInfo.White, DrawObjectSettings),
-            ("Misc", UtilInfo.White, DrawMiscSettings),
-            ("Generic", UtilInfo.White, ShowMiscSettings)
+            ("Misc", UtilInfo.White, DrawMiscSettings)
         );
         ImGui.EndChild();
     }
@@ -129,7 +132,7 @@ public class MainUi : IDisposable
     {
         UiHelpers.DrawTabs("radar-visibility-tabs",
             ("General Visibility", UtilInfo.White, DrawGeneralVisibilitySettings),
-            ("Deep Dungeon Visibility", UtilInfo.Red, DrawDeepDungeonVisibilitySettings),
+            ("Additional Features", UtilInfo.White, ShowMiscSettings),
             ("Advanced Visibility", UtilInfo.White, DrawAdvancedVisibilitySettings)
         );
     }
@@ -288,9 +291,7 @@ public class MainUi : IDisposable
 
     private void DrawDeepDungeonVisibilitySettings()
     {
-        var tag = "deepdungeonmobtypecloroptions";
-        ImGui.BeginChild($"##{tag}-deep-dungeon-settings-child", new Vector2(0, ChildHeight));
-        ImGui.Columns(2, $"##{tag}-settings-columns", false);
+        ImGui.BeginChild($"##radar-deep-dungeon-settings-tabs-child");
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Auspice", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);

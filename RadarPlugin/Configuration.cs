@@ -40,16 +40,16 @@ public class Configuration
 
     public class DeepDungeonOptions
     {
-        public ESPOption SpecialUndeadOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Yellow};
-        public ESPOption AuspiceOption { get; set; } = new(objectOptDefault)  { ColorU = UtilInfo.Green};
-        public ESPOption EasyMobOption { get; set; } = new(objectOptDefault)  { ColorU = UtilInfo.LightBlue};
+        public ESPOption SpecialUndeadOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Yellow};
+        public ESPOption AuspiceOption { get; set; } = new(mobOptDefault)  { ColorU = UtilInfo.Green};
+        public ESPOption EasyMobOption { get; set; } = new(mobOptDefault)  { ColorU = UtilInfo.LightBlue};
         public ESPOption TrapOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Orange};
         public ESPOption ReturnOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Blue };
         public ESPOption PassageOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Blue};
         public ESPOption GoldChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Gold};
         public ESPOption SilverChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Silver};
         public ESPOption BronzeChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Bronze};
-        public ESPOption MimicOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Red};
+        public ESPOption MimicOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Red};
         public ESPOption AccursedHoardOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Turquoise};
     }
 

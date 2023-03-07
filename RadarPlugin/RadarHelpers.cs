@@ -79,10 +79,8 @@ public class RadarHelpers
                 if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
                     configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) return false;
                 return true;
-                break;
             case ObjectKind.GatheringPoint:
                 return configInterface.cfg.ShowGatheringPoint;
-                break;
             case ObjectKind.MountType:
                 return configInterface.cfg.ShowMountType;
             case ObjectKind.Retainer:
@@ -93,8 +91,6 @@ public class RadarHelpers
                 return configInterface.cfg.ShowCutscene;
             case ObjectKind.CardStand:
                 return configInterface.cfg.ShowCardStand;
-            default:
-                break;
         }
 
         return false;
