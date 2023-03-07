@@ -140,33 +140,29 @@ public class RadarHelpers
             switch (UtilInfo.DeepDungeonMobTypesMap[gameObject.DataId])
             {
                 case DeepDungeonMobTypes.SpecialUndead:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.SpecialUndead;
+                    return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption.ColorU;
                 case DeepDungeonMobTypes.Auspice:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Auspice;
+                    return configInterface.cfg.DeepDungeonOptions.AuspiceOption.ColorU;
                 case DeepDungeonMobTypes.EasyMobs:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.EasyMobs;
+                    return configInterface.cfg.DeepDungeonOptions.EasyMobOption.ColorU;
                 case DeepDungeonMobTypes.Traps:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps;
+                    return configInterface.cfg.DeepDungeonOptions.TrapOption.ColorU;
                 case DeepDungeonMobTypes.Return:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Return;
+                    return configInterface.cfg.DeepDungeonOptions.ReturnOption.ColorU;
                 case DeepDungeonMobTypes.Passage:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage;
+                    return configInterface.cfg.DeepDungeonOptions.PassageOption.ColorU;
                 case DeepDungeonMobTypes.GoldChest:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest;
+                    return configInterface.cfg.DeepDungeonOptions.GoldChestOption.ColorU;
                 case DeepDungeonMobTypes.SilverChest:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest;
+                    return configInterface.cfg.DeepDungeonOptions.SilverChestOption.ColorU;
                 case DeepDungeonMobTypes.BronzeChest:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest;
+                    return configInterface.cfg.DeepDungeonOptions.BronzeChestOption.ColorU;
                 case DeepDungeonMobTypes.AccursedHoard:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard;
+                    return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption.ColorU;
                 case DeepDungeonMobTypes.Mimic:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic;
-                case DeepDungeonMobTypes.Default:
-                default:
-                    return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
+                    return configInterface.cfg.DeepDungeonOptions.MimicOption.ColorU;
             }
-
-            return configInterface.cfg.DeepDungeonMobTypeColorOptions.Default;
+            // If no specific config interface, it defaults
         }
 
         // Finally if nothing else
@@ -208,6 +204,39 @@ public class RadarHelpers
 
     public Configuration.ESPOption GetParams(GameObject areaObject)
     {
+        // If Deep Dungeon
+        if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMobTypesMap.ContainsKey(areaObject.DataId) &&
+            UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+            areaObject.ObjectKind != ObjectKind.Player)
+        {
+            switch (UtilInfo.DeepDungeonMobTypesMap[areaObject.DataId])
+            {
+                case DeepDungeonMobTypes.SpecialUndead:
+                    return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption;
+                case DeepDungeonMobTypes.Auspice:
+                    return configInterface.cfg.DeepDungeonOptions.AuspiceOption;
+                case DeepDungeonMobTypes.EasyMobs:
+                    return configInterface.cfg.DeepDungeonOptions.EasyMobOption;
+                case DeepDungeonMobTypes.Traps:
+                    return configInterface.cfg.DeepDungeonOptions.TrapOption;
+                case DeepDungeonMobTypes.Return:
+                    return configInterface.cfg.DeepDungeonOptions.ReturnOption;
+                case DeepDungeonMobTypes.Passage:
+                    return configInterface.cfg.DeepDungeonOptions.PassageOption;
+                case DeepDungeonMobTypes.GoldChest:
+                    return configInterface.cfg.DeepDungeonOptions.GoldChestOption;
+                case DeepDungeonMobTypes.SilverChest:
+                    return configInterface.cfg.DeepDungeonOptions.SilverChestOption;
+                case DeepDungeonMobTypes.BronzeChest:
+                    return configInterface.cfg.DeepDungeonOptions.BronzeChestOption;
+                case DeepDungeonMobTypes.AccursedHoard:
+                    return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption;
+                case DeepDungeonMobTypes.Mimic:
+                    return configInterface.cfg.DeepDungeonOptions.MimicOption;
+            }
+            // If no specific config interface, it defaults
+        }
+
         switch (areaObject.ObjectKind)
         {
             case ObjectKind.Player:

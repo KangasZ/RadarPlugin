@@ -289,108 +289,19 @@ public class MainUi : IDisposable
     private void DrawDeepDungeonVisibilitySettings()
     {
         var tag = "deepdungeonmobtypecloroptions";
-        ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "This is only color, currently!\n" +
-            "Any other settings will inherit from the default config!\n" +
-            "If you want to disable a specific custom category,\nset the opacity to 0.\n" +
-            "This can be done in the A (alpha) in the RGBA selector.");
         ImGui.BeginChild($"##{tag}-deep-dungeon-settings-child", new Vector2(0, ChildHeight));
         ImGui.Columns(2, $"##{tag}-settings-columns", false);
-        var defaultColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Default);
-        if (ImGui.ColorEdit4($"Default##{tag}", ref defaultColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Default = ImGui.ColorConvertFloat4ToU32(defaultColor);
-            configInterface.Save();
-        }
-
-        var specialUndeadColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.SpecialUndead);
-        if (ImGui.ColorEdit4($"Special Undead##{tag}", ref specialUndeadColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.SpecialUndead =
-                ImGui.ColorConvertFloat4ToU32(specialUndeadColor);
-            configInterface.Save();
-        }
-
-        var auspiceColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Auspice);
-        if (ImGui.ColorEdit4($"Auspice##{tag}", ref auspiceColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Auspice = ImGui.ColorConvertFloat4ToU32(auspiceColor);
-            configInterface.Save();
-        }
-
-        var easyMobsColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.EasyMobs);
-        if (ImGui.ColorEdit4($"Easy Mobs##{tag}", ref easyMobsColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.EasyMobs = ImGui.ColorConvertFloat4ToU32(easyMobsColor);
-            configInterface.Save();
-        }
-
-        var trapsColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps);
-        if (ImGui.ColorEdit4($"Traps##{tag}", ref trapsColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Traps = ImGui.ColorConvertFloat4ToU32(trapsColor);
-            configInterface.Save();
-        }
-
-        var returnColors = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Return);
-        if (ImGui.ColorEdit4($"Returns##{tag}", ref returnColors, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Return = ImGui.ColorConvertFloat4ToU32(returnColors);
-            configInterface.Save();
-        }
-
-        var passageColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage);
-        if (ImGui.ColorEdit4($"Passages##{tag}", ref passageColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Passage = ImGui.ColorConvertFloat4ToU32(passageColor);
-            configInterface.Save();
-        }
-
-        ImGui.NextColumn();
-        var goldChestColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest);
-        if (ImGui.ColorEdit4($"Gold Chest##{tag}", ref goldChestColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.GoldChest =
-                ImGui.ColorConvertFloat4ToU32(goldChestColor);
-            configInterface.Save();
-        }
-
-        var silverChestColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest);
-        if (ImGui.ColorEdit4($"Silver Chest##{tag}", ref silverChestColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.SilverChest =
-                ImGui.ColorConvertFloat4ToU32(silverChestColor);
-            configInterface.Save();
-        }
-
-        var bronzeChestColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest);
-        if (ImGui.ColorEdit4($"Bronze Chest##{tag}", ref bronzeChestColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.BronzeChest =
-                ImGui.ColorConvertFloat4ToU32(bronzeChestColor);
-            configInterface.Save();
-        }
-
-        var mimicColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic);
-        if (ImGui.ColorEdit4($"Mimics##{tag}", ref mimicColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.Mimic = ImGui.ColorConvertFloat4ToU32(mimicColor);
-            configInterface.Save();
-        }
-
-        var accursedHoardColor =
-            ImGui.ColorConvertU32ToFloat4(configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard);
-        if (ImGui.ColorEdit4($"Accursed Hoard##{tag}", ref accursedHoardColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.DeepDungeonMobTypeColorOptions.AccursedHoard =
-                ImGui.ColorConvertFloat4ToU32(accursedHoardColor);
-            configInterface.Save();
-        }
-
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Auspice", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest", MobType.Object);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard", MobType.Object);
         ImGui.EndChild();
     }
 
