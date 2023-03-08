@@ -43,7 +43,7 @@ public static class UtilInfo
         561, 562, 563, 564, 565, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, // POTD
         770, 771, 772, 782, 773, 783, 774, 784, 775, 785, // HOH
         732, 763, 795, 827, // Eureka (Old) (in order)
-        1099, 1100, 1101, // Eureka Orthos in order
+        1099, 1100, 1101, 1102, // Eureka Orthos in order
     };
 
     /**
@@ -117,6 +117,8 @@ public static class UtilInfo
         { 1543, "Bronze Coffer" },
         { 1544, "Bronze Coffer" },
         { 1545, "Bronze Coffer" },
+        { 1546, "Bronze Coffer" },
+        { 1547, "Bronze Coffer" },
 
         // Mimics
         { 2006020, "Mimic Coffer" },
@@ -126,6 +128,9 @@ public static class UtilInfo
         { 7393, "Silver Mimic" },
         { 7394, "Gold Mimic" },
         { 15997, "Bronze Mimic" },
+        { 15998, "Bronze? Mimic" },
+        { 15999, "Silver Mimic" },
+
 
         //Returns
         { 2007187, "Cairn of Return" },
@@ -161,6 +166,8 @@ public static class UtilInfo
         { 7394, DeepDungeonMobTypes.Mimic },
         { 5832, DeepDungeonMobTypes.Mimic },
         { 15997, DeepDungeonMobTypes.Mimic },
+        { 15998, DeepDungeonMobTypes.Mimic },
+        { 15999, DeepDungeonMobTypes.Mimic },
 
 
         // Returns
@@ -211,7 +218,9 @@ public static class UtilInfo
         { 1543, DeepDungeonMobTypes.BronzeChest },
         { 1544, DeepDungeonMobTypes.BronzeChest },
         { 1545, DeepDungeonMobTypes.BronzeChest },
-
+        { 1546, DeepDungeonMobTypes.BronzeChest },
+        { 1547, DeepDungeonMobTypes.BronzeChest },
+        
         // Coffers
         { 2007358, DeepDungeonMobTypes.GoldChest },
         { 2007357, DeepDungeonMobTypes.SilverChest },
