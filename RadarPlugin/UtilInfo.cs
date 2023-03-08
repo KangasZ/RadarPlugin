@@ -220,7 +220,7 @@ public static class UtilInfo
         { 1545, DeepDungeonMobTypes.BronzeChest },
         { 1546, DeepDungeonMobTypes.BronzeChest },
         { 1547, DeepDungeonMobTypes.BronzeChest },
-        
+
         // Coffers
         { 2007358, DeepDungeonMobTypes.GoldChest },
         { 2007357, DeepDungeonMobTypes.SilverChest },
@@ -244,6 +244,9 @@ public static class UtilInfo
         { 7396, DeepDungeonMobTypes.Auspice }, // Komainu
         { 7397, DeepDungeonMobTypes.Auspice }, // Inugami
         { 7398, DeepDungeonMobTypes.Auspice }, // Senri
+
+        { 15898, DeepDungeonMobTypes.Auspice }, //WHM Demiclone
+        { 15899, DeepDungeonMobTypes.Auspice }, // BLM Demiclone
 
         // POTD Specail Undead
         { 5049, DeepDungeonMobTypes.SpecialUndead },
@@ -271,6 +274,7 @@ public static class UtilInfo
         { 5288, DeepDungeonMobTypes.SpecialUndead },
         { 5289, DeepDungeonMobTypes.SpecialUndead },
 
+        // Dread Orthos Mobs 
         { 12322, DeepDungeonMobTypes.SpecialUndead },
         { 12323, DeepDungeonMobTypes.SpecialUndead },
         { 12324, DeepDungeonMobTypes.SpecialUndead },
