@@ -42,8 +42,8 @@ public static class UtilInfo
     {
         561, 562, 563, 564, 565, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, // POTD
         770, 771, 772, 782, 773, 783, 774, 784, 775, 785, // HOH
-        732, 763, 795, 827, // Eureka (in order)
-        1099, // Orthos in order
+        732, 763, 795, 827, // Eureka (Old) (in order)
+        1099, 1100, 1101, // Eureka Orthos in order
     };
 
     /**
@@ -113,6 +113,10 @@ public static class UtilInfo
 
         // Eureka Orthos Bronze Coffers
         { 1541, "Bronze Coffer" },
+        { 1542, "Bronze Coffer" },
+        { 1543, "Bronze Coffer" },
+        { 1544, "Bronze Coffer" },
+        { 1545, "Bronze Coffer" },
 
         // Mimics
         { 2006020, "Mimic Coffer" },
@@ -121,6 +125,7 @@ public static class UtilInfo
         { 7392, "Bronze Mimic" },
         { 7393, "Silver Mimic" },
         { 7394, "Gold Mimic" },
+        { 15997, "Bronze Mimic" },
 
         //Returns
         { 2007187, "Cairn of Return" },
@@ -155,6 +160,8 @@ public static class UtilInfo
         { 7393, DeepDungeonMobTypes.Mimic },
         { 7394, DeepDungeonMobTypes.Mimic },
         { 5832, DeepDungeonMobTypes.Mimic },
+        { 15997, DeepDungeonMobTypes.Mimic },
+
 
         // Returns
         { 2007187, DeepDungeonMobTypes.Return },
@@ -200,6 +207,10 @@ public static class UtilInfo
 
         // Eureka Orthos Bronze Coffers
         { 1541, DeepDungeonMobTypes.BronzeChest },
+        { 1542, DeepDungeonMobTypes.BronzeChest },
+        { 1543, DeepDungeonMobTypes.BronzeChest },
+        { 1544, DeepDungeonMobTypes.BronzeChest },
+        { 1545, DeepDungeonMobTypes.BronzeChest },
 
         // Coffers
         { 2007358, DeepDungeonMobTypes.GoldChest },
@@ -218,6 +229,7 @@ public static class UtilInfo
         //Easy Mobs
         { 5041, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
         { 7610, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 10309, DeepDungeonMobTypes.EasyMobs }, // Orthos Korrigan
 
         // Auspices
         { 7396, DeepDungeonMobTypes.Auspice }, // Komainu
@@ -249,6 +261,10 @@ public static class UtilInfo
         { 5287, DeepDungeonMobTypes.SpecialUndead },
         { 5288, DeepDungeonMobTypes.SpecialUndead },
         { 5289, DeepDungeonMobTypes.SpecialUndead },
+
+        { 12322, DeepDungeonMobTypes.SpecialUndead },
+        { 12323, DeepDungeonMobTypes.SpecialUndead },
+        { 12324, DeepDungeonMobTypes.SpecialUndead },
     };
 
     public static uint Color(byte r, byte g, byte b, byte a)
