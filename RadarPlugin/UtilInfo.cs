@@ -43,7 +43,7 @@ public static class UtilInfo
         561, 562, 563, 564, 565, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, // POTD
         770, 771, 772, 782, 773, 783, 774, 784, 775, 785, // HOH
         732, 763, 795, 827, // Eureka (Old) (in order)
-        1099, 1100, 1101, 1102, // Eureka Orthos in order
+        1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, // Eureka Orthos in order
     };
 
     /**
@@ -119,7 +119,13 @@ public static class UtilInfo
         { 1545, "Bronze Coffer" },
         { 1546, "Bronze Coffer" },
         { 1547, "Bronze Coffer" },
-
+        { 1548, "Bronze Coffer" },
+        { 1549, "Bronze Coffer" },
+        { 1550, "Bronze Coffer" },
+        { 1551, "Bronze Coffer" },
+        { 1552, "Bronze Coffer" },
+        { 1553, "Bronze Coffer" },
+        
         // Mimics
         { 2006020, "Mimic Coffer" },
         { 2566, "Mimic" },
@@ -127,18 +133,12 @@ public static class UtilInfo
         { 7392, "Bronze Mimic" },
         { 7393, "Silver Mimic" },
         { 7394, "Gold Mimic" },
+
+        // Orthos
         { 15997, "Bronze Mimic" },
         { 15998, "Bronze? Mimic" },
         { 15999, "Silver Mimic" },
-
-
-        //Returns
-        { 2007187, "Cairn of Return" },
-        { 2009506, "Beacon of Return" },
-
-        // Passage
-        { 2007188, "Cairn of Passage" },
-        { 2009507, "Beacon of Passage" },
+        { 16002, "Gold Mimic" },
 
         // Traps
         { 2007182, "Landmine" },
@@ -168,6 +168,7 @@ public static class UtilInfo
         { 15997, DeepDungeonMobTypes.Mimic },
         { 15998, DeepDungeonMobTypes.Mimic },
         { 15999, DeepDungeonMobTypes.Mimic },
+        { 16002, DeepDungeonMobTypes.Mimic },
 
 
         // Returns
@@ -220,11 +221,19 @@ public static class UtilInfo
         { 1545, DeepDungeonMobTypes.BronzeChest },
         { 1546, DeepDungeonMobTypes.BronzeChest },
         { 1547, DeepDungeonMobTypes.BronzeChest },
+        { 1548, DeepDungeonMobTypes.BronzeChest },
+        { 1549, DeepDungeonMobTypes.BronzeChest },
+        { 1550, DeepDungeonMobTypes.BronzeChest },
+        { 1551, DeepDungeonMobTypes.BronzeChest },
+        { 1552, DeepDungeonMobTypes.BronzeChest },
+        { 1553, DeepDungeonMobTypes.BronzeChest },
+
 
         // Coffers
         { 2007358, DeepDungeonMobTypes.GoldChest },
         { 2007357, DeepDungeonMobTypes.SilverChest },
         { 2007542, DeepDungeonMobTypes.AccursedHoard },
+        { 2007543, DeepDungeonMobTypes.AccursedHoard },
 
         // Traps
         { 2007182, DeepDungeonMobTypes.Traps },
@@ -238,15 +247,24 @@ public static class UtilInfo
         //Easy Mobs
         { 5041, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
         { 7610, DeepDungeonMobTypes.EasyMobs }, // Korrigan
-        { 10309, DeepDungeonMobTypes.EasyMobs }, // Orthos Korrigan
+        
+        // Orthos Korrigans
+        { 16007, DeepDungeonMobTypes.EasyMobs },
+        { 16008, DeepDungeonMobTypes.EasyMobs },
+        { 16009, DeepDungeonMobTypes.EasyMobs },
+        { 16012, DeepDungeonMobTypes.EasyMobs },
+
 
         // Auspices
+        // First three may be wrong
         { 7396, DeepDungeonMobTypes.Auspice }, // Komainu
         { 7397, DeepDungeonMobTypes.Auspice }, // Inugami
         { 7398, DeepDungeonMobTypes.Auspice }, // Senri
 
-        { 15898, DeepDungeonMobTypes.Auspice }, //WHM Demiclone
+        { 15898, DeepDungeonMobTypes.Auspice }, // WHM Demiclone
         { 15899, DeepDungeonMobTypes.Auspice }, // BLM Demiclone
+        { 15900, DeepDungeonMobTypes.Auspice }, // Onion knight Demiclone
+
 
         // POTD Specail Undead
         { 5049, DeepDungeonMobTypes.SpecialUndead },
@@ -275,10 +293,20 @@ public static class UtilInfo
         { 5289, DeepDungeonMobTypes.SpecialUndead },
 
         // Dread Orthos Mobs 
-        { 12322, DeepDungeonMobTypes.SpecialUndead },
-        { 12323, DeepDungeonMobTypes.SpecialUndead },
-        { 12324, DeepDungeonMobTypes.SpecialUndead },
-        
+        // Meracydian Clone
+        { 15912, DeepDungeonMobTypes.SpecialUndead },
+        { 15914, DeepDungeonMobTypes.SpecialUndead },
+
+        // Demi Cochma
+        { 15902, DeepDungeonMobTypes.SpecialUndead },
+        { 15904, DeepDungeonMobTypes.SpecialUndead },
+        { 15907, DeepDungeonMobTypes.SpecialUndead },
+        { 15910, DeepDungeonMobTypes.SpecialUndead },
+
+        // Lamia Queen
+        { 15924, DeepDungeonMobTypes.SpecialUndead },
+
+
         // BA Objects
         { 2009728, DeepDungeonMobTypes.Traps }, // Eureka Trap,
         { 2009729, DeepDungeonMobTypes.Passage }, // Eureka Portal,
