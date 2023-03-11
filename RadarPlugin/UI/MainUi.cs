@@ -4,6 +4,7 @@ using System.Numerics;
 using Dalamud.Game.ClientState;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Utility;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin.UI;
@@ -15,15 +16,17 @@ public class MainUi : IDisposable
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible = false;
     private readonly ClientState clientState;
+    private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
 
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi,
-        ClientState clientState)
+        ClientState clientState, RadarHelpers radarHelpers)
     {
         this.clientState = clientState;
         this.localMobsUi = localMobsUi;
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
+        this.radarHelper = radarHelpers;
         this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.dalamudPluginInterface.UiBuilder.OpenConfigUi += OpenUi;
     }
@@ -58,7 +61,7 @@ public class MainUi : IDisposable
         {
             UiHelpers.DrawTabs("radar-settings-tabs",
                 ("General", UtilInfo.White, DrawGeneralSettings),
-                ("Visibility", UtilInfo.Red, DrawVisibilitySettings),
+                ("Overview", UtilInfo.Red, DrawVisibilitySettings),
                 ("Overworld", UtilInfo.Green, Draw3DRadarSettings),
                 ("Deep Dungeon", UtilInfo.Yellow, DrawDeepDungeonVisibilitySettings),
                 ("Utility", UtilInfo.White, DrawUtilityTab)
@@ -70,11 +73,57 @@ public class MainUi : IDisposable
 
     private void DrawUtilityTab()
     {
-        ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
-        if (ImGui.Button("Load Current Objects"))
+        if (ImGui.Button("Load Current Objects Menu"))
         {
             PluginLog.Debug("Pulling Area Objects");
             this.localMobsUi.DrawLocalMobsUi();
+        }
+        ImGui.TextWrapped(
+            "More Advanced Settings. Unless you are a developer or know what you're doing, this menu will likely be useless.");
+        ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
+        ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
+        var onlyVisible = configInterface.cfg.ShowOnlyVisible;
+        if (ImGui.Checkbox("Show Only Visible", ref onlyVisible))
+        {
+            configInterface.cfg.ShowOnlyVisible = onlyVisible;
+            configInterface.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
+        }
+
+        var showNameless = configInterface.cfg.ShowNameless;
+        if (ImGui.Checkbox("Nameless", ref showNameless))
+        {
+            configInterface.cfg.ShowNameless = showNameless;
+            configInterface.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Show nameless mobs.\nYou probably want to keep this OFF.");
+        }
+
+        var objHideList = configInterface.cfg.DebugMode;
+        if (ImGui.Checkbox("Debug Mode", ref objHideList))
+        {
+            configInterface.cfg.DebugMode = objHideList;
+            configInterface.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Shows literally everything no matter what. Also modifies the display string.");
+        }
+
+        if (configInterface.cfg.DebugMode)
+        {
+            // Todo: Debug swap text bools
         }
     }
 
@@ -116,14 +165,12 @@ public class MainUi : IDisposable
             "Note 2: Entities that are not on the client are not viewable. For instance, deep dungeon traps are not visible until you unveil them.");
         ImGui.Spacing();
         ImGui.TextWrapped(
-            "Note 2: Invisible mobs may be shown. Use the Utility tab to remove these. This is kinda being worked on but does not have an easy solution.");
+            "Note 3: Invisible mobs may be shown. Use the Utility tab to remove these. This is kinda being worked on but does not have an easy solution.");
     }
 
     private void Draw3DRadarSettings()
     {
         ImGui.BeginChild($"##radar-settings-tabs-child");
-        ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
-            "THE ENABLED BUTTONS DO NOT HAVE ANY USE HERE");
         UiHelpers.DrawTabs("radar-3d-settings-tabs",
             ("Players and Npcs", UtilInfo.White, DrawPlayerNpcSettings),
             ("Objects", UtilInfo.White, DrawObjectSettings),
@@ -137,8 +184,7 @@ public class MainUi : IDisposable
         UiHelpers.DrawTabs("radar-visibility-tabs",
             ("Overworld", UtilInfo.Green, DrawGeneralVisibilitySettings),
             ("Deep Dungeons", UtilInfo.Yellow, DrawDeepDungeonOverviewSettings),
-            ("Additional Features", UtilInfo.White, ShowMiscSettings),
-            ("Advanced Visibility", UtilInfo.White, DrawAdvancedVisibilitySettings)
+            ("Additional Features", UtilInfo.White, ShowMiscSettings)
         );
     }
 
@@ -146,24 +192,24 @@ public class MainUi : IDisposable
     {
         DrawSeperator($"Enemies Options", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Auspice");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic");
-        
+
         DrawSeperator($"Loot Options", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard");
 
-        
+
         DrawSeperator($"DD Specific Options", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage");
     }
 
-    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag)
+    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "")
     {
         var color = ImGui.ColorConvertU32ToFloat4(espOption.ColorU);
         if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-{tag}", ref color,
@@ -180,7 +226,15 @@ public class MainUi : IDisposable
             espOption.Enabled = enabled;
             configInterface.Save();
         }
-        
+
+        // TODO: Information icon instead of hover desc
+        if (!description.IsNullOrWhitespace())
+        {
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip(description);
+            }
+        }
     }
 
     private void ShowMiscSettings()
@@ -365,7 +419,7 @@ public class MainUi : IDisposable
     {
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
             MobType.Character);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Auspice", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
     }
@@ -400,7 +454,7 @@ public class MainUi : IDisposable
         DrawSeperator($"{id} Options", UtilInfo.Red);
         ImGui.BeginChild($"##radar-settings-tabs-child-{id}", new Vector2(0, 78));
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
-        
+
         var enabled = option.Enabled;
         if (ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref enabled))
         {
@@ -423,7 +477,7 @@ public class MainUi : IDisposable
             option.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
             configInterface.Save();
         }
-        
+
         var objectDotSize = option.DotSize;
         if (ImGui.SliderFloat($"Dot Size##{id}-dot-size", ref objectDotSize, UtilInfo.MinDotSize,
                 UtilInfo.MaxDotSize))
@@ -443,72 +497,13 @@ public class MainUi : IDisposable
         ImGui.EndChild();
     }
 
-    private void DrawAdvancedVisibilitySettings()
-    {
-        ImGui.TextWrapped(
-            "More Advanced Settings. Unless you are a developer or know what you're doing, this menu will likely be useless.");
-        var onlyVisible = configInterface.cfg.ShowOnlyVisible;
-        if (ImGui.Checkbox("Only Visible", ref onlyVisible))
-        {
-            configInterface.cfg.ShowOnlyVisible = onlyVisible;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Show only visible mobs.\nYou probably don't want to turn this off.\nMay not remove all invisible entities currently. Use the util window.");
-        }
-
-        var showNameless = configInterface.cfg.ShowNameless;
-        if (ImGui.Checkbox("Nameless", ref showNameless))
-        {
-            configInterface.cfg.ShowNameless = showNameless;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Show nameless mobs.\nYou probably don't want this enabled.");
-        }
-
-        var objHideList = configInterface.cfg.DebugMode;
-        if (ImGui.Checkbox("Debug Mode", ref objHideList))
-        {
-            configInterface.cfg.DebugMode = objHideList;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Shows literally everything no matter what. Also modifies the display string.");
-        }
-    }
-
     private void DrawGeneralVisibilitySettings()
     {
         ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
 
         DrawSeperator("Players and Npcs", UtilInfo.Red);
-
-        var playersColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.PlayerOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-players", ref playersColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.PlayerOption.ColorU = ImGui.ColorConvertFloat4ToU32(playersColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var players = configInterface.cfg.ShowPlayers;
-        if (ImGui.Checkbox("Players", ref players))
-        {
-            configInterface.cfg.ShowPlayers = players;
-            configInterface.Save();
-        }
-
+        DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players");
+        // Custom YOUR PLAYER that I don't want to deal with yet.
         ImGui.SameLine();
         var you = configInterface.cfg.ShowYOU;
         if (ImGui.Checkbox("Your Player", ref you))
@@ -516,254 +511,31 @@ public class MainUi : IDisposable
             configInterface.cfg.ShowYOU = you;
             configInterface.Save();
         }
-
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(
                 "Will show your player character if enabled. Inherits player settings.");
         }
-
-
-        var npcColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.NpcOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-enemy-color", ref npcColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.NpcOption.ColorU = ImGui.ColorConvertFloat4ToU32(npcColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var enemyShow = configInterface.cfg.ShowEnemies;
-        if (ImGui.Checkbox("Enemies", ref enemyShow))
-        {
-            configInterface.cfg.ShowEnemies = enemyShow;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip("Shows most enemies that are considered battleable");
-        }
-
-        var companionsColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.CompanionOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-companions", ref companionsColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.CompanionOption.ColorU = ImGui.ColorConvertFloat4ToU32(companionsColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var npc = configInterface.cfg.ShowCompanion;
-        if (ImGui.Checkbox("Companions", ref npc))
-        {
-            configInterface.cfg.ShowCompanion = npc;
-            configInterface.Save();
-        }
-
-
-        var eventNpcsColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.EventNpcOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-eventnpcs", ref eventNpcsColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.EventNpcOption.ColorU = ImGui.ColorConvertFloat4ToU32(eventNpcsColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var eventNpcs = configInterface.cfg.ShowEventNpc;
-        if (ImGui.Checkbox("Event NPCs", ref eventNpcs))
-        {
-            configInterface.cfg.ShowEventNpc = eventNpcs;
-            configInterface.Save();
-        }
-
-        var retainderColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.RetainerOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-retainer", ref retainderColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.RetainerOption.ColorU = ImGui.ColorConvertFloat4ToU32(retainderColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var showRetainer = configInterface.cfg.ShowRetainer;
-        if (ImGui.Checkbox("Retainer", ref showRetainer))
-        {
-            configInterface.cfg.ShowRetainer = showRetainer;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Shows retainers.");
-        }
+        DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
+            "Shows most enemies that are considered battleable");
+        DrawSettingsOverview(configInterface.cfg.CompanionOption, "Companions");
+        DrawSettingsOverview(configInterface.cfg.EventNpcOption, "Event NPCs");
+        DrawSettingsOverview(configInterface.cfg.RetainerOption, "Retainers");
 
         DrawSeperator("Objects", UtilInfo.Red);
-
-        var lootColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.TreasureOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-treaure", ref lootColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.TreasureOption.ColorU = ImGui.ColorConvertFloat4ToU32(npcColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var objShow = configInterface.cfg.ShowLoot;
-        if (ImGui.Checkbox("Loot", ref objShow))
-        {
-            ImGui.SetTooltip("Enables showing objects on the screen.");
-            configInterface.cfg.ShowLoot = objShow;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip("Shows most loot. The loot classification is via the dalamud's association.");
-        }
-
-        var eventObjs = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.EventObjOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-eventobjs", ref eventObjs,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.EventObjOption.ColorU = ImGui.ColorConvertFloat4ToU32(eventObjs);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var events = configInterface.cfg.ShowEvents;
-        if (ImGui.Checkbox("Event Objects", ref events))
-        {
-            configInterface.cfg.ShowEvents = events;
-            configInterface.Save();
-        }
-
-
-        var areaObjs = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AreaOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-areaobjs", ref areaObjs, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AreaOption.ColorU = ImGui.ColorConvertFloat4ToU32(areaObjs);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-
-        var showAreaObjs = configInterface.cfg.ShowAreaObjects;
-        if (ImGui.Checkbox("Area Objects", ref showAreaObjs))
-        {
-            configInterface.cfg.ShowAreaObjects = showAreaObjs;
-            configInterface.Save();
-        }
-
-        var aetheriteColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AetheryteOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-aetherytes", ref aetheriteColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AetheryteOption.ColorU = ImGui.ColorConvertFloat4ToU32(aetheriteColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var showAetherytes = configInterface.cfg.ShowAetherytes;
-        if (ImGui.Checkbox("Aetherytes", ref showAetherytes))
-        {
-            configInterface.cfg.ShowAetherytes = showAetherytes;
-            configInterface.Save();
-        }
-
-
-        var cutsceneObjectColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.CutsceneOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-cutscene", ref cutsceneObjectColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.CutsceneOption.ColorU = ImGui.ColorConvertFloat4ToU32(cutsceneObjectColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var showCutsceneObject = configInterface.cfg.ShowCutscene;
-        if (ImGui.Checkbox("Cutscene Objects", ref showCutsceneObject))
-        {
-            configInterface.cfg.ShowCutscene = showCutsceneObject;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Shows cutscene objects. I have no idea either.");
-        }
-
-
+        DrawSettingsOverview(configInterface.cfg.TreasureOption, "Treasure",
+            "Shows most loot. The loot classification is via the dalamud's association.");
+        DrawSettingsOverview(configInterface.cfg.EventObjOption, "Event Objects");
+        DrawSettingsOverview(configInterface.cfg.AreaOption, "Area Objects");
+        DrawSettingsOverview(configInterface.cfg.AetheryteOption, "Aetherytes");
+        DrawSettingsOverview(configInterface.cfg.CutsceneOption, "Cutscene Objects",
+            "Shows cutscene objects. I have no idea what these are!");
+        
         DrawSeperator("Misc", UtilInfo.Red);
-
-        var cardStandColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.CardStandOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-cardStand", ref cardStandColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.CardStandOption.ColorU = ImGui.ColorConvertFloat4ToU32(cardStandColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var showCardStand = configInterface.cfg.ShowCardStand;
-        if (ImGui.Checkbox("Card Stand (Island Sanctuary Nodes)", ref showCardStand))
-        {
-            configInterface.cfg.ShowCardStand = showCardStand;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Show card stand. This includes island sanctuary stuff (mostly).");
-        }
-
-
-        var gatheringPointColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.GatheringPointOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-gatheringpointcolor", ref gatheringPointColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.GatheringPointOption.ColorU = ImGui.ColorConvertFloat4ToU32(gatheringPointColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var showGatheringPoint = configInterface.cfg.ShowGatheringPoint;
-        if (ImGui.Checkbox("Gathering Point", ref showGatheringPoint))
-        {
-            configInterface.cfg.ShowGatheringPoint = showGatheringPoint;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Shows Gathering Points");
-        }
-
-        var mountPointColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.MountOption.ColorU);
-        if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-mountoptioncolor", ref mountPointColor,
-                ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.MountOption.ColorU = ImGui.ColorConvertFloat4ToU32(mountPointColor);
-            configInterface.Save();
-        }
-
-        ImGui.SameLine();
-        var showMount = configInterface.cfg.ShowMountType;
-        if (ImGui.Checkbox("Mount", ref showMount))
-        {
-            configInterface.cfg.ShowMountType = showMount;
-            configInterface.Save();
-        }
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Shows mounts. Gets a little cluttered");
-        }
-
+        DrawSettingsOverview(configInterface.cfg.CardStandOption, "Card Stand (Island Sanctuary Nodes)",
+            "Show card stand. This includes island sanctuary stuff (mostly).");
+        DrawSettingsOverview(configInterface.cfg.GatheringPointOption, "Gathering Point", "Shows Gathering Points");
+        DrawSettingsOverview(configInterface.cfg.MountOption, "Mount", "Shows mounts. Gets a little cluttered");
         ImGui.EndChild();
     }
 

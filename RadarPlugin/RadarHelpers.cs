@@ -1,7 +1,9 @@
 ﻿using System;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Logging;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin;
@@ -10,14 +12,17 @@ public class RadarHelpers
 {
     private readonly Configuration configInterface;
     private readonly ClientState clientState;
+    private readonly Condition conditionInterface;
 
     public RadarHelpers(
         Configuration configInterface,
-        ClientState clientState
+        ClientState clientState,
+        Condition condition
     )
     {
         this.clientState = clientState;
         this.configInterface = configInterface;
+        this.conditionInterface = condition;
     }
 
 
@@ -36,7 +41,7 @@ public class RadarHelpers
         if (configInterface.cfg.ShowBaDdObjects)
         {
             // TODO: Check if we need to swap this out with a seperte eureka and potd list
-            if (UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) && (
+            if (this.IsSpecialZone() && (
                     UtilInfo.RenameList.ContainsKey(obj.DataId) ||
                     UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
             {
@@ -96,7 +101,11 @@ public class RadarHelpers
         return false;
     }
 
-
+    public bool IsSpecialZone()
+    {
+        return UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) || this.conditionInterface[ConditionFlag.InDeepDungeon];
+    }
+    
     /**
      * TODO: Refactor this to be done once per second instead of on each render.
      */
@@ -130,7 +139,7 @@ public class RadarHelpers
 
         // If Deep Dungeon
         if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId) &&
-            UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+            IsSpecialZone() &&
             gameObject.ObjectKind != ObjectKind.Player)
         {
             switch (UtilInfo.DeepDungeonMobTypesMap[gameObject.DataId])
@@ -194,7 +203,8 @@ public class RadarHelpers
                 return configInterface.cfg.CardStandOption.ColorU;
             case ObjectKind.None:
             default:
-                return configInterface.cfg.ObjectOption.ColorU;
+                PluginLog.Error($"Game Object Got Invalid Color: {gameObject.DataId}");
+                return UtilInfo.Yellow;
         }
     }
 

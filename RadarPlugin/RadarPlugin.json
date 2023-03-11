@@ -1,7 +1,7 @@
 ﻿{
   "Name": "Radar Plugin",
   "Author": "KangasZ",
-  "Description": "Radar plugin that will break your eyes.",
+  "Description": "3D Radar to see everything through walls.",
   "RepoUrl": "https://github.com/KangasZ/RadarPlugin",
-  "Punchline": "See things through walls."
+  "Punchline": "See stuff through things!"
 }

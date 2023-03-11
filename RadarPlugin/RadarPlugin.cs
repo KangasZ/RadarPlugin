@@ -29,15 +29,15 @@ public sealed class RadarPlugin : IDalamudPlugin
     {
         // Services and DI
         configInterface = new Configuration(pluginInterface);
-        radarHelpers = new RadarHelpers(configInterface, clientState);
+        radarHelpers = new RadarHelpers(configInterface, clientState, condition);
 
         // UI
         mobEditUi = new MobEditUi(pluginInterface, configInterface, radarHelpers);
         localMobsUi = new LocalMobsUi(pluginInterface, configInterface, objectTable, mobEditUi, radarHelpers);
-        mainUi = new MainUi(pluginInterface, configInterface, localMobsUi, clientState);
+        mainUi = new MainUi(pluginInterface, configInterface, localMobsUi, clientState, radarHelpers);
         
         // Command manager
-        pluginCommands = new PluginCommands(commandManager, mainUi);
+        pluginCommands = new PluginCommands(commandManager, mainUi, configInterface);
         radarLogic = new RadarLogic(pluginInterface, configInterface, objectTable, condition, clientState, gameGui, radarHelpers);
     }
 

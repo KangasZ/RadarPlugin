@@ -278,13 +278,13 @@ public static class UtilInfo
         { 12322, DeepDungeonMobTypes.SpecialUndead },
         { 12323, DeepDungeonMobTypes.SpecialUndead },
         { 12324, DeepDungeonMobTypes.SpecialUndead },
+        
+        // BA Objects
+        { 2009728, DeepDungeonMobTypes.Traps }, // Eureka Trap,
+        { 2009729, DeepDungeonMobTypes.Passage }, // Eureka Portal,
+        { 2009726, DeepDungeonMobTypes.Passage }, // Unstable portal
+        { 2009727, DeepDungeonMobTypes.Passage }, // Stable portal
     };
-
-    public static uint Color(byte r, byte g, byte b, byte a)
-    {
-        var intColor = (a << 24) | (g << 8) | (b << 16) | r;
-        return (uint)intColor;
-    }
 
     public static float Distance2D(this Vector3 v, Vector3 v2)
     {
