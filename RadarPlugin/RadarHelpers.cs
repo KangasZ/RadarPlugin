@@ -59,23 +59,23 @@ public class RadarHelpers
         switch (obj.ObjectKind)
         {
             case ObjectKind.Treasure:
-                return configInterface.cfg.ShowLoot;
+                return configInterface.cfg.TreasureOption.Enabled;
             case ObjectKind.Companion:
-                return configInterface.cfg.ShowCompanion;
+                return configInterface.cfg.CompanionOption.Enabled;
             case ObjectKind.Area:
-                return configInterface.cfg.ShowAreaObjects;
+                return configInterface.cfg.AreaOption.Enabled;
             case ObjectKind.Aetheryte:
-                return configInterface.cfg.ShowAetherytes;
+                return configInterface.cfg.AetheryteOption.Enabled;
             case ObjectKind.EventNpc:
-                return configInterface.cfg.ShowEventNpc;
+                return configInterface.cfg.EventNpcOption.Enabled;
             case ObjectKind.EventObj:
-                return configInterface.cfg.ShowEvents;
+                return configInterface.cfg.EventObjOption.Enabled;
             case ObjectKind.None:
                 break;
             case ObjectKind.Player:
-                return configInterface.cfg.ShowPlayers;
+                return configInterface.cfg.PlayerOption.Enabled;
             case ObjectKind.BattleNpc:
-                if (!configInterface.cfg.ShowEnemies) return false;
+                if (!configInterface.cfg.NpcOption.Enabled) return false;
                 if (obj is not BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
                     return false; // This should never trigger
                 //if (!clientstructobj->GetIsTargetable()) continue;
@@ -85,17 +85,17 @@ public class RadarHelpers
                     configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) return false;
                 return true;
             case ObjectKind.GatheringPoint:
-                return configInterface.cfg.ShowGatheringPoint;
+                return configInterface.cfg.GatheringPointOption.Enabled;
             case ObjectKind.MountType:
-                return configInterface.cfg.ShowMountType;
+                return configInterface.cfg.MountOption.Enabled;
             case ObjectKind.Retainer:
-                return configInterface.cfg.ShowRetainer;
+                return configInterface.cfg.RetainerOption.Enabled;
             case ObjectKind.Housing:
-                return configInterface.cfg.ShowHousing;
+                return configInterface.cfg.HousingOption.Enabled;
             case ObjectKind.Cutscene:
-                return configInterface.cfg.ShowCutscene;
+                return configInterface.cfg.CutsceneOption.Enabled;
             case ObjectKind.CardStand:
-                return configInterface.cfg.ShowCardStand;
+                return configInterface.cfg.CardStandOption.Enabled;
         }
 
         return false;
