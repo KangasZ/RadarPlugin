@@ -116,7 +116,8 @@ public static class UtilInfo
         { 1551, "Bronze Coffer" },
         { 1552, "Bronze Coffer" },
         { 1553, "Bronze Coffer" },
-        
+        { 1554, "Bronze Coffer" },
+
         // Mimics
         { 2006020, "Mimic Coffer" },
         { 2566, "Mimic" },
@@ -160,7 +161,7 @@ public static class UtilInfo
         { 15998, DeepDungeonMobTypes.Mimic },
         { 15999, DeepDungeonMobTypes.Mimic },
         { 16002, DeepDungeonMobTypes.Mimic },
-
+        { 16003, DeepDungeonMobTypes.Mimic },
 
         // Returns
         { 2007187, DeepDungeonMobTypes.Return },
@@ -218,6 +219,7 @@ public static class UtilInfo
         { 1551, DeepDungeonMobTypes.BronzeChest },
         { 1552, DeepDungeonMobTypes.BronzeChest },
         { 1553, DeepDungeonMobTypes.BronzeChest },
+        { 1554, DeepDungeonMobTypes.BronzeChest },
 
 
         // Coffers
@@ -287,16 +289,19 @@ public static class UtilInfo
         // Meracydian Clone
         { 15912, DeepDungeonMobTypes.SpecialUndead },
         { 15914, DeepDungeonMobTypes.SpecialUndead },
-
+        { 15918, DeepDungeonMobTypes.SpecialUndead },
+        { 15919, DeepDungeonMobTypes.SpecialUndead },
+        
         // Demi Cochma
         { 15902, DeepDungeonMobTypes.SpecialUndead },
+        { 15905, DeepDungeonMobTypes.SpecialUndead },
         { 15904, DeepDungeonMobTypes.SpecialUndead },
         { 15907, DeepDungeonMobTypes.SpecialUndead },
         { 15910, DeepDungeonMobTypes.SpecialUndead },
 
         // Lamia Queen
+        { 15922, DeepDungeonMobTypes.SpecialUndead },
         { 15924, DeepDungeonMobTypes.SpecialUndead },
-
 
         // BA Objects
         { 2009728, DeepDungeonMobTypes.Traps }, // Eureka Trap,

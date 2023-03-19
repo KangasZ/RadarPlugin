@@ -363,7 +363,7 @@ public class RadarLogic : IDisposable
     {
         var nearbyMobs = objectTable
             .Where(obj => obj.IsValid() && radarHelpers.ShouldRender(obj))
-            .Select(obj => (obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj))).ToList();
+            .Select(obj => (obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
         /*
          *foreach (var obj in objectTable)
          *{
