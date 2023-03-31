@@ -191,7 +191,9 @@ public class MainUi : IDisposable
     private void DrawDeepDungeonOverviewSettings()
     {
         DrawSeperator($"Enemies Options", UtilInfo.Red);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PlayerOption, "Players");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic");
@@ -417,9 +419,12 @@ public class MainUi : IDisposable
 
     private void DrawDDMobSettings()
     {
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.PlayerOption, "Players",
+            MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
             MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' Mobs", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
     }

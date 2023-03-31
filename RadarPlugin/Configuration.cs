@@ -24,6 +24,7 @@ public class Configuration
 
     public class DeepDungeonOptions
     {
+        public ESPOption PlayerOption { get; set; } = new(playerOptDefault);
         public ESPOption SpecialUndeadOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Yellow };
         public ESPOption AuspiceOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Green };
         public ESPOption EasyMobOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.LightBlue };

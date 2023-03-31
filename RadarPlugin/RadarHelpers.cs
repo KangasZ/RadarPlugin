@@ -40,12 +40,52 @@ public class RadarHelpers
 
         if (configInterface.cfg.ShowBaDdObjects)
         {
+            //                    UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
             // TODO: Check if we need to swap this out with a seperte eureka and potd list
-            if (this.IsSpecialZone() && (
-                    UtilInfo.RenameList.ContainsKey(obj.DataId) ||
-                    UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
+            if (this.IsSpecialZone())
             {
-                return true;
+                if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
+                {
+                    switch (UtilInfo.DeepDungeonMobTypesMap[obj.DataId])
+                    {
+                        case DeepDungeonMobTypes.Default:
+                            return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
+                        case DeepDungeonMobTypes.SpecialUndead:
+                            return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption.Enabled;
+                        case DeepDungeonMobTypes.Auspice:
+                            return configInterface.cfg.DeepDungeonOptions.AuspiceOption.Enabled;
+                        case DeepDungeonMobTypes.EasyMobs:
+                            return configInterface.cfg.DeepDungeonOptions.EasyMobOption.Enabled;
+                        case DeepDungeonMobTypes.Traps:
+                            return configInterface.cfg.DeepDungeonOptions.TrapOption.Enabled;
+                        case DeepDungeonMobTypes.Return:
+                            return configInterface.cfg.DeepDungeonOptions.ReturnOption.Enabled;
+                        case DeepDungeonMobTypes.Passage:
+                            return configInterface.cfg.DeepDungeonOptions.PassageOption.Enabled;
+                        case DeepDungeonMobTypes.GoldChest:
+                            return configInterface.cfg.DeepDungeonOptions.GoldChestOption.Enabled;
+                        case DeepDungeonMobTypes.SilverChest:
+                            return configInterface.cfg.DeepDungeonOptions.SilverChestOption.Enabled;
+                        case DeepDungeonMobTypes.BronzeChest:
+                            return configInterface.cfg.DeepDungeonOptions.BronzeChestOption.Enabled;
+                        case DeepDungeonMobTypes.AccursedHoard:
+                            return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption.Enabled;
+                        case DeepDungeonMobTypes.Mimic:
+                            return configInterface.cfg.DeepDungeonOptions.MimicOption.Enabled;
+                        default:
+                            return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
+                    }
+                }
+
+                switch (obj.ObjectKind)
+                {
+                    case ObjectKind.BattleNpc:
+                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
+                    case ObjectKind.Player:
+                        return configInterface.cfg.DeepDungeonOptions.PlayerOption.Enabled;
+                }
+
+                return false;
             }
         }
 
@@ -103,9 +143,10 @@ public class RadarHelpers
 
     public bool IsSpecialZone()
     {
-        return UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) || this.conditionInterface[ConditionFlag.InDeepDungeon];
+        return UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) ||
+               this.conditionInterface[ConditionFlag.InDeepDungeon];
     }
-    
+
     /**
      * TODO: Refactor this to be done once per second instead of on each render.
      */
@@ -138,36 +179,47 @@ public class RadarHelpers
         }
 
         // If Deep Dungeon
-        if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId) &&
-            IsSpecialZone() &&
-            gameObject.ObjectKind != ObjectKind.Player)
+        if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
         {
-            switch (UtilInfo.DeepDungeonMobTypesMap[gameObject.DataId])
+            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId))
             {
-                case DeepDungeonMobTypes.SpecialUndead:
-                    return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption.ColorU;
-                case DeepDungeonMobTypes.Auspice:
-                    return configInterface.cfg.DeepDungeonOptions.AuspiceOption.ColorU;
-                case DeepDungeonMobTypes.EasyMobs:
-                    return configInterface.cfg.DeepDungeonOptions.EasyMobOption.ColorU;
-                case DeepDungeonMobTypes.Traps:
-                    return configInterface.cfg.DeepDungeonOptions.TrapOption.ColorU;
-                case DeepDungeonMobTypes.Return:
-                    return configInterface.cfg.DeepDungeonOptions.ReturnOption.ColorU;
-                case DeepDungeonMobTypes.Passage:
-                    return configInterface.cfg.DeepDungeonOptions.PassageOption.ColorU;
-                case DeepDungeonMobTypes.GoldChest:
-                    return configInterface.cfg.DeepDungeonOptions.GoldChestOption.ColorU;
-                case DeepDungeonMobTypes.SilverChest:
-                    return configInterface.cfg.DeepDungeonOptions.SilverChestOption.ColorU;
-                case DeepDungeonMobTypes.BronzeChest:
-                    return configInterface.cfg.DeepDungeonOptions.BronzeChestOption.ColorU;
-                case DeepDungeonMobTypes.AccursedHoard:
-                    return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption.ColorU;
-                case DeepDungeonMobTypes.Mimic:
-                    return configInterface.cfg.DeepDungeonOptions.MimicOption.ColorU;
+                switch (UtilInfo.DeepDungeonMobTypesMap[gameObject.DataId])
+                {
+                    case DeepDungeonMobTypes.Default:
+                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.ColorU;
+                    case DeepDungeonMobTypes.SpecialUndead:
+                        return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption.ColorU;
+                    case DeepDungeonMobTypes.Auspice:
+                        return configInterface.cfg.DeepDungeonOptions.AuspiceOption.ColorU;
+                    case DeepDungeonMobTypes.EasyMobs:
+                        return configInterface.cfg.DeepDungeonOptions.EasyMobOption.ColorU;
+                    case DeepDungeonMobTypes.Traps:
+                        return configInterface.cfg.DeepDungeonOptions.TrapOption.ColorU;
+                    case DeepDungeonMobTypes.Return:
+                        return configInterface.cfg.DeepDungeonOptions.ReturnOption.ColorU;
+                    case DeepDungeonMobTypes.Passage:
+                        return configInterface.cfg.DeepDungeonOptions.PassageOption.ColorU;
+                    case DeepDungeonMobTypes.GoldChest:
+                        return configInterface.cfg.DeepDungeonOptions.GoldChestOption.ColorU;
+                    case DeepDungeonMobTypes.SilverChest:
+                        return configInterface.cfg.DeepDungeonOptions.SilverChestOption.ColorU;
+                    case DeepDungeonMobTypes.BronzeChest:
+                        return configInterface.cfg.DeepDungeonOptions.BronzeChestOption.ColorU;
+                    case DeepDungeonMobTypes.AccursedHoard:
+                        return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption.ColorU;
+                    case DeepDungeonMobTypes.Mimic:
+                        return configInterface.cfg.DeepDungeonOptions.MimicOption.ColorU;
+                    default:
+                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.ColorU;
+                }
             }
-            // If no specific config interface, it defaults
+
+            if (gameObject.ObjectKind == ObjectKind.Player)
+            {
+                return configInterface.cfg.DeepDungeonOptions.PlayerOption.ColorU;
+            }
+
+            return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.ColorU;
         }
 
         // Finally if nothing else
@@ -211,9 +263,7 @@ public class RadarHelpers
     public Configuration.ESPOption GetParams(GameObject areaObject)
     {
         // If Deep Dungeon
-        if (configInterface.cfg.ShowBaDdObjects && UtilInfo.DeepDungeonMobTypesMap.ContainsKey(areaObject.DataId) &&
-            UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
-            areaObject.ObjectKind != ObjectKind.Player)
+        if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
         {
             switch (UtilInfo.DeepDungeonMobTypesMap[areaObject.DataId])
             {
