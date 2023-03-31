@@ -263,34 +263,48 @@ public class RadarHelpers
     public Configuration.ESPOption GetParams(GameObject areaObject)
     {
         // If Deep Dungeon
+        // If Deep Dungeon
         if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
         {
-            switch (UtilInfo.DeepDungeonMobTypesMap[areaObject.DataId])
+            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(areaObject.DataId))
             {
-                case DeepDungeonMobTypes.SpecialUndead:
-                    return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption;
-                case DeepDungeonMobTypes.Auspice:
-                    return configInterface.cfg.DeepDungeonOptions.AuspiceOption;
-                case DeepDungeonMobTypes.EasyMobs:
-                    return configInterface.cfg.DeepDungeonOptions.EasyMobOption;
-                case DeepDungeonMobTypes.Traps:
-                    return configInterface.cfg.DeepDungeonOptions.TrapOption;
-                case DeepDungeonMobTypes.Return:
-                    return configInterface.cfg.DeepDungeonOptions.ReturnOption;
-                case DeepDungeonMobTypes.Passage:
-                    return configInterface.cfg.DeepDungeonOptions.PassageOption;
-                case DeepDungeonMobTypes.GoldChest:
-                    return configInterface.cfg.DeepDungeonOptions.GoldChestOption;
-                case DeepDungeonMobTypes.SilverChest:
-                    return configInterface.cfg.DeepDungeonOptions.SilverChestOption;
-                case DeepDungeonMobTypes.BronzeChest:
-                    return configInterface.cfg.DeepDungeonOptions.BronzeChestOption;
-                case DeepDungeonMobTypes.AccursedHoard:
-                    return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption;
-                case DeepDungeonMobTypes.Mimic:
-                    return configInterface.cfg.DeepDungeonOptions.MimicOption;
+                switch (UtilInfo.DeepDungeonMobTypesMap[areaObject.DataId])
+                {
+                    case DeepDungeonMobTypes.Default:
+                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
+                    case DeepDungeonMobTypes.SpecialUndead:
+                        return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption;
+                    case DeepDungeonMobTypes.Auspice:
+                        return configInterface.cfg.DeepDungeonOptions.AuspiceOption;
+                    case DeepDungeonMobTypes.EasyMobs:
+                        return configInterface.cfg.DeepDungeonOptions.EasyMobOption;
+                    case DeepDungeonMobTypes.Traps:
+                        return configInterface.cfg.DeepDungeonOptions.TrapOption;
+                    case DeepDungeonMobTypes.Return:
+                        return configInterface.cfg.DeepDungeonOptions.ReturnOption;
+                    case DeepDungeonMobTypes.Passage:
+                        return configInterface.cfg.DeepDungeonOptions.PassageOption;
+                    case DeepDungeonMobTypes.GoldChest:
+                        return configInterface.cfg.DeepDungeonOptions.GoldChestOption;
+                    case DeepDungeonMobTypes.SilverChest:
+                        return configInterface.cfg.DeepDungeonOptions.SilverChestOption;
+                    case DeepDungeonMobTypes.BronzeChest:
+                        return configInterface.cfg.DeepDungeonOptions.BronzeChestOption;
+                    case DeepDungeonMobTypes.AccursedHoard:
+                        return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption;
+                    case DeepDungeonMobTypes.Mimic:
+                        return configInterface.cfg.DeepDungeonOptions.MimicOption;
+                    default:
+                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
+                }
             }
-            // If no specific config interface, it defaults
+
+            if (areaObject.ObjectKind == ObjectKind.Player)
+            {
+                return configInterface.cfg.DeepDungeonOptions.PlayerOption;
+            }
+
+            return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
         }
 
         switch (areaObject.ObjectKind)
