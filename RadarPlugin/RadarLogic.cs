@@ -354,7 +354,7 @@ public class RadarLogic : IDisposable
 #endif
                 }
             }
-
+            
             Thread.Sleep(1000);
         }
     }
@@ -364,16 +364,6 @@ public class RadarLogic : IDisposable
         var nearbyMobs = objectTable
             .Where(obj => obj.IsValid() && radarHelpers.ShouldRender(obj))
             .Select(obj => (obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-        /*
-         *foreach (var obj in objectTable)
-         *{
-         *  if (!obj.IsValid()) continue;
-         *  if (radarHelpers.ShouldRender(obj))
-         *  {
-         *      nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-         *  }
-         *}
-         */
 
         Monitor.Enter(areaObjects);
         areaObjects.Clear();

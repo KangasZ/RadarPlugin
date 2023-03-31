@@ -40,7 +40,7 @@ public class RadarHelpers
 
         if (configInterface.cfg.ShowBaDdObjects)
         {
-            //                    UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
+            // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
             // TODO: Check if we need to swap this out with a seperte eureka and potd list
             if (this.IsSpecialZone())
             {
