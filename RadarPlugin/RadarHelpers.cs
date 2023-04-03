@@ -38,61 +38,57 @@ public class RadarHelpers
             return configInterface.cfg.ShowYOU;
         }
 
-        if (configInterface.cfg.ShowBaDdObjects)
-        {
-            // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
-            // TODO: Check if we need to swap this out with a seperte eureka and potd list
-            if (this.IsSpecialZone())
-            {
-                if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
-                {
-                    switch (UtilInfo.DeepDungeonMobTypesMap[obj.DataId])
-                    {
-                        case DeepDungeonMobTypes.Default:
-                            return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
-                        case DeepDungeonMobTypes.SpecialUndead:
-                            return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption.Enabled;
-                        case DeepDungeonMobTypes.Auspice:
-                            return configInterface.cfg.DeepDungeonOptions.AuspiceOption.Enabled;
-                        case DeepDungeonMobTypes.EasyMobs:
-                            return configInterface.cfg.DeepDungeonOptions.EasyMobOption.Enabled;
-                        case DeepDungeonMobTypes.Traps:
-                            return configInterface.cfg.DeepDungeonOptions.TrapOption.Enabled;
-                        case DeepDungeonMobTypes.Return:
-                            return configInterface.cfg.DeepDungeonOptions.ReturnOption.Enabled;
-                        case DeepDungeonMobTypes.Passage:
-                            return configInterface.cfg.DeepDungeonOptions.PassageOption.Enabled;
-                        case DeepDungeonMobTypes.GoldChest:
-                            return configInterface.cfg.DeepDungeonOptions.GoldChestOption.Enabled;
-                        case DeepDungeonMobTypes.SilverChest:
-                            return configInterface.cfg.DeepDungeonOptions.SilverChestOption.Enabled;
-                        case DeepDungeonMobTypes.BronzeChest:
-                            return configInterface.cfg.DeepDungeonOptions.BronzeChestOption.Enabled;
-                        case DeepDungeonMobTypes.AccursedHoard:
-                            return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption.Enabled;
-                        case DeepDungeonMobTypes.Mimic:
-                            return configInterface.cfg.DeepDungeonOptions.MimicOption.Enabled;
-                        default:
-                            return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
-                    }
-                }
-
-                switch (obj.ObjectKind)
-                {
-                    case ObjectKind.BattleNpc:
-                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
-                    case ObjectKind.Player:
-                        return configInterface.cfg.DeepDungeonOptions.PlayerOption.Enabled;
-                }
-
-                return false;
-            }
-        }
-
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
         if (this.configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
         {
             return false;
+        }
+
+        if (this.IsSpecialZone() && configInterface.cfg.ShowBaDdObjects)
+        {
+            // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
+            // TODO: Check if we need to swap this out with a seperte eureka and potd list
+            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
+            {
+                switch (UtilInfo.DeepDungeonMobTypesMap[obj.DataId])
+                {
+                    case DeepDungeonMobTypes.Default:
+                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
+                    case DeepDungeonMobTypes.SpecialUndead:
+                        return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption.Enabled;
+                    case DeepDungeonMobTypes.Auspice:
+                        return configInterface.cfg.DeepDungeonOptions.AuspiceOption.Enabled;
+                    case DeepDungeonMobTypes.EasyMobs:
+                        return configInterface.cfg.DeepDungeonOptions.EasyMobOption.Enabled;
+                    case DeepDungeonMobTypes.Traps:
+                        return configInterface.cfg.DeepDungeonOptions.TrapOption.Enabled;
+                    case DeepDungeonMobTypes.Return:
+                        return configInterface.cfg.DeepDungeonOptions.ReturnOption.Enabled;
+                    case DeepDungeonMobTypes.Passage:
+                        return configInterface.cfg.DeepDungeonOptions.PassageOption.Enabled;
+                    case DeepDungeonMobTypes.GoldChest:
+                        return configInterface.cfg.DeepDungeonOptions.GoldChestOption.Enabled;
+                    case DeepDungeonMobTypes.SilverChest:
+                        return configInterface.cfg.DeepDungeonOptions.SilverChestOption.Enabled;
+                    case DeepDungeonMobTypes.BronzeChest:
+                        return configInterface.cfg.DeepDungeonOptions.BronzeChestOption.Enabled;
+                    case DeepDungeonMobTypes.AccursedHoard:
+                        return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption.Enabled;
+                    case DeepDungeonMobTypes.Mimic:
+                        return configInterface.cfg.DeepDungeonOptions.MimicOption.Enabled;
+                    default:
+                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
+                }
+            }
+
+            if (obj.ObjectKind == ObjectKind.BattleNpc && obj is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
+            {
+                if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
+                if (mob.IsDead) return false;
+                if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
+                    configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) return false;
+                return true;
+            }
         }
 
         if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
@@ -214,12 +210,10 @@ public class RadarHelpers
                 }
             }
 
-            if (gameObject.ObjectKind == ObjectKind.Player)
+            if (gameObject.ObjectKind == ObjectKind.BattleNpc && gameObject is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
             {
-                return configInterface.cfg.DeepDungeonOptions.PlayerOption.ColorU;
+                return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.ColorU;
             }
-
-            return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.ColorU;
         }
 
         // Finally if nothing else
@@ -299,12 +293,10 @@ public class RadarHelpers
                 }
             }
 
-            if (areaObject.ObjectKind == ObjectKind.Player)
+            if (areaObject.ObjectKind == ObjectKind.BattleNpc && areaObject is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
             {
-                return configInterface.cfg.DeepDungeonOptions.PlayerOption;
+                return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
             }
-
-            return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
         }
 
         switch (areaObject.ObjectKind)
