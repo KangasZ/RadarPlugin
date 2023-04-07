@@ -159,9 +159,9 @@ public class RadarLogic : IDisposable
 
         if (gameObject is BattleNpc npc2)
         {
-            if (espOption.ShowAggroCircle)
+            if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
             {
-                if (!espOption.ShowAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
+                if (!configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
                 if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
                 {
                     DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,

@@ -314,10 +314,10 @@ public class MainUi : IDisposable
     {
         var tag = "aggroradiusoptions";
 
-        var showNpcAggroCircle = configInterface.cfg.NpcOption.ShowAggroCircle;
+        var showNpcAggroCircle = configInterface.cfg.AggroRadiusOptions.ShowAggroCircle;
         if (ImGui.Checkbox($"Aggro Circle##{tag}-settings", ref showNpcAggroCircle))
         {
-            configInterface.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
+            configInterface.cfg.AggroRadiusOptions.ShowAggroCircle = showNpcAggroCircle;
             configInterface.Save();
         }
 
@@ -326,10 +326,10 @@ public class MainUi : IDisposable
             ImGui.SetTooltip("Draws aggro circle.");
         }
 
-        var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.NpcOption.ShowAggroCircleInCombat;
+        var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat;
         if (ImGui.Checkbox($"Aggro Circle In Combat##{tag}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
         {
-            configInterface.cfg.NpcOption.ShowAggroCircleInCombat = onlyShowNpcAggroCircleWhenOutOfCombat;
+            configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat = onlyShowNpcAggroCircleWhenOutOfCombat;
             configInterface.Save();
         }
 

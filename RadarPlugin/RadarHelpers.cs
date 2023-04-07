@@ -44,6 +44,7 @@ public class RadarHelpers
             return false;
         }
 
+
         if (this.IsSpecialZone() && configInterface.cfg.ShowBaDdObjects)
         {
             // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
@@ -81,6 +82,8 @@ public class RadarHelpers
                 }
             }
 
+            if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+
             if (obj.ObjectKind == ObjectKind.BattleNpc && obj is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
             {
                 if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
@@ -92,6 +95,8 @@ public class RadarHelpers
         }
 
         if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+
+        
         switch (obj.ObjectKind)
         {
             case ObjectKind.Treasure:
