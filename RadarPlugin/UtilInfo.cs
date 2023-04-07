@@ -162,6 +162,8 @@ public static class UtilInfo
         { 15999, DeepDungeonMobTypes.Mimic },
         { 16002, DeepDungeonMobTypes.Mimic },
         { 16003, DeepDungeonMobTypes.Mimic },
+        { 16004, DeepDungeonMobTypes.Mimic },
+        { 16005, DeepDungeonMobTypes.Mimic },
 
         // Returns
         { 2007187, DeepDungeonMobTypes.Return },
@@ -242,10 +244,16 @@ public static class UtilInfo
         { 7610, DeepDungeonMobTypes.EasyMobs }, // Korrigan
         
         // Orthos Korrigans
+        { 16006, DeepDungeonMobTypes.EasyMobs },
         { 16007, DeepDungeonMobTypes.EasyMobs },
         { 16008, DeepDungeonMobTypes.EasyMobs },
         { 16009, DeepDungeonMobTypes.EasyMobs },
+        { 16010, DeepDungeonMobTypes.EasyMobs },
+        { 16011, DeepDungeonMobTypes.EasyMobs },
         { 16012, DeepDungeonMobTypes.EasyMobs },
+        { 16013, DeepDungeonMobTypes.EasyMobs },
+        { 16014, DeepDungeonMobTypes.EasyMobs },
+        { 16015, DeepDungeonMobTypes.EasyMobs },
 
 
         // Auspices
@@ -288,21 +296,40 @@ public static class UtilInfo
         // Dread Orthos Mobs 
         // Meracydian Clone
         { 15912, DeepDungeonMobTypes.SpecialUndead },
+        { 15913, DeepDungeonMobTypes.SpecialUndead },
         { 15914, DeepDungeonMobTypes.SpecialUndead },
+        { 15915, DeepDungeonMobTypes.SpecialUndead },
+        { 15916, DeepDungeonMobTypes.SpecialUndead },
+        { 15917, DeepDungeonMobTypes.SpecialUndead },
         { 15918, DeepDungeonMobTypes.SpecialUndead },
         { 15919, DeepDungeonMobTypes.SpecialUndead },
-        
+        { 15920, DeepDungeonMobTypes.SpecialUndead },
+        { 15921, DeepDungeonMobTypes.SpecialUndead },
+
         // Demi Cochma
         { 15902, DeepDungeonMobTypes.SpecialUndead },
-        { 15905, DeepDungeonMobTypes.SpecialUndead },
+        { 15903, DeepDungeonMobTypes.SpecialUndead },
         { 15904, DeepDungeonMobTypes.SpecialUndead },
+        { 15905, DeepDungeonMobTypes.SpecialUndead },
+        { 15906, DeepDungeonMobTypes.SpecialUndead },
         { 15907, DeepDungeonMobTypes.SpecialUndead },
+        { 15908, DeepDungeonMobTypes.SpecialUndead },
+        { 15909, DeepDungeonMobTypes.SpecialUndead },
         { 15910, DeepDungeonMobTypes.SpecialUndead },
+        { 15911, DeepDungeonMobTypes.SpecialUndead },
 
         // Lamia Queen
         { 15922, DeepDungeonMobTypes.SpecialUndead },
+        { 15923, DeepDungeonMobTypes.SpecialUndead },
         { 15924, DeepDungeonMobTypes.SpecialUndead },
-
+        { 15925, DeepDungeonMobTypes.SpecialUndead },
+        { 15926, DeepDungeonMobTypes.SpecialUndead },
+        { 15927, DeepDungeonMobTypes.SpecialUndead },
+        { 15928, DeepDungeonMobTypes.SpecialUndead },
+        { 15929, DeepDungeonMobTypes.SpecialUndead },
+        { 15930, DeepDungeonMobTypes.SpecialUndead },
+        { 15931, DeepDungeonMobTypes.SpecialUndead },
+        
         // BA Objects
         { 2009728, DeepDungeonMobTypes.Traps }, // Eureka Trap,
         { 2009729, DeepDungeonMobTypes.Passage }, // Eureka Portal,

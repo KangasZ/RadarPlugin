@@ -159,9 +159,16 @@ public class RadarLogic : IDisposable
 
         if (gameObject is BattleNpc npc2)
         {
-            if (espOption.ShowAggroCircle)
+            if (configInterface.cfg.HitboxOptions.HitboxEnabled)
             {
-                if (!espOption.ShowAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
+                DrawHitbox(drawListPtr, gameObject.Position, gameObject.HitboxRadius,
+                    configInterface.cfg.HitboxOptions.HitboxColor);
+            }
+            
+            if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
+            {
+                if (!configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
+                if (npc2.BattleNpcKind != BattleNpcSubKind.Enemy) return;
                 if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
                 {
                     DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
@@ -174,12 +181,6 @@ public class RadarLogic : IDisposable
                         gameObject.Rotation,
                         uint.MaxValue);
                 }
-            }
-
-            if (configInterface.cfg.HitboxOptions.HitboxEnabled)
-            {
-                DrawHitbox(drawListPtr, gameObject.Position, gameObject.HitboxRadius,
-                    configInterface.cfg.HitboxOptions.HitboxColor);
             }
         }
     }
@@ -354,7 +355,7 @@ public class RadarLogic : IDisposable
 #endif
                 }
             }
-
+            
             Thread.Sleep(1000);
         }
     }
@@ -364,16 +365,6 @@ public class RadarLogic : IDisposable
         var nearbyMobs = objectTable
             .Where(obj => obj.IsValid() && radarHelpers.ShouldRender(obj))
             .Select(obj => (obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-        /*
-         *foreach (var obj in objectTable)
-         *{
-         *  if (!obj.IsValid()) continue;
-         *  if (radarHelpers.ShouldRender(obj))
-         *  {
-         *      nearbyMobs.Add((obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
-         *  }
-         *}
-         */
 
         Monitor.Enter(areaObjects);
         areaObjects.Clear();

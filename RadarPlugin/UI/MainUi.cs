@@ -192,6 +192,7 @@ public class MainUi : IDisposable
     {
         DrawSeperator($"Enemies Options", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic");
@@ -313,10 +314,10 @@ public class MainUi : IDisposable
     {
         var tag = "aggroradiusoptions";
 
-        var showNpcAggroCircle = configInterface.cfg.NpcOption.ShowAggroCircle;
+        var showNpcAggroCircle = configInterface.cfg.AggroRadiusOptions.ShowAggroCircle;
         if (ImGui.Checkbox($"Aggro Circle##{tag}-settings", ref showNpcAggroCircle))
         {
-            configInterface.cfg.NpcOption.ShowAggroCircle = showNpcAggroCircle;
+            configInterface.cfg.AggroRadiusOptions.ShowAggroCircle = showNpcAggroCircle;
             configInterface.Save();
         }
 
@@ -325,10 +326,10 @@ public class MainUi : IDisposable
             ImGui.SetTooltip("Draws aggro circle.");
         }
 
-        var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.NpcOption.ShowAggroCircleInCombat;
+        var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat;
         if (ImGui.Checkbox($"Aggro Circle In Combat##{tag}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
         {
-            configInterface.cfg.NpcOption.ShowAggroCircleInCombat = onlyShowNpcAggroCircleWhenOutOfCombat;
+            configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat = onlyShowNpcAggroCircleWhenOutOfCombat;
             configInterface.Save();
         }
 
@@ -420,6 +421,7 @@ public class MainUi : IDisposable
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
             MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' Mobs", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
     }

@@ -40,6 +40,8 @@ public class Configuration
 
     public class AggroRadiusOptions
     {
+        public bool ShowAggroCircle = false;
+        public bool ShowAggroCircleInCombat = false;
         public uint FrontColor = UtilInfo.Red;
         public uint RearColor = UtilInfo.Green;
         public uint RightSideColor = UtilInfo.Yellow;
@@ -62,8 +64,6 @@ public class Configuration
             DisplayType = espOption.DisplayType;
             DotSize = espOption.DotSize;
             ColorU = espOption.ColorU;
-            ShowAggroCircle = espOption.ShowAggroCircle;
-            ShowAggroCircleInCombat = espOption.ShowAggroCircleInCombat;
             ShowFC = espOption.ShowFC;
             DrawDistance = espOption.DrawDistance;
         }
@@ -72,8 +72,6 @@ public class Configuration
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public float DotSize = 2.2f;
         public uint ColorU = 0xffffffff;
-        public bool ShowAggroCircle = false;
-        public bool ShowAggroCircleInCombat = false;
         public bool ShowFC = false; // Unused
         public bool DrawDistance = false;
     }
@@ -134,8 +132,6 @@ public class Configuration
         ColorU = 0xffff00ff,
         DisplayType = DisplayTypes.DotAndName,
         DotSize = 2.2f,
-        ShowAggroCircle = false,
-        ShowAggroCircleInCombat = false,
         ShowFC = false,
         DrawDistance = false
     };
@@ -146,8 +142,6 @@ public class Configuration
         ColorU = 0xffFFFF00,
         DisplayType = DisplayTypes.NameOnly,
         DotSize = 2.2f,
-        ShowAggroCircle = false,
-        ShowAggroCircleInCombat = false,
         ShowFC = false,
         DrawDistance = false
     };
@@ -158,8 +152,6 @@ public class Configuration
         ColorU = 0xffffffff,
         DisplayType = DisplayTypes.HealthBarAndValueAndName,
         DotSize = 2.2f,
-        ShowAggroCircle = false,
-        ShowAggroCircleInCombat = false,
         ShowFC = false,
         DrawDistance = false
     };
