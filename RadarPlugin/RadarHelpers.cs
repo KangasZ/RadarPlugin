@@ -83,7 +83,6 @@ public class RadarHelpers
             }
 
             if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-
             if (obj.ObjectKind == ObjectKind.BattleNpc && obj is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
             {
                 if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
@@ -117,14 +116,19 @@ public class RadarHelpers
                 return configInterface.cfg.PlayerOption.Enabled;
             case ObjectKind.BattleNpc:
                 if (!configInterface.cfg.NpcOption.Enabled) return false;
-                if (obj is not BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
+                if (obj is not BattleNpc mob)
                     return false; // This should never trigger
                 //if (!clientstructobj->GetIsTargetable()) continue;
                 //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-                if (mob.IsDead) return false;
-                if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
-                    configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) return false;
-                return true;
+                if (mob.BattleNpcKind == BattleNpcSubKind.Enemy)
+                {
+                    if (mob.IsDead) return false;
+                    if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
+                        configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) return false;
+                    return true;
+                }
+
+                return configInterface.cfg.CompanionOption.Enabled;
             case ObjectKind.GatheringPoint:
                 return configInterface.cfg.GatheringPointOption.Enabled;
             case ObjectKind.MountType:
