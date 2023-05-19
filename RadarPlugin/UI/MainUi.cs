@@ -73,13 +73,48 @@ public class MainUi : IDisposable
 
     private void DrawUtilityTab()
     {
+        ;
+        var configName = configInterface.cfg.ConfigName;
+        ImGui.Text("Current Config Name:");
+        if (ImGui.InputText("", ref configName, 50))
+        {
+            configInterface.cfg.ConfigName = configName;
+            configInterface.Save();
+        }
+
+        if (ImGui.Button("Save Current Config"))
+        {
+            this.configInterface.SaveCurrentConfig();
+        }
+        
+        ImGui.Text("Saved Configurations:");
+        var selectedConfig = configInterface.selectedConfig;
+        if (ImGui.Combo("##selectedconfigcombobox", ref selectedConfig, configInterface.configs, configInterface.configs.Length))
+        {
+            if (selectedConfig < configInterface.configs.Length)
+            {
+                configInterface.selectedConfig = selectedConfig;
+            }
+        }
+        if (ImGui.Button("Load Selected Config"))
+        {
+            this.configInterface.LoadConfig(configInterface.configs[selectedConfig]);
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Delete Selected Config"))
+        {
+            this.configInterface.DeleteConfig(configInterface.configs[selectedConfig]);
+        }
+        ImGui.Separator();
+        
         if (ImGui.Button("Load Current Objects Menu"))
         {
             PluginLog.Debug("Pulling Area Objects");
             this.localMobsUi.DrawLocalMobsUi();
         }
-        ImGui.TextWrapped(
-            "More Advanced Settings. Unless you are a developer or know what you're doing, this menu will likely be useless.");
+        
+        ImGui.Separator();
+
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
         var onlyVisible = configInterface.cfg.ShowOnlyVisible;
@@ -152,6 +187,21 @@ public class MainUi : IDisposable
                 "Will display things such as portals, chests, and traps.");
         }
 
+        var backgroundDrawList = configInterface.cfg.UseBackgroundDrawList;
+        if (ImGui.Checkbox("Use Background Draw List", ref backgroundDrawList))
+        {
+            configInterface.cfg.UseBackgroundDrawList = backgroundDrawList;
+            configInterface.Save();
+        }
+        
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "This feature will use a background draw list from ImGui to render the 3d radar.\n" +
+                "It will be under any other Dalamud plugin. This is the original behavior.\n" +
+                "There should be no difference between this and normal operations");
+        }
+        
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
             "v1.5.1.0: Deep dungeon config may be overwritten.");
 

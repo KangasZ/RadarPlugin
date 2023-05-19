@@ -39,10 +39,25 @@ public class LocalMobsUi : IDisposable
     public void DrawLocalMobsUi()
     {
         areaObjects.Clear();
-        areaObjects.AddRange(objectTable.Where(x => x.DataId != 0).GroupBy(x => x.DataId).Select(x => x.First()));
+        IEnumerable<GameObject> tempObjects = objectTable;
+        if (configInterface.cfg.LocalMobsUiSettings.ShowPlayers)
+        {
+            areaObjects.AddRange(objectTable.Where(x => x.DataId == 0));
+        }
+
+        // Don't show duplicates but show npcs
+        if (!configInterface.cfg.LocalMobsUiSettings.Duplicates && configInterface.cfg.LocalMobsUiSettings.ShowNpcs)
+        {
+            areaObjects.AddRange(objectTable.Where(x => x.DataId != 0).GroupBy(x => x.DataId).Select(x => x.First()));
+        }
+        else if (configInterface.cfg.LocalMobsUiSettings.ShowNpcs)
+        {
+            areaObjects.AddRange(objectTable.Where(x => x.DataId != 0));
+        }
+
         currentMobsVisible = true;
     }
-    
+
     private void DrawCurrentMobsWindow()
     {
         if (!currentMobsVisible) return;
@@ -52,6 +67,35 @@ public class LocalMobsUi : IDisposable
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
+            if (ImGui.Button("Reload Mobs"))
+            {
+                DrawLocalMobsUi();
+            }
+
+            ImGui.SameLine();
+            var showPlayers = configInterface.cfg.LocalMobsUiSettings.ShowPlayers;
+            if (ImGui.Checkbox("Players##localmobsui", ref showPlayers))
+            {
+                configInterface.cfg.LocalMobsUiSettings.ShowPlayers = showPlayers;
+                configInterface.Save();
+            }
+
+            ImGui.SameLine();
+            var showDuplicates = configInterface.cfg.LocalMobsUiSettings.Duplicates;
+            if (ImGui.Checkbox("Duplicates##localmobsui", ref showDuplicates))
+            {
+                configInterface.cfg.LocalMobsUiSettings.Duplicates = showDuplicates;
+                configInterface.Save();
+            }
+
+            ImGui.SameLine();
+            var showNpcs = configInterface.cfg.LocalMobsUiSettings.ShowNpcs;
+            if (ImGui.Checkbox("NPCs##localmobsui", ref showNpcs))
+            {
+                configInterface.cfg.LocalMobsUiSettings.ShowNpcs = showNpcs;
+                configInterface.Save();
+            }
+
             ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");

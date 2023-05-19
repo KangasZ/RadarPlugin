@@ -78,14 +78,37 @@ public class RadarLogic : IDisposable
             return;
         }
 
-        var width = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
-        var height = ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
-        var drawListPtr = ImGui.GetBackgroundDrawList();
+        ImGui.Begin("RadarPluginOverlay", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoInputs
+                                                                  | ImGuiWindowFlags.NoScrollbar |
+                                                                  ImGuiWindowFlags.NoMouseInputs |
+                                                                  ImGuiWindowFlags.NoScrollWithMouse |
+                                                                  ImGuiWindowFlags.NoBackground |
+                                                                  ImGuiWindowFlags.NoTitleBar |
+                                                                  ImGuiWindowFlags.NoBringToFrontOnFocus |
+                                                                  ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoNav |
+                                                                  ImGuiWindowFlags.NoDecoration |
+                                                                  ImGuiWindowFlags.NoDocking |
+                                                                  ImGuiWindowFlags.NoFocusOnAppearing);
+        var mainViewPort = ImGui.GetMainViewport();
+        ImGui.SetWindowPos(mainViewPort.Pos);
+        ImGui.SetWindowSize(mainViewPort.Size);
+        ImDrawListPtr drawListPtr;
+        if (configInterface.cfg.UseBackgroundDrawList)
+        {
+            drawListPtr = ImGui.GetBackgroundDrawList();
+        }
+        else
+        {
+            drawListPtr = ImGui.GetWindowDrawList();
+        }
+
         foreach (var areaObject in areaObjects)
         {
             var espOption = radarHelpers.GetParams(areaObject.Item1);
             DrawEsp(drawListPtr, areaObject.Item1, areaObject.Item2, areaObject.Item3, espOption);
         }
+
+        ImGui.End();
 
         Monitor.Exit(areaObjects);
     }
@@ -164,10 +187,11 @@ public class RadarLogic : IDisposable
                 DrawHitbox(drawListPtr, gameObject.Position, gameObject.HitboxRadius,
                     configInterface.cfg.HitboxOptions.HitboxColor);
             }
-            
+
             if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
             {
-                if (!configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat && (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
+                if (!configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat &&
+                    (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
                 if (npc2.BattleNpcKind != BattleNpcSubKind.Enemy) return;
                 if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
                 {
@@ -355,7 +379,7 @@ public class RadarLogic : IDisposable
 #endif
                 }
             }
-            
+
             Thread.Sleep(1000);
         }
     }

@@ -2,6 +2,10 @@
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Dalamud.Logging;
+using Newtonsoft.Json;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin;
@@ -9,6 +13,13 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class LocalMobsUISettings
+    {
+        public bool Duplicates = false;
+        public bool ShowPlayers = false;
+        public bool ShowNpcs = true;
+    }
+    
     public class HitboxOptions
     {
         public bool HitboxEnabled = false;
@@ -79,7 +90,9 @@ public class Configuration
     public class Config : IPluginConfiguration
     {
         public int Version { get; set; } = 1;
+        public string ConfigName { get; set; } = "default";
         public bool Enabled { get; set; } = true;
+        public bool UseBackgroundDrawList { get; set; } = false;
         public bool ShowBaDdObjects { get; set; } = true;
         public bool ShowLoot { get; set; } = false;
         public bool DebugMode { get; set; } = false;
@@ -120,6 +133,7 @@ public class Configuration
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
         public HitboxOptions HitboxOptions { get; set; } = new();
+        public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
     }
 
     public Config cfg;
@@ -156,6 +170,10 @@ public class Configuration
         DrawDistance = false
     };
 
+    [NonSerialized] public string[] configs;
+
+    [NonSerialized] public int selectedConfig = 0;
+
     public Configuration(DalamudPluginInterface pluginInterface)
     {
         this.pluginInterface = pluginInterface;
@@ -180,10 +198,101 @@ public class Configuration
             cfg.CutsceneOption.Enabled = cfg.ShowCutscene;
             cfg.CardStandOption.Enabled = cfg.ShowCardStand;
         }
+
+        var configDirectory = this.pluginInterface.ConfigDirectory;
+        if (!configDirectory.Exists)
+        {
+            configDirectory.Create();
+        }
+
+        UpdateConfigs();
     }
 
+    public void SaveCurrentConfig()
+    {
+        PluginLog.Debug($"Saving config {cfg.ConfigName}");
+        SavePluginConfig(cfg, cfg.ConfigName);
+        UpdateConfigs();
+    }
+    
+    public bool LoadConfig(string configName)
+    {
+        PluginLog.Debug($"Loading config {configName}");
+        SavePluginConfig(cfg, cfg.ConfigName);
+        UpdateConfigs();
+        var tempConfig = Load(configName);
+        if (tempConfig != null)
+        {
+            this.cfg = tempConfig;
+            return true;
+        }
+        PluginLog.Debug("Config was NOT loaded!");
+        return false;
+    }
+    
     public void Save()
     {
         pluginInterface.SavePluginConfig(cfg);
     }
+    
+    public void UpdateConfigs() {
+        configs = this.pluginInterface.ConfigDirectory.GetFiles().Select(x => x.Name).ToArray();
+        if (selectedConfig >= configs.Length)
+        {
+            selectedConfig = 0;
+        }
+    }
+
+    public void DeleteConfig(string configName)
+    {
+        PluginLog.Debug($"Deleting config {configName}");
+        var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName;
+        FileInfo configFile = new FileInfo(path);
+        if (configFile.Exists)
+        {
+            configFile.Delete();
+        }
+        UpdateConfigs();
+    }
+    
+    private Config? Load(string configName)
+    {
+
+        var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName;
+        FileInfo configFile = new FileInfo(path);
+        PluginLog.Debug(configFile.FullName);
+        return !configFile.Exists ? null : DeserializeConfig(File.ReadAllText(configFile.FullName));
+    }
+
+    internal void SavePluginConfig(Config? currentConfig, string configName)
+    {
+        if (currentConfig == null)
+            return;
+        var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
+        this.Save(currentConfig, path);
+    }
+    internal void Save(Config config, string path) => 
+        this.WriteAllTextSafe(path , this.SerializeConfig(config));
+
+    internal string SerializeConfig(Config config) => JsonConvert.SerializeObject(config, Formatting.Indented, new JsonSerializerSettings()
+    {
+        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+        TypeNameHandling = TypeNameHandling.Objects
+    });
+    
+    internal void WriteAllTextSafe(string path, string text)
+    {
+        string str = path + ".tmp";
+        if (File.Exists(str))
+            File.Delete(str);
+        File.WriteAllText(str, text);
+        File.Move(str, path, true);
+    }
+    
+    internal static Config? DeserializeConfig(string data) => JsonConvert.DeserializeObject<Config>(data, new JsonSerializerSettings()
+    {
+        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+        TypeNameHandling = TypeNameHandling.None
+    });
+    
 }
