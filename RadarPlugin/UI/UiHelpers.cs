@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Logging;
 using ImGuiNET;
 using RadarPlugin.Enums;
@@ -31,6 +33,62 @@ public static class UiHelpers
         ImGui.EndTabBar();
     }
 
+    public static void LabeledHelpMarker(string label, string tooltip)
+    {
+        ImGuiComponents.HelpMarker(tooltip);
+        ImGui.SameLine();
+        ImGui.TextUnformatted(label);
+        HoverTooltip(tooltip);
+    }
+    
+    public static void HoverTooltip(string tooltip)
+    {
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(tooltip);
+        }
+    }
+    
+    public static void TextURL(string name, string url, uint color)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, color);
+        ImGui.Text(name);
+        ImGui.PopStyleColor();
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+
+            DrawUnderline(ImGui.GetColorU32(ImGuiCol.ButtonHovered));
+            ImGui.BeginTooltip();
+            ImGui.PushFont(UiBuilder.IconFont);
+            ImGui.Text(FontAwesomeIcon.Link.ToIconString()); ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
+            ImGui.PopFont();
+            ImGui.Text(url);
+            ImGui.EndTooltip();
+        }
+        else
+        {
+            DrawUnderline(ImGui.GetColorU32(ImGuiCol.Button));
+        }
+    }
+
+    public static void DrawUnderline(uint color)
+    {
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+        min.Y = max.Y;
+        ImGui.GetWindowDrawList().AddLine(min, max, color, 1.0f);
+    }
+    
     public static bool GetBorderClampedVector2(
         Vector2 screenpos,
         Vector2 clampSize,

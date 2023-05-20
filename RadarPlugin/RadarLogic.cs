@@ -78,17 +78,20 @@ public class RadarLogic : IDisposable
             return;
         }
 
-        ImGui.Begin("RadarPluginOverlay", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoInputs
-                                                                  | ImGuiWindowFlags.NoScrollbar |
-                                                                  ImGuiWindowFlags.NoMouseInputs |
-                                                                  ImGuiWindowFlags.NoScrollWithMouse |
-                                                                  ImGuiWindowFlags.NoBackground |
-                                                                  ImGuiWindowFlags.NoTitleBar |
-                                                                  ImGuiWindowFlags.NoBringToFrontOnFocus |
-                                                                  ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoNav |
-                                                                  ImGuiWindowFlags.NoDecoration |
-                                                                  ImGuiWindowFlags.NoDocking |
-                                                                  ImGuiWindowFlags.NoFocusOnAppearing);
+        ImGui.Begin("RadarPluginOverlay",
+            ImGuiWindowFlags.NoMove | 
+            ImGuiWindowFlags.NoInputs |
+            ImGuiWindowFlags.NoScrollbar |
+            ImGuiWindowFlags.NoMouseInputs |
+            ImGuiWindowFlags.NoScrollWithMouse |
+            ImGuiWindowFlags.NoBackground |
+            ImGuiWindowFlags.NoTitleBar |
+            ImGuiWindowFlags.NoBringToFrontOnFocus |
+            ImGuiWindowFlags.NoResize |
+            ImGuiWindowFlags.NoNav |
+            ImGuiWindowFlags.NoDecoration |
+            ImGuiWindowFlags.NoDocking |
+            ImGuiWindowFlags.NoFocusOnAppearing);
         var mainViewPort = ImGui.GetMainViewport();
         ImGui.SetWindowPos(mainViewPort.Pos);
         ImGui.SetWindowSize(mainViewPort.Size);

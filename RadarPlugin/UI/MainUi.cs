@@ -212,14 +212,16 @@ public class MainUi : IDisposable
             configInterface.cfg.DotSize = objectDotSize;
             configInterface.Save();
         }
-
         
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "v1.5.1.0: Deep dungeon config may be overwritten.");
-
+            "Issues or Feedback: ");
+        ImGui.SameLine();
+        UiHelpers.TextURL("GitHub", "https://github.com/KangasZ/RadarPlugin", ImGui.GetColorU32(ImGuiCol.Text));
+        ImGui.Indent();
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
-            "    1. Use tabs to customize experience and fix invisible mobs.\n" +
-            "    2. Bring bugs or feature requests up to author\n");
+            "1. Use tabs to customize experience and fix invisible mobs.\n" +
+            "2. Bring bugs or feature requests up\n");
+        ImGui.Unindent();
         ImGui.TextWrapped(
             "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
@@ -578,6 +580,7 @@ public class MainUi : IDisposable
             configInterface.cfg.SeparateParty = partySeparation;
             configInterface.Save();
         }
+        UiHelpers.LabeledHelpMarker("", "This will separate everything");
         var friendSeparation = configInterface.cfg.SeparateFriends;
         if (ImGui.Checkbox($"Separate Friends##player-settings", ref friendSeparation))
         {
