@@ -11,7 +11,7 @@ namespace RadarPlugin.UI;
 
 public class MainUi : IDisposable
 {
-    private readonly Configuration configInterface;
+    private Configuration configInterface;
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible = false;
@@ -199,8 +199,20 @@ public class MainUi : IDisposable
             ImGui.SetTooltip(
                 "This feature will use a background draw list from ImGui to render the 3d radar.\n" +
                 "It will be under any other Dalamud plugin. This is the original behavior.\n" +
-                "There should be no difference between this and normal operations");
+                "There should be practically no difference between this and normal operations");
         }
+        
+        ImGui.Text("Dot Size");
+        ImGui.SameLine();
+        ImGui.PushItemWidth(150);
+        var objectDotSize = configInterface.cfg.DotSize;
+        if (ImGui.SliderFloat("##dot-size", ref objectDotSize, UtilInfo.MinDotSize,
+                UtilInfo.MaxDotSize))
+        {
+            configInterface.cfg.DotSize = objectDotSize;
+            configInterface.Save();
+        }
+
         
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
             "v1.5.1.0: Deep dungeon config may be overwritten.");
@@ -530,15 +542,6 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        var objectDotSize = option.DotSize;
-        if (ImGui.SliderFloat($"Dot Size##{id}-dot-size", ref objectDotSize, UtilInfo.MinDotSize,
-                UtilInfo.MaxDotSize))
-        {
-            option.DotSize = objectDotSize;
-            configInterface.Save();
-        }
-
-
         var showDistance = option.DrawDistance;
         if (ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref showDistance))
         {
@@ -553,8 +556,9 @@ public class MainUi : IDisposable
     {
         ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
 
-        DrawSeperator("Players and Npcs", UtilInfo.Red);
+        DrawSeperator("Players", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players");
+        
         // Custom YOUR PLAYER that I don't want to deal with yet.
         ImGui.SameLine();
         var you = configInterface.cfg.ShowYOU;
@@ -568,6 +572,39 @@ public class MainUi : IDisposable
             ImGui.SetTooltip(
                 "Will show your player character if enabled. Inherits player settings.");
         }
+        var partySeparation = configInterface.cfg.SeparateParty;
+        if (ImGui.Checkbox($"Separate Party##player-settings", ref partySeparation))
+        {
+            configInterface.cfg.SeparateParty = partySeparation;
+            configInterface.Save();
+        }
+        var friendSeparation = configInterface.cfg.SeparateFriends;
+        if (ImGui.Checkbox($"Separate Friends##player-settings", ref friendSeparation))
+        {
+            configInterface.cfg.SeparateFriends = friendSeparation;
+            configInterface.Save();
+        }
+        
+        var allianceSeparation = configInterface.cfg.SeparateAlliance;
+        if (ImGui.Checkbox($"Separate Alliance##player-settings", ref allianceSeparation))
+        {
+            configInterface.cfg.SeparateAlliance = allianceSeparation;
+            configInterface.Save();
+        }
+
+        if (configInterface.cfg.SeparateParty)
+        {
+            DrawSettingsOverview(configInterface.cfg.PartyOption, "Party");
+        }
+        if (configInterface.cfg.SeparateAlliance)
+        {
+            DrawSettingsOverview(configInterface.cfg.AllianceOption, "Alliance");
+        }
+        if (configInterface.cfg.SeparateFriends)
+        {
+            DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends");
+        }
+        DrawSeperator("Npcs", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
             "Shows most enemies that are considered battleable");
         DrawSettingsOverview(configInterface.cfg.CompanionOption, "Companions");

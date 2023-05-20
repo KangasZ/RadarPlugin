@@ -173,7 +173,8 @@ public class LocalMobsUi : IDisposable
                         }
                         else
                         {
-                            var color = helpers.GetColor(x);
+                            var color = helpers.GetParams(x).ColorU;
+                            
                             configInterface.cfg.ColorOverride.Add(x.DataId, color);
                             configInterface.Save();
                         }

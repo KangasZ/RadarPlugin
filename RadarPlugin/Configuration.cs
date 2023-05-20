@@ -73,7 +73,6 @@ public class Configuration
         {
             Enabled = espOption.Enabled;
             DisplayType = espOption.DisplayType;
-            DotSize = espOption.DotSize;
             ColorU = espOption.ColorU;
             ShowFC = espOption.ShowFC;
             DrawDistance = espOption.DrawDistance;
@@ -81,7 +80,6 @@ public class Configuration
 
         public bool Enabled = true;
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
-        public float DotSize = 2.2f;
         public uint ColorU = 0xffffffff;
         public bool ShowFC = false; // Unused
         public bool DrawDistance = false;
@@ -117,7 +115,10 @@ public class Configuration
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true };
-        public ESPOption PlayerOption { get; set; } = new(playerOptDefault) { Enabled = false };
+        public ESPOption PlayerOption { get; set; } = new(playerOptDefault) { Enabled = true };
+        public ESPOption FriendOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Orange};
+        public ESPOption AllianceOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Gold};
+        public ESPOption PartyOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Turquoise};
         public ESPOption TreasureOption { get; set; } = new(objectOptDefault) { Enabled = true };
         public ESPOption CompanionOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public ESPOption AreaOption { get; set; } = new(objectOptDefault) { Enabled = false };
@@ -134,6 +135,10 @@ public class Configuration
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
+        public float DotSize = 2.2f;
+        public bool SeparateAlliance { get; set; } = true;
+        public bool SeparateParty { get; set; } = true;
+        public bool SeparateFriends { get; set; } = true;
     }
 
     public Config cfg;
@@ -145,7 +150,6 @@ public class Configuration
         Enabled = true,
         ColorU = 0xffff00ff,
         DisplayType = DisplayTypes.DotAndName,
-        DotSize = 2.2f,
         ShowFC = false,
         DrawDistance = false
     };
@@ -155,7 +159,6 @@ public class Configuration
         Enabled = true,
         ColorU = 0xffFFFF00,
         DisplayType = DisplayTypes.NameOnly,
-        DotSize = 2.2f,
         ShowFC = false,
         DrawDistance = false
     };
@@ -165,7 +168,6 @@ public class Configuration
         Enabled = true,
         ColorU = 0xffffffff,
         DisplayType = DisplayTypes.HealthBarAndValueAndName,
-        DotSize = 2.2f,
         ShowFC = false,
         DrawDistance = false
     };

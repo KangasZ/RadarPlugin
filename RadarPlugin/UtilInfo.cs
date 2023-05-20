@@ -17,8 +17,8 @@ public static class UtilInfo
     public const uint LightBlue = 0xFFE6D8AD;
     public const uint Bronze = 0xFF327FCD;
     public const uint Turquoise = 0xffc8d530;
-    public const float MinDotSize = 1.2f;
-    public const float MaxDotSize = 3.8f;
+    public const float MinDotSize = 0.6f;
+    public const float MaxDotSize = 6f;
     public const uint OpacityMax = 0xff000000;
 
 

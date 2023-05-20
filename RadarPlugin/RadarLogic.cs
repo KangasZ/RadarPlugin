@@ -30,7 +30,7 @@ public class RadarLogic : IDisposable
     private Task backgroundLoop;
     private bool keepRunning;
     private readonly ObjectTable objectTable;
-    private List<(GameObject, uint, string)> areaObjects; // Game object, color, string
+    private List<(GameObject gameObject, uint? color, string text)> areaObjects; // Game object, color, string
     private readonly ClientState clientState;
     private readonly GameGui gameGui;
     private readonly RadarHelpers radarHelpers;
@@ -51,7 +51,7 @@ public class RadarLogic : IDisposable
         PluginLog.Debug("Radar Loaded");
         keepRunning = true;
         // TODO: In the future adjust this
-        areaObjects = new List<(GameObject, uint, string)>();
+        areaObjects = new List<(GameObject, uint?, string)>();
 
         this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += OnTick;
@@ -123,22 +123,23 @@ public class RadarLogic : IDisposable
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
-    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint color, string name,
+    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint? overrideColor, string name,
         Configuration.ESPOption espOption)
     {
+        var color = overrideColor ?? espOption.ColorU;
         var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
         if (visibleOnScreen)
         {
             switch (espOption.DisplayType)
             {
                 case DisplayTypes.DotOnly:
-                    DrawDot(drawListPtr, onScreenPosition, espOption.DotSize, color);
+                    DrawDot(drawListPtr, onScreenPosition, configInterface.cfg.DotSize, color);
                     break;
                 case DisplayTypes.NameOnly:
                     DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.DotAndName:
-                    DrawDot(drawListPtr, onScreenPosition, espOption.DotSize, color);
+                    DrawDot(drawListPtr, onScreenPosition, configInterface.cfg.DotSize, color);
                     DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.HealthBarOnly:
@@ -388,7 +389,7 @@ public class RadarLogic : IDisposable
     {
         var nearbyMobs = objectTable
             .Where(obj => obj.IsValid() && radarHelpers.ShouldRender(obj))
-            .Select(obj => (obj, radarHelpers.GetColor(obj), radarHelpers.GetText(obj)));
+            .Select(obj => (obj, radarHelpers.GetColorOverride(obj), radarHelpers.GetText(obj)));
 
         Monitor.Enter(areaObjects);
         areaObjects.Clear();

@@ -8,12 +8,12 @@ using RadarPlugin.UI;
 
 namespace RadarPlugin;
 
-public sealed class RadarPlugin : IDalamudPlugin
+public class RadarPlugin : IDalamudPlugin
 {
     public string Name => "Radar Plugin";
     private RadarLogic radarLogic;
     private PluginCommands pluginCommands;
-    private Configuration configInterface;
+    private static Configuration configInterface { get; set; }
     private MainUi mainUi;
     private MobEditUi mobEditUi;
     private LocalMobsUi localMobsUi;

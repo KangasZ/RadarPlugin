@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
 using RadarPlugin.Enums;
@@ -175,97 +176,18 @@ public class RadarHelpers
         return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
     }
 
-    public uint GetColor(GameObject gameObject)
+    public uint? GetColorOverride(GameObject gameObject)
     {
         // Override over all
         if (configInterface.cfg.ColorOverride.ContainsKey(gameObject.DataId))
         {
             return configInterface.cfg.ColorOverride[gameObject.DataId];
         }
-
-        // If Deep Dungeon
-        if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
-        {
-            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(gameObject.DataId))
-            {
-                switch (UtilInfo.DeepDungeonMobTypesMap[gameObject.DataId])
-                {
-                    case DeepDungeonMobTypes.Default:
-                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.ColorU;
-                    case DeepDungeonMobTypes.SpecialUndead:
-                        return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption.ColorU;
-                    case DeepDungeonMobTypes.Auspice:
-                        return configInterface.cfg.DeepDungeonOptions.AuspiceOption.ColorU;
-                    case DeepDungeonMobTypes.EasyMobs:
-                        return configInterface.cfg.DeepDungeonOptions.EasyMobOption.ColorU;
-                    case DeepDungeonMobTypes.Traps:
-                        return configInterface.cfg.DeepDungeonOptions.TrapOption.ColorU;
-                    case DeepDungeonMobTypes.Return:
-                        return configInterface.cfg.DeepDungeonOptions.ReturnOption.ColorU;
-                    case DeepDungeonMobTypes.Passage:
-                        return configInterface.cfg.DeepDungeonOptions.PassageOption.ColorU;
-                    case DeepDungeonMobTypes.GoldChest:
-                        return configInterface.cfg.DeepDungeonOptions.GoldChestOption.ColorU;
-                    case DeepDungeonMobTypes.SilverChest:
-                        return configInterface.cfg.DeepDungeonOptions.SilverChestOption.ColorU;
-                    case DeepDungeonMobTypes.BronzeChest:
-                        return configInterface.cfg.DeepDungeonOptions.BronzeChestOption.ColorU;
-                    case DeepDungeonMobTypes.AccursedHoard:
-                        return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption.ColorU;
-                    case DeepDungeonMobTypes.Mimic:
-                        return configInterface.cfg.DeepDungeonOptions.MimicOption.ColorU;
-                    default:
-                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.ColorU;
-                }
-            }
-
-            if (gameObject.ObjectKind == ObjectKind.BattleNpc && gameObject is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
-            {
-                return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.ColorU;
-            }
-        }
-
-        // Finally if nothing else
-        switch (gameObject.ObjectKind)
-        {
-            case ObjectKind.Player:
-                return configInterface.cfg.PlayerOption.ColorU;
-            case ObjectKind.BattleNpc:
-                return configInterface.cfg.NpcOption.ColorU;
-            case ObjectKind.EventNpc:
-                return configInterface.cfg.EventNpcOption.ColorU;
-            case ObjectKind.Treasure:
-                return configInterface.cfg.TreasureOption.ColorU;
-            case ObjectKind.Aetheryte:
-                return configInterface.cfg.AetheryteOption.ColorU;
-            case ObjectKind.GatheringPoint:
-                return configInterface.cfg.GatheringPointOption.ColorU;
-            case ObjectKind.EventObj:
-                return configInterface.cfg.EventObjOption.ColorU;
-            case ObjectKind.MountType:
-                return configInterface.cfg.MountOption.ColorU;
-            case ObjectKind.Companion:
-                return configInterface.cfg.CompanionOption.ColorU;
-            case ObjectKind.Retainer:
-                return configInterface.cfg.RetainerOption.ColorU;
-            case ObjectKind.Area:
-                return configInterface.cfg.AreaOption.ColorU;
-            case ObjectKind.Housing:
-                return configInterface.cfg.HousingOption.ColorU;
-            case ObjectKind.Cutscene:
-                return configInterface.cfg.CutsceneOption.ColorU;
-            case ObjectKind.CardStand:
-                return configInterface.cfg.CardStandOption.ColorU;
-            case ObjectKind.None:
-            default:
-                PluginLog.Error($"Game Object Got Invalid Color: {gameObject.DataId}");
-                return UtilInfo.Yellow;
-        }
+        return null;
     }
 
     public Configuration.ESPOption GetParams(GameObject areaObject)
     {
-        // If Deep Dungeon
         // If Deep Dungeon
         if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
         {
@@ -311,6 +233,32 @@ public class RadarHelpers
         switch (areaObject.ObjectKind)
         {
             case ObjectKind.Player:
+                if (areaObject is PlayerCharacter chara)
+                {
+                    if (configInterface.cfg.SeparateFriends)
+                    {
+                        if (chara.StatusFlags.HasFlag(StatusFlags.Friend))
+                        {
+                            return configInterface.cfg.FriendOption;
+                        }
+                    }
+                    
+                    if (configInterface.cfg.SeparateParty)
+                    {
+                        if (chara.StatusFlags.HasFlag(StatusFlags.PartyMember))
+                        {
+                            return configInterface.cfg.PartyOption;
+                        }
+                    }
+                    
+                    if (configInterface.cfg.SeparateAlliance)
+                    {
+                        if (chara.StatusFlags.HasFlag(StatusFlags.AllianceMember))
+                        {
+                            return configInterface.cfg.AllianceOption;
+                        }
+                    }
+                }
                 return configInterface.cfg.PlayerOption;
             case ObjectKind.BattleNpc:
                 return configInterface.cfg.NpcOption;
