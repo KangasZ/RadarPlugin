@@ -237,7 +237,7 @@ public class RadarHelpers
                 {
                     if (configInterface.cfg.SeparateFriends)
                     {
-                        if (chara.StatusFlags.HasFlag(StatusFlags.Friend))
+                        if (((byte)chara.StatusFlags & 0x80) == 0x80)
                         {
                             return configInterface.cfg.FriendOption;
                         }
@@ -245,7 +245,7 @@ public class RadarHelpers
                     
                     if (configInterface.cfg.SeparateParty)
                     {
-                        if (chara.StatusFlags.HasFlag(StatusFlags.PartyMember))
+                        if (((byte)chara.StatusFlags & 0x20) == 0x20)
                         {
                             return configInterface.cfg.PartyOption;
                         }
@@ -253,7 +253,7 @@ public class RadarHelpers
                     
                     if (configInterface.cfg.SeparateAlliance)
                     {
-                        if (chara.StatusFlags.HasFlag(StatusFlags.AllianceMember))
+                        if (((byte)chara.StatusFlags & 0x40) == 0x40)
                         {
                             return configInterface.cfg.AllianceOption;
                         }
