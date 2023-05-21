@@ -14,7 +14,4 @@ To use the plugin, please install the custom repository with the following link:
 Please do not include my projects in other custom repos like Aku API.
 
 ## Notice
-This is distributed with the MIT license. I take absolutely no responsibility for what users do with the plugin.
-
-Under no circumstance is this plugin designed to assist any PvP-centric modes. I will not condone nor support this activity. Moving forward I may be actively repressing this activity with condition checks.
-
+This is distributed with the MIT license. I take absolutely no responsibility for any actions by the users of this plugin.
