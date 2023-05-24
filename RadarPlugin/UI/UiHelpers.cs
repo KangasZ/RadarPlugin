@@ -12,6 +12,23 @@ namespace RadarPlugin.UI;
 
 public static class UiHelpers
 {
+    public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText)
+    {
+        var retStatement = false;
+        var tempVar = boxValue;
+        if (ImGui.Checkbox(label, ref tempVar))
+        {
+            boxValue = tempVar;
+            retStatement = true;
+        }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(
+                "Will show your player character if enabled. Inherits player settings.");
+        }
+
+        return retStatement;
+    }
     public static void DrawTabs(string tabId, params (string label, uint color, Action function)[] tabs)
     {
         ImGui.BeginTabBar($"##{tabId}");

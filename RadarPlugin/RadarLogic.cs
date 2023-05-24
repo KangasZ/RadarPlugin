@@ -391,7 +391,7 @@ public class RadarLogic : IDisposable
     private void UpdateMobInfo()
     {
         var nearbyMobs = objectTable
-            .Where(obj => obj.IsValid() && radarHelpers.ShouldRender(obj))
+            .Where(obj => radarHelpers.GetParams(obj).Enabled && radarHelpers.ShouldRender(obj))
             .Select(obj => (obj, radarHelpers.GetColorOverride(obj), radarHelpers.GetText(obj)));
 
         Monitor.Enter(areaObjects);

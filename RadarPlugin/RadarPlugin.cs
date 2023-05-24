@@ -13,7 +13,8 @@ public class RadarPlugin : IDalamudPlugin
     public string Name => "Radar Plugin";
     private RadarLogic radarLogic;
     private PluginCommands pluginCommands;
-    private static Configuration configInterface { get; set; }
+    public Configuration configInterface { get; private set; }
+    public RadarPlugin RadarPlugin
     private MainUi mainUi;
     private MobEditUi mobEditUi;
     private LocalMobsUi localMobsUi;

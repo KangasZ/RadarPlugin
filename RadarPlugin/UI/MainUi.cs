@@ -563,17 +563,10 @@ public class MainUi : IDisposable
         
         // Custom YOUR PLAYER that I don't want to deal with yet.
         ImGui.SameLine();
-        var you = configInterface.cfg.ShowYOU;
-        if (ImGui.Checkbox("Your Player", ref you))
-        {
-            configInterface.cfg.ShowYOU = you;
-            configInterface.Save();
-        }
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Will show your player character if enabled. Inherits player settings.");
-        }
+        UiHelpers.DrawCheckbox("Your Player", configInterface.cfg.ShowYOU,
+            "Will show your player character if enabled. Inherits player settings.");
+
+        
         var partySeparation = configInterface.cfg.SeparateParty;
         if (ImGui.Checkbox($"Separate Party##player-settings", ref partySeparation))
         {
