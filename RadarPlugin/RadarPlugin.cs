@@ -11,13 +11,14 @@ namespace RadarPlugin;
 public class RadarPlugin : IDalamudPlugin
 {
     public string Name => "Radar Plugin";
-    private RadarLogic radarLogic;
-    private PluginCommands pluginCommands;
-    private static Configuration configInterface { get; set; }
-    private MainUi mainUi;
-    private MobEditUi mobEditUi;
-    private LocalMobsUi localMobsUi;
-    private RadarHelpers radarHelpers;
+    private readonly Configuration Configuration;
+    private readonly RadarPlugin Plugin;
+    private readonly RadarLogic radarLogic;
+    private readonly PluginCommands pluginCommands;
+    private readonly MainUi mainUi;
+    private readonly MobEditUi mobEditUi;
+    private readonly LocalMobsUi localMobsUi;
+    private readonly RadarHelpers radarHelpers;
 
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
@@ -27,18 +28,19 @@ public class RadarPlugin : IDalamudPlugin
         ClientState clientState,
         GameGui gameGui)
     {
+        Plugin = this;
         // Services and DI
-        configInterface = new Configuration(pluginInterface);
-        radarHelpers = new RadarHelpers(configInterface, clientState, condition);
+        Configuration = new Configuration(pluginInterface);
+        radarHelpers = new RadarHelpers(Configuration, clientState, condition);
 
         // UI
-        mobEditUi = new MobEditUi(pluginInterface, configInterface, radarHelpers);
-        localMobsUi = new LocalMobsUi(pluginInterface, configInterface, objectTable, mobEditUi, radarHelpers);
-        mainUi = new MainUi(pluginInterface, configInterface, localMobsUi, clientState, radarHelpers);
+        mobEditUi = new MobEditUi(pluginInterface, Configuration, radarHelpers);
+        localMobsUi = new LocalMobsUi(pluginInterface, Configuration, objectTable, mobEditUi, radarHelpers);
+        mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers);
         
         // Command manager
-        pluginCommands = new PluginCommands(commandManager, mainUi, configInterface);
-        radarLogic = new RadarLogic(pluginInterface, configInterface, objectTable, condition, clientState, gameGui, radarHelpers);
+        pluginCommands = new PluginCommands(commandManager, mainUi, Configuration);
+        radarLogic = new RadarLogic(pluginInterface, Configuration, objectTable, condition, clientState, gameGui, radarHelpers);
     }
 
     public void Dispose()

@@ -88,29 +88,29 @@ public class Configuration
     public class Config : IPluginConfiguration
     {
         public int Version { get; set; } = 1;
-        public string ConfigName { get; set; } = "default";
-        public bool Enabled { get; set; } = true;
-        public bool UseBackgroundDrawList { get; set; } = false;
-        public bool ShowBaDdObjects { get; set; } = true;
-        public bool ShowLoot { get; set; } = false;
-        public bool DebugMode { get; set; } = false;
-        public bool ShowPlayers { get; set; } = false;
-        public bool ShowEnemies { get; set; } = true;
-        public bool ShowEvents { get; set; } = false;
-        public bool ShowCompanion { get; set; } = false;
-        public bool ShowEventNpc { get; set; } = false;
-        public bool ShowAreaObjects { get; set; } = false;
-        public bool ShowAetherytes { get; set; } = false;
-        public bool ShowCardStand { get; set; } = false;
-        public bool ShowGatheringPoint { get; set; } = false;
-        public bool ShowMountType { get; set; } = false;
-        public bool ShowRetainer { get; set; } = false;
-        public bool ShowHousing { get; set; } = false;
-        public bool ShowCutscene { get; set; } = false;
-        public bool ShowNameless { get; set; } = false;
-        public bool ShowOnlyVisible { get; set; } = true;
-        public bool ShowYOU { get; set; } = false;
-        public bool ShowOffScreen { get; set; } = true;
+        public string ConfigName = "default";
+        public bool Enabled = true;
+        public bool UseBackgroundDrawList = false;
+        public bool ShowBaDdObjects = true;
+        public bool ShowLoot = false;
+        public bool DebugMode = false;
+        public bool ShowPlayers = false;
+        public bool ShowEnemies = true;
+        public bool ShowEvents = false;
+        public bool ShowCompanion = false;
+        public bool ShowEventNpc= false;
+        public bool ShowAreaObjects = false;
+        public bool ShowAetherytes = false;
+        public bool ShowCardStand = false;
+        public bool ShowGatheringPoint = false;
+        public bool ShowMountType = false;
+        public bool ShowRetainer = false;
+        public bool ShowHousing = false;
+        public bool ShowCutscene = false;
+        public bool ShowNameless = false;
+        public bool ShowOnlyVisible = true;
+        public bool ShowYOU = false;
+        public bool ShowOffScreen = true;
         public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
@@ -136,9 +136,9 @@ public class Configuration
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
         public float DotSize = 2.2f;
-        public bool SeparateAlliance { get; set; } = true;
-        public bool SeparateParty { get; set; } = true;
-        public bool SeparateFriends { get; set; } = true;
+        public bool SeparateAlliance = true;
+        public bool SeparateParty = true;
+        public bool SeparateFriends = true;
     }
 
     public Config cfg;

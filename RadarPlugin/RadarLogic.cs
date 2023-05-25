@@ -72,14 +72,8 @@ public class RadarLogic : IDisposable
 
     private void DrawRadar()
     {
-        if (!Monitor.TryEnter(areaObjects))
-        {
-            PluginLog.Error("Try Enter Failed. This is not necessarily error");
-            return;
-        }
-
         ImGui.Begin("RadarPluginOverlay",
-            ImGuiWindowFlags.NoMove | 
+            ImGuiWindowFlags.NoMove |
             ImGuiWindowFlags.NoInputs |
             ImGuiWindowFlags.NoScrollbar |
             ImGuiWindowFlags.NoMouseInputs |
@@ -105,15 +99,28 @@ public class RadarLogic : IDisposable
             drawListPtr = ImGui.GetWindowDrawList();
         }
 
-        foreach (var areaObject in areaObjects)
+        bool gotMonitor = false;
+        Monitor.TryEnter(areaObjects, ref gotMonitor);
+        if (!gotMonitor)
         {
-            var espOption = radarHelpers.GetParams(areaObject.Item1);
-            DrawEsp(drawListPtr, areaObject.Item1, areaObject.Item2, areaObject.Item3, espOption);
+            PluginLog.Error("Try Enter Failed. This is not necessarily error");
+        }
+        else
+        {
+            foreach (var areaObject in areaObjects)
+            {
+                var espOption = radarHelpers.GetParams(areaObject.Item1);
+                DrawEsp(drawListPtr, areaObject.gameObject, areaObject.color, areaObject.text, espOption);
+            }
         }
 
-        ImGui.End();
+        if (Monitor.IsEntered(areaObjects))
+        {
+            Monitor.Exit(areaObjects);
+        }
 
-        Monitor.Exit(areaObjects);
+
+        ImGui.End();
     }
 
     /**
@@ -391,7 +398,7 @@ public class RadarLogic : IDisposable
     private void UpdateMobInfo()
     {
         var nearbyMobs = objectTable
-            .Where(obj => obj.IsValid() && radarHelpers.ShouldRender(obj))
+            .Where(obj => radarHelpers.ShouldRender(obj) && radarHelpers.GetParams(obj).Enabled)
             .Select(obj => (obj, radarHelpers.GetColorOverride(obj), radarHelpers.GetText(obj)));
 
         Monitor.Enter(areaObjects);
@@ -401,11 +408,7 @@ public class RadarLogic : IDisposable
     }
 
 
-    private void CleanupZoneTerritoryWrapper(object? _, ushort __)
-    {
-        PluginLog.Debug($"New Territory: {clientState.TerritoryType}");
-        CleanupZone();
-    }
+    #region CLEANUP REGION
 
     private void CleanupZone()
     {
@@ -420,6 +423,12 @@ public class RadarLogic : IDisposable
         CleanupZone();
     }
 
+    private void CleanupZoneTerritoryWrapper(object? _, ushort __)
+    {
+        PluginLog.Debug($"New Territory: {clientState.TerritoryType}");
+        CleanupZone();
+    }
+
     public void Dispose()
     {
         pluginInterface.UiBuilder.Draw -= OnTick;
@@ -428,8 +437,10 @@ public class RadarLogic : IDisposable
         clientState.Login -= CleanupZoneLogWrapper;
         keepRunning = false;
         while (!backgroundLoop.IsCompleted) ;
-        Monitor.Enter(areaObjects);
-        Monitor.Exit(areaObjects);
+        backgroundLoop.Dispose();
+        areaObjects.Clear();
         PluginLog.Information("Radar Unloaded");
     }
+
+    #endregion
 }

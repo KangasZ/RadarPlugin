@@ -29,122 +29,62 @@ public class RadarHelpers
 
     public unsafe bool ShouldRender(GameObject obj)
     {
+        // TOdo: move debug check
         if (configInterface.cfg.DebugMode)
         {
             return true;
         }
-
+        
+        // Objest valid check
+        if (!obj.IsValid())
+        {
+            return false;
+        }
+        
+        // Object within ignore lists
+        if (UtilInfo.DataIdIgnoreList.Contains(obj.DataId) || configInterface.cfg.DataIdIgnoreList.Contains(obj.DataId)) return false;
+        
+        // Is the object YOU
         if (clientState.LocalPlayer != null && obj.Address == clientState.LocalPlayer.Address)
         {
             return configInterface.cfg.ShowYOU;
         }
-
+        
+        // Object visible & config check
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
-        if (this.configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
+        if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
         {
             return false;
         }
+        
 
 
-        if (this.IsSpecialZone() && configInterface.cfg.ShowBaDdObjects)
+        if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
         {
             // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
-            // TODO: Check if we need to swap this out with a seperte eureka and potd list
-            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
+            if (!UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
             {
-                switch (UtilInfo.DeepDungeonMobTypesMap[obj.DataId])
+                if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+                if (obj.ObjectKind == ObjectKind.BattleNpc && obj is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
                 {
-                    case DeepDungeonMobTypes.Default:
-                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
-                    case DeepDungeonMobTypes.SpecialUndead:
-                        return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption.Enabled;
-                    case DeepDungeonMobTypes.Auspice:
-                        return configInterface.cfg.DeepDungeonOptions.AuspiceOption.Enabled;
-                    case DeepDungeonMobTypes.EasyMobs:
-                        return configInterface.cfg.DeepDungeonOptions.EasyMobOption.Enabled;
-                    case DeepDungeonMobTypes.Traps:
-                        return configInterface.cfg.DeepDungeonOptions.TrapOption.Enabled;
-                    case DeepDungeonMobTypes.Return:
-                        return configInterface.cfg.DeepDungeonOptions.ReturnOption.Enabled;
-                    case DeepDungeonMobTypes.Passage:
-                        return configInterface.cfg.DeepDungeonOptions.PassageOption.Enabled;
-                    case DeepDungeonMobTypes.GoldChest:
-                        return configInterface.cfg.DeepDungeonOptions.GoldChestOption.Enabled;
-                    case DeepDungeonMobTypes.SilverChest:
-                        return configInterface.cfg.DeepDungeonOptions.SilverChestOption.Enabled;
-                    case DeepDungeonMobTypes.BronzeChest:
-                        return configInterface.cfg.DeepDungeonOptions.BronzeChestOption.Enabled;
-                    case DeepDungeonMobTypes.AccursedHoard:
-                        return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption.Enabled;
-                    case DeepDungeonMobTypes.Mimic:
-                        return configInterface.cfg.DeepDungeonOptions.MimicOption.Enabled;
-                    default:
-                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled;
-                }
-            }
-
-            if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (obj.ObjectKind == ObjectKind.BattleNpc && obj is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
-            {
-                if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
-                if (mob.IsDead) return false;
-                if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
-                    configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) return false;
-                return true;
-            }
-        }
-
-        if (String.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-
-        
-        switch (obj.ObjectKind)
-        {
-            case ObjectKind.Treasure:
-                return configInterface.cfg.TreasureOption.Enabled;
-            case ObjectKind.Companion:
-                return configInterface.cfg.CompanionOption.Enabled;
-            case ObjectKind.Area:
-                return configInterface.cfg.AreaOption.Enabled;
-            case ObjectKind.Aetheryte:
-                return configInterface.cfg.AetheryteOption.Enabled;
-            case ObjectKind.EventNpc:
-                return configInterface.cfg.EventNpcOption.Enabled;
-            case ObjectKind.EventObj:
-                return configInterface.cfg.EventObjOption.Enabled;
-            case ObjectKind.None:
-                break;
-            case ObjectKind.Player:
-                return configInterface.cfg.PlayerOption.Enabled;
-            case ObjectKind.BattleNpc:
-                if (!configInterface.cfg.NpcOption.Enabled) return false;
-                if (obj is not BattleNpc mob)
-                    return false; // This should never trigger
-                //if (!clientstructobj->GetIsTargetable()) continue;
-                //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-                if (mob.BattleNpcKind == BattleNpcSubKind.Enemy)
-                {
+                    if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
                     if (mob.IsDead) return false;
-                    if (UtilInfo.DataIdIgnoreList.Contains(mob.DataId) ||
-                        configInterface.cfg.DataIdIgnoreList.Contains(mob.DataId)) return false;
-                    return true;
                 }
+            }
 
-                return configInterface.cfg.CompanionOption.Enabled;
-            case ObjectKind.GatheringPoint:
-                return configInterface.cfg.GatheringPointOption.Enabled;
-            case ObjectKind.MountType:
-                return configInterface.cfg.MountOption.Enabled;
-            case ObjectKind.Retainer:
-                return configInterface.cfg.RetainerOption.Enabled;
-            case ObjectKind.Housing:
-                return configInterface.cfg.HousingOption.Enabled;
-            case ObjectKind.Cutscene:
-                return configInterface.cfg.CutsceneOption.Enabled;
-            case ObjectKind.CardStand:
-                return configInterface.cfg.CardStandOption.Enabled;
+            return true;
+        }
+        
+
+        if (obj is BattleChara mobNpc)
+        {
+            //if (!clientstructobj->GetIsTargetable()) continue;
+            //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
+            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+            if (mobNpc.IsDead) return false;
         }
 
-        return false;
+        return true;
     }
 
     public bool IsSpecialZone()
@@ -179,9 +119,9 @@ public class RadarHelpers
     public uint? GetColorOverride(GameObject gameObject)
     {
         // Override over all
-        if (configInterface.cfg.ColorOverride.ContainsKey(gameObject.DataId))
+        if (configInterface.cfg.ColorOverride.TryGetValue(gameObject.DataId, out var @override))
         {
-            return configInterface.cfg.ColorOverride[gameObject.DataId];
+            return @override;
         }
         return null;
     }
@@ -191,9 +131,9 @@ public class RadarHelpers
         // If Deep Dungeon
         if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
         {
-            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(areaObject.DataId))
+            if (UtilInfo.DeepDungeonMobTypesMap.TryGetValue(areaObject.DataId, out var value))
             {
-                switch (UtilInfo.DeepDungeonMobTypesMap[areaObject.DataId])
+                switch (value)
                 {
                     case DeepDungeonMobTypes.Default:
                         return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
@@ -233,30 +173,24 @@ public class RadarHelpers
         switch (areaObject.ObjectKind)
         {
             case ObjectKind.Player:
-                if (areaObject is PlayerCharacter chara)
+                if (areaObject is PlayerCharacter {ObjectKind: ObjectKind.Player} chara)
                 {
-                    if (configInterface.cfg.SeparateFriends)
+                    // If is friend
+                    if (configInterface.cfg.SeparateFriends && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
                     {
-                        if (((byte)chara.StatusFlags & 0x80) == 0x80)
-                        {
-                            return configInterface.cfg.FriendOption;
-                        }
+                        return configInterface.cfg.FriendOption;
                     }
                     
-                    if (configInterface.cfg.SeparateParty)
+                    // Is in party
+                    if (configInterface.cfg.SeparateParty && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
                     {
-                        if (((byte)chara.StatusFlags & 0x20) == 0x20)
-                        {
-                            return configInterface.cfg.PartyOption;
-                        }
+                        return configInterface.cfg.PartyOption;
                     }
                     
-                    if (configInterface.cfg.SeparateAlliance)
+                    // If in alliance
+                    if (configInterface.cfg.SeparateAlliance && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
                     {
-                        if (((byte)chara.StatusFlags & 0x40) == 0x40)
-                        {
-                            return configInterface.cfg.AllianceOption;
-                        }
+                        return configInterface.cfg.AllianceOption;
                     }
                 }
                 return configInterface.cfg.PlayerOption;
@@ -287,8 +221,9 @@ public class RadarHelpers
             case ObjectKind.CardStand:
                 return configInterface.cfg.CardStandOption;
             case ObjectKind.None:
+            case ObjectKind.Ornament:
             default:
-                return configInterface.cfg.TreasureOption;
+                return configInterface.cfg.NpcOption;
         }
     }
 }

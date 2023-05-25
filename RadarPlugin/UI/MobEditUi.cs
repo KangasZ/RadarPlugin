@@ -8,7 +8,7 @@ namespace RadarPlugin.UI;
 
 public class MobEditUi : IDisposable
 {
-    private readonly Configuration configInterface;
+    private Configuration configInterface;
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private GameObject localObject;
 
