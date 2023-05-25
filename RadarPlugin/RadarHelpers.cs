@@ -173,7 +173,7 @@ public class RadarHelpers
         switch (areaObject.ObjectKind)
         {
             case ObjectKind.Player:
-                if (areaObject is PlayerCharacter chara)
+                if (areaObject is PlayerCharacter {ObjectKind: ObjectKind.Player} chara)
                 {
                     // If is friend
                     if (configInterface.cfg.SeparateFriends && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80

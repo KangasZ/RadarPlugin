@@ -2,6 +2,7 @@
 using ImGuiNET;
 using System.Numerics;
 using Dalamud.Game.ClientState;
+using Dalamud.Interface;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Utility;
@@ -76,11 +77,7 @@ public class MainUi : IDisposable
         var shouldSave = false;
         var configName = configInterface.cfg.ConfigName;
         ImGui.Text("Current Config Name:");
-        if (ImGui.InputText("", ref configName, 50))
-        {
-            configInterface.cfg.ConfigName = configName;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.InputText("", ref configInterface.cfg.ConfigName, 50);
 
         if (ImGui.Button("Save Current Config"))
         {
@@ -121,34 +118,21 @@ public class MainUi : IDisposable
 
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
-        
-        shouldSave |= ImGui.Checkbox("Show Only Visible", ref configInterface.cfg.ShowOnlyVisible);
 
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
-        }
+        shouldSave |= ImGui.Checkbox("Show Only Visible", ref configInterface.cfg.ShowOnlyVisible);
+        UiHelpers.HoverTooltip("Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
 
         shouldSave |= ImGui.Checkbox("Nameless", ref configInterface.cfg.ShowNameless);
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Show nameless mobs.\nYou probably want to keep this OFF.");
-        }
+        UiHelpers.HoverTooltip("Show nameless mobs.\nYou probably want to keep this OFF.");
 
         shouldSave |= ImGui.Checkbox("Debug Mode", ref configInterface.cfg.DebugMode);
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Shows literally everything no matter what. Also modifies the display string.");
-        }
+        UiHelpers.HoverTooltip("Shows literally everything no matter what. Also modifies the display string.");
 
         if (configInterface.cfg.DebugMode)
         {
             // Todo: Debug swap text bools
         }
+
         if (shouldSave) configInterface.Save();
     }
 
@@ -322,34 +306,14 @@ public class MainUi : IDisposable
         ImGui.Text("Off Screen Objects Settings");
         ImGui.PopStyleColor();
         ImGui.Separator();
-        var showOffScreen = configInterface.cfg.ShowOffScreen;
-        if (ImGui.Checkbox("Show Offscreen Objects", ref showOffScreen))
-        {
-            configInterface.cfg.ShowOffScreen = showOffScreen;
-            configInterface.Save();
-        }
 
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "Show an arrow to the offscreen enemies.");
-        }
+        shouldSave |= ImGui.Checkbox("Show Offscreen Objects", ref configInterface.cfg.ShowOffScreen);
+        UiHelpers.HoverTooltip("Show an arrow to the offscreen enemies.");
 
-        var distanceFromEdge = configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge;
-        if (ImGui.DragFloat($"Distance From Edge{id}", ref distanceFromEdge, 0.2f, 2f, 80f))
-        {
-            configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge = distanceFromEdge;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.DragFloat($"Distance From Edge{id}", ref configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge, 0.2f, 2f, 80f);
 
-        var size = configInterface.cfg.OffScreenObjectsOptions.Size;
-        if (ImGui.DragFloat($"Size{id}", ref size, 0.1f, 2f, 20f))
-        {
-            configInterface.cfg.OffScreenObjectsOptions.Size = size;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.DragFloat($"Size{id}", ref configInterface.cfg.OffScreenObjectsOptions.Size, 0.1f, 2f, 20f);
 
-        var thickness = configInterface.cfg.OffScreenObjectsOptions.Thickness;
         shouldSave |= ImGui.DragFloat($"Thickness{id}", ref configInterface.cfg.OffScreenObjectsOptions.Thickness, 0.1f, 0.4f, 20f);
 
         ImGui.EndChild();
@@ -358,67 +322,24 @@ public class MainUi : IDisposable
 
     private void DrawAggroCircleSettings()
     {
+        var shouldSave = false;
+
         var tag = "aggroradiusoptions";
 
-        var showNpcAggroCircle = configInterface.cfg.AggroRadiusOptions.ShowAggroCircle;
-        if (ImGui.Checkbox($"Aggro Circle##{tag}-settings", ref showNpcAggroCircle))
-        {
-            configInterface.cfg.AggroRadiusOptions.ShowAggroCircle = showNpcAggroCircle;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.Checkbox($"Aggro Circle##{tag}-settings", ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircle);
+        UiHelpers.HoverTooltip("Draws aggro circle.");
 
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip("Draws aggro circle.");
-        }
+        shouldSave |= ImGui.Checkbox($"Aggro Circle In Combat##{tag}-settings", ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat);
 
-        var onlyShowNpcAggroCircleWhenOutOfCombat = configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat;
-        if (ImGui.Checkbox($"Aggro Circle In Combat##{tag}-settings", ref onlyShowNpcAggroCircleWhenOutOfCombat))
-        {
-            configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat = onlyShowNpcAggroCircleWhenOutOfCombat;
-            configInterface.Save();
-        }
+        UiHelpers.HoverTooltip("If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
 
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(
-                "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
-        }
-
-        var frontColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.FrontColor);
-        if (ImGui.ColorEdit4($"Front##{tag}", ref frontColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AggroRadiusOptions.FrontColor =
-                ImGui.ColorConvertFloat4ToU32(frontColor) | UtilInfo.OpacityMax;
-            configInterface.Save();
-        }
-
+        shouldSave |= UiHelpers.Vector4ColorSelector($"Front##{tag}", ref configInterface.cfg.AggroRadiusOptions.FrontColor);
         ImGui.SameLine();
-        var rearColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RearColor);
-        if (ImGui.ColorEdit4($"Rear##{tag}", ref rearColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AggroRadiusOptions.RearColor =
-                ImGui.ColorConvertFloat4ToU32(rearColor) | UtilInfo.OpacityMax;
-            configInterface.Save();
-        }
+        shouldSave |= UiHelpers.Vector4ColorSelector($"Rear##{tag}", ref configInterface.cfg.AggroRadiusOptions.RearColor);
 
-        var leftSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.LeftSideColor);
-        if (ImGui.ColorEdit4($"Left##{tag}", ref leftSideColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AggroRadiusOptions.LeftSideColor =
-                ImGui.ColorConvertFloat4ToU32(leftSideColor) | UtilInfo.OpacityMax;
-            configInterface.Save();
-        }
-
+        shouldSave |= UiHelpers.Vector4ColorSelector($"Left##{tag}", ref configInterface.cfg.AggroRadiusOptions.LeftSideColor);
         ImGui.SameLine();
-
-        var rightSideColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.AggroRadiusOptions.RightSideColor);
-        if (ImGui.ColorEdit4($"Right##{tag}", ref rightSideColor, ImGuiColorEditFlags.NoInputs))
-        {
-            configInterface.cfg.AggroRadiusOptions.RightSideColor =
-                ImGui.ColorConvertFloat4ToU32(rightSideColor) | UtilInfo.OpacityMax;
-            configInterface.Save();
-        }
+        shouldSave |= UiHelpers.Vector4ColorSelector($"Right##{tag}", ref configInterface.cfg.AggroRadiusOptions.RightSideColor);
 
 
         var circleOpacity = (float)(configInterface.cfg.AggroRadiusOptions.CircleOpacity >> 24) / byte.MaxValue;
@@ -434,6 +355,8 @@ public class MainUi : IDisposable
             configInterface.cfg.AggroRadiusOptions.FrontConeOpacity = ((uint)(coneOpacity * 255) << 24) | 0x00FFFFFF;
             configInterface.Save();
         }
+
+        if (shouldSave) configInterface.Save();
     }
 
     private void DrawDeepDungeonVisibilitySettings()
@@ -505,15 +428,9 @@ public class MainUi : IDisposable
         ImGui.BeginChild($"##radar-settings-tabs-child-{id}", new Vector2(0, 78));
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
 
-        var enabled = option.Enabled;
-        if (ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref enabled))
-        {
-            option.Enabled = enabled;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref option.Enabled);
 
-        var displayType = DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType,
-            (int)option.DisplayType);
+        var displayType = DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType, (int)option.DisplayType);
         if (displayType != DisplayTypes.Default)
         {
             option.DisplayType = displayType;
@@ -521,12 +438,7 @@ public class MainUi : IDisposable
         }
 
         ImGui.NextColumn();
-        var colorChange = ImGui.ColorConvertU32ToFloat4(option.ColorU);
-        if (ImGui.ColorEdit4($"Color##{id}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
-        {
-            option.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
-            configInterface.Save();
-        }
+        shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
 
         shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
         if (shouldSave) configInterface.Save();
@@ -580,7 +492,7 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.AetheryteOption, "Aetherytes");
         DrawSettingsOverview(configInterface.cfg.CutsceneOption, "Cutscene Objects",
             "Shows cutscene objects. I have no idea what these are!");
-        
+
         DrawSeperator("Misc", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.CardStandOption, "Card Stand (Island Sanctuary Nodes)",
             "Show card stand. This includes island sanctuary stuff (mostly).");

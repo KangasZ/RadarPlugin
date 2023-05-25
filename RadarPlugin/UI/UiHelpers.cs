@@ -12,6 +12,13 @@ namespace RadarPlugin.UI;
 
 public static class UiHelpers
 {
+    public static bool Vector4ColorSelector(string label, ref uint configColor, ImGuiColorEditFlags flags = ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.NoInputs)
+    {
+        var tempColor = ImGui.ColorConvertU32ToFloat4(configColor);
+        if (!ImGui.ColorEdit4(label, ref tempColor, ImGuiColorEditFlags.NoInputs)) return false;
+        configColor = ImGui.ColorConvertFloat4ToU32(tempColor);
+        return true;
+    }
     public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText)
     {
         var retStatement = false;
@@ -77,9 +84,9 @@ public static class UiHelpers
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
-                Process.Start(new ProcessStartInfo
+                PluginLog.Log("Opening RadarPlugin GitHub");
+                Process.Start(new ProcessStartInfo(url)
                 {
-                    FileName = url,
                     UseShellExecute = true
                 });
             }

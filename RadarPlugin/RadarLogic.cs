@@ -110,11 +110,15 @@ public class RadarLogic : IDisposable
             foreach (var areaObject in areaObjects)
             {
                 var espOption = radarHelpers.GetParams(areaObject.Item1);
-                DrawEsp(drawListPtr, areaObject.Item1, areaObject.Item2, areaObject.Item3, espOption);
+                DrawEsp(drawListPtr, areaObject.gameObject, areaObject.color, areaObject.text, espOption);
             }
+        }
 
+        if (Monitor.IsEntered(areaObjects))
+        {
             Monitor.Exit(areaObjects);
         }
+
 
         ImGui.End();
     }
@@ -394,7 +398,7 @@ public class RadarLogic : IDisposable
     private void UpdateMobInfo()
     {
         var nearbyMobs = objectTable
-            .Where(obj => radarHelpers.GetParams(obj).Enabled && radarHelpers.ShouldRender(obj))
+            .Where(obj => radarHelpers.ShouldRender(obj) && radarHelpers.GetParams(obj).Enabled)
             .Select(obj => (obj, radarHelpers.GetColorOverride(obj), radarHelpers.GetText(obj)));
 
         Monitor.Enter(areaObjects);
@@ -434,8 +438,7 @@ public class RadarLogic : IDisposable
         keepRunning = false;
         while (!backgroundLoop.IsCompleted) ;
         backgroundLoop.Dispose();
-        Monitor.Enter(areaObjects);
-        Monitor.Exit(areaObjects);
+        areaObjects.Clear();
         PluginLog.Information("Radar Unloaded");
     }
 
