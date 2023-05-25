@@ -89,11 +89,12 @@ public class RadarLogic : IDisposable
         }
 
         
-        foreach (var areaObject in objectTable.Where(obj => radarHelpers.ShouldRender(obj) && radarHelpers.GetParams(obj).Enabled))
+        foreach (var areaObject in objectTable.Where(obj => radarHelpers.ShouldRender(obj)))
         {
             var gameObj = areaObject;
-            var color = radarHelpers.GetColorOverride(areaObject);
             var espOption = radarHelpers.GetParams(areaObject);
+            if (!espOption.Enabled) continue;
+            var color = radarHelpers.GetColorOverride(areaObject);
             var text = radarHelpers.GetText(areaObject);
             DrawEsp(drawListPtr, gameObj, color, text, espOption);
         }
