@@ -188,6 +188,9 @@ public class MainUi : IDisposable
         }
 
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
+            "Some big changes to plugin internals for 6.4.\nIf stuff is not working please report it!\n");
+        
+        ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
             "Issues or Feedback: ");
         ImGui.SameLine();
         UiHelpers.TextURL("GitHub", "https://github.com/KangasZ/RadarPlugin", ImGui.GetColorU32(ImGuiCol.Text));
@@ -196,14 +199,12 @@ public class MainUi : IDisposable
             "1. Use tabs to customize experience and fix invisible mobs.\n" +
             "2. Bring bugs or feature requests up\n");
         ImGui.Unindent();
-        ImGui.TextWrapped(
-            "Note 1: Entities to be shown are refreshed once per second. Please be mindful of this.");
         ImGui.Spacing();
         ImGui.TextWrapped(
-            "Note 2: Entities that are not on the client are not viewable. For instance, deep dungeon traps are not visible until you unveil them.");
+            "Note 1: Entities that are not on the client are not viewable. For instance, deep dungeon traps are not visible until you unveil them.");
         ImGui.Spacing();
         ImGui.TextWrapped(
-            "Note 3: Invisible mobs may be shown. Use the Utility tab to remove these. This is kinda being worked on but does not have an easy solution.");
+            "Note 2: Invisible mobs may be shown. Use the Utility tab to remove these.");
     }
 
     private void Draw3DRadarSettings()

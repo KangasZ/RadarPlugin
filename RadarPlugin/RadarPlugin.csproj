@@ -4,7 +4,7 @@
 		<Name>Radar Plugin</Name>
 		<Punchline>3D-Radar ESP</Punchline>
 		<Authors>KangasZ</Authors>
-		<Version>1.7.1.1</Version>
+		<Version>1.7.1.2</Version>
 		<RootNamespace>RadarPlugin</RootNamespace>
 		<Copyright>MIT @ KangasZ</Copyright>
 	</PropertyGroup>
