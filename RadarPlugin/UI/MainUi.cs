@@ -73,6 +73,7 @@ public class MainUi : IDisposable
 
     private void DrawUtilityTab()
     {
+        var shouldSave = false;
         var configName = configInterface.cfg.ConfigName;
         ImGui.Text("Current Config Name:");
         if (ImGui.InputText("", ref configName, 50))
@@ -120,12 +121,8 @@ public class MainUi : IDisposable
 
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
-        var onlyVisible = configInterface.cfg.ShowOnlyVisible;
-        if (ImGui.Checkbox("Show Only Visible", ref onlyVisible))
-        {
-            configInterface.cfg.ShowOnlyVisible = onlyVisible;
-            configInterface.Save();
-        }
+        
+        shouldSave |= ImGui.Checkbox("Show Only Visible", ref configInterface.cfg.ShowOnlyVisible);
 
         if (ImGui.IsItemHovered())
         {
@@ -133,12 +130,7 @@ public class MainUi : IDisposable
                 "Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
         }
 
-        var showNameless = configInterface.cfg.ShowNameless;
-        if (ImGui.Checkbox("Nameless", ref configInterface.cfg.ShowNameless))
-        {
-            configInterface.cfg.ShowNameless = showNameless;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.Checkbox("Nameless", ref configInterface.cfg.ShowNameless);
 
         if (ImGui.IsItemHovered())
         {
@@ -146,13 +138,7 @@ public class MainUi : IDisposable
                 "Show nameless mobs.\nYou probably want to keep this OFF.");
         }
 
-        var objHideList = configInterface.cfg.DebugMode;
-        if (ImGui.Checkbox("Debug Mode", ref objHideList))
-        {
-            configInterface.cfg.DebugMode = objHideList;
-            configInterface.Save();
-        }
-
+        shouldSave |= ImGui.Checkbox("Debug Mode", ref configInterface.cfg.DebugMode);
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(
@@ -163,6 +149,7 @@ public class MainUi : IDisposable
         {
             // Todo: Debug swap text bools
         }
+        if (shouldSave) configInterface.Save();
     }
 
     private void DrawGeneralSettings()

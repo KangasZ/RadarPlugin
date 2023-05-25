@@ -29,6 +29,7 @@ public class RadarHelpers
 
     public unsafe bool ShouldRender(GameObject obj)
     {
+        // TOdo: move debug check
         if (configInterface.cfg.DebugMode)
         {
             return true;
@@ -75,12 +76,11 @@ public class RadarHelpers
         }
         
 
-        if (obj is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mobNpc)
+        if (obj is BattleChara mobNpc)
         {
             //if (!clientstructobj->GetIsTargetable()) continue;
             //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
             if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (mobNpc.BattleNpcKind != BattleNpcSubKind.Enemy) return true;
             if (mobNpc.IsDead) return false;
         }
 
@@ -176,19 +176,19 @@ public class RadarHelpers
                 if (areaObject is PlayerCharacter chara)
                 {
                     // If is friend
-                    if (configInterface.cfg.SeparateFriends && ((byte)chara.StatusFlags & 0x80) == 0x80)
+                    if (configInterface.cfg.SeparateFriends && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
                     {
                         return configInterface.cfg.FriendOption;
                     }
                     
                     // Is in party
-                    if (configInterface.cfg.SeparateParty && ((byte)chara.StatusFlags & 0x20) == 0x20)
+                    if (configInterface.cfg.SeparateParty && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
                     {
                         return configInterface.cfg.PartyOption;
                     }
                     
                     // If in alliance
-                    if (configInterface.cfg.SeparateAlliance && ((byte)chara.StatusFlags & 0x40) == 0x40)
+                    if (configInterface.cfg.SeparateAlliance && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
                     {
                         return configInterface.cfg.AllianceOption;
                     }
@@ -223,7 +223,7 @@ public class RadarHelpers
             case ObjectKind.None:
             case ObjectKind.Ornament:
             default:
-                return configInterface.cfg.TreasureOption;
+                return configInterface.cfg.NpcOption;
         }
     }
 }
