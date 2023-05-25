@@ -73,7 +73,6 @@ public class MainUi : IDisposable
 
     private void DrawUtilityTab()
     {
-        ;
         var configName = configInterface.cfg.ConfigName;
         ImGui.Text("Current Config Name:");
         if (ImGui.InputText("", ref configName, 50))
@@ -86,33 +85,37 @@ public class MainUi : IDisposable
         {
             this.configInterface.SaveCurrentConfig();
         }
-        
+
         ImGui.Text("Saved Configurations:");
         var selectedConfig = configInterface.selectedConfig;
-        if (ImGui.Combo("##selectedconfigcombobox", ref selectedConfig, configInterface.configs, configInterface.configs.Length))
+        if (ImGui.Combo("##selectedconfigcombobox", ref selectedConfig, configInterface.configs,
+                configInterface.configs.Length))
         {
             if (selectedConfig < configInterface.configs.Length)
             {
                 configInterface.selectedConfig = selectedConfig;
             }
         }
+
         if (ImGui.Button("Load Selected Config"))
         {
             this.configInterface.LoadConfig(configInterface.configs[selectedConfig]);
         }
+
         ImGui.SameLine();
         if (ImGui.Button("Delete Selected Config"))
         {
             this.configInterface.DeleteConfig(configInterface.configs[selectedConfig]);
         }
+
         ImGui.Separator();
-        
+
         if (ImGui.Button("Load Current Objects Menu"))
         {
             PluginLog.Debug("Pulling Area Objects");
             this.localMobsUi.DrawLocalMobsUi();
         }
-        
+
         ImGui.Separator();
 
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
@@ -131,7 +134,7 @@ public class MainUi : IDisposable
         }
 
         var showNameless = configInterface.cfg.ShowNameless;
-        if (ImGui.Checkbox("Nameless", ref showNameless))
+        if (ImGui.Checkbox("Nameless", ref configInterface.cfg.ShowNameless))
         {
             configInterface.cfg.ShowNameless = showNameless;
             configInterface.Save();
@@ -193,7 +196,7 @@ public class MainUi : IDisposable
             configInterface.cfg.UseBackgroundDrawList = backgroundDrawList;
             configInterface.Save();
         }
-        
+
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(
@@ -201,7 +204,7 @@ public class MainUi : IDisposable
                 "It will be under any other Dalamud plugin. This is the original behavior.\n" +
                 "There should be practically no difference between this and normal operations");
         }
-        
+
         ImGui.Text("Dot Size");
         ImGui.SameLine();
         ImGui.PushItemWidth(150);
@@ -212,7 +215,7 @@ public class MainUi : IDisposable
             configInterface.cfg.DotSize = objectDotSize;
             configInterface.Save();
         }
-        
+
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
             "Issues or Feedback: ");
         ImGui.SameLine();
@@ -276,21 +279,18 @@ public class MainUi : IDisposable
 
     private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "")
     {
+        bool shouldSave = false;
         var color = ImGui.ColorConvertU32ToFloat4(espOption.ColorU);
         if (ImGui.ColorEdit4($"##visiblitygeneralsettings-color-{tag}", ref color,
                 ImGuiColorEditFlags.NoInputs))
         {
             espOption.ColorU = ImGui.ColorConvertFloat4ToU32(color);
-            configInterface.Save();
+            shouldSave |= true;
         }
 
         ImGui.SameLine();
-        var enabled = espOption.Enabled;
-        if (ImGui.Checkbox($"{tag}##enabled-{tag}", ref enabled))
-        {
-            espOption.Enabled = enabled;
-            configInterface.Save();
-        }
+
+        shouldSave |= ImGui.Checkbox($"{tag}##enabled-{tag}", ref espOption.Enabled);
 
         // TODO: Information icon instead of hover desc
         if (!description.IsNullOrWhitespace())
@@ -300,6 +300,8 @@ public class MainUi : IDisposable
                 ImGui.SetTooltip(description);
             }
         }
+
+        if (shouldSave) configInterface.Save();
     }
 
     private void ShowMiscSettings()
@@ -312,12 +314,8 @@ public class MainUi : IDisposable
         ImGui.Text("Hitbox Options");
         ImGui.PopStyleColor();
         ImGui.Separator();
-        var hitboxEnabled = configInterface.cfg.HitboxOptions.HitboxEnabled;
-        if (ImGui.Checkbox($"Show Hitbox{id}-hitbox", ref hitboxEnabled))
-        {
-            configInterface.cfg.HitboxOptions.HitboxEnabled = hitboxEnabled;
-            configInterface.Save();
-        }
+        var shouldSave = false;
+        shouldSave |= ImGui.Checkbox($"Show Hitbox{id}-hitbox", ref configInterface.cfg.HitboxOptions.HitboxEnabled);
 
         var hitboxColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.HitboxOptions.HitboxColor);
         if (ImGui.ColorEdit4($"Color{id}-hitbox-color", ref hitboxColor, ImGuiColorEditFlags.NoInputs))
@@ -365,13 +363,10 @@ public class MainUi : IDisposable
         }
 
         var thickness = configInterface.cfg.OffScreenObjectsOptions.Thickness;
-        if (ImGui.DragFloat($"Thickness{id}", ref thickness, 0.1f, 0.4f, 20f))
-        {
-            configInterface.cfg.OffScreenObjectsOptions.Thickness = thickness;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.DragFloat($"Thickness{id}", ref configInterface.cfg.OffScreenObjectsOptions.Thickness, 0.1f, 0.4f, 20f);
 
         ImGui.EndChild();
+        if (shouldSave) configInterface.Save();
     }
 
     private void DrawAggroCircleSettings()
@@ -485,7 +480,8 @@ public class MainUi : IDisposable
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
             MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", MobType.Character);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' Mobs", MobType.Character);
+        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' Mobs",
+            MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
         DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
     }
@@ -517,6 +513,7 @@ public class MainUi : IDisposable
 
     private void DrawTypeSettings(Configuration.ESPOption option, string id, MobType mobType)
     {
+        bool shouldSave = false;
         DrawSeperator($"{id} Options", UtilInfo.Red);
         ImGui.BeginChild($"##radar-settings-tabs-child-{id}", new Vector2(0, 78));
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
@@ -544,62 +541,43 @@ public class MainUi : IDisposable
             configInterface.Save();
         }
 
-        var showDistance = option.DrawDistance;
-        if (ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref showDistance))
-        {
-            option.DrawDistance = showDistance;
-            configInterface.Save();
-        }
-
+        shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
+        if (shouldSave) configInterface.Save();
         ImGui.EndChild();
     }
 
     private void DrawGeneralVisibilitySettings()
     {
+        bool shouldSave = false;
         ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
 
         DrawSeperator("Players", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players");
-        
+
         // Custom YOUR PLAYER that I don't want to deal with yet.
         ImGui.SameLine();
-        UiHelpers.DrawCheckbox("Your Player", configInterface.cfg.ShowYOU,
+        shouldSave |= UiHelpers.DrawCheckbox("Your Player##player-settings", ref configInterface.cfg.ShowYOU,
             "Will show your player character if enabled. Inherits player settings.");
-
-        
-        var partySeparation = configInterface.cfg.SeparateParty;
-        if (ImGui.Checkbox($"Separate Party##player-settings", ref partySeparation))
-        {
-            configInterface.cfg.SeparateParty = partySeparation;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
         UiHelpers.LabeledHelpMarker("", "This will separate everything");
-        var friendSeparation = configInterface.cfg.SeparateFriends;
-        if (ImGui.Checkbox($"Separate Friends##player-settings", ref friendSeparation))
-        {
-            configInterface.cfg.SeparateFriends = friendSeparation;
-            configInterface.Save();
-        }
-        
-        var allianceSeparation = configInterface.cfg.SeparateAlliance;
-        if (ImGui.Checkbox($"Separate Alliance##player-settings", ref allianceSeparation))
-        {
-            configInterface.cfg.SeparateAlliance = allianceSeparation;
-            configInterface.Save();
-        }
+        shouldSave |= ImGui.Checkbox($"Separate Friends##player-settings", ref configInterface.cfg.SeparateFriends);
+        shouldSave |= ImGui.Checkbox($"Separate Alliance##player-settings", ref configInterface.cfg.SeparateAlliance);
 
         if (configInterface.cfg.SeparateParty)
         {
             DrawSettingsOverview(configInterface.cfg.PartyOption, "Party");
         }
+
         if (configInterface.cfg.SeparateAlliance)
         {
             DrawSettingsOverview(configInterface.cfg.AllianceOption, "Alliance");
         }
+
         if (configInterface.cfg.SeparateFriends)
         {
             DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends");
         }
+
         DrawSeperator("Npcs", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
             "Shows most enemies that are considered battleable");
@@ -619,9 +597,11 @@ public class MainUi : IDisposable
         DrawSeperator("Misc", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.CardStandOption, "Card Stand (Island Sanctuary Nodes)",
             "Show card stand. This includes island sanctuary stuff (mostly).");
-        DrawSettingsOverview(configInterface.cfg.GatheringPointOption, "Gathering Point", "Shows Gathering Points");
+        DrawSettingsOverview(configInterface.cfg.GatheringPointOption, "Gathering Point",
+            "Shows Gathering Points");
         DrawSettingsOverview(configInterface.cfg.MountOption, "Mount", "Shows mounts. Gets a little cluttered");
         ImGui.EndChild();
+        if (shouldSave) configInterface.Save();
     }
 
     private void DrawSeperator(string text, uint color)
