@@ -27,10 +27,7 @@ public class RadarLogic : IDisposable
     private readonly DalamudPluginInterface pluginInterface;
     private Configuration configInterface;
     private readonly Condition conditionInterface;
-    private Task backgroundLoop;
-    private bool keepRunning;
     private readonly ObjectTable objectTable;
-    private List<(GameObject gameObject, uint? color, string text)> areaObjects; // Game object, color, string
     private readonly ClientState clientState;
     private readonly GameGui gameGui;
     private readonly RadarHelpers radarHelpers;
@@ -49,17 +46,9 @@ public class RadarLogic : IDisposable
 
         // Loads plugin
         PluginLog.Debug("Radar Loaded");
-        keepRunning = true;
-        // TODO: In the future adjust this
-        areaObjects = new List<(GameObject, uint?, string)>();
 
         this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += OnTick;
-        backgroundLoop = Task.Run(BackgroundLoop);
-
-        this.clientState.TerritoryChanged += CleanupZoneTerritoryWrapper;
-        this.clientState.Logout += CleanupZoneLogWrapper;
-        this.clientState.Login += CleanupZoneLogWrapper;
     }
 
     private void OnTick()
@@ -99,27 +88,16 @@ public class RadarLogic : IDisposable
             drawListPtr = ImGui.GetWindowDrawList();
         }
 
-        bool gotMonitor = false;
-        Monitor.TryEnter(areaObjects, ref gotMonitor);
-        if (!gotMonitor)
+        
+        foreach (var areaObject in objectTable.Where(obj => radarHelpers.ShouldRender(obj) && radarHelpers.GetParams(obj).Enabled))
         {
-            PluginLog.Error("Try Enter Failed. This is not necessarily error");
+            var gameObj = areaObject;
+            var color = radarHelpers.GetColorOverride(areaObject);
+            var espOption = radarHelpers.GetParams(areaObject);
+            var text = radarHelpers.GetText(areaObject);
+            DrawEsp(drawListPtr, gameObj, color, text, espOption);
         }
-        else
-        {
-            foreach (var areaObject in areaObjects)
-            {
-                var espOption = radarHelpers.GetParams(areaObject.Item1);
-                DrawEsp(drawListPtr, areaObject.gameObject, areaObject.color, areaObject.text, espOption);
-            }
-        }
-
-        if (Monitor.IsEntered(areaObjects))
-        {
-            Monitor.Exit(areaObjects);
-        }
-
-
+        
         ImGui.End();
     }
 
@@ -369,76 +347,13 @@ public class RadarLogic : IDisposable
         imDrawListPtr.PathFillConvex(color);
     }
 
-    private void BackgroundLoop()
-    {
-        while (keepRunning)
-        {
-            if (configInterface.cfg.Enabled)
-            {
-                if (CheckDraw())
-                {
-#if DEBUG
-                    PluginLog.Verbose("Did not update mob info due to check fail.");
-#endif
-                }
-                else
-                {
-                    var time = DateTime.Now;
-                    UpdateMobInfo();
-#if DEBUG
-                    PluginLog.Verbose($"Refreshed Mob Info in {(DateTime.Now - time).TotalMilliseconds} ms.");
-#endif
-                }
-            }
-
-            Thread.Sleep(1000);
-        }
-    }
-
-    private void UpdateMobInfo()
-    {
-        var nearbyMobs = objectTable
-            .Where(obj => radarHelpers.ShouldRender(obj) && radarHelpers.GetParams(obj).Enabled)
-            .Select(obj => (obj, radarHelpers.GetColorOverride(obj), radarHelpers.GetText(obj)));
-
-        Monitor.Enter(areaObjects);
-        areaObjects.Clear();
-        areaObjects.AddRange(nearbyMobs);
-        Monitor.Exit(areaObjects);
-    }
 
 
     #region CLEANUP REGION
-
-    private void CleanupZone()
-    {
-        PluginLog.Verbose("Clearing because of condition met.");
-        Monitor.Enter(areaObjects);
-        areaObjects.Clear();
-        Monitor.Exit(areaObjects);
-    }
-
-    private void CleanupZoneLogWrapper(object? sender, EventArgs e)
-    {
-        CleanupZone();
-    }
-
-    private void CleanupZoneTerritoryWrapper(object? _, ushort __)
-    {
-        PluginLog.Debug($"New Territory: {clientState.TerritoryType}");
-        CleanupZone();
-    }
-
+    
     public void Dispose()
     {
         pluginInterface.UiBuilder.Draw -= OnTick;
-        clientState.TerritoryChanged -= CleanupZoneTerritoryWrapper;
-        clientState.Logout -= CleanupZoneLogWrapper;
-        clientState.Login -= CleanupZoneLogWrapper;
-        keepRunning = false;
-        while (!backgroundLoop.IsCompleted) ;
-        backgroundLoop.Dispose();
-        areaObjects.Clear();
         PluginLog.Information("Radar Unloaded");
     }
 

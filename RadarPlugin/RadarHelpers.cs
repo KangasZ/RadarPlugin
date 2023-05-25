@@ -64,14 +64,14 @@ public class RadarHelpers
             // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
             if (!UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
             {
-                if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+                //if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
                 if (obj.ObjectKind == ObjectKind.BattleNpc && obj is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
                 {
                     if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
                     if (mob.IsDead) return false;
                 }
             }
-
+ 
             return true;
         }
         
@@ -80,7 +80,7 @@ public class RadarHelpers
         {
             //if (!clientstructobj->GetIsTargetable()) continue;
             //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+            //if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
             if (mobNpc.IsDead) return false;
         }
 
