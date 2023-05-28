@@ -233,7 +233,7 @@ public class Configuration
             Save();
             return true;
         }
-        PluginLog.Debug("Config was NOT loaded!");
+        PluginLog.Error("Config was NOT loaded!");
         return false;
     }
     
