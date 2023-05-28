@@ -171,7 +171,7 @@ public class RadarHelpers
                 if (areaObject is PlayerCharacter chara)
                 {
                     // Is the object is YOU
-                    if (configInterface.cfg.SeparateYourPlayer && chara.Address == clientState.LocalPlayer.Address)
+                    if (configInterface.cfg.SeparateYourPlayer && clientState.LocalPlayer != null && chara.Address == clientState.LocalPlayer.Address)
                     {
                         return configInterface.cfg.YourPlayerOption;
                     }
