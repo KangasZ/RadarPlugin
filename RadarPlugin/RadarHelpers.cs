@@ -80,7 +80,7 @@ public class RadarHelpers
         {
             //if (!clientstructobj->GetIsTargetable()) continue;
             //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-            //if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
             if (mobNpc.IsDead) return false;
         }
 
@@ -119,9 +119,9 @@ public class RadarHelpers
     public uint? GetColorOverride(GameObject gameObject)
     {
         // Override over all
-        if (configInterface.cfg.ColorOverride.TryGetValue(gameObject.DataId, out var @override))
+        if (configInterface.cfg.ColorOverride.TryGetValue(gameObject.DataId, out var colorOverride))
         {
-            return @override;
+            return colorOverride;
         }
         return null;
     }
@@ -173,7 +173,7 @@ public class RadarHelpers
         switch (areaObject.ObjectKind)
         {
             case ObjectKind.Player:
-                if (areaObject is PlayerCharacter {ObjectKind: ObjectKind.Player} chara)
+                if (areaObject is PlayerCharacter chara)
                 {
                     // If is friend
                     if (configInterface.cfg.SeparateFriends && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
@@ -194,7 +194,13 @@ public class RadarHelpers
                     }
                 }
                 return configInterface.cfg.PlayerOption;
+            case ObjectKind.Companion:
+                return configInterface.cfg.CompanionOption;
             case ObjectKind.BattleNpc:
+                if (areaObject is BattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo})
+                {
+                    return configInterface.cfg.CompanionOption;
+                }
                 return configInterface.cfg.NpcOption;
             case ObjectKind.EventNpc:
                 return configInterface.cfg.EventNpcOption;
@@ -208,8 +214,6 @@ public class RadarHelpers
                 return configInterface.cfg.EventObjOption;
             case ObjectKind.MountType:
                 return configInterface.cfg.MountOption;
-            case ObjectKind.Companion:
-                return configInterface.cfg.CompanionOption;
             case ObjectKind.Retainer:
                 return configInterface.cfg.RetainerOption;
             case ObjectKind.Area:
@@ -220,8 +224,9 @@ public class RadarHelpers
                 return configInterface.cfg.CutsceneOption;
             case ObjectKind.CardStand:
                 return configInterface.cfg.CardStandOption;
-            case ObjectKind.None:
             case ObjectKind.Ornament:
+                return configInterface.cfg.OrnamentOption;
+            case ObjectKind.None:
             default:
                 return configInterface.cfg.NpcOption;
         }

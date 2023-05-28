@@ -116,6 +116,7 @@ public class Configuration
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true };
         public ESPOption PlayerOption { get; set; } = new(playerOptDefault) { Enabled = true };
+        public ESPOption YourPlayerOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Turquoise};
         public ESPOption FriendOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Orange};
         public ESPOption AllianceOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Gold};
         public ESPOption PartyOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Turquoise};
@@ -131,14 +132,17 @@ public class Configuration
         public ESPOption HousingOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public ESPOption CutsceneOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public ESPOption CardStandOption { get; set; } = new(objectOptDefault) { Enabled = false };
+        public ESPOption OrnamentOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
         public float DotSize = 2.2f;
         public bool SeparateAlliance = true;
+        public bool SeparateYourPlayer = true;
         public bool SeparateParty = true;
         public bool SeparateFriends = true;
+        public bool AddDistanceOnNames = false;
     }
 
     public Config cfg;
@@ -226,6 +230,7 @@ public class Configuration
         if (tempConfig != null)
         {
             this.cfg = tempConfig;
+            Save();
             return true;
         }
         PluginLog.Debug("Config was NOT loaded!");
