@@ -44,12 +44,7 @@ public class RadarHelpers
         // Object within ignore lists
         if (UtilInfo.DataIdIgnoreList.Contains(obj.DataId) || configInterface.cfg.DataIdIgnoreList.Contains(obj.DataId)) return false;
         
-        // Is the object YOU
-        if (clientState.LocalPlayer != null && obj.Address == clientState.LocalPlayer.Address)
-        {
-            return configInterface.cfg.ShowYOU;
-        }
-        
+
         // Object visible & config check
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
         if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
@@ -175,6 +170,12 @@ public class RadarHelpers
             case ObjectKind.Player:
                 if (areaObject is PlayerCharacter chara)
                 {
+                    // Is the object is YOU
+                    if (configInterface.cfg.SeparateYourPlayer && chara.Address == clientState.LocalPlayer.Address)
+                    {
+                        return configInterface.cfg.YourPlayerOption;
+                    }
+                    
                     // If is friend
                     if (configInterface.cfg.SeparateFriends && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
                     {
