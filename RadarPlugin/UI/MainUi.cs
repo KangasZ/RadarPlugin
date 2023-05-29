@@ -141,18 +141,18 @@ public class MainUi : IDisposable
         bool shouldSave = false;
         ImGui.TextColored(new Vector4(0xff, 0xff, 0x00, 0xff),
             "This is made by KangasZ for use in FFXIV.");
-        
+
         shouldSave |= ImGui.Checkbox("Enabled", ref configInterface.cfg.Enabled);
-        
+
         shouldSave |= ImGui.Checkbox("Eureka/Deep Dungeons Support", ref configInterface.cfg.ShowBaDdObjects);
         UiHelpers.LabeledHelpMarker("", "This focuses on giving support to eureka and deep dungeons.\n" +
                                         "Will display things such as portals, chests, and traps.");
-        
+
         shouldSave |= ImGui.Checkbox("Use Background Draw List", ref configInterface.cfg.UseBackgroundDrawList);
-        
+
         UiHelpers.LabeledHelpMarker("", "This feature will use a background draw list from ImGui to render the 3d radar.\n" +
-                                    "It will be under any other Dalamud plugin. This is the original behavior.\n" +
-                                    "There should be practically no difference between this and normal operations");
+                                        "It will be under any other Dalamud plugin. This is the original behavior.\n" +
+                                        "There should be practically no difference between this and normal operations");
 
         ImGui.Text("Dot Size");
         ImGui.SameLine();
@@ -224,28 +224,26 @@ public class MainUi : IDisposable
         {
             DrawSettingsOverview(configInterface.cfg.YourPlayerOption, "Your Player", mobType: MobType.Character);
         }
+
         // Todo: Make the radar path for this
         shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
         if (configInterface.cfg.SeparateParty)
         {
             DrawSettingsOverview(configInterface.cfg.PartyOption, "Party", mobType: MobType.Character);
         }
+
         shouldSave |= ImGui.Checkbox($"Separate Friends##player-settings", ref configInterface.cfg.SeparateFriends);
         if (configInterface.cfg.SeparateFriends)
         {
             DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
         }
+
         shouldSave |= ImGui.Checkbox($"Separate Alliance##player-settings", ref configInterface.cfg.SeparateAlliance);
         if (configInterface.cfg.SeparateAlliance)
         {
             DrawSettingsOverview(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Character);
         }
-        
 
-        if (configInterface.cfg.SeparateFriends)
-        {
-            DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
-        }
         if (shouldSave) configInterface.Save();
     }
 
@@ -273,9 +271,9 @@ public class MainUi : IDisposable
 
     private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "", MobType mobType = MobType.Object)
     {
-        DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType, ref espOption.DisplayType);
-        ImGui.SameLine();
         bool shouldSave = false;
+        shouldSave |= DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType, ref espOption.DisplayType);
+        ImGui.SameLine();
         shouldSave |= UiHelpers.Vector4ColorSelector($"##visiblitygeneralsettings-color-{tag}", ref espOption.ColorU);
 
         ImGui.SameLine();
@@ -285,10 +283,7 @@ public class MainUi : IDisposable
         // TODO: Information icon instead of hover desc
         if (!description.IsNullOrWhitespace())
         {
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip(description);
-            }
+            UiHelpers.HoverTooltip(description);
         }
 
         if (shouldSave) configInterface.Save();
