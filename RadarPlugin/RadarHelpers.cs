@@ -75,7 +75,7 @@ public class RadarHelpers
         {
             //if (!clientstructobj->GetIsTargetable()) continue;
             //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+            //if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
             if (mobNpc.IsDead) return false;
         }
 

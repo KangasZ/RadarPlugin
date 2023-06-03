@@ -188,7 +188,8 @@ public class MainUi : IDisposable
     {
         ImGui.BeginChild($"##radar-settings-tabs-child");
         UiHelpers.DrawTabs("radar-3d-settings-tabs",
-            ("Players and Npcs", UtilInfo.White, DrawPlayerNpcSettings),
+            ("Players", UtilInfo.Silver, DrawPlayerSettings),
+            ("Npcs", UtilInfo.White, DrawNpcSettings),
             ("Objects", UtilInfo.White, DrawObjectSettings),
             ("Misc", UtilInfo.White, DrawMiscSettings)
         );
@@ -386,60 +387,104 @@ public class MainUi : IDisposable
 
     private void DrawDDEntitiesSettings()
     {
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", MobType.Object);
     }
 
     private void DrawDDLootSettings()
     {
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard", MobType.Object);
     }
 
     private void DrawDDMobSettings()
     {
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
             MobType.Character);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", MobType.Character);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' Mobs",
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", MobType.Character);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' Mobs",
             MobType.Character);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
-        DrawTypeSettings(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
+        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
     }
 
-    private void DrawPlayerNpcSettings()
+    private void DrawPlayerSettings()
     {
-        DrawTypeSettings(configInterface.cfg.PlayerOption, "Players", MobType.Character);
-        DrawTypeSettings(configInterface.cfg.NpcOption, "Enemies", MobType.Character);
-        DrawTypeSettings(configInterface.cfg.CompanionOption, "Companions", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.EventNpcOption, "Event Npcs", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.RetainerOption, "Retainer", MobType.Object);
+        var shouldSave = false;
+        DrawSeperator("Players", UtilInfo.Red);
+        DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players", mobType: MobType.Character);
+
+        // Custom YOUR PLAYER that I don't want to deal with yet.\
+        ImGui.Separator();
+        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
+        ImGui.Text("Separators");
+        UiHelpers.LabeledHelpMarker("", "These options will dissociate the given category with the overriding player configuration.\n" +
+                                        "Any player not in one of these categories will default to 'general' player option.");
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+        shouldSave |= ImGui.Checkbox($"Separate Your Player##player-settings", ref configInterface.cfg.SeparateYourPlayer);
+        shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
+        shouldSave |= ImGui.Checkbox($"Separate Friends##player-settings", ref configInterface.cfg.SeparateFriends);
+        shouldSave |= ImGui.Checkbox($"Separate Alliance##player-settings", ref configInterface.cfg.SeparateAlliance);
+        
+        DrawSeperator("Player Separations", UtilInfo.Red);
+        if (configInterface.cfg.SeparateYourPlayer)
+        {
+            DrawSettingsDetailed(configInterface.cfg.YourPlayerOption, "Your Player", MobType.Character);
+        }
+
+        // Todo: Make the radar path for this
+        if (configInterface.cfg.SeparateParty)
+        {
+            DrawSettingsDetailed(configInterface.cfg.PartyOption, "Party", mobType: MobType.Character);
+        }
+
+        if (configInterface.cfg.SeparateFriends)
+        {
+            DrawSettingsDetailed(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
+        }
+
+        if (configInterface.cfg.SeparateAlliance)
+        {
+            DrawSettingsDetailed(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Character);
+        }
+
+        if (shouldSave) configInterface.Save();
+    }
+
+    private void DrawNpcSettings()
+    {
+        DrawSettingsDetailed(configInterface.cfg.PlayerOption, "Players", MobType.Character);
+        DrawSettingsDetailed(configInterface.cfg.NpcOption, "Enemies", MobType.Character);
+        DrawSettingsDetailed(configInterface.cfg.CompanionOption, "Companions", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.EventNpcOption, "Event Npcs", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.RetainerOption, "Retainer", MobType.Object);
     }
 
     private void DrawMiscSettings()
     {
-        DrawTypeSettings(configInterface.cfg.CardStandOption, "Card Stand", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.GatheringPointOption, "Gathering Point", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.MountOption, "Mount", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.CardStandOption, "Card Stand", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.GatheringPointOption, "Gathering Point", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.MountOption, "Mount", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.OrnamentOption, "Ornaments", MobType.Object);
     }
 
     private void DrawObjectSettings()
     {
-        DrawTypeSettings(configInterface.cfg.TreasureOption, "Loot", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.EventObjOption, "Event Objects", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.AreaOption, "Area Objects", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.AetheryteOption, "Aetherytes", MobType.Object);
-        DrawTypeSettings(configInterface.cfg.CutsceneOption, "Cutscene", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.TreasureOption, "Loot", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.EventObjOption, "Event Objects", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.AreaOption, "Area Objects", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.AetheryteOption, "Aetherytes", MobType.Object);
+        DrawSettingsDetailed(configInterface.cfg.CutsceneOption, "Cutscene", MobType.Object);
     }
 
-    private void DrawTypeSettings(Configuration.ESPOption option, string id, MobType mobType)
+    private void DrawSettingsDetailed(Configuration.ESPOption option, string id, MobType mobType)
     {
         bool shouldSave = false;
         DrawSeperator($"{id} Options", UtilInfo.Red);
-        ImGui.BeginChild($"##radar-settings-tabs-child-{id}", new Vector2(0, 78));
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
 
         shouldSave |= ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref option.Enabled);
@@ -449,9 +494,36 @@ public class MainUi : IDisposable
         ImGui.NextColumn();
         shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
 
-        shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
+        
+        ImGui.NextColumn();
+        shouldSave |= ImGui.Checkbox($"Override Distance##{id}-distance-bool", ref option.DrawDistanceOverride);
+        ImGui.NextColumn();
+        if (option.DrawDistanceOverride)
+        {
+            shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
+        }
+        else
+        {
+            ImGui.Text("");
+        }
+        ImGui.NextColumn();
+
+        shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
+        ImGui.NextColumn();
+
+        if (option.DotSizeOverride)
+        {
+            shouldSave |= ImGui.SliderFloat($"##{id}-dot-size", ref option.DotSize, UtilInfo.MinDotSize,
+                UtilInfo.MaxDotSize);
+        }
+        else
+        {
+            ImGui.Text("");
+        }
+        ImGui.NextColumn();
+        //todo Implement this in helpers
+        ImGui.Columns(1);
         if (shouldSave) configInterface.Save();
-        ImGui.EndChild();
     }
 
     private void DrawGeneralVisibilitySettings()
