@@ -12,6 +12,75 @@ namespace RadarPlugin.UI;
 
 public static class UiHelpers
 {
+    
+    public static bool DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, ref DisplayTypes currVal)
+    {
+        var val = (int)currVal;
+        switch (mobType)
+        {
+            case MobType.Object:
+                ImGui.PushItemWidth(175);
+                var lb = ImGui.Combo($"##{id}",
+                    ref val,
+                    new string[]
+                    {
+                        "Dot Only",
+                        "Name Only",
+                        "Dot and Name",
+                    }, 3, 3);
+                ImGui.PopItemWidth();
+
+                if (lb)
+                {
+                    if (val >= 0 && val <= 2)
+                    {
+                        currVal = (DisplayTypes)val;
+                    }
+                }
+
+                return lb;
+            case MobType.Character:
+                ImGui.PushItemWidth(175);
+                var lb2 = ImGui.Combo($"##{id}",
+                    ref val,
+                    new string[]
+                    {
+                        "Dot Only",
+                        "Name Only",
+                        "Dot and Name",
+                        "Health Bar Only",
+                        "Health Bar And Value",
+                        "Health Bar And Name",
+                        "Health Bar, Value, And Name",
+                        "Health Value Only",
+                        "Health Value and Name"
+                    }, 9, 9);
+                ImGui.PopItemWidth();
+                if (lb2)
+                {
+                    if (val >= 0 && val <= 8)
+                    {
+                        currVal = (DisplayTypes)val;
+                    }
+                }
+
+                return lb2;
+            default:
+                PluginLog.Error(
+                    "Mob Type Is Wrong. This literally should never occur. Please dear god help me if it does.");
+                return false;
+        }
+    }
+    
+    public static void DrawSeperator(string text, uint color)
+    {
+        ImGui.Separator();
+        ImGui.PushStyleColor(ImGuiCol.Text, color);
+        ImGui.Text(text);
+        ImGui.PopStyleColor();
+        ImGui.Separator();
+    }
+    
     public static bool Vector4ColorSelector(string label, ref uint configColor, ImGuiColorEditFlags flags = ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.NoInputs)
     {
         var tempColor = ImGui.ColorConvertU32ToFloat4(configColor);

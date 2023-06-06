@@ -19,6 +19,7 @@ public class RadarPlugin : IDalamudPlugin
     private readonly MobEditUi mobEditUi;
     private readonly LocalMobsUi localMobsUi;
     private readonly RadarHelpers radarHelpers;
+    private readonly TypeConfigurator typeConfiguratorUi;
 
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
@@ -36,7 +37,8 @@ public class RadarPlugin : IDalamudPlugin
         // UI
         mobEditUi = new MobEditUi(pluginInterface, Configuration, radarHelpers);
         localMobsUi = new LocalMobsUi(pluginInterface, Configuration, objectTable, mobEditUi, radarHelpers);
-        mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers);
+        typeConfiguratorUi = new TypeConfigurator(pluginInterface, Configuration, radarHelpers);
+        mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers, typeConfiguratorUi);
         
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi, Configuration);
