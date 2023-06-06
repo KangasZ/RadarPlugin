@@ -119,16 +119,17 @@ public class RadarLogic : IDisposable
         var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
         if (visibleOnScreen)
         {
+            var dotSize = espOption.DotSizeOverride ? espOption.DotSize : configInterface.cfg.DotSize;
             switch (espOption.DisplayType)
             {
                 case DisplayTypes.DotOnly:
-                    DrawDot(drawListPtr, onScreenPosition, configInterface.cfg.DotSize, color);
+                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
                     break;
                 case DisplayTypes.NameOnly:
                     DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.DotAndName:
-                    DrawDot(drawListPtr, onScreenPosition, configInterface.cfg.DotSize, color);
+                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
                     DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.HealthBarOnly:

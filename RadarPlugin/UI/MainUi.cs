@@ -160,7 +160,6 @@ public class MainUi : IDisposable
         shouldSave |= ImGui.SliderFloat("##dot-size", ref configInterface.cfg.DotSize, UtilInfo.MinDotSize,
             UtilInfo.MaxDotSize);
 
-        shouldSave |= ImGui.Checkbox($"Distance On Names##enabled-distanceForNames", ref configInterface.cfg.AddDistanceOnNames);
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
             "Some big changes to plugin internals for 6.4.\nIf stuff is not working please report it!\n");
@@ -429,35 +428,25 @@ public class MainUi : IDisposable
         shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
         shouldSave |= ImGui.Checkbox($"Separate Friends##player-settings", ref configInterface.cfg.SeparateFriends);
         shouldSave |= ImGui.Checkbox($"Separate Alliance##player-settings", ref configInterface.cfg.SeparateAlliance);
-        
+
         DrawSeperator("Player Separations", UtilInfo.Red);
-        if (configInterface.cfg.SeparateYourPlayer)
-        {
-            DrawSettingsDetailed(configInterface.cfg.YourPlayerOption, "Your Player", MobType.Character);
-        }
 
+        DrawSettingsDetailed(configInterface.cfg.YourPlayerOption, "Your Player", MobType.Character);
+        
         // Todo: Make the radar path for this
-        if (configInterface.cfg.SeparateParty)
-        {
-            DrawSettingsDetailed(configInterface.cfg.PartyOption, "Party", mobType: MobType.Character);
-        }
 
-        if (configInterface.cfg.SeparateFriends)
-        {
-            DrawSettingsDetailed(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
-        }
+        DrawSettingsDetailed(configInterface.cfg.PartyOption, "Party", mobType: MobType.Character);
+        
+        DrawSettingsDetailed(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
 
-        if (configInterface.cfg.SeparateAlliance)
-        {
-            DrawSettingsDetailed(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Character);
-        }
+
+        DrawSettingsDetailed(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Character);
 
         if (shouldSave) configInterface.Save();
     }
 
     private void DrawNpcSettings()
     {
-        DrawSettingsDetailed(configInterface.cfg.PlayerOption, "Players", MobType.Character);
         DrawSettingsDetailed(configInterface.cfg.NpcOption, "Enemies", MobType.Character);
         DrawSettingsDetailed(configInterface.cfg.CompanionOption, "Companions", MobType.Object);
         DrawSettingsDetailed(configInterface.cfg.EventNpcOption, "Event Npcs", MobType.Object);
@@ -494,23 +483,12 @@ public class MainUi : IDisposable
         ImGui.NextColumn();
         shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
 
+
+        shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
         
         ImGui.NextColumn();
-        shouldSave |= ImGui.Checkbox($"Override Distance##{id}-distance-bool", ref option.DrawDistanceOverride);
-        ImGui.NextColumn();
-        if (option.DrawDistanceOverride)
-        {
-            shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
-        }
-        else
-        {
-            ImGui.Text("");
-        }
-        ImGui.NextColumn();
-
         shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
         ImGui.NextColumn();
-
         if (option.DotSizeOverride)
         {
             shouldSave |= ImGui.SliderFloat($"##{id}-dot-size", ref option.DotSize, UtilInfo.MinDotSize,
@@ -520,6 +498,7 @@ public class MainUi : IDisposable
         {
             ImGui.Text("");
         }
+
         ImGui.NextColumn();
         //todo Implement this in helpers
         ImGui.Columns(1);

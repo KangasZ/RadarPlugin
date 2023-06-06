@@ -146,7 +146,6 @@ public class Configuration
         public bool SeparateYourPlayer = true;
         public bool SeparateParty = true;
         public bool SeparateFriends = true;
-        public bool AddDistanceOnNames = false;
     }
 
     public Config cfg;
