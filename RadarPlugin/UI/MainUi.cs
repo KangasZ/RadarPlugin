@@ -215,9 +215,9 @@ public class MainUi : IDisposable
         ImGui.Separator();
         ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
         ImGui.Text("Separators");
+        ImGui.PopStyleColor();
         UiHelpers.LabeledHelpMarker("", "These options will dissociate the given category with the overriding player configuration.\n" +
                                         "Any player not in one of these categories will default to 'general' player option.");
-        ImGui.PopStyleColor();
         ImGui.Separator();
         shouldSave |= ImGui.Checkbox($"Separate Your Player##player-settings", ref configInterface.cfg.SeparateYourPlayer);
         if (configInterface.cfg.SeparateYourPlayer)
@@ -420,9 +420,9 @@ public class MainUi : IDisposable
         ImGui.Separator();
         ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
         ImGui.Text("Separators");
+        ImGui.PopStyleColor();
         UiHelpers.LabeledHelpMarker("", "These options will dissociate the given category with the overriding player configuration.\n" +
                                         "Any player not in one of these categories will default to 'general' player option.");
-        ImGui.PopStyleColor();
         ImGui.Separator();
         shouldSave |= ImGui.Checkbox($"Separate Your Player##player-settings", ref configInterface.cfg.SeparateYourPlayer);
         shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
