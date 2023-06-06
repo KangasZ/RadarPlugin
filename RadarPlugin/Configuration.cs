@@ -111,7 +111,6 @@ public class Configuration
         public bool ShowCutscene = false;
         public bool ShowNameless = false;
         public bool ShowOnlyVisible = true;
-        public bool ShowYOU = false;
         public bool ShowOffScreen = true;
         public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
@@ -140,10 +139,10 @@ public class Configuration
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
         public float DotSize = 2.2f;
-        public bool SeparateAlliance = true;
-        public bool SeparateYourPlayer = true;
-        public bool SeparateParty = true;
-        public bool SeparateFriends = true;
+        public bool SeparateAlliance = false;
+        public bool SeparateYourPlayer = false;
+        public bool SeparateParty = false;
+        public bool SeparateFriends = false;
     }
 
     public Config cfg;
