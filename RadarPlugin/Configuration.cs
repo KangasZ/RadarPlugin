@@ -83,9 +83,7 @@ public class Configuration
         public uint ColorU = 0xffffffff;
         public bool ShowFC = false; // Unused
         public bool DrawDistance = false;
-
         public bool DotSizeOverride = false;
-        public bool DrawDistanceOverride = false;
         public float DotSize = 2.2f;
     }
 
