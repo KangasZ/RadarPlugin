@@ -119,16 +119,17 @@ public class RadarLogic : IDisposable
         var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
         if (visibleOnScreen)
         {
+            var dotSize = espOption.DotSizeOverride ? espOption.DotSize : configInterface.cfg.DotSize;
             switch (espOption.DisplayType)
             {
                 case DisplayTypes.DotOnly:
-                    DrawDot(drawListPtr, onScreenPosition, configInterface.cfg.DotSize, color);
+                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
                     break;
                 case DisplayTypes.NameOnly:
                     DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.DotAndName:
-                    DrawDot(drawListPtr, onScreenPosition, configInterface.cfg.DotSize, color);
+                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
                     DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
                     break;
                 case DisplayTypes.HealthBarOnly:
@@ -220,7 +221,7 @@ public class RadarLogic : IDisposable
     private void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
         uint playerOptColor)
     {
-        if (gameObject is not BattleNpc npc) return;
+        if (gameObject is not BattleChara npc) return;
         var healthText = ((int)(((double)npc.CurrentHp / npc.MaxHp) * 100)).ToString();
         var healthTextSize = ImGui.CalcTextSize(healthText);
         imDrawListPtr.AddText(
@@ -252,7 +253,7 @@ public class RadarLogic : IDisposable
         uint playerOptColor)
     {
         const float radius = 13f;
-        if (gameObject is not BattleNpc npc) return;
+        if (gameObject is not BattleChara npc) return;
 
         var v1 = (float)npc.CurrentHp / (float)npc.MaxHp;
         var aMax = PI * 2.0f;
