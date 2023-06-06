@@ -432,14 +432,8 @@ public class MainUi : IDisposable
         DrawSeperator("Player Separations", UtilInfo.Red);
 
         DrawSettingsDetailed(configInterface.cfg.YourPlayerOption, "Your Player", MobType.Character);
-        
-        // Todo: Make the radar path for this
-
         DrawSettingsDetailed(configInterface.cfg.PartyOption, "Party", mobType: MobType.Character);
-        
         DrawSettingsDetailed(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
-
-
         DrawSettingsDetailed(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Character);
 
         if (shouldSave) configInterface.Save();
