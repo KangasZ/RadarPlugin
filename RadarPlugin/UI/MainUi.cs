@@ -20,7 +20,7 @@ public class MainUi : IDisposable
     private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
     private readonly TypeConfigurator typeConfigurator;
-
+    
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi,
         ClientState clientState, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator)
     {
@@ -100,12 +100,33 @@ public class MainUi : IDisposable
         {
             this.configInterface.LoadConfig(configInterface.configs[selectedConfig]);
         }
-
+        UiHelpers.HoverTooltip("This will save your current config when loading!");
         ImGui.SameLine();
         if (ImGui.Button("Delete Selected Config"))
         {
-            this.configInterface.DeleteConfig(configInterface.configs[selectedConfig]);
+            ImGui.OpenPopup("DeleteConfigPopup");
         }
+        ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
+        ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
+        if (ImGui.BeginPopup("DeleteConfigPopup"))
+        {
+            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(UtilInfo.Red), $"Do you really want to delete the config: \"{configInterface.configs[selectedConfig]}\"?");
+            if (ImGui.Button("Yes"))
+            {
+                this.configInterface.DeleteConfig(configInterface.configs[selectedConfig]);
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.SameLine();
+            ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
+            if (ImGui.Button("No"))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.PopStyleColor();
+            ImGui.EndPopup();
+        }
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
 
         ImGui.Separator();
 
