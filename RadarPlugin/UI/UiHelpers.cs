@@ -5,6 +5,7 @@ using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Logging;
+using Dalamud.Utility;
 using ImGuiNET;
 using RadarPlugin.Enums;
 
@@ -12,6 +13,32 @@ namespace RadarPlugin.UI;
 
 public static class UiHelpers
 {
+    public static bool DrawDotSizeSlider(ref float dotSize, string id)
+    {
+        return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, UtilInfo.MinDotSize, UtilInfo.MaxDotSize, UtilInfo.DefaultDotSize);
+    }
+    
+    public static bool DrawFloatWithResetSlider(ref float floatToModify, string tag, string id, float min, float max, float defaultFloatValue)
+    {
+        bool shouldSave = false;
+        if (!tag.IsNullOrWhitespace())
+        {
+            ImGui.Text(tag);
+            ImGui.SameLine();
+        }
+        ImGui.PushItemWidth(150);
+        shouldSave |= ImGui.SliderFloat($"##float-slider-{id}-{tag}", ref floatToModify, min, max);
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{tag}"))
+        {
+            floatToModify = defaultFloatValue;
+            shouldSave = true;
+        }
+        ImGui.PopFont();
+
+        return shouldSave;
+    }
     
     public static bool DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, ref DisplayTypes currVal)
     {

@@ -29,12 +29,6 @@ public class RadarHelpers
 
     public unsafe bool ShouldRender(GameObject obj)
     {
-        // TOdo: move debug check
-        if (configInterface.cfg.DebugMode)
-        {
-            return true;
-        }
-        
         // Objest valid check
         if (!obj.IsValid())
         {

@@ -13,7 +13,7 @@ public class TypeConfigurator
     private bool configuratorWindowVisible = false;
     private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
-    
+
     // Current Modification
     private Configuration.ESPOption espOption;
     private string espDescription;
@@ -36,10 +36,17 @@ public class TypeConfigurator
 
     public void OpenUiWithType(ref Configuration.ESPOption espOption, string typeId, MobType mobType)
     {
-        configuratorWindowVisible = true;
-        espDescription = typeId;
-        this.espOption = espOption;
-        this.mobType = mobType;
+        if (typeId == this.espDescription && configuratorWindowVisible == true)
+        {
+            configuratorWindowVisible = false;
+        }
+        else
+        {
+            configuratorWindowVisible = true;
+            espDescription = typeId;
+            this.espOption = espOption;
+            this.mobType = mobType;
+        }
     }
 
     private void Draw()
@@ -48,9 +55,10 @@ public class TypeConfigurator
         {
             return;
         }
+
         DrawConfiguratorWindow();
     }
-    
+
     private void DrawConfiguratorWindow()
     {
         var size = new Vector2(400, 260);
@@ -64,7 +72,7 @@ public class TypeConfigurator
 
         ImGui.End();
     }
-    
+
     private void DrawSettingsDetailed(Configuration.ESPOption option, string id, MobType mobType)
     {
         bool shouldSave = false;
@@ -80,14 +88,14 @@ public class TypeConfigurator
 
 
         shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
-        
+
         ImGui.NextColumn();
         shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
         ImGui.NextColumn();
         if (option.DotSizeOverride)
         {
-            shouldSave |= ImGui.SliderFloat($"##{id}-dot-size", ref option.DotSize, UtilInfo.MinDotSize,
-                UtilInfo.MaxDotSize);
+            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window", UtilInfo.MinDotSize, UtilInfo.MaxDotSize,
+                UtilInfo.DefaultDotSize);
         }
         else
         {

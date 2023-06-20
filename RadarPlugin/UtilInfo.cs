@@ -20,6 +20,7 @@ public static class UtilInfo
     public const float MinDotSize = 0.6f;
     public const float MaxDotSize = 6f;
     public const uint OpacityMax = 0xff000000;
+    public const float DefaultDotSize = 2.2f;
 
 
     /**

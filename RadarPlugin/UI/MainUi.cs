@@ -66,14 +66,16 @@ public class MainUi : IDisposable
                 ("General", UtilInfo.White, DrawGeneralSettings),
                 ("Overview", UtilInfo.Red, DrawVisibilitySettings),
                 ("Additional Features", UtilInfo.White, ShowMiscSettings),
-                ("Utility", UtilInfo.White, DrawUtilityTab)
+                ("Utility", UtilInfo.White, DrawUtilityTab),
+                ("Config", UtilInfo.White, DrawConfigTab)
+
             );
         }
 
         ImGui.End();
     }
 
-    private void DrawUtilityTab()
+    private void DrawConfigTab()
     {
         var shouldSave = false;
         var configName = configInterface.cfg.ConfigName;
@@ -110,7 +112,7 @@ public class MainUi : IDisposable
         ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
         if (ImGui.BeginPopup("DeleteConfigPopup"))
         {
-            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(UtilInfo.Red), $"Do you really want to delete the config: \"{configInterface.configs[selectedConfig]}\"?");
+            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(UtilInfo.White), $"Do you really want to delete the config: \"{configInterface.configs[selectedConfig]}\"?");
             if (ImGui.Button("Yes"))
             {
                 this.configInterface.DeleteConfig(configInterface.configs[selectedConfig]);
@@ -127,6 +129,13 @@ public class MainUi : IDisposable
         }
         ImGui.PopStyleVar();
         ImGui.PopStyleColor();
+        
+        if (shouldSave) configInterface.Save();
+    }
+
+    private void DrawUtilityTab()
+    {
+        var shouldSave = false;
 
         ImGui.Separator();
 
@@ -141,11 +150,12 @@ public class MainUi : IDisposable
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
 
+        
         shouldSave |= ImGui.Checkbox("Show Only Visible", ref configInterface.cfg.ShowOnlyVisible);
         UiHelpers.HoverTooltip("Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
-
+        
         shouldSave |= ImGui.Checkbox("Nameless", ref configInterface.cfg.ShowNameless);
-        UiHelpers.HoverTooltip("Show nameless mobs.\nYou probably want to keep this OFF.");
+        UiHelpers.LabeledHelpMarker("","Show nameless mobs.\nYou probably want to keep this OFF.\nTHIS DOES NOT WORK RIGHT NOW!!!");
 
         shouldSave |= ImGui.Checkbox("Debug Mode", ref configInterface.cfg.DebugMode);
         UiHelpers.HoverTooltip("Shows literally everything no matter what. Also modifies the display string.");
@@ -176,11 +186,9 @@ public class MainUi : IDisposable
                                         "It will be under any other Dalamud plugin. This is the original behavior.\n" +
                                         "There should be practically no difference between this and normal operations");
 
-        ImGui.Text("Dot Size");
-        ImGui.SameLine();
-        ImGui.PushItemWidth(150);
-        shouldSave |= ImGui.SliderFloat("##dot-size", ref configInterface.cfg.DotSize, UtilInfo.MinDotSize,
-            UtilInfo.MaxDotSize);
+        shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
+        
+        //shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontScale, "Font Scale", "font-scale-default-window", 0.1f, 3.0f, 1.0f);
 
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
@@ -387,6 +395,7 @@ public class MainUi : IDisposable
         if (shouldSave) configInterface.Save();
     }
 
+    
     private void DrawGeneralVisibilitySettings()
     {
         bool shouldSave = false;
