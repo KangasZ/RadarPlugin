@@ -84,7 +84,7 @@ public class Configuration
         public bool ShowFC = false; // Unused
         public bool DrawDistance = false;
         public bool DotSizeOverride = false;
-        public float DotSize = 2.2f;
+        public float DotSize = UtilInfo.DefaultDotSize;
     }
 
     public class Config : IPluginConfiguration
@@ -138,11 +138,12 @@ public class Configuration
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
-        public float DotSize = 2.2f;
+        public float DotSize = UtilInfo.DefaultDotSize;
         public bool SeparateAlliance = false;
         public bool SeparateYourPlayer = false;
         public bool SeparateParty = false;
         public bool SeparateFriends = false;
+        public float FontScale = 1.0f;
     }
 
     public Config cfg;

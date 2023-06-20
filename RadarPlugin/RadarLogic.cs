@@ -76,6 +76,8 @@ public class RadarLogic : IDisposable
             ImGuiWindowFlags.NoDocking |
             ImGuiWindowFlags.NoFocusOnAppearing);
         var mainViewPort = ImGui.GetMainViewport();
+        var font = ImGui.GetFont();
+        var fontSize = ImGui.GetFontSize();
         ImGui.SetWindowPos(mainViewPort.Pos);
         ImGui.SetWindowSize(mainViewPort.Size);
         ImDrawListPtr drawListPtr;
@@ -88,12 +90,20 @@ public class RadarLogic : IDisposable
             drawListPtr = ImGui.GetWindowDrawList();
         }
 
-        
-        foreach (var areaObject in objectTable.Where(obj => radarHelpers.ShouldRender(obj)))
+        IEnumerable<GameObject> objectTableRef;
+        if (configInterface.cfg.DebugMode)
+        {
+            objectTableRef = objectTable;
+        }
+        else
+        {
+            objectTableRef = objectTable.Where(obj => radarHelpers.ShouldRender(obj));
+        }
+        foreach (var areaObject in objectTableRef)
         {
             var gameObj = areaObject;
             var espOption = radarHelpers.GetParams(areaObject);
-            if (!espOption.Enabled) continue;
+            if (!espOption.Enabled && !configInterface.cfg.DebugMode) continue;
             var color = radarHelpers.GetColorOverride(areaObject);
             var text = radarHelpers.GetText(areaObject);
             DrawEsp(drawListPtr, gameObj, color, text, espOption);
@@ -241,8 +251,10 @@ public class RadarLogic : IDisposable
             tagText += "m";
         }
 
+
         var tagTextSize = ImGui.CalcTextSize(tagText);
-        imDrawListPtr.AddText(
+        imDrawListPtr.AddText(ImGui.GetFont(),
+            ImGui.GetFontSize(),
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
             objectOptionColor,
             tagText);

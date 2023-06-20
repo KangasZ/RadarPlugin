@@ -19,15 +19,17 @@ public class MainUi : IDisposable
     private readonly ClientState clientState;
     private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
-
+    private readonly TypeConfigurator typeConfigurator;
+    
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi,
-        ClientState clientState, RadarHelpers radarHelpers)
+        ClientState clientState, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator)
     {
         this.clientState = clientState;
         this.localMobsUi = localMobsUi;
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.radarHelper = radarHelpers;
+        this.typeConfigurator = typeConfigurator;
         this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.dalamudPluginInterface.UiBuilder.OpenConfigUi += OpenUi;
     }
@@ -55,7 +57,7 @@ public class MainUi : IDisposable
             return;
         }
 
-        var size = new Vector2(405, 440);
+        var size = new Vector2(480, 440);
         ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible))
@@ -63,16 +65,17 @@ public class MainUi : IDisposable
             UiHelpers.DrawTabs("radar-settings-tabs",
                 ("General", UtilInfo.White, DrawGeneralSettings),
                 ("Overview", UtilInfo.Red, DrawVisibilitySettings),
-                ("Overworld", UtilInfo.Green, Draw3DRadarSettings),
-                ("Deep Dungeon", UtilInfo.Yellow, DrawDeepDungeonVisibilitySettings),
-                ("Utility", UtilInfo.White, DrawUtilityTab)
+                ("Additional Features", UtilInfo.White, ShowMiscSettings),
+                ("Utility", UtilInfo.White, DrawUtilityTab),
+                ("Config", UtilInfo.White, DrawConfigTab)
+
             );
         }
 
         ImGui.End();
     }
 
-    private void DrawUtilityTab()
+    private void DrawConfigTab()
     {
         var shouldSave = false;
         var configName = configInterface.cfg.ConfigName;
@@ -99,12 +102,40 @@ public class MainUi : IDisposable
         {
             this.configInterface.LoadConfig(configInterface.configs[selectedConfig]);
         }
-
+        UiHelpers.HoverTooltip("This will save your current config when loading!");
         ImGui.SameLine();
         if (ImGui.Button("Delete Selected Config"))
         {
-            this.configInterface.DeleteConfig(configInterface.configs[selectedConfig]);
+            ImGui.OpenPopup("DeleteConfigPopup");
         }
+        ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
+        ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
+        if (ImGui.BeginPopup("DeleteConfigPopup"))
+        {
+            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(UtilInfo.White), $"Do you really want to delete the config: \"{configInterface.configs[selectedConfig]}\"?");
+            if (ImGui.Button("Yes"))
+            {
+                this.configInterface.DeleteConfig(configInterface.configs[selectedConfig]);
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.SameLine();
+            ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
+            if (ImGui.Button("No"))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.PopStyleColor();
+            ImGui.EndPopup();
+        }
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
+        
+        if (shouldSave) configInterface.Save();
+    }
+
+    private void DrawUtilityTab()
+    {
+        var shouldSave = false;
 
         ImGui.Separator();
 
@@ -119,11 +150,12 @@ public class MainUi : IDisposable
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
 
+        
         shouldSave |= ImGui.Checkbox("Show Only Visible", ref configInterface.cfg.ShowOnlyVisible);
         UiHelpers.HoverTooltip("Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
-
+        
         shouldSave |= ImGui.Checkbox("Nameless", ref configInterface.cfg.ShowNameless);
-        UiHelpers.HoverTooltip("Show nameless mobs.\nYou probably want to keep this OFF.");
+        UiHelpers.LabeledHelpMarker("","Show nameless mobs.\nYou probably want to keep this OFF.\nTHIS DOES NOT WORK RIGHT NOW!!!");
 
         shouldSave |= ImGui.Checkbox("Debug Mode", ref configInterface.cfg.DebugMode);
         UiHelpers.HoverTooltip("Shows literally everything no matter what. Also modifies the display string.");
@@ -154,11 +186,9 @@ public class MainUi : IDisposable
                                         "It will be under any other Dalamud plugin. This is the original behavior.\n" +
                                         "There should be practically no difference between this and normal operations");
 
-        ImGui.Text("Dot Size");
-        ImGui.SameLine();
-        ImGui.PushItemWidth(150);
-        shouldSave |= ImGui.SliderFloat("##dot-size", ref configInterface.cfg.DotSize, UtilInfo.MinDotSize,
-            UtilInfo.MaxDotSize);
+        shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
+        
+        //shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontScale, "Font Scale", "font-scale-default-window", 0.1f, 3.0f, 1.0f);
 
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
@@ -182,33 +212,20 @@ public class MainUi : IDisposable
             "Note 2: Invisible mobs may be shown. Use the Utility tab to remove these.");
         if (shouldSave) configInterface.Save();
     }
-
-    private void Draw3DRadarSettings()
-    {
-        ImGui.BeginChild($"##radar-settings-tabs-child");
-        UiHelpers.DrawTabs("radar-3d-settings-tabs",
-            ("Players", UtilInfo.Silver, DrawPlayerSettings),
-            ("Npcs", UtilInfo.White, DrawNpcSettings),
-            ("Objects", UtilInfo.White, DrawObjectSettings),
-            ("Misc", UtilInfo.White, DrawMiscSettings)
-        );
-        ImGui.EndChild();
-    }
-
+    
     private void DrawVisibilitySettings()
     {
         UiHelpers.DrawTabs("radar-visibility-tabs",
             ("Players", UtilInfo.Silver, DrawPlayerGeneralSettings),
             ("Overworld", UtilInfo.Green, DrawGeneralVisibilitySettings),
-            ("Deep Dungeons", UtilInfo.Yellow, DrawDeepDungeonOverviewSettings),
-            ("Additional Features", UtilInfo.White, ShowMiscSettings)
+            ("Deep Dungeons", UtilInfo.Yellow, DrawDeepDungeonOverviewSettings)
         );
     }
 
     private void DrawPlayerGeneralSettings()
     {
         var shouldSave = false;
-        DrawSeperator("Players", UtilInfo.Red);
+        UiHelpers.DrawSeperator("Players", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players", mobType: MobType.Character);
 
         // Custom YOUR PLAYER that I don't want to deal with yet.\
@@ -249,21 +266,21 @@ public class MainUi : IDisposable
 
     private void DrawDeepDungeonOverviewSettings()
     {
-        DrawSeperator($"Enemies Options", UtilInfo.Red);
+        UiHelpers.DrawSeperator($"Enemies Options", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", mobType: MobType.Character);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs", mobType: MobType.Character);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", mobType: MobType.Character);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", mobType: MobType.Character);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", mobType: MobType.Character);
 
-        DrawSeperator($"Loot Options", UtilInfo.Red);
+        UiHelpers.DrawSeperator($"Loot Options", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard");
 
 
-        DrawSeperator($"DD Specific Options", UtilInfo.Red);
+        UiHelpers.DrawSeperator($"DD Specific Options", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return");
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage");
@@ -272,7 +289,7 @@ public class MainUi : IDisposable
     private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "", MobType mobType = MobType.Object)
     {
         bool shouldSave = false;
-        shouldSave |= DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType, ref espOption.DisplayType);
+        shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType, ref espOption.DisplayType);
         ImGui.SameLine();
         shouldSave |= UiHelpers.Vector4ColorSelector($"##visiblitygeneralsettings-color-{tag}", ref espOption.ColorU);
 
@@ -280,10 +297,15 @@ public class MainUi : IDisposable
 
         shouldSave |= ImGui.Checkbox($"{tag}##enabled-{tag}", ref espOption.Enabled);
 
-        // TODO: Information icon instead of hover desc
         if (!description.IsNullOrWhitespace())
         {
-            UiHelpers.HoverTooltip(description);
+            UiHelpers.LabeledHelpMarker("", description);
+        }
+        
+        ImGui.SameLine(ImGui.GetWindowWidth() - 100);
+        if (ImGui.Button($"More Options##button-for-type-configurator{tag}"))
+        {
+            typeConfigurator.OpenUiWithType(ref espOption, tag, mobType);
         }
 
         if (shouldSave) configInterface.Save();
@@ -373,155 +395,30 @@ public class MainUi : IDisposable
         if (shouldSave) configInterface.Save();
     }
 
-    private void DrawDeepDungeonVisibilitySettings()
-    {
-        ImGui.BeginChild($"##radar-deep-dungeon-settings-tabs-child");
-        UiHelpers.DrawTabs("radar-deep-dungeons-3d-settings-tabs",
-            ("Mobs", UtilInfo.White, DrawDDMobSettings),
-            ("Loot", UtilInfo.White, DrawDDLootSettings),
-            ("DD Specific", UtilInfo.White, DrawDDEntitiesSettings)
-        );
-        ImGui.EndChild();
-    }
-
-    private void DrawDDEntitiesSettings()
-    {
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", MobType.Object);
-    }
-
-    private void DrawDDLootSettings()
-    {
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard", MobType.Object);
-    }
-
-    private void DrawDDMobSettings()
-    {
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
-            MobType.Character);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", MobType.Character);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' Mobs",
-            MobType.Character);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", MobType.Character);
-        DrawSettingsDetailed(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", MobType.Character);
-    }
-
-    private void DrawPlayerSettings()
-    {
-        var shouldSave = false;
-        DrawSeperator("Players", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players", mobType: MobType.Character);
-
-        // Custom YOUR PLAYER that I don't want to deal with yet.\
-        ImGui.Separator();
-        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
-        ImGui.Text("Separators");
-        ImGui.PopStyleColor();
-        UiHelpers.LabeledHelpMarker("", "These options will dissociate the given category with the overriding player configuration.\n" +
-                                        "Any player not in one of these categories will default to 'general' player option.");
-        ImGui.Separator();
-        shouldSave |= ImGui.Checkbox($"Separate Your Player##player-settings", ref configInterface.cfg.SeparateYourPlayer);
-        shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
-        shouldSave |= ImGui.Checkbox($"Separate Friends##player-settings", ref configInterface.cfg.SeparateFriends);
-        shouldSave |= ImGui.Checkbox($"Separate Alliance##player-settings", ref configInterface.cfg.SeparateAlliance);
-
-        DrawSeperator("Player Separations", UtilInfo.Red);
-
-        DrawSettingsDetailed(configInterface.cfg.YourPlayerOption, "Your Player", MobType.Character);
-        DrawSettingsDetailed(configInterface.cfg.PartyOption, "Party", mobType: MobType.Character);
-        DrawSettingsDetailed(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
-        DrawSettingsDetailed(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Character);
-
-        if (shouldSave) configInterface.Save();
-    }
-
-    private void DrawNpcSettings()
-    {
-        DrawSettingsDetailed(configInterface.cfg.NpcOption, "Enemies", MobType.Character);
-        DrawSettingsDetailed(configInterface.cfg.CompanionOption, "Companions", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.EventNpcOption, "Event Npcs", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.RetainerOption, "Retainer", MobType.Object);
-    }
-
-    private void DrawMiscSettings()
-    {
-        DrawSettingsDetailed(configInterface.cfg.CardStandOption, "Card Stand", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.GatheringPointOption, "Gathering Point", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.MountOption, "Mount", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.OrnamentOption, "Ornaments", MobType.Object);
-    }
-
-    private void DrawObjectSettings()
-    {
-        DrawSettingsDetailed(configInterface.cfg.TreasureOption, "Loot", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.EventObjOption, "Event Objects", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.AreaOption, "Area Objects", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.AetheryteOption, "Aetherytes", MobType.Object);
-        DrawSettingsDetailed(configInterface.cfg.CutsceneOption, "Cutscene", MobType.Object);
-    }
-
-    private void DrawSettingsDetailed(Configuration.ESPOption option, string id, MobType mobType)
-    {
-        bool shouldSave = false;
-        DrawSeperator($"{id} Options", UtilInfo.Red);
-        ImGui.Columns(2, $"##{id}-type-settings-columns", false);
-
-        shouldSave |= ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref option.Enabled);
-
-        shouldSave |= DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType, ref option.DisplayType);
-
-        ImGui.NextColumn();
-        shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
-
-
-        shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
-        
-        ImGui.NextColumn();
-        shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
-        ImGui.NextColumn();
-        if (option.DotSizeOverride)
-        {
-            shouldSave |= ImGui.SliderFloat($"##{id}-dot-size", ref option.DotSize, UtilInfo.MinDotSize,
-                UtilInfo.MaxDotSize);
-        }
-        else
-        {
-            ImGui.Text("");
-        }
-
-        ImGui.NextColumn();
-        //todo Implement this in helpers
-        ImGui.Columns(1);
-        if (shouldSave) configInterface.Save();
-    }
-
+    
     private void DrawGeneralVisibilitySettings()
     {
         bool shouldSave = false;
         ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
 
-        DrawSeperator("Npcs", UtilInfo.Red);
+        UiHelpers.DrawSeperator("Npcs", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
             description: "Shows most enemies that are considered battleable", mobType: MobType.Character);
         DrawSettingsOverview(configInterface.cfg.CompanionOption, "Companions");
         DrawSettingsOverview(configInterface.cfg.EventNpcOption, "Event NPCs");
         DrawSettingsOverview(configInterface.cfg.RetainerOption, "Retainers");
 
-        DrawSeperator("Objects", UtilInfo.Red);
+        UiHelpers.DrawSeperator("Objects", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.TreasureOption, "Treasure",
             "Shows most loot. The loot classification is via the dalamud's association.");
         DrawSettingsOverview(configInterface.cfg.EventObjOption, "Event Objects");
         DrawSettingsOverview(configInterface.cfg.AreaOption, "Area Objects");
         DrawSettingsOverview(configInterface.cfg.AetheryteOption, "Aetherytes");
-        DrawSettingsOverview(configInterface.cfg.CutsceneOption, "Cutscene Objects",
+        DrawSettingsOverview(configInterface.cfg.CutsceneOption, "Cutscene Objs",
             "Shows cutscene objects. I have no idea what these are!");
 
-        DrawSeperator("Misc", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.CardStandOption, "Card Stand (Island Sanctuary Nodes)",
+        UiHelpers.DrawSeperator("Misc", UtilInfo.Red);
+        DrawSettingsOverview(configInterface.cfg.CardStandOption, "Card Stand",
             "Show card stand. This includes island sanctuary stuff (mostly).");
         DrawSettingsOverview(configInterface.cfg.GatheringPointOption, "Gathering Point",
             "Shows Gathering Points");
@@ -529,73 +426,5 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.OrnamentOption, "Ornaments", "Shows ornaments, like wings.");
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
-    }
-
-    private void DrawSeperator(string text, uint color)
-    {
-        ImGui.Separator();
-        ImGui.PushStyleColor(ImGuiCol.Text, color);
-        ImGui.Text(text);
-        ImGui.PopStyleColor();
-        ImGui.Separator();
-    }
-
-    public bool DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, ref DisplayTypes currVal)
-    {
-        var val = (int)currVal;
-        switch (mobType)
-        {
-            case MobType.Object:
-                ImGui.PushItemWidth(175);
-                var lb = ImGui.Combo($"##{id}",
-                    ref val,
-                    new string[]
-                    {
-                        "Dot Only",
-                        "Name Only",
-                        "Dot and Name",
-                    }, 3, 3);
-                ImGui.PopItemWidth();
-
-                if (lb)
-                {
-                    if (val >= 0 && val <= 2)
-                    {
-                        currVal = (DisplayTypes)val;
-                    }
-                }
-
-                return lb;
-            case MobType.Character:
-                ImGui.PushItemWidth(175);
-                var lb2 = ImGui.Combo($"##{id}",
-                    ref val,
-                    new string[]
-                    {
-                        "Dot Only",
-                        "Name Only",
-                        "Dot and Name",
-                        "Health Bar Only",
-                        "Health Bar And Value",
-                        "Health Bar And Name",
-                        "Health Bar, Value, And Name",
-                        "Health Value Only",
-                        "Health Value and Name"
-                    }, 9, 9);
-                ImGui.PopItemWidth();
-                if (lb2)
-                {
-                    if (val >= 0 && val <= 8)
-                    {
-                        currVal = (DisplayTypes)val;
-                    }
-                }
-
-                return lb2;
-            default:
-                PluginLog.Error(
-                    "Mob Type Is Wrong. This literally should never occur. Please dear god help me if it does.");
-                return false;
-        }
     }
 }
