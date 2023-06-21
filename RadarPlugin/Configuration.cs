@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dalamud.Logging;
+using ImGuiNET;
 using Newtonsoft.Json;
 using RadarPlugin.Enums;
 
@@ -13,6 +14,13 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class FontSettings
+    {
+        public bool UseCustomFont = true;
+        public bool UseAxisFont = true;
+        public float FontSize = ImGui.GetFontSize();
+    }
+
     public class LocalMobsUISettings
     {
         public bool Duplicates = false;
@@ -143,7 +151,7 @@ public class Configuration
         public bool SeparateYourPlayer = false;
         public bool SeparateParty = false;
         public bool SeparateFriends = false;
-        public float FontScale = 1.0f;
+        public FontSettings FontSettings { get; set; } = new();
     }
 
     public Config cfg;

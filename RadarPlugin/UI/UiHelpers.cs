@@ -17,8 +17,8 @@ public static class UiHelpers
     {
         return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, UtilInfo.MinDotSize, UtilInfo.MaxDotSize, UtilInfo.DefaultDotSize);
     }
-    
-    public static bool DrawFloatWithResetSlider(ref float floatToModify, string tag, string id, float min, float max, float defaultFloatValue)
+
+    public static bool DrawFloatWithResetSlider(ref float floatToModify, string tag, string id, float min, float max, float defaultFloatValue, string format = "%.2f")
     {
         bool shouldSave = false;
         if (!tag.IsNullOrWhitespace())
@@ -27,7 +27,9 @@ public static class UiHelpers
             ImGui.SameLine();
         }
         ImGui.PushItemWidth(150);
-        shouldSave |= ImGui.SliderFloat($"##float-slider-{id}-{tag}", ref floatToModify, min, max);
+
+        shouldSave |= ImGui.SliderFloat($"##float-slider-{id}-{tag}", ref floatToModify, min, max, format);
+        
         ImGui.SameLine();
         ImGui.PushFont(UiBuilder.IconFont);
         if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{tag}"))

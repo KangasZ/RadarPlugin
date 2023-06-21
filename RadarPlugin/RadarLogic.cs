@@ -1,6 +1,7 @@
 ﻿using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
@@ -12,6 +13,9 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
+using Dalamud.Interface;
+using Dalamud.Interface.GameFonts;
+using Dalamud.Interface.Raii;
 using Dalamud.Plugin;
 using ImGuiNET;
 using RadarPlugin.Enums;
@@ -32,6 +36,11 @@ public class RadarLogic : IDisposable
     private readonly GameGui gameGui;
     private readonly RadarHelpers radarHelpers;
 
+    private bool builtFontFirst = false;
+    private GameFontHandle? gameFont;
+    private ImFontPtr? dalamudFont;
+    private bool fontBuilt = false;
+    private DateTime lastGeneratedFont;
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
         Condition condition, ClientState clientState, GameGui gameGui, RadarHelpers radarHelpers)
@@ -43,20 +52,81 @@ public class RadarLogic : IDisposable
         this.conditionInterface = condition;
         this.gameGui = gameGui;
         this.radarHelpers = radarHelpers;
-
         // Loads plugin
         PluginLog.Debug("Radar Loaded");
 
         this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += OnTick;
+        this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
+
+        lastGeneratedFont = DateTime.UtcNow;
+    }
+
+    private void BuildFont()
+    {
+        fontBuilt = false;
+        var fontFile = Path.Combine(pluginInterface.DalamudAssetDirectory.FullName, "UIRes", "NotoSansCJKjp-Medium.otf");
+        if (File.Exists(fontFile))
+        {
+            try
+            {
+                dalamudFont = ImGui.GetIO().Fonts.AddFontFromFileTTF(fontFile, configInterface.cfg.FontSettings.FontSize);
+                fontBuilt = true;
+                PluginLog.Debug("Custom dalamud font loaded sucesffully");
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, "Font failed to load!");
+            }
+        }
+        else
+        {
+            PluginLog.Error("Font does not exist! Please fix dev.");
+        }
     }
 
     private void OnTick()
     {
         if (!configInterface.cfg.Enabled) return;
+
+        ImFontPtr fontPtr = LoadFont();
+        using var font = ImRaii.PushFont(fontPtr);
         if (objectTable.Length == 0) return;
         if (CheckDraw()) return;
         DrawRadar();
+    }
+
+    private ImFontPtr LoadFont()
+    {
+        ImFontPtr fontPtr;
+        if (configInterface.cfg.FontSettings.UseCustomFont)
+        {
+            if (configInterface.cfg.FontSettings.UseAxisFont)
+            {
+                if (this.gameFont != null && this.gameFont.Available)
+                {
+                    var tempPointer = gameFont.ImFont;
+                    if (tempPointer.IsLoaded() && Math.Abs(tempPointer.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
+                    {
+                        return this.gameFont.ImFont;
+                    }
+                }
+                gameFont = pluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis, configInterface.cfg.FontSettings.FontSize));
+                return gameFont.ImFont;
+            }
+
+            if (dalamudFont.HasValue && this.fontBuilt && dalamudFont.Value.IsLoaded() && Math.Abs(dalamudFont.Value.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
+            {
+                return dalamudFont.Value;
+            }
+
+            pluginInterface.UiBuilder.RebuildFonts();
+            return this.fontBuilt ? dalamudFont.Value : ImGui.GetFont() ;
+        }
+
+        fontPtr = ImGui.GetFont();
+
+        return fontPtr;
     }
 
     private void DrawRadar()
@@ -99,6 +169,7 @@ public class RadarLogic : IDisposable
         {
             objectTableRef = objectTable.Where(obj => radarHelpers.ShouldRender(obj));
         }
+
         foreach (var areaObject in objectTableRef)
         {
             var gameObj = areaObject;
@@ -108,7 +179,7 @@ public class RadarLogic : IDisposable
             var text = radarHelpers.GetText(areaObject);
             DrawEsp(drawListPtr, gameObj, color, text, espOption);
         }
-        
+
         ImGui.End();
     }
 
@@ -362,12 +433,12 @@ public class RadarLogic : IDisposable
     }
 
 
-
     #region CLEANUP REGION
-    
+
     public void Dispose()
     {
         pluginInterface.UiBuilder.Draw -= OnTick;
+        this.pluginInterface.UiBuilder.BuildFonts -= BuildFont;
         PluginLog.Information("Radar Unloaded");
     }
 

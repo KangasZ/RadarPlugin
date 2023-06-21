@@ -188,7 +188,7 @@ public class MainUi : IDisposable
 
         shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
         
-        //shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontScale, "Font Scale", "font-scale-default-window", 0.1f, 3.0f, 1.0f);
+        shouldSave |= DrawFontOptions();
 
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
@@ -212,7 +212,69 @@ public class MainUi : IDisposable
             "Note 2: Invisible mobs may be shown. Use the Utility tab to remove these.");
         if (shouldSave) configInterface.Save();
     }
-    
+
+    private bool DrawFontOptions()
+    {
+        var shouldSave = false;
+
+        shouldSave |= ImGui.Checkbox("Use Custom Font##custom-font-selector-default", ref configInterface.cfg.FontSettings.UseCustomFont);
+        
+        shouldSave |= ImGui.Checkbox("Use Axis Font##axis-font-selector-default", ref configInterface.cfg.FontSettings.UseAxisFont);
+
+        
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontSettings.FontSize, "Font Size", "font-scale-default-window", 7f, 36f, ImGui.GetFontSize(), "%.0fpx");
+
+        if (ImGui.Button("9.6px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 9.6f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("12px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 12f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("16px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 16f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("17px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 17f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("18px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 18f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("24px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 24f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("36px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 36f;
+            shouldSave = true;
+        }
+
+        return shouldSave;
+    }
+
     private void DrawVisibilitySettings()
     {
         UiHelpers.DrawTabs("radar-visibility-tabs",
