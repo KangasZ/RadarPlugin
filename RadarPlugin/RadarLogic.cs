@@ -36,11 +36,9 @@ public class RadarLogic : IDisposable
     private readonly GameGui gameGui;
     private readonly RadarHelpers radarHelpers;
 
-    private bool builtFontFirst = false;
     private GameFontHandle? gameFont;
     private ImFontPtr? dalamudFont;
     private bool fontBuilt = false;
-    private DateTime lastGeneratedFont;
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
         Condition condition, ClientState clientState, GameGui gameGui, RadarHelpers radarHelpers)
@@ -59,7 +57,6 @@ public class RadarLogic : IDisposable
         this.pluginInterface.UiBuilder.Draw += OnTick;
         this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
 
-        lastGeneratedFont = DateTime.UtcNow;
     }
 
     private void BuildFont()

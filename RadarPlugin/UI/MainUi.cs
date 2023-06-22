@@ -195,7 +195,7 @@ public class MainUi : IDisposable
         
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "Some big changes to plugin internals for 6.4.\nIf stuff is not working please report it!\n");
+            "Thank you for your support!");
         ImGui.Separator();
 
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
@@ -228,14 +228,8 @@ public class MainUi : IDisposable
 
         
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontSettings.FontSize, "Font Size", "font-scale-default-window", 7f, 36f, ImGui.GetFontSize(), "%.0fpx");
-
-        if (ImGui.Button("9.6px"))
-        {
-            configInterface.cfg.FontSettings.FontSize = 9.6f;
-            shouldSave = true;
-        }
         
-        ImGui.SameLine();
+        
         if (ImGui.Button("12px"))
         {
             configInterface.cfg.FontSettings.FontSize = 12f;
@@ -260,6 +254,20 @@ public class MainUi : IDisposable
         if (ImGui.Button("18px"))
         {
             configInterface.cfg.FontSettings.FontSize = 18f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("20px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 20f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("22px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 22f;
             shouldSave = true;
         }
         

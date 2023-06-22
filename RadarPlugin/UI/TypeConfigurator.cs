@@ -9,7 +9,6 @@ public class TypeConfigurator
 {
     private Configuration configInterface;
     private readonly DalamudPluginInterface dalamudPluginInterface;
-    private readonly LocalMobsUi localMobsUi;
     private bool configuratorWindowVisible = false;
     private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
