@@ -188,11 +188,14 @@ public class MainUi : IDisposable
 
         shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
         
-        //shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontScale, "Font Scale", "font-scale-default-window", 0.1f, 3.0f, 1.0f);
+        shouldSave |= DrawFontOptions();
 
+        //shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.EspPadding, "Esp Padding", "esp-padding-default-window", 0f, 25f, UtilInfo.DefaultEspPadding, "%.1fpx");
+
+        
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "Some big changes to plugin internals for 6.4.\nIf stuff is not working please report it!\n");
+            "Thank you for your support!");
         ImGui.Separator();
 
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
@@ -212,7 +215,79 @@ public class MainUi : IDisposable
             "Note 2: Invisible mobs may be shown. Use the Utility tab to remove these.");
         if (shouldSave) configInterface.Save();
     }
-    
+
+    private bool DrawFontOptions()
+    {
+        var shouldSave = false;
+
+        shouldSave |= ImGui.Checkbox("Use Custom Font##custom-font-selector-default", ref configInterface.cfg.FontSettings.UseCustomFont);
+        UiHelpers.LabeledHelpMarker("", "Use a custom font size and potentially type instead of the default ImGui font.\nThis may lag your game slightly when you enable it the first time.");
+
+        shouldSave |= ImGui.Checkbox("Use Axis Font##axis-font-selector-default", ref configInterface.cfg.FontSettings.UseAxisFont);
+        UiHelpers.LabeledHelpMarker("", "Uses the axis font instead of default dalamud.\nThis is what most of the game is rendered with.");
+
+        
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontSettings.FontSize, "Font Size", "font-scale-default-window", 7f, 36f, ImGui.GetFontSize(), "%.0fpx");
+        
+        
+        if (ImGui.Button("12px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 12f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("16px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 16f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("17px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 17f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("18px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 18f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("20px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 20f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("22px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 22f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("24px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 24f;
+            shouldSave = true;
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("36px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 36f;
+            shouldSave = true;
+        }
+
+        return shouldSave;
+    }
+
     private void DrawVisibilitySettings()
     {
         UiHelpers.DrawTabs("radar-visibility-tabs",
@@ -226,7 +301,7 @@ public class MainUi : IDisposable
     {
         var shouldSave = false;
         UiHelpers.DrawSeperator("Players", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players", mobType: MobType.Character);
+        DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players", mobType: MobType.Player);
 
         // Custom YOUR PLAYER that I don't want to deal with yet.\
         ImGui.Separator();
@@ -239,26 +314,26 @@ public class MainUi : IDisposable
         shouldSave |= ImGui.Checkbox($"Separate Your Player##player-settings", ref configInterface.cfg.SeparateYourPlayer);
         if (configInterface.cfg.SeparateYourPlayer)
         {
-            DrawSettingsOverview(configInterface.cfg.YourPlayerOption, "Your Player", mobType: MobType.Character);
+            DrawSettingsOverview(configInterface.cfg.YourPlayerOption, "Your Player", mobType: MobType.Player);
         }
 
         // Todo: Make the radar path for this
         shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
         if (configInterface.cfg.SeparateParty)
         {
-            DrawSettingsOverview(configInterface.cfg.PartyOption, "Party", mobType: MobType.Character);
+            DrawSettingsOverview(configInterface.cfg.PartyOption, "Party", mobType: MobType.Player);
         }
 
         shouldSave |= ImGui.Checkbox($"Separate Friends##player-settings", ref configInterface.cfg.SeparateFriends);
         if (configInterface.cfg.SeparateFriends)
         {
-            DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
+            DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Player);
         }
 
         shouldSave |= ImGui.Checkbox($"Separate Alliance##player-settings", ref configInterface.cfg.SeparateAlliance);
         if (configInterface.cfg.SeparateAlliance)
         {
-            DrawSettingsOverview(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Character);
+            DrawSettingsOverview(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Player);
         }
 
         if (shouldSave) configInterface.Save();

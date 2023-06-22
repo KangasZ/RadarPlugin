@@ -3,5 +3,6 @@
 public enum MobType
 {
     Object,
-    Character
+    Character,
+    Player,
 }

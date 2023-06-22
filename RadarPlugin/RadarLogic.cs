@@ -1,6 +1,7 @@
 ﻿using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
@@ -12,6 +13,9 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
+using Dalamud.Interface;
+using Dalamud.Interface.GameFonts;
+using Dalamud.Interface.Raii;
 using Dalamud.Plugin;
 using ImGuiNET;
 using RadarPlugin.Enums;
@@ -32,6 +36,9 @@ public class RadarLogic : IDisposable
     private readonly GameGui gameGui;
     private readonly RadarHelpers radarHelpers;
 
+    private GameFontHandle? gameFont;
+    private ImFontPtr? dalamudFont;
+    private bool fontBuilt = false;
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
         Condition condition, ClientState clientState, GameGui gameGui, RadarHelpers radarHelpers)
@@ -43,20 +50,80 @@ public class RadarLogic : IDisposable
         this.conditionInterface = condition;
         this.gameGui = gameGui;
         this.radarHelpers = radarHelpers;
-
         // Loads plugin
         PluginLog.Debug("Radar Loaded");
 
         this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += OnTick;
+        this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
+
+    }
+
+    private void BuildFont()
+    {
+        fontBuilt = false;
+        var fontFile = Path.Combine(pluginInterface.DalamudAssetDirectory.FullName, "UIRes", "NotoSansCJKjp-Medium.otf");
+        if (File.Exists(fontFile))
+        {
+            try
+            {
+                dalamudFont = ImGui.GetIO().Fonts.AddFontFromFileTTF(fontFile, configInterface.cfg.FontSettings.FontSize);
+                fontBuilt = true;
+                PluginLog.Debug("Custom dalamud font loaded sucesffully");
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex, "Font failed to load!");
+            }
+        }
+        else
+        {
+            PluginLog.Error("Font does not exist! Please fix dev.");
+        }
     }
 
     private void OnTick()
     {
         if (!configInterface.cfg.Enabled) return;
+
+        ImFontPtr fontPtr = LoadFont();
+        using var font = ImRaii.PushFont(fontPtr);
         if (objectTable.Length == 0) return;
         if (CheckDraw()) return;
         DrawRadar();
+    }
+
+    private ImFontPtr LoadFont()
+    {
+        ImFontPtr fontPtr;
+        if (configInterface.cfg.FontSettings.UseCustomFont)
+        {
+            if (configInterface.cfg.FontSettings.UseAxisFont)
+            {
+                if (this.gameFont != null && this.gameFont.Available)
+                {
+                    var tempPointer = gameFont.ImFont;
+                    if (tempPointer.IsLoaded() && Math.Abs(tempPointer.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
+                    {
+                        return this.gameFont.ImFont;
+                    }
+                }
+                gameFont = pluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis, configInterface.cfg.FontSettings.FontSize));
+                return gameFont.ImFont;
+            }
+
+            if (dalamudFont.HasValue && this.fontBuilt && dalamudFont.Value.IsLoaded() && Math.Abs(dalamudFont.Value.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
+            {
+                return dalamudFont.Value;
+            }
+
+            pluginInterface.UiBuilder.RebuildFonts();
+            return this.fontBuilt ? dalamudFont.Value : ImGui.GetFont() ;
+        }
+
+        fontPtr = ImGui.GetFont();
+
+        return fontPtr;
     }
 
     private void DrawRadar()
@@ -99,16 +166,16 @@ public class RadarLogic : IDisposable
         {
             objectTableRef = objectTable.Where(obj => radarHelpers.ShouldRender(obj));
         }
+
         foreach (var areaObject in objectTableRef)
         {
             var gameObj = areaObject;
             var espOption = radarHelpers.GetParams(areaObject);
             if (!espOption.Enabled && !configInterface.cfg.DebugMode) continue;
             var color = radarHelpers.GetColorOverride(areaObject);
-            var text = radarHelpers.GetText(areaObject);
-            DrawEsp(drawListPtr, gameObj, color, text, espOption);
+            DrawEsp(drawListPtr, gameObj, color, espOption);
         }
-        
+
         ImGui.End();
     }
 
@@ -122,7 +189,7 @@ public class RadarLogic : IDisposable
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
-    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint? overrideColor, string name,
+    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint? overrideColor,
         Configuration.ESPOption espOption)
     {
         var color = overrideColor ?? espOption.ColorU;
@@ -136,11 +203,11 @@ public class RadarLogic : IDisposable
                     DrawDot(drawListPtr, onScreenPosition, dotSize, color);
                     break;
                 case DisplayTypes.NameOnly:
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     break;
                 case DisplayTypes.DotAndName:
                     DrawDot(drawListPtr, onScreenPosition, dotSize, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     break;
                 case DisplayTypes.HealthBarOnly:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
@@ -151,11 +218,11 @@ public class RadarLogic : IDisposable
                     break;
                 case DisplayTypes.HealthBarAndName:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     break;
                 case DisplayTypes.HealthBarAndValueAndName:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
                     break;
                 case DisplayTypes.HealthValueOnly:
@@ -163,7 +230,7 @@ public class RadarLogic : IDisposable
                     break;
                 case DisplayTypes.HealthValueAndName:
                     DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -208,7 +275,27 @@ public class RadarLogic : IDisposable
                 }
             }
         }
+        /*
+        if (gameObject is PlayerCharacter pc)
+        {
+        // Todo: Implement this!
+            this.DrawHp(drawListPtr, onScreenPosition, color, (BattleChara) pc);
+        }*/
     }
+
+    //todo lmao
+    private void DrawHp(ImDrawListPtr imDrawListPtr, Vector2 position, uint objectOptionColor,
+        BattleChara gameObject)
+    {
+        var tagText = $"{gameObject.CurrentHp}";
+
+        var tagTextSize = ImGui.CalcTextSize(tagText);
+        imDrawListPtr.AddText(
+            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y + configInterface.cfg.EspPadding),
+            objectOptionColor,
+            tagText);
+    }
+
 
     private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius,
         uint color)
@@ -240,10 +327,16 @@ public class RadarLogic : IDisposable
             healthText);
     }
 
-    private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, string tagText, uint objectOptionColor,
-        GameObject gameObject, bool drawDistance)
+    private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, uint objectOptionColor,
+        GameObject gameObject, Configuration.ESPOption espOption)
     {
-        if (drawDistance)
+        var tagText = radarHelpers.GetText(gameObject);
+        if (espOption.ReplaceWithJobName && gameObject is PlayerCharacter { ClassJob.GameData: { } } pc)
+        {
+            tagText = pc.ClassJob.GameData.Abbreviation.RawString;
+        }
+        
+        if (espOption.DrawDistance)
         {
             tagText += " ";
             if (clientState.LocalPlayer != null)
@@ -253,8 +346,7 @@ public class RadarLogic : IDisposable
 
 
         var tagTextSize = ImGui.CalcTextSize(tagText);
-        imDrawListPtr.AddText(ImGui.GetFont(),
-            ImGui.GetFontSize(),
+        imDrawListPtr.AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
             objectOptionColor,
             tagText);
@@ -362,12 +454,12 @@ public class RadarLogic : IDisposable
     }
 
 
-
     #region CLEANUP REGION
-    
+
     public void Dispose()
     {
         pluginInterface.UiBuilder.Draw -= OnTick;
+        this.pluginInterface.UiBuilder.BuildFonts -= BuildFont;
         PluginLog.Information("Radar Unloaded");
     }
 

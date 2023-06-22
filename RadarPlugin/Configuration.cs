@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dalamud.Logging;
+using ImGuiNET;
 using Newtonsoft.Json;
 using RadarPlugin.Enums;
 
@@ -13,6 +14,13 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class FontSettings
+    {
+        public bool UseCustomFont = false;
+        public bool UseAxisFont = false;
+        public float FontSize = ImGui.GetFontSize();
+    }
+
     public class LocalMobsUISettings
     {
         public bool Duplicates = false;
@@ -79,12 +87,19 @@ public class Configuration
         }
 
         public bool Enabled = true;
+        /*
+        public bool ShowDot = true;
+        public bool ShowHp = false;
+        public bool ReplaceDotWithHP = false;
+        public bool ShowName = true;*/
+        
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public uint ColorU = 0xffffffff;
         public bool ShowFC = false; // Unused
         public bool DrawDistance = false;
         public bool DotSizeOverride = false;
         public float DotSize = UtilInfo.DefaultDotSize;
+        public bool ReplaceWithJobName = false;
     }
 
     public class Config : IPluginConfiguration
@@ -143,7 +158,8 @@ public class Configuration
         public bool SeparateYourPlayer = false;
         public bool SeparateParty = false;
         public bool SeparateFriends = false;
-        public float FontScale = 1.0f;
+        public FontSettings FontSettings { get; set; } = new();
+        public float EspPadding = UtilInfo.DefaultEspPadding;
     }
 
     public Config cfg;
@@ -185,26 +201,7 @@ public class Configuration
     {
         this.pluginInterface = pluginInterface;
         cfg = this.pluginInterface.GetPluginConfig() as Config ?? new Config();
-
-        // Migrate version 0 to 1
-        if (cfg.Version == 0)
-        {
-            cfg.Version = 1;
-            cfg.NpcOption.Enabled = cfg.ShowEnemies;
-            cfg.PlayerOption.Enabled = cfg.ShowPlayers;
-            cfg.TreasureOption.Enabled = cfg.ShowLoot;
-            cfg.CompanionOption.Enabled = cfg.ShowCompanion;
-            cfg.AreaOption.Enabled = cfg.ShowAreaObjects;
-            cfg.AetheryteOption.Enabled = cfg.ShowAetherytes;
-            cfg.EventNpcOption.Enabled = cfg.ShowEventNpc;
-            cfg.EventObjOption.Enabled = cfg.ShowEvents;
-            cfg.GatheringPointOption.Enabled = cfg.ShowGatheringPoint;
-            cfg.MountOption.Enabled = cfg.ShowMountType;
-            cfg.RetainerOption.Enabled = cfg.ShowRetainer;
-            cfg.HousingOption.Enabled = cfg.ShowHousing;
-            cfg.CutsceneOption.Enabled = cfg.ShowCutscene;
-            cfg.CardStandOption.Enabled = cfg.ShowCardStand;
-        }
+        MigrateCfg(ref cfg);
 
         var configDirectory = this.pluginInterface.ConfigDirectory;
         if (!configDirectory.Exists)
@@ -215,6 +212,29 @@ public class Configuration
         UpdateConfigs();
     }
 
+    private void MigrateCfg(ref Config oldConfig)
+    {
+        // Migrate version 0 to 1
+        if (oldConfig.Version == 0)
+        {
+            oldConfig.Version = 1;
+            oldConfig.NpcOption.Enabled = oldConfig.ShowEnemies;
+            oldConfig.PlayerOption.Enabled = oldConfig.ShowPlayers;
+            oldConfig.TreasureOption.Enabled = oldConfig.ShowLoot;
+            oldConfig.CompanionOption.Enabled = oldConfig.ShowCompanion;
+            oldConfig.AreaOption.Enabled = oldConfig.ShowAreaObjects;
+            oldConfig.AetheryteOption.Enabled = oldConfig.ShowAetherytes;
+            oldConfig.EventNpcOption.Enabled = oldConfig.ShowEventNpc;
+            oldConfig.EventObjOption.Enabled = oldConfig.ShowEvents;
+            oldConfig.GatheringPointOption.Enabled = oldConfig.ShowGatheringPoint;
+            oldConfig.MountOption.Enabled = oldConfig.ShowMountType;
+            oldConfig.RetainerOption.Enabled = oldConfig.ShowRetainer;
+            oldConfig.HousingOption.Enabled = oldConfig.ShowHousing;
+            oldConfig.CutsceneOption.Enabled = oldConfig.ShowCutscene;
+            oldConfig.CardStandOption.Enabled = oldConfig.ShowCardStand;
+        }
+    }
+    
     public void SaveCurrentConfig()
     {
         PluginLog.Debug($"Saving config {cfg.ConfigName}");
@@ -231,6 +251,7 @@ public class Configuration
         if (tempConfig != null)
         {
             this.cfg = tempConfig;
+            MigrateCfg(ref cfg);
             Save();
             return true;
         }

@@ -9,7 +9,6 @@ public class TypeConfigurator
 {
     private Configuration configInterface;
     private readonly DalamudPluginInterface dalamudPluginInterface;
-    private readonly LocalMobsUi localMobsUi;
     private bool configuratorWindowVisible = false;
     private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
@@ -101,8 +100,13 @@ public class TypeConfigurator
         {
             ImGui.Text("");
         }
-
         ImGui.NextColumn();
+
+        if (mobType == MobType.Player)
+        {
+            shouldSave |= ImGui.Checkbox($"Replace Name With Job##{id}-name-job-replacement", ref option.ReplaceWithJobName);
+        }
+        
         //todo Implement this in helpers
         ImGui.Columns(1);
         if (shouldSave) configInterface.Save();
