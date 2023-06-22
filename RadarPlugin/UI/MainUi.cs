@@ -195,7 +195,7 @@ public class MainUi : IDisposable
         
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "Thank you for your support!");
+            "Thank you for your support! New font options for 6.41!");
         ImGui.Separator();
 
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
