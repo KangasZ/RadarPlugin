@@ -218,8 +218,10 @@ public class MainUi : IDisposable
         var shouldSave = false;
 
         shouldSave |= ImGui.Checkbox("Use Custom Font##custom-font-selector-default", ref configInterface.cfg.FontSettings.UseCustomFont);
-        
+        UiHelpers.LabeledHelpMarker("", "Use a custom font size and potentially type instead of the default ImGui font.\nThis may lag your game slightly when you enable it the first time.");
+
         shouldSave |= ImGui.Checkbox("Use Axis Font##axis-font-selector-default", ref configInterface.cfg.FontSettings.UseAxisFont);
+        UiHelpers.LabeledHelpMarker("", "Uses the axis font instead of default dalamud.\nThis is what most of the game is rendered with.");
 
         
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontSettings.FontSize, "Font Size", "font-scale-default-window", 7f, 36f, ImGui.GetFontSize(), "%.0fpx");
@@ -288,7 +290,7 @@ public class MainUi : IDisposable
     {
         var shouldSave = false;
         UiHelpers.DrawSeperator("Players", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players", mobType: MobType.Character);
+        DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players", mobType: MobType.Player);
 
         // Custom YOUR PLAYER that I don't want to deal with yet.\
         ImGui.Separator();
@@ -301,26 +303,26 @@ public class MainUi : IDisposable
         shouldSave |= ImGui.Checkbox($"Separate Your Player##player-settings", ref configInterface.cfg.SeparateYourPlayer);
         if (configInterface.cfg.SeparateYourPlayer)
         {
-            DrawSettingsOverview(configInterface.cfg.YourPlayerOption, "Your Player", mobType: MobType.Character);
+            DrawSettingsOverview(configInterface.cfg.YourPlayerOption, "Your Player", mobType: MobType.Player);
         }
 
         // Todo: Make the radar path for this
         shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
         if (configInterface.cfg.SeparateParty)
         {
-            DrawSettingsOverview(configInterface.cfg.PartyOption, "Party", mobType: MobType.Character);
+            DrawSettingsOverview(configInterface.cfg.PartyOption, "Party", mobType: MobType.Player);
         }
 
         shouldSave |= ImGui.Checkbox($"Separate Friends##player-settings", ref configInterface.cfg.SeparateFriends);
         if (configInterface.cfg.SeparateFriends)
         {
-            DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Character);
+            DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Player);
         }
 
         shouldSave |= ImGui.Checkbox($"Separate Alliance##player-settings", ref configInterface.cfg.SeparateAlliance);
         if (configInterface.cfg.SeparateAlliance)
         {
-            DrawSettingsOverview(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Character);
+            DrawSettingsOverview(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Player);
         }
 
         if (shouldSave) configInterface.Save();

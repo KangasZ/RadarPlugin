@@ -176,8 +176,7 @@ public class RadarLogic : IDisposable
             var espOption = radarHelpers.GetParams(areaObject);
             if (!espOption.Enabled && !configInterface.cfg.DebugMode) continue;
             var color = radarHelpers.GetColorOverride(areaObject);
-            var text = radarHelpers.GetText(areaObject);
-            DrawEsp(drawListPtr, gameObj, color, text, espOption);
+            DrawEsp(drawListPtr, gameObj, color, espOption);
         }
 
         ImGui.End();
@@ -193,7 +192,7 @@ public class RadarLogic : IDisposable
                clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
     }
 
-    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint? overrideColor, string name,
+    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint? overrideColor,
         Configuration.ESPOption espOption)
     {
         var color = overrideColor ?? espOption.ColorU;
@@ -207,11 +206,11 @@ public class RadarLogic : IDisposable
                     DrawDot(drawListPtr, onScreenPosition, dotSize, color);
                     break;
                 case DisplayTypes.NameOnly:
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     break;
                 case DisplayTypes.DotAndName:
                     DrawDot(drawListPtr, onScreenPosition, dotSize, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     break;
                 case DisplayTypes.HealthBarOnly:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
@@ -222,11 +221,11 @@ public class RadarLogic : IDisposable
                     break;
                 case DisplayTypes.HealthBarAndName:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     break;
                 case DisplayTypes.HealthBarAndValueAndName:
                     DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
                     break;
                 case DisplayTypes.HealthValueOnly:
@@ -234,7 +233,7 @@ public class RadarLogic : IDisposable
                     break;
                 case DisplayTypes.HealthValueAndName:
                     DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, name, color, gameObject, espOption.DrawDistance);
+                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -279,8 +278,39 @@ public class RadarLogic : IDisposable
                 }
             }
         }
+
+        if (gameObject is PlayerCharacter pc)
+        {
+            
+        }
     }
 
+    //todo lmao
+    private void DrawHp(ImDrawListPtr imDrawListPtr, Vector2 position, uint objectOptionColor,
+        GameObject gameObject, Configuration.ESPOption espOption)
+    {
+        var tagText = radarHelpers.GetText(gameObject);
+        if (espOption.ReplaceWithJobName && gameObject is PlayerCharacter { ClassJob.GameData: { } } pc)
+        {
+            tagText = pc.ClassJob.GameData.Abbreviation.RawString;
+        }
+        
+        if (espOption.DrawDistance)
+        {
+            tagText += " ";
+            if (clientState.LocalPlayer != null)
+                tagText += gameObject.Position.Distance2D(clientState.LocalPlayer.Position).ToString("0.0");
+            tagText += "m";
+        }
+
+
+        var tagTextSize = ImGui.CalcTextSize(tagText);
+        imDrawListPtr.AddText(
+            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
+            objectOptionColor,
+            tagText);
+    }
+    
     private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius,
         uint color)
     {
@@ -311,10 +341,16 @@ public class RadarLogic : IDisposable
             healthText);
     }
 
-    private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, string tagText, uint objectOptionColor,
-        GameObject gameObject, bool drawDistance)
+    private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, uint objectOptionColor,
+        GameObject gameObject, Configuration.ESPOption espOption)
     {
-        if (drawDistance)
+        var tagText = radarHelpers.GetText(gameObject);
+        if (espOption.ReplaceWithJobName && gameObject is PlayerCharacter { ClassJob.GameData: { } } pc)
+        {
+            tagText = pc.ClassJob.GameData.Abbreviation.RawString;
+        }
+        
+        if (espOption.DrawDistance)
         {
             tagText += " ";
             if (clientState.LocalPlayer != null)
@@ -324,8 +360,7 @@ public class RadarLogic : IDisposable
 
 
         var tagTextSize = ImGui.CalcTextSize(tagText);
-        imDrawListPtr.AddText(ImGui.GetFont(),
-            ImGui.GetFontSize(),
+        imDrawListPtr.AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
             objectOptionColor,
             tagText);

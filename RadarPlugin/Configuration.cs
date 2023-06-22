@@ -93,6 +93,7 @@ public class Configuration
         public bool DrawDistance = false;
         public bool DotSizeOverride = false;
         public float DotSize = UtilInfo.DefaultDotSize;
+        public bool ReplaceWithJobName = false;
     }
 
     public class Config : IPluginConfiguration

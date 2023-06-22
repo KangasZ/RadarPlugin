@@ -101,8 +101,13 @@ public class TypeConfigurator
         {
             ImGui.Text("");
         }
-
         ImGui.NextColumn();
+
+        if (mobType == MobType.Player)
+        {
+            shouldSave |= ImGui.Checkbox($"Replace Name With Job##{id}-name-job-replacement", ref option.ReplaceWithJobName);
+        }
+        
         //todo Implement this in helpers
         ImGui.Columns(1);
         if (shouldSave) configInterface.Save();

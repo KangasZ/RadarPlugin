@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Logging;
@@ -38,6 +40,7 @@ public static class UiHelpers
             shouldSave = true;
         }
         ImGui.PopFont();
+        UiHelpers.HoverTooltip($"Default: {defaultFloatValue.ToString(CultureInfo.InvariantCulture)}");
 
         return shouldSave;
     }
@@ -45,6 +48,10 @@ public static class UiHelpers
     public static bool DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, ref DisplayTypes currVal)
     {
         var val = (int)currVal;
+        if (mobType == MobType.Player)
+        {
+            mobType = MobType.Character;
+        }
         switch (mobType)
         {
             case MobType.Object:
