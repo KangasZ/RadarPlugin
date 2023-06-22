@@ -190,6 +190,9 @@ public class MainUi : IDisposable
         
         shouldSave |= DrawFontOptions();
 
+        //shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.EspPadding, "Esp Padding", "esp-padding-default-window", 0f, 25f, UtilInfo.DefaultEspPadding, "%.1fpx");
+
+        
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
             "Some big changes to plugin internals for 6.4.\nIf stuff is not working please report it!\n");

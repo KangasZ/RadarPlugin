@@ -60,9 +60,9 @@ public static class UiHelpers
                     ref val,
                     new string[]
                     {
-                        "Dot Only",
-                        "Name Only",
-                        "Dot and Name",
+                        "Dot",
+                        "Name",
+                        "Dot + Name",
                     }, 3, 3);
                 ImGui.PopItemWidth();
 
@@ -81,15 +81,15 @@ public static class UiHelpers
                     ref val,
                     new string[]
                     {
-                        "Dot Only",
-                        "Name Only",
-                        "Dot and Name",
-                        "Health Bar Only",
-                        "Health Bar And Value",
-                        "Health Bar And Name",
-                        "Health Bar, Value, And Name",
-                        "Health Value Only",
-                        "Health Value and Name"
+                        "Dot",
+                        "Name",
+                        "Dot + Name",
+                        "Health Bar",
+                        "Health Bar + Health Value",
+                        "Name + Health Bar",
+                        "Name + Health Bar + Health Value",
+                        "Health Value",
+                        "Name + Health Value"
                     }, 9, 9);
                 ImGui.PopItemWidth();
                 if (lb2)

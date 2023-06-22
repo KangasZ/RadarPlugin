@@ -278,39 +278,28 @@ public class RadarLogic : IDisposable
                 }
             }
         }
-
+        /*
         if (gameObject is PlayerCharacter pc)
         {
-            
-        }
+        // Todo: Implement this!
+            this.DrawHp(drawListPtr, onScreenPosition, color, (BattleChara) pc);
+        }*/
     }
 
     //todo lmao
     private void DrawHp(ImDrawListPtr imDrawListPtr, Vector2 position, uint objectOptionColor,
-        GameObject gameObject, Configuration.ESPOption espOption)
+        BattleChara gameObject)
     {
-        var tagText = radarHelpers.GetText(gameObject);
-        if (espOption.ReplaceWithJobName && gameObject is PlayerCharacter { ClassJob.GameData: { } } pc)
-        {
-            tagText = pc.ClassJob.GameData.Abbreviation.RawString;
-        }
-        
-        if (espOption.DrawDistance)
-        {
-            tagText += " ";
-            if (clientState.LocalPlayer != null)
-                tagText += gameObject.Position.Distance2D(clientState.LocalPlayer.Position).ToString("0.0");
-            tagText += "m";
-        }
-
+        var tagText = $"{gameObject.CurrentHp}";
 
         var tagTextSize = ImGui.CalcTextSize(tagText);
         imDrawListPtr.AddText(
-            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
+            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y + configInterface.cfg.EspPadding),
             objectOptionColor,
             tagText);
     }
-    
+
+
     private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius,
         uint color)
     {
