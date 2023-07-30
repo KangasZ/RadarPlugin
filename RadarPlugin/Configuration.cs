@@ -92,6 +92,7 @@ public class Configuration
         public bool ShowHp = false;
         public bool ReplaceDotWithHP = false;
         public bool ShowName = true;*/
+        public bool ShowMp = false;
         
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public uint ColorU = 0xffffffff;

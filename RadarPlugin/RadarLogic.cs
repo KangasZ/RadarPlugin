@@ -275,27 +275,24 @@ public class RadarLogic : IDisposable
                 }
             }
         }
-        /*
-        if (gameObject is PlayerCharacter pc)
+        
+        if (gameObject is PlayerCharacter pc && espOption.ShowMp)
         {
-        // Todo: Implement this!
-            this.DrawHp(drawListPtr, onScreenPosition, color, (BattleChara) pc);
-        }*/
+            DrawMp(drawListPtr, onScreenPosition, pc, color);
+        }
     }
 
     //todo lmao
-    private void DrawHp(ImDrawListPtr imDrawListPtr, Vector2 position, uint objectOptionColor,
-        BattleChara gameObject)
+    private void DrawMp(ImDrawListPtr imDrawListPtr, Vector2 position, PlayerCharacter gameObject,
+        uint playerOptColor)
     {
-        var tagText = $"{gameObject.CurrentHp}";
-
-        var tagTextSize = ImGui.CalcTextSize(tagText);
+        var mpText = gameObject.CurrentMp.ToString();
+        var mptextSize = ImGui.CalcTextSize(mpText);
         imDrawListPtr.AddText(
-            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y + configInterface.cfg.EspPadding),
-            objectOptionColor,
-            tagText);
+            new Vector2((position.X - mptextSize.X / 2.0f), (position.Y + mptextSize.Y * 1.5f)),
+            playerOptColor,
+            mpText);
     }
-
 
     private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius,
         uint color)
@@ -319,7 +316,8 @@ public class RadarLogic : IDisposable
         uint playerOptColor)
     {
         if (gameObject is not BattleChara npc) return;
-        var healthText = ((int)(((double)npc.CurrentHp / npc.MaxHp) * 100)).ToString();
+        var health = ((uint)(((double)npc.CurrentHp / npc.MaxHp) * 100));
+        var healthText = health.ToString();
         var healthTextSize = ImGui.CalcTextSize(healthText);
         imDrawListPtr.AddText(
             new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),

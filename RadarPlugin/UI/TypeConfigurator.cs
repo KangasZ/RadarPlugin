@@ -76,21 +76,29 @@ public class TypeConfigurator
     {
         bool shouldSave = false;
         UiHelpers.DrawSeperator($"{id} Options", UtilInfo.Red);
+        // Column 1
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
 
         shouldSave |= ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref option.Enabled);
 
         shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType, ref option.DisplayType);
 
+        shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
+        
+        if (mobType == MobType.Player)
+        {
+            shouldSave |= ImGui.Checkbox($"Replace Name With Job##{id}-name-job-replacement", ref option.ReplaceWithJobName);
+            
+            shouldSave |= ImGui.Checkbox($"Show MP##{id}-mp-value-shown", ref option.ShowMp);
+        }
+        
+        
+        // Column 2
         ImGui.NextColumn();
         shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
 
-
         shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
-
-        ImGui.NextColumn();
-        shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
-        ImGui.NextColumn();
+        
         if (option.DotSizeOverride)
         {
             shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window", UtilInfo.MinDotSize, UtilInfo.MaxDotSize,
@@ -100,14 +108,8 @@ public class TypeConfigurator
         {
             ImGui.Text("");
         }
-        ImGui.NextColumn();
-
-        if (mobType == MobType.Player)
-        {
-            shouldSave |= ImGui.Checkbox($"Replace Name With Job##{id}-name-job-replacement", ref option.ReplaceWithJobName);
-        }
         
-        //todo Implement this in helpers
+        //Reset Column
         ImGui.Columns(1);
         if (shouldSave) configInterface.Save();
     }
