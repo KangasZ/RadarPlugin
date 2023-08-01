@@ -56,8 +56,8 @@ public static class UtilInfo
         6388, // Opened traps in potd
         9823, // Owain
         9822, // munderg
-        9841, //owain
-        9824, //owain
+        9841, // owain
+        9824, // owain
         9768, // Av? 
     };
 

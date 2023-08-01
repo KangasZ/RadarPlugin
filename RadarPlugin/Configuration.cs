@@ -194,7 +194,7 @@ public class Configuration
         DrawDistance = false
     };
 
-    [NonSerialized] public string[] configs;
+    [NonSerialized] public string[] configs = new[]{""};
 
     [NonSerialized] public int selectedConfig = 0;
 
