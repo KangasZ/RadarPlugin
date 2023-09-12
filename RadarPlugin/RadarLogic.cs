@@ -128,35 +128,38 @@ public class RadarLogic : IDisposable
 
     private void DrawRadar()
     {
-        ImGui.Begin("RadarPluginOverlay",
-            ImGuiWindowFlags.NoMove |
-            ImGuiWindowFlags.NoInputs |
-            ImGuiWindowFlags.NoScrollbar |
-            ImGuiWindowFlags.NoMouseInputs |
-            ImGuiWindowFlags.NoScrollWithMouse |
-            ImGuiWindowFlags.NoBackground |
-            ImGuiWindowFlags.NoTitleBar |
-            ImGuiWindowFlags.NoBringToFrontOnFocus |
-            ImGuiWindowFlags.NoResize |
-            ImGuiWindowFlags.NoNav |
-            ImGuiWindowFlags.NoDecoration |
-            ImGuiWindowFlags.NoDocking |
-            ImGuiWindowFlags.NoFocusOnAppearing);
-        var mainViewPort = ImGui.GetMainViewport();
-        var font = ImGui.GetFont();
-        var fontSize = ImGui.GetFontSize();
-        ImGui.SetWindowPos(mainViewPort.Pos);
-        ImGui.SetWindowSize(mainViewPort.Size);
+        // Setup Drawlist
+        var bgDl = configInterface.cfg.UseBackgroundDrawList;
+        
         ImDrawListPtr drawListPtr;
-        if (configInterface.cfg.UseBackgroundDrawList)
+        if (bgDl)
         {
             drawListPtr = ImGui.GetBackgroundDrawList();
         }
         else
         {
+            ImGui.Begin("RadarPluginOverlay",
+                ImGuiWindowFlags.NoMove |
+                ImGuiWindowFlags.NoInputs |
+                ImGuiWindowFlags.NoScrollbar |
+                ImGuiWindowFlags.NoMouseInputs |
+                ImGuiWindowFlags.NoScrollWithMouse |
+                ImGuiWindowFlags.NoBackground |
+                ImGuiWindowFlags.NoTitleBar |
+                ImGuiWindowFlags.NoBringToFrontOnFocus |
+                ImGuiWindowFlags.NoResize |
+                ImGuiWindowFlags.NoNav |
+                ImGuiWindowFlags.NoDecoration |
+                ImGuiWindowFlags.NoDocking |
+                ImGuiWindowFlags.NoFocusOnAppearing);
+            var mainViewPort = ImGui.GetMainViewport();
+        
+            ImGui.SetWindowPos(mainViewPort.Pos);
+            ImGui.SetWindowSize(mainViewPort.Size);
             drawListPtr = ImGui.GetWindowDrawList();
         }
 
+        // Figure out object table
         IEnumerable<GameObject> objectTableRef;
         if (configInterface.cfg.DebugMode)
         {
@@ -169,14 +172,16 @@ public class RadarLogic : IDisposable
 
         foreach (var areaObject in objectTableRef)
         {
-            var gameObj = areaObject;
             var espOption = radarHelpers.GetParams(areaObject);
             if (!espOption.Enabled && !configInterface.cfg.DebugMode) continue;
             var color = radarHelpers.GetColorOverride(areaObject);
-            DrawEsp(drawListPtr, gameObj, color, espOption);
+            DrawEsp(drawListPtr, areaObject, color, espOption);
         }
 
-        ImGui.End();
+        if (!bgDl)
+        {
+            ImGui.End();
+        }
     }
 
     /**
@@ -248,37 +253,40 @@ public class RadarLogic : IDisposable
                 configInterface.cfg.OffScreenObjectsOptions.Thickness);
         }
 
-        if (gameObject is BattleNpc npc2)
+        switch (gameObject)
         {
-            if (configInterface.cfg.HitboxOptions.HitboxEnabled)
+            case BattleNpc npc2:
             {
-                DrawHitbox(drawListPtr, gameObject.Position, gameObject.HitboxRadius,
-                    configInterface.cfg.HitboxOptions.HitboxColor);
-            }
+                if (configInterface.cfg.HitboxOptions.HitboxEnabled)
+                {
+                    DrawHitbox(drawListPtr, gameObject.Position, gameObject.HitboxRadius,
+                        configInterface.cfg.HitboxOptions.HitboxColor);
+                }
 
-            if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
-            {
-                if (!configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat &&
-                    (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
-                if (npc2.BattleNpcKind != BattleNpcSubKind.Enemy) return;
-                if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
+                if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
                 {
-                    DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
-                        gameObject.Rotation,
-                        uint.MaxValue);
+                    if (!configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat &&
+                        (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
+                    if (npc2.BattleNpcKind != BattleNpcSubKind.Enemy) return;
+                    if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
+                    {
+                        DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
+                            gameObject.Rotation,
+                            uint.MaxValue);
+                    }
+                    else
+                    {
+                        DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius,
+                            gameObject.Rotation,
+                            uint.MaxValue);
+                    }
                 }
-                else
-                {
-                    DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius,
-                        gameObject.Rotation,
-                        uint.MaxValue);
-                }
+
+                break;
             }
-        }
-        
-        if (gameObject is PlayerCharacter pc && espOption.ShowMp)
-        {
-            DrawMp(drawListPtr, onScreenPosition, pc, color);
+            case PlayerCharacter pc when espOption.ShowMp:
+                DrawMp(drawListPtr, onScreenPosition, pc, color);
+                break;
         }
     }
 

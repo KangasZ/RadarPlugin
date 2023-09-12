@@ -30,7 +30,7 @@ public static class UtilInfo
     {
         { 5832, 16f } //mimic 2
     };
-    
+
     public static HashSet<ushort> DeepDungeonMapIds = new()
     {
         561, 562, 563, 564, 565, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603, 604, 605, // POTD
@@ -56,8 +56,8 @@ public static class UtilInfo
         6388, // Opened traps in potd
         9823, // Owain
         9822, // munderg
-        9841, //owain
-        9824, //owain
+        9841, // owain
+        9824, // owain
         9768, // Av? 
     };
 
@@ -162,6 +162,8 @@ public static class UtilInfo
         { 15997, DeepDungeonMobTypes.Mimic },
         { 15998, DeepDungeonMobTypes.Mimic },
         { 15999, DeepDungeonMobTypes.Mimic },
+        { 16000, DeepDungeonMobTypes.Mimic },
+        { 16001, DeepDungeonMobTypes.Mimic },
         { 16002, DeepDungeonMobTypes.Mimic },
         { 16003, DeepDungeonMobTypes.Mimic },
         { 16004, DeepDungeonMobTypes.Mimic },
@@ -244,7 +246,7 @@ public static class UtilInfo
         //Easy Mobs
         { 5041, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
         { 7610, DeepDungeonMobTypes.EasyMobs }, // Korrigan
-        
+
         // Orthos Korrigans
         { 16006, DeepDungeonMobTypes.EasyMobs },
         { 16007, DeepDungeonMobTypes.EasyMobs },
@@ -331,7 +333,7 @@ public static class UtilInfo
         { 15929, DeepDungeonMobTypes.SpecialUndead },
         { 15930, DeepDungeonMobTypes.SpecialUndead },
         { 15931, DeepDungeonMobTypes.SpecialUndead },
-        
+
         // BA Objects
         { 2009728, DeepDungeonMobTypes.Traps }, // Eureka Trap,
         { 2009729, DeepDungeonMobTypes.Passage }, // Eureka Portal,

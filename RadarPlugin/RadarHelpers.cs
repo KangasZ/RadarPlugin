@@ -30,15 +30,12 @@ public class RadarHelpers
     public unsafe bool ShouldRender(GameObject obj)
     {
         // Objest valid check
-        if (!obj.IsValid())
-        {
-            return false;
-        }
+        if (!obj.IsValid()) return false;
+        //if (obj.DataId == GameObject.InvalidGameObjectId) return false;
         
         // Object within ignore lists
         if (UtilInfo.DataIdIgnoreList.Contains(obj.DataId) || configInterface.cfg.DataIdIgnoreList.Contains(obj.DataId)) return false;
         
-
         // Object visible & config check
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
         if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
@@ -46,22 +43,15 @@ public class RadarHelpers
             return false;
         }
         
-
-
+        
         if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
         {
             // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
-            if (!UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
-            {
-                //if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-                if (obj.ObjectKind == ObjectKind.BattleNpc && obj is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
-                {
-                    if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
-                    if (mob.IsDead) return false;
-                }
-            }
- 
-            return true;
+            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)) return true;
+            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob) return true;
+            if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
+            return !mob.IsDead;
         }
         
 
@@ -69,7 +59,7 @@ public class RadarHelpers
         {
             //if (!clientstructobj->GetIsTargetable()) continue;
             //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-            //if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
             if (mobNpc.IsDead) return false;
         }
 
