@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState;
 using Dalamud.Interface;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using RadarPlugin.Enums;
 
@@ -16,13 +17,13 @@ public class MainUi : IDisposable
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible = false;
-    private readonly ClientState clientState;
+    private readonly IClientState clientState;
     private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
     private readonly TypeConfigurator typeConfigurator;
     
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi,
-        ClientState clientState, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator)
+        IClientState clientState, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator)
     {
         this.clientState = clientState;
         this.localMobsUi = localMobsUi;

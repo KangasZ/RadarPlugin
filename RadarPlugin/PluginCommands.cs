@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using Dalamud.Game.Command;
+using Dalamud.Plugin.Services;
 using RadarPlugin.UI;
 
 namespace RadarPlugin;
 
 public class PluginCommands : IDisposable
 {
-    private readonly CommandManager commandManager;
+    private readonly ICommandManager commandManager;
     private readonly MainUi mainUi;
     private readonly Configuration configInterface;
 
-    public PluginCommands(CommandManager commandManager, MainUi mainUi, Configuration configuration)
+    public PluginCommands(ICommandManager commandManager, MainUi mainUi, Configuration configuration)
     {
         this.mainUi = mainUi;
         this.commandManager = commandManager;

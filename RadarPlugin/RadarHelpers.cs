@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin;
@@ -12,13 +13,13 @@ namespace RadarPlugin;
 public class RadarHelpers
 {
     private readonly Configuration configInterface;
-    private readonly ClientState clientState;
-    private readonly Condition conditionInterface;
+    private readonly IClientState clientState;
+    private readonly ICondition conditionInterface;
 
     public RadarHelpers(
         Configuration configInterface,
-        ClientState clientState,
-        Condition condition
+        IClientState clientState,
+        ICondition condition
     )
     {
         this.clientState = clientState;

@@ -1,9 +1,5 @@
-﻿using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
-using Dalamud.Plugin;
+﻿using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using RadarPlugin.UI;
 
 namespace RadarPlugin;
@@ -23,11 +19,12 @@ public class RadarPlugin : IDalamudPlugin
 
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
-        CommandManager commandManager,
-        ObjectTable objectTable,
-        Condition condition,
-        ClientState clientState,
-        GameGui gameGui)
+        ICommandManager commandManager,
+        IObjectTable objectTable,
+        ICondition condition,
+        IClientState clientState,
+        IGameGui gameGui,
+        IPluginLog pluginLog)
     {
         Plugin = this;
         // Services and DI
@@ -42,7 +39,7 @@ public class RadarPlugin : IDalamudPlugin
         
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi, Configuration);
-        radarLogic = new RadarLogic(pluginInterface, Configuration, objectTable, condition, clientState, gameGui, radarHelpers);
+        radarLogic = new RadarLogic(pluginInterface, Configuration, objectTable, condition, clientState, gameGui, radarHelpers, pluginLog);
     }
 
     public void Dispose()

@@ -4,19 +4,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.Gui;
-using Dalamud.Interface;
 using Dalamud.Interface.GameFonts;
-using Dalamud.Interface.Raii;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using RadarPlugin.Enums;
 using RadarPlugin.UI;
@@ -30,18 +25,19 @@ public class RadarLogic : IDisposable
     private const float PI = 3.14159265359f;
     private readonly DalamudPluginInterface pluginInterface;
     private Configuration configInterface;
-    private readonly Condition conditionInterface;
-    private readonly ObjectTable objectTable;
-    private readonly ClientState clientState;
-    private readonly GameGui gameGui;
+    private readonly ICondition conditionInterface;
+    private readonly IObjectTable objectTable;
+    private readonly IClientState clientState;
+    private readonly IGameGui gameGui;
     private readonly RadarHelpers radarHelpers;
+    private readonly IPluginLog pluginLog;
 
     private GameFontHandle? gameFont;
     private ImFontPtr? dalamudFont;
     private bool fontBuilt = false;
 
-    public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, ObjectTable objectTable,
-        Condition condition, ClientState clientState, GameGui gameGui, RadarHelpers radarHelpers)
+    public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, IObjectTable objectTable,
+        ICondition condition, IClientState clientState, IGameGui gameGui, RadarHelpers radarHelpers, IPluginLog pluginLog)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -51,7 +47,7 @@ public class RadarLogic : IDisposable
         this.gameGui = gameGui;
         this.radarHelpers = radarHelpers;
         // Loads plugin
-        PluginLog.Debug("Radar Loaded");
+        pluginLog.Debug("Radar Loaded");
 
         this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += OnTick;

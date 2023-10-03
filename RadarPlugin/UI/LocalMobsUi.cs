@@ -6,6 +6,7 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace RadarPlugin.UI;
@@ -16,14 +17,14 @@ public class LocalMobsUi : IDisposable
     private bool currentMobsVisible = false;
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly Configuration configInterface;
-    private readonly ObjectTable objectTable;
+    private readonly IObjectTable objectTable;
     private readonly MobEditUi mobEditUi;
     private readonly RadarHelpers helpers;
 
     public LocalMobsUi(
         DalamudPluginInterface dalamudPluginInterface,
         Configuration configInterface,
-        ObjectTable objectTable,
+        IObjectTable objectTable,
         MobEditUi mobEditUi,
         RadarHelpers helpers)
     {
