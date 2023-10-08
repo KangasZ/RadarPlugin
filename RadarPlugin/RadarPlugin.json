@@ -3,5 +3,6 @@
   "Author": "KangasZ",
   "Description": "3D Radar to see everything through walls.",
   "RepoUrl": "https://github.com/KangasZ/RadarPlugin",
-  "Punchline": "See stuff through things!"
+  "Punchline": "See stuff through things!",
+  "Changelog": "Added Distance Cap Feature\nUpdated Config Tab\nUpdated Show Hitbox Feature"
 }
