@@ -22,6 +22,7 @@ public static class UtilInfo
     public const uint OpacityMax = 0xff000000;
     public const float DefaultDotSize = 2.2f;
     public const float DefaultEspPadding = 7f;
+    public const float DefaultMaxEspDistance = 300f;
 
 
     /**

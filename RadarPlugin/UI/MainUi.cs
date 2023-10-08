@@ -109,6 +109,12 @@ public class MainUi : IDisposable
         {
             ImGui.OpenPopup("DeleteConfigPopup");
         }
+        
+        if (ImGui.Button("New Config"))
+        {
+            this.configInterface.SaveNewDefaultConfig();
+        }
+        
         ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
         ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
         if (ImGui.BeginPopup("DeleteConfigPopup"))
@@ -186,6 +192,15 @@ public class MainUi : IDisposable
         UiHelpers.LabeledHelpMarker("", "This feature will use a background draw list from ImGui to render the 3d radar.\n" +
                                         "It will be under any other Dalamud plugin. This is the original behavior.\n" +
                                         "There should be practically no difference between this and normal operations");
+
+        shouldSave |= UiHelpers.DrawCheckbox("Distance Cap", ref configInterface.cfg.UseMaxDistance, "Max distance for the esp");
+
+        if (configInterface.cfg.UseMaxDistance)
+        {
+            ImGui.SameLine();
+            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.MaxDistance, "", "default-max-distance-size", 30f, 2000f,
+                UtilInfo.DefaultMaxEspDistance, "%.0fm");
+        }
 
         shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
         
@@ -389,23 +404,50 @@ public class MainUi : IDisposable
 
     private void ShowMiscSettings()
     {
+        var shouldSave = false;
         var id = "##miscsettings";
         ImGui.BeginChild($"{id}-child", new Vector2(0, 0));
+        
+        UiHelpers.DrawSeperator("Hitbox Options", UtilInfo.Red);
 
-        ImGui.Separator();
-        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
-        ImGui.Text("Hitbox Options");
-        ImGui.PopStyleColor();
-        ImGui.Separator();
-        var shouldSave = false;
         shouldSave |= ImGui.Checkbox($"Show Hitbox{id}-hitbox", ref configInterface.cfg.HitboxOptions.HitboxEnabled);
 
-        var hitboxColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.HitboxOptions.HitboxColor);
-        if (ImGui.ColorEdit4($"Color{id}-hitbox-color", ref hitboxColor, ImGuiColorEditFlags.NoInputs))
+        shouldSave |= ImGui.DragFloat($"Thickness{id}", ref configInterface.cfg.HitboxOptions.Thickness, 0.1f, 0.1f, 14f);
+
+        shouldSave |= ImGui.Checkbox($"Override Mob Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.OverrideMobColor);
+        
+        if (configInterface.cfg.HitboxOptions.OverrideMobColor)
         {
-            configInterface.cfg.HitboxOptions.HitboxColor = ImGui.ColorConvertFloat4ToU32(hitboxColor);
-            configInterface.Save();
+            var hitboxColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.HitboxOptions.HitboxColor);
+            if (ImGui.ColorEdit4($"Color{id}-hitbox-color", ref hitboxColor, ImGuiColorEditFlags.NoInputs))
+            {
+                configInterface.cfg.HitboxOptions.HitboxColor = ImGui.ColorConvertFloat4ToU32(hitboxColor);
+                configInterface.Save();
+            }
         }
+
+        shouldSave |= ImGui.Checkbox($"Draw Inside Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.DrawInsideCircle);
+
+        if (configInterface.cfg.HitboxOptions.DrawInsideCircle)
+        {
+            shouldSave |= ImGui.Checkbox("Use Different Inside Color", ref configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor);
+
+            if (!configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
+            {
+                var circleOpacity = (float)(configInterface.cfg.HitboxOptions.InsideCircleOpacity >> 24) / byte.MaxValue;
+                if (ImGui.DragFloat($"Inside Circle Opacity{id}", ref circleOpacity, 0.005f, 0, 1))
+                {
+                    configInterface.cfg.HitboxOptions.InsideCircleOpacity = ((uint)(circleOpacity * 255) << 24) | 0x00FFFFFF;
+                    configInterface.Save();
+                }
+            }
+
+            if (configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
+            {
+                shouldSave |= UiHelpers.Vector4ColorSelector($"Inside Circle Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.InsideCircleColor);
+            }
+        }
+        
 
         ImGui.Separator();
         ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);

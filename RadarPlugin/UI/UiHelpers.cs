@@ -123,6 +123,7 @@ public static class UiHelpers
         configColor = ImGui.ColorConvertFloat4ToU32(tempColor);
         return true;
     }
+
     public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText)
     {
         var retStatement = false;
@@ -132,10 +133,10 @@ public static class UiHelpers
             boxValue = tempVar;
             retStatement = true;
         }
-        if (ImGui.IsItemHovered())
+
+        if (tooltipText != null)
         {
-            ImGui.SetTooltip(
-                "Will show your player character if enabled. Inherits player settings.");
+            LabeledHelpMarker("", tooltipText);
         }
 
         return retStatement;

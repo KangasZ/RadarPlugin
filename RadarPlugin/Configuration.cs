@@ -31,7 +31,14 @@ public class Configuration
     public class HitboxOptions
     {
         public bool HitboxEnabled = false;
+        public bool OverrideMobColor = false;
         public uint HitboxColor = UtilInfo.Turquoise;
+        public float Thickness = 2.2f;
+
+        public bool DrawInsideCircle = false;
+        public uint InsideCircleOpacity = 0xffffffff;
+        public bool UseDifferentInsideCircleColor = false;
+        public uint InsideCircleColor = UtilInfo.Turquoise & 0x50ffffff;
     }
 
     public class OffScreenObjectsOptions
@@ -127,7 +134,7 @@ public class Configuration
         public bool ShowCutscene = false;
         public bool ShowNameless = false;
         public bool ShowOnlyVisible = true;
-        public bool ShowOffScreen = true;
+        public bool ShowOffScreen = false;
         public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
@@ -159,6 +166,8 @@ public class Configuration
         public bool SeparateYourPlayer = false;
         public bool SeparateParty = false;
         public bool SeparateFriends = false;
+        public bool UseMaxDistance = false;
+        public float MaxDistance = UtilInfo.DefaultMaxEspDistance;
         public FontSettings FontSettings { get; set; } = new();
         public float EspPadding = UtilInfo.DefaultEspPadding;
     }
@@ -189,7 +198,7 @@ public class Configuration
     {
         Enabled = true,
         ColorU = 0xffffffff,
-        DisplayType = DisplayTypes.HealthBarAndValueAndName,
+        DisplayType = DisplayTypes.HealthValueAndName,
         ShowFC = false,
         DrawDistance = false
     };
@@ -240,7 +249,6 @@ public class Configuration
     {
         PluginLog.Debug($"Saving config {cfg.ConfigName}");
         SavePluginConfig(cfg, cfg.ConfigName);
-        UpdateConfigs();
     }
     
     public bool LoadConfig(string configName)
@@ -266,18 +274,33 @@ public class Configuration
     }
     
     public void UpdateConfigs() {
-        configs = this.pluginInterface.ConfigDirectory.GetFiles().Select(x => x.Name).ToArray();
+        configs = this.pluginInterface.ConfigDirectory.GetFiles().Select(x => x.Name.Substring(0, x.Name.Length-5)).ToArray();
         if (selectedConfig >= configs.Length)
         {
             selectedConfig = 0;
         }
     }
 
+    public void SaveNewDefaultConfig()
+    {
+        var count = 1;
+        var newName = "new config";
+        while (configs.Any(x => x == newName))
+        {
+            newName = $"new config {count}";
+            count++;
+        }
+
+        var newConfig = new Config() { ConfigName = newName };
+
+        SavePluginConfig(newConfig, newConfig.ConfigName);
+    }
+    
     public void DeleteConfig(string configName)
     {
         PluginLog.Debug($"Deleting config {configName}");
-        var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName;
-        FileInfo configFile = new FileInfo(path);
+        var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
+        var configFile = new FileInfo(path);
         if (configFile.Exists)
         {
             configFile.Delete();
@@ -288,7 +311,7 @@ public class Configuration
     private Config? Load(string configName)
     {
 
-        var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName;
+        var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
         FileInfo configFile = new FileInfo(path);
         PluginLog.Debug(configFile.FullName);
         return !configFile.Exists ? null : DeserializeConfig(File.ReadAllText(configFile.FullName));
@@ -300,7 +323,9 @@ public class Configuration
             return;
         var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
         this.Save(currentConfig, path);
+        UpdateConfigs();
     }
+    
     internal void Save(Config config, string path) => 
         this.WriteAllTextSafe(path , this.SerializeConfig(config));
 
