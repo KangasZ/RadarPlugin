@@ -43,8 +43,9 @@ public class RadarHelpers
         {
             return false;
         }
-        
-        
+        // Distance check
+
+        // Eureka DD STQ
         if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
         {
             // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))

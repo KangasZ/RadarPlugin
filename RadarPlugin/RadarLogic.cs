@@ -46,8 +46,9 @@ public class RadarLogic : IDisposable
         this.conditionInterface = condition;
         this.gameGui = gameGui;
         this.radarHelpers = radarHelpers;
+        this.pluginLog = pluginLog;
         // Loads plugin
-        pluginLog.Debug("Radar Loaded");
+        this.pluginLog.Debug("Radar Loaded");
 
         this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += OnTick;
@@ -65,16 +66,16 @@ public class RadarLogic : IDisposable
             {
                 dalamudFont = ImGui.GetIO().Fonts.AddFontFromFileTTF(fontFile, configInterface.cfg.FontSettings.FontSize);
                 fontBuilt = true;
-                PluginLog.Debug("Custom dalamud font loaded sucesffully");
+                this.pluginLog.Debug("Custom dalamud font loaded sucesffully");
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, "Font failed to load!");
+                this.pluginLog.Error(ex, "Font failed to load!");
             }
         }
         else
         {
-            PluginLog.Error("Font does not exist! Please fix dev.");
+            this.pluginLog.Error("Font does not exist! Please fix dev.");
         }
     }
 
@@ -164,6 +165,10 @@ public class RadarLogic : IDisposable
         else
         {
             objectTableRef = objectTable.Where(obj => radarHelpers.ShouldRender(obj));
+            if (configInterface.cfg.UseMaxDistance && clientState.LocalPlayer != null)
+            {
+                objectTableRef = objectTableRef.Where(x => x.Position.Distance2D(clientState.LocalPlayer.Position) < configInterface.cfg.MaxDistance);
+            }
         }
 
         foreach (var areaObject in objectTableRef)
@@ -255,8 +260,33 @@ public class RadarLogic : IDisposable
             {
                 if (configInterface.cfg.HitboxOptions.HitboxEnabled)
                 {
+                    uint colorResolved;
+
+                    if (configInterface.cfg.HitboxOptions.OverrideMobColor)
+                    {
+                        colorResolved = configInterface.cfg.HitboxOptions.HitboxColor;
+                    }
+                    else
+                    {
+                        colorResolved = color;
+                    }
+                    //opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
                     DrawHitbox(drawListPtr, gameObject.Position, gameObject.HitboxRadius,
-                        configInterface.cfg.HitboxOptions.HitboxColor);
+                        colorResolved, configInterface.cfg.HitboxOptions.Thickness);
+
+                    if (configInterface.cfg.HitboxOptions.DrawInsideCircle)
+                    {
+                        uint insideColorResolved;
+                        if (configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
+                        {
+                            insideColorResolved = configInterface.cfg.HitboxOptions.InsideCircleColor;
+                        }
+                        else
+                        {
+                            insideColorResolved = colorResolved & configInterface.cfg.HitboxOptions.InsideCircleOpacity;
+                        }
+                        DrawConeAtCenterPointFromRotation(drawListPtr, gameObject.Position, gameObject.Rotation, MathF.PI * 2, gameObject.HitboxRadius, insideColorResolved, 100);
+                    }
                 }
 
                 if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
@@ -299,14 +329,8 @@ public class RadarLogic : IDisposable
     }
 
     private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius,
-        uint color)
+        uint color, float thickness)
     {
-        var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
-
-        var thickness = 2f;
-
-        //todo: handle CONE
-        //todo: shove opacity into color 
         DrawArcAtCenterPointFromRotations(drawListPtr, gameObjectPosition, 0, 2 * MathF.PI, gameObjectHitboxRadius,
             color, thickness, 400);
     }
