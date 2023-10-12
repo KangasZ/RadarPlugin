@@ -19,21 +19,21 @@ public static class UiHelpers
         return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, UtilInfo.MinDotSize, UtilInfo.MaxDotSize, UtilInfo.DefaultDotSize);
     }
 
-    public static bool DrawFloatWithResetSlider(ref float floatToModify, string tag, string id, float min, float max, float defaultFloatValue, string format = "%.2f")
+    public static bool DrawFloatWithResetSlider(ref float floatToModify, string textDiscription, string id, float min, float max, float defaultFloatValue, string format = "%.2f")
     {
         bool shouldSave = false;
-        if (!tag.IsNullOrWhitespace())
+        if (!textDiscription.IsNullOrWhitespace())
         {
-            ImGui.Text(tag);
+            ImGui.Text(textDiscription);
             ImGui.SameLine();
         }
         ImGui.PushItemWidth(150);
 
-        shouldSave |= ImGui.SliderFloat($"##float-slider-{id}-{tag}", ref floatToModify, min, max, format);
+        shouldSave |= ImGui.SliderFloat($"##float-slider-{id}-{textDiscription}", ref floatToModify, min, max, format);
         
         ImGui.SameLine();
         ImGui.PushFont(UiBuilder.IconFont);
-        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{tag}"))
+        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{textDiscription}"))
         {
             floatToModify = defaultFloatValue;
             shouldSave = true;

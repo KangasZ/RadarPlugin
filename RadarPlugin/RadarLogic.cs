@@ -53,7 +53,6 @@ public class RadarLogic : IDisposable
         this.clientState = clientState;
         this.pluginInterface.UiBuilder.Draw += OnTick;
         this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
-
     }
 
     private void BuildFont()
@@ -88,6 +87,7 @@ public class RadarLogic : IDisposable
         if (objectTable.Length == 0) return;
         if (CheckDraw()) return;
         DrawRadar();
+        radarHelpers.ResetDistance();
     }
 
     private ImFontPtr LoadFont()
@@ -105,17 +105,19 @@ public class RadarLogic : IDisposable
                         return this.gameFont.ImFont;
                     }
                 }
+
                 gameFont = pluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis, configInterface.cfg.FontSettings.FontSize));
                 return gameFont.ImFont;
             }
 
-            if (dalamudFont.HasValue && this.fontBuilt && dalamudFont.Value.IsLoaded() && Math.Abs(dalamudFont.Value.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
+            if (dalamudFont.HasValue && this.fontBuilt && dalamudFont.Value.IsLoaded() &&
+                Math.Abs(dalamudFont.Value.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
             {
                 return dalamudFont.Value;
             }
 
             pluginInterface.UiBuilder.RebuildFonts();
-            return this.fontBuilt ? dalamudFont.Value : ImGui.GetFont() ;
+            return this.fontBuilt ? dalamudFont.Value : ImGui.GetFont();
         }
 
         fontPtr = ImGui.GetFont();
@@ -127,7 +129,7 @@ public class RadarLogic : IDisposable
     {
         // Setup Drawlist
         var bgDl = configInterface.cfg.UseBackgroundDrawList;
-        
+
         ImDrawListPtr drawListPtr;
         if (bgDl)
         {
@@ -150,7 +152,7 @@ public class RadarLogic : IDisposable
                 ImGuiWindowFlags.NoDocking |
                 ImGuiWindowFlags.NoFocusOnAppearing);
             var mainViewPort = ImGui.GetMainViewport();
-        
+
             ImGui.SetWindowPos(mainViewPort.Pos);
             ImGui.SetWindowSize(mainViewPort.Size);
             drawListPtr = ImGui.GetWindowDrawList();
@@ -167,7 +169,7 @@ public class RadarLogic : IDisposable
             objectTableRef = objectTable.Where(obj => radarHelpers.ShouldRender(obj));
             if (configInterface.cfg.UseMaxDistance && clientState.LocalPlayer != null)
             {
-                objectTableRef = objectTableRef.Where(x => x.Position.Distance2D(clientState.LocalPlayer.Position) < configInterface.cfg.MaxDistance);
+                objectTableRef = objectTableRef.Where(x => radarHelpers.GetDistanceFromPlayer(x) < configInterface.cfg.MaxDistance);
             }
         }
 
@@ -270,6 +272,7 @@ public class RadarLogic : IDisposable
                     {
                         colorResolved = color;
                     }
+
                     //opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
                     DrawHitbox(drawListPtr, gameObject.Position, gameObject.HitboxRadius,
                         colorResolved, configInterface.cfg.HitboxOptions.Thickness);
@@ -285,27 +288,31 @@ public class RadarLogic : IDisposable
                         {
                             insideColorResolved = colorResolved & configInterface.cfg.HitboxOptions.InsideCircleOpacity;
                         }
-                        DrawConeAtCenterPointFromRotation(drawListPtr, gameObject.Position, gameObject.Rotation, MathF.PI * 2, gameObject.HitboxRadius, insideColorResolved, 100);
+
+                        DrawConeAtCenterPointFromRotation(drawListPtr, gameObject.Position, gameObject.Rotation, MathF.PI * 2, gameObject.HitboxRadius,
+                            insideColorResolved, 100);
                     }
                 }
 
                 if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
                 {
+                    // Aggro radius max distance check
+                    if (configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool && radarHelpers.GetDistanceFromPlayer(npc2) > configInterface.cfg.AggroRadiusOptions.MaxDistance)
+                    {
+                            return;
+                    }
                     if (!configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat &&
                         (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
                     if (npc2.BattleNpcKind != BattleNpcSubKind.Enemy) return;
+                    float aggroRadius = 10;
                     if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
                     {
-                        DrawAggroRadius(drawListPtr, gameObject.Position, range + gameObject.HitboxRadius,
-                            gameObject.Rotation,
-                            uint.MaxValue);
+                        aggroRadius = range;
                     }
-                    else
-                    {
-                        DrawAggroRadius(drawListPtr, gameObject.Position, 10 + gameObject.HitboxRadius,
-                            gameObject.Rotation,
-                            uint.MaxValue);
-                    }
+
+                    DrawAggroRadius(drawListPtr, gameObject.Position, aggroRadius + gameObject.HitboxRadius,
+                        gameObject.Rotation,
+                        uint.MaxValue);
                 }
 
                 break;
@@ -316,7 +323,7 @@ public class RadarLogic : IDisposable
         }
     }
 
-    //todo lmao
+    //todo better
     private void DrawMp(ImDrawListPtr imDrawListPtr, Vector2 position, PlayerCharacter gameObject,
         uint playerOptColor)
     {
@@ -361,13 +368,11 @@ public class RadarLogic : IDisposable
         {
             tagText = pc.ClassJob.GameData.Abbreviation.RawString;
         }
-        
+
         if (espOption.DrawDistance)
         {
-            tagText += " ";
             if (clientState.LocalPlayer != null)
-                tagText += gameObject.Position.Distance2D(clientState.LocalPlayer.Position).ToString("0.0");
-            tagText += "m";
+                tagText += radarHelpers.GetDistanceFromPlayer(gameObject).ToString(" 0.0m");
         }
 
 

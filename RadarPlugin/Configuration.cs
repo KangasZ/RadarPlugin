@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Newtonsoft.Json;
 using RadarPlugin.Enums;
@@ -68,6 +68,8 @@ public class Configuration
     {
         public bool ShowAggroCircle = false;
         public bool ShowAggroCircleInCombat = false;
+        public bool MaxDistanceCapBool = true;
+        public float MaxDistance = UtilInfo.DefaultMaxAggroRadiusDistance;
         public uint FrontColor = UtilInfo.Red;
         public uint RearColor = UtilInfo.Green;
         public uint RightSideColor = UtilInfo.Yellow;
@@ -119,6 +121,7 @@ public class Configuration
         public bool ShowBaDdObjects = true;
         public bool ShowLoot = false;
         public bool DebugMode = false;
+        public bool DebugText = false;
         public bool ShowPlayers = false;
         public bool ShowEnemies = true;
         public bool ShowEvents = false;
@@ -134,6 +137,7 @@ public class Configuration
         public bool ShowCutscene = false;
         public bool ShowNameless = false;
         public bool ShowOnlyVisible = true;
+        public bool OverrideShowInvisiblePlayerCharacters = true;
         public bool ShowOffScreen = false;
         public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
@@ -206,8 +210,9 @@ public class Configuration
     [NonSerialized] public string[] configs = new[]{""};
 
     [NonSerialized] public int selectedConfig = 0;
+    [NonSerialized] private readonly IPluginLog pluginLog;
 
-    public Configuration(DalamudPluginInterface pluginInterface)
+    public Configuration(DalamudPluginInterface pluginInterface, IPluginLog pluginLog)
     {
         this.pluginInterface = pluginInterface;
         cfg = this.pluginInterface.GetPluginConfig() as Config ?? new Config();
@@ -219,6 +224,7 @@ public class Configuration
             configDirectory.Create();
         }
 
+        this.pluginLog = pluginLog;
         UpdateConfigs();
     }
 
@@ -247,13 +253,13 @@ public class Configuration
     
     public void SaveCurrentConfig()
     {
-        PluginLog.Debug($"Saving config {cfg.ConfigName}");
+        pluginLog.Debug($"Saving config {cfg.ConfigName}");
         SavePluginConfig(cfg, cfg.ConfigName);
     }
     
     public bool LoadConfig(string configName)
     {
-        PluginLog.Debug($"Loading config {configName}");
+        pluginLog.Debug($"Loading config {configName}");
         SavePluginConfig(cfg, cfg.ConfigName);
         UpdateConfigs();
         var tempConfig = Load(configName);
@@ -264,7 +270,7 @@ public class Configuration
             Save();
             return true;
         }
-        PluginLog.Error("Config was NOT loaded!");
+        pluginLog.Error("Config was NOT loaded!");
         return false;
     }
     
@@ -298,7 +304,7 @@ public class Configuration
     
     public void DeleteConfig(string configName)
     {
-        PluginLog.Debug($"Deleting config {configName}");
+        pluginLog.Debug($"Deleting config {configName}");
         var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
         var configFile = new FileInfo(path);
         if (configFile.Exists)
@@ -313,7 +319,7 @@ public class Configuration
 
         var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
         FileInfo configFile = new FileInfo(path);
-        PluginLog.Debug(configFile.FullName);
+        pluginLog.Debug(configFile.FullName);
         return !configFile.Exists ? null : DeserializeConfig(File.ReadAllText(configFile.FullName));
     }
 
@@ -337,7 +343,7 @@ public class Configuration
     
     internal void WriteAllTextSafe(string path, string text)
     {
-        string str = path + ".tmp";
+        var str = path + ".tmp";
         if (File.Exists(str))
             File.Delete(str);
         File.WriteAllText(str, text);

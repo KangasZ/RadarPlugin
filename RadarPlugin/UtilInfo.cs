@@ -23,6 +23,7 @@ public static class UtilInfo
     public const float DefaultDotSize = 2.2f;
     public const float DefaultEspPadding = 7f;
     public const float DefaultMaxEspDistance = 300f;
+    public const float DefaultMaxAggroRadiusDistance = 50f;
 
 
     /**

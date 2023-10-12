@@ -24,11 +24,12 @@ public class RadarPlugin : IDalamudPlugin
         ICondition condition,
         IClientState clientState,
         IGameGui gameGui,
-        IPluginLog pluginLog)
+        IPluginLog pluginLog,
+        IChatGui chatGui)
     {
         Plugin = this;
         // Services and DI
-        Configuration = new Configuration(pluginInterface);
+        Configuration = new Configuration(pluginInterface, pluginLog);
         radarHelpers = new RadarHelpers(Configuration, clientState, condition);
 
         // UI
@@ -38,7 +39,7 @@ public class RadarPlugin : IDalamudPlugin
         mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers, typeConfiguratorUi);
         
         // Command manager
-        pluginCommands = new PluginCommands(commandManager, mainUi, Configuration);
+        pluginCommands = new PluginCommands(commandManager, mainUi, Configuration, chatGui);
         radarLogic = new RadarLogic(pluginInterface, Configuration, objectTable, condition, clientState, gameGui, radarHelpers, pluginLog);
     }
 
