@@ -369,12 +369,16 @@ public class RadarLogic : IDisposable
             tagText = pc.ClassJob.GameData.Abbreviation.RawString;
         }
 
+        if (espOption.AppendLevelToName && gameObject is BattleNpc battleNpc)
+        {
+            tagText += $" LV:{battleNpc.Level}";
+        }
+        
         if (espOption.DrawDistance)
         {
             if (clientState.LocalPlayer != null)
                 tagText += radarHelpers.GetDistanceFromPlayer(gameObject).ToString(" 0.0m");
         }
-
 
         var tagTextSize = ImGui.CalcTextSize(tagText);
         imDrawListPtr.AddText(

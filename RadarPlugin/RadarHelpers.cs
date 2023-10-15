@@ -42,7 +42,7 @@ public class RadarHelpers
 
         // Object visible & config check
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
-        if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0) || clientstructobj->GetIsTargetable())
+        if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))// || !clientstructobj->GetIsTargetable()))
         {
             // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still. 
             if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters) return false;
@@ -115,7 +115,7 @@ public class RadarHelpers
         {
             text = obj.Name.TextValue;
         }
-
+        
         return configInterface.cfg.DebugText ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
     }
 
@@ -208,11 +208,24 @@ public class RadarHelpers
             case ObjectKind.Companion:
                 return configInterface.cfg.CompanionOption;
             case ObjectKind.BattleNpc:
-                if (areaObject is BattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo })
+                if (areaObject is not BattleChara bnpc)
+                {
+                    return configInterface.cfg.NpcOption;
+                }
+                
+                if (bnpc is BattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo })
                 {
                     return configInterface.cfg.CompanionOption;
                 }
 
+                if (configInterface.cfg.LevelRendering.LevelRenderingEnabled)
+                {
+                    if (clientState.LocalPlayer!.Level - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow > bnpc.Level)
+                    {
+                        return configInterface.cfg.LevelRendering.LevelRenderEspOption;
+                    }
+                }
+                
                 return configInterface.cfg.NpcOption;
             case ObjectKind.EventNpc:
                 return configInterface.cfg.EventNpcOption;

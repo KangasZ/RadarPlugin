@@ -14,6 +14,13 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class LevelRendering
+    {
+        public bool LevelRenderingEnabled = false;
+        public int RelativeLevelsBelow = 20;
+        public ESPOption LevelRenderEspOption = new(mobOptDefault);
+    }
+    
     public class FontSettings
     {
         public bool UseCustomFont = false;
@@ -93,6 +100,7 @@ public class Configuration
             ColorU = espOption.ColorU;
             ShowFC = espOption.ShowFC;
             DrawDistance = espOption.DrawDistance;
+            AppendLevelToName = espOption.AppendLevelToName;
         }
 
         public bool Enabled = true;
@@ -110,6 +118,7 @@ public class Configuration
         public bool DotSizeOverride = false;
         public float DotSize = UtilInfo.DefaultDotSize;
         public bool ReplaceWithJobName = false;
+        public bool AppendLevelToName = false;
     }
 
     public class Config : IPluginConfiguration
@@ -142,7 +151,7 @@ public class Configuration
         public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
-        public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true };
+        public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true, AppendLevelToName = false };
         public ESPOption PlayerOption { get; set; } = new(playerOptDefault) { Enabled = true };
         public ESPOption YourPlayerOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Turquoise};
         public ESPOption FriendOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Orange};
@@ -173,6 +182,7 @@ public class Configuration
         public bool UseMaxDistance = false;
         public float MaxDistance = UtilInfo.DefaultMaxEspDistance;
         public FontSettings FontSettings { get; set; } = new();
+        public LevelRendering LevelRendering { get; set; } = new();
         public float EspPadding = UtilInfo.DefaultEspPadding;
     }
 
@@ -204,7 +214,7 @@ public class Configuration
         ColorU = 0xffffffff,
         DisplayType = DisplayTypes.HealthValueAndName,
         ShowFC = false,
-        DrawDistance = false
+        DrawDistance = false,
     };
 
     [NonSerialized] public string[] configs = new[]{""};

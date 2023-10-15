@@ -363,26 +363,26 @@ public class MainUi : IDisposable
     private void DrawDeepDungeonOverviewSettings()
     {
         UiHelpers.DrawSeperator($"Enemies Options", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", mobType: MobType.Character);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs", mobType: MobType.Character);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", mobType: MobType.Character);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", mobType: MobType.Character);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", mobType: MobType.Character);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
 
         UiHelpers.DrawSeperator($"Loot Options", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard", displayOrigination: DisplayOrigination.DeepDungeon);
 
 
         UiHelpers.DrawSeperator($"DD Specific Options", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", displayOrigination: DisplayOrigination.DeepDungeon);
     }
 
-    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "", MobType mobType = MobType.Object)
+    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "", MobType mobType = MobType.Object, DisplayOrigination displayOrigination = DisplayOrigination.OpenWorld)
     {
         bool shouldSave = false;
         shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType, ref espOption.DisplayType);
@@ -401,7 +401,7 @@ public class MainUi : IDisposable
         ImGui.SameLine(ImGui.GetWindowWidth() - 100);
         if (ImGui.Button($"More Options##button-for-type-configurator{tag}"))
         {
-            typeConfigurator.OpenUiWithType(ref espOption, tag, mobType);
+            typeConfigurator.OpenUiWithType(ref espOption, tag, mobType, displayOrigination);
         }
 
         if (shouldSave) configInterface.Save();
@@ -476,6 +476,18 @@ public class MainUi : IDisposable
         if (ImGui.CollapsingHeader("Font Settings"))
         {
             shouldSave |= DrawFontOptions();
+        }
+
+
+        if (ImGui.CollapsingHeader("Level-Based Rendering"))
+        {
+            var levelRenderingSettings = configInterface.cfg.LevelRendering;
+            shouldSave |= UiHelpers.DrawCheckbox("Enabled", ref levelRenderingSettings.LevelRenderingEnabled, "Enable Relative Level-Based Rendering");
+            if (levelRenderingSettings.LevelRenderingEnabled)
+            {
+                shouldSave |= UiHelpers.DrawIntWithResetSlider(ref levelRenderingSettings.RelativeLevelsBelow, "Relative Level To Render", "level-based-rel-level", 1, 89, 20);
+                DrawSettingsOverview(levelRenderingSettings.LevelRenderEspOption, "Level-Based Enemies", "", MobType.Character);
+            }
         }
         
         ImGui.EndChild();
