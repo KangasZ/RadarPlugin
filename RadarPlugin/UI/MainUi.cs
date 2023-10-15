@@ -110,7 +110,7 @@ public class MainUi : IDisposable
             ImGui.OpenPopup("DeleteConfigPopup");
         }
         
-        if (ImGui.Button("New Config"))
+        if (ImGui.Button("New BLANK Config"))
         {
             this.configInterface.SaveNewDefaultConfig();
         }
