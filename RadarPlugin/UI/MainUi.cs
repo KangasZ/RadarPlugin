@@ -204,7 +204,7 @@ public class MainUi : IDisposable
             if (configInterface.cfg.ShowOnlyVisible)
             {
                 ImGui.SameLine();
-                shouldSave |= UiHelpers.DrawCheckbox("Show Invisible Player Characters", ref configInterface.cfg.OverrideShowInvisiblePlayerCharacters, "Will show invisible player characters (like GMs or players loading in).\nI have 0 proof that this works! If anyone can verify that'd be great.");
+                shouldSave |= UiHelpers.DrawCheckbox("Show Invisible Player Characters", ref configInterface.cfg.OverrideShowInvisiblePlayerCharacters, "Will show invisible player characters (like GMs or players loading in).\nI have 0 proof that this works on GMs.");
             }
             shouldSave |= ImGui.Checkbox("Show Nameless", ref configInterface.cfg.ShowNameless);
             UiHelpers.LabeledHelpMarker("","Show nameless mobs.\nYou probably want to keep this OFF.");
