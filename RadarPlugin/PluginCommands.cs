@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using Dalamud.Game.Command;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
 using RadarPlugin.UI;
 
@@ -11,15 +13,17 @@ public class PluginCommands : IDisposable
     private readonly ICommandManager commandManager;
     private readonly MainUi mainUi;
     private readonly Configuration configInterface;
+    private readonly IChatGui chatGui;
 
-    public PluginCommands(ICommandManager commandManager, MainUi mainUi, Configuration configuration)
+    public PluginCommands(ICommandManager commandManager, MainUi mainUi, Configuration configuration, IChatGui chatGui)
     {
         this.mainUi = mainUi;
+        this.chatGui = chatGui;
         this.commandManager = commandManager;
         this.configInterface = configuration;
         this.commandManager.AddHandler("/radar", new CommandInfo(SettingsCommand)
         {
-            HelpMessage = "Opens configuration. Subcommands: /radar [ debug ]",
+            HelpMessage = "Opens configuration. Subcommands: /radar [ showall | showdebug ]",
             ShowInHelp = true
         });
         this.commandManager.AddHandler("/radarcfg", new CommandInfo(RadarCfgCommand)
@@ -56,9 +60,36 @@ public class PluginCommands : IDisposable
         var subcommand = regex.Success && regex.Groups.Count > 1 ? regex.Groups[1].Value : string.Empty;
         switch (subcommand.ToLower())
         {
-            case "debug":
+            case "showall":
             {
                 configInterface.cfg.DebugMode = !configInterface.cfg.DebugMode;
+                
+                var activatedString = configInterface.cfg.DebugMode ? "Enabled" : "Disabled";
+                var seString = new SeStringBuilder();
+                seString.Append($"Radar Plugin: Show All Entities Feature {activatedString}");
+                var chatEntry = new XivChatEntry()
+                {
+                    Type = XivChatType.Echo,
+                    Message = seString.Build()
+                };
+                chatGui.Print(chatEntry);
+                
+                break;
+            }
+            case "showdebug":
+            {
+                configInterface.cfg.DebugText = !configInterface.cfg.DebugText;
+                
+                var activatedString = configInterface.cfg.DebugText ? "Enabled" : "Disabled";
+                var seString = new SeStringBuilder();
+                seString.Append($"Radar Plugin: Debug Text Feature {activatedString}");
+                var chatEntry = new XivChatEntry()
+                {
+                    Type = XivChatType.Echo,
+                    Message = seString.Build()
+                };
+                chatGui.Print(chatEntry);
+                
                 break;
             }
         }

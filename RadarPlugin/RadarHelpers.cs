@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -15,6 +16,7 @@ public class RadarHelpers
     private readonly Configuration configInterface;
     private readonly IClientState clientState;
     private readonly ICondition conditionInterface;
+    private Dictionary<uint, float> distanceDictionary;
 
     public RadarHelpers(
         Configuration configInterface,
@@ -25,6 +27,7 @@ public class RadarHelpers
         this.clientState = clientState;
         this.configInterface = configInterface;
         this.conditionInterface = condition;
+        this.distanceDictionary = new Dictionary<uint, float>();
     }
 
 
@@ -33,15 +36,17 @@ public class RadarHelpers
         // Objest valid check
         if (!obj.IsValid()) return false;
         //if (obj.DataId == GameObject.InvalidGameObjectId) return false;
-        
+
         // Object within ignore lists
         if (UtilInfo.DataIdIgnoreList.Contains(obj.DataId) || configInterface.cfg.DataIdIgnoreList.Contains(obj.DataId)) return false;
-        
+
         // Object visible & config check
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
-        if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))
+        if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))// || !clientstructobj->GetIsTargetable()))
         {
-            return false;
+            // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still. 
+            if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters) return false;
+            if (obj.ObjectKind != ObjectKind.Player) return false;
         }
         // Distance check
 
@@ -55,7 +60,7 @@ public class RadarHelpers
             if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
             return !mob.IsDead;
         }
-        
+
 
         if (obj is BattleChara mobNpc)
         {
@@ -66,6 +71,23 @@ public class RadarHelpers
         }
 
         return true;
+    }
+
+    public void ResetDistance()
+    {
+        this.distanceDictionary = new Dictionary<uint, float>();
+    }
+
+    public float GetDistanceFromPlayer(GameObject obj)
+    {
+        if (distanceDictionary.TryGetValue(obj.ObjectId, out var value))
+        {
+            return value;
+        }
+
+        var distance = obj.Position.Distance2D(clientState.LocalPlayer!.Position);
+        distanceDictionary[obj.ObjectId] = distance;
+        return distance;
     }
 
     public bool IsSpecialZone()
@@ -93,8 +115,8 @@ public class RadarHelpers
         {
             text = obj.Name.TextValue;
         }
-
-        return configInterface.cfg.DebugMode ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
+        
+        return configInterface.cfg.DebugText ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
     }
 
     public uint? GetColorOverride(GameObject gameObject)
@@ -104,6 +126,7 @@ public class RadarHelpers
         {
             return colorOverride;
         }
+
         return null;
     }
 
@@ -161,33 +184,48 @@ public class RadarHelpers
                     {
                         return configInterface.cfg.YourPlayerOption;
                     }
-                    
+
                     // If is friend
                     if (configInterface.cfg.SeparateFriends && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
                     {
                         return configInterface.cfg.FriendOption;
                     }
-                    
+
                     // Is in party
                     if (configInterface.cfg.SeparateParty && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
                     {
                         return configInterface.cfg.PartyOption;
                     }
-                    
+
                     // If in alliance
                     if (configInterface.cfg.SeparateAlliance && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
                     {
                         return configInterface.cfg.AllianceOption;
                     }
                 }
+
                 return configInterface.cfg.PlayerOption;
             case ObjectKind.Companion:
                 return configInterface.cfg.CompanionOption;
             case ObjectKind.BattleNpc:
-                if (areaObject is BattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo})
+                if (areaObject is not BattleChara bnpc)
+                {
+                    return configInterface.cfg.NpcOption;
+                }
+                
+                if (bnpc is BattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo })
                 {
                     return configInterface.cfg.CompanionOption;
                 }
+
+                if (configInterface.cfg.LevelRendering.LevelRenderingEnabled)
+                {
+                    if (clientState.LocalPlayer!.Level - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow > bnpc.Level)
+                    {
+                        return configInterface.cfg.LevelRendering.LevelRenderEspOption;
+                    }
+                }
+                
                 return configInterface.cfg.NpcOption;
             case ObjectKind.EventNpc:
                 return configInterface.cfg.EventNpcOption;

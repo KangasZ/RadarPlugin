@@ -110,7 +110,7 @@ public class MainUi : IDisposable
             ImGui.OpenPopup("DeleteConfigPopup");
         }
         
-        if (ImGui.Button("New Config"))
+        if (ImGui.Button("New BLANK Config"))
         {
             this.configInterface.SaveNewDefaultConfig();
         }
@@ -158,15 +158,6 @@ public class MainUi : IDisposable
         ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
 
         
-        shouldSave |= ImGui.Checkbox("Show Only Visible", ref configInterface.cfg.ShowOnlyVisible);
-        UiHelpers.HoverTooltip("Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
-        
-        shouldSave |= ImGui.Checkbox("Nameless", ref configInterface.cfg.ShowNameless);
-        UiHelpers.LabeledHelpMarker("","Show nameless mobs.\nYou probably want to keep this OFF.\nTHIS DOES NOT WORK RIGHT NOW!!!");
-
-        shouldSave |= ImGui.Checkbox("Debug Mode", ref configInterface.cfg.DebugMode);
-        UiHelpers.HoverTooltip("Shows literally everything no matter what. Also modifies the display string.");
-
         if (configInterface.cfg.DebugMode)
         {
             // Todo: Debug swap text bools
@@ -198,20 +189,34 @@ public class MainUi : IDisposable
         if (configInterface.cfg.UseMaxDistance)
         {
             ImGui.SameLine();
-            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.MaxDistance, "", "default-max-distance-size", 30f, 2000f,
+            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.MaxDistance, "", "default-max-distance-size", 1f, 2000f,
                 UtilInfo.DefaultMaxEspDistance, "%.0fm");
         }
 
         shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
         
-        shouldSave |= DrawFontOptions();
+        shouldSave |= UiHelpers.DrawCheckbox("Debug Text", ref configInterface.cfg.DebugText, "Replaces name with a debug string of:\n'Name, DataId, MobType'\n/radar showdebug");
 
-        //shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.EspPadding, "Esp Padding", "esp-padding-default-window", 0f, 25f, UtilInfo.DefaultEspPadding, "%.1fpx");
+        if (ImGui.CollapsingHeader("Filtering Rules"))
+        {
+            shouldSave |= UiHelpers.DrawCheckbox("Only Show Visible Entities", ref configInterface.cfg.ShowOnlyVisible, "Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
 
-        
+            if (configInterface.cfg.ShowOnlyVisible)
+            {
+                ImGui.SameLine();
+                shouldSave |= UiHelpers.DrawCheckbox("Show Invisible Player Characters", ref configInterface.cfg.OverrideShowInvisiblePlayerCharacters, "Will show invisible player characters (like GMs or players loading in).\nI have 0 proof that this works! If anyone can verify that'd be great.");
+            }
+            shouldSave |= ImGui.Checkbox("Show Nameless", ref configInterface.cfg.ShowNameless);
+            UiHelpers.LabeledHelpMarker("","Show nameless mobs.\nYou probably want to keep this OFF.");
+            
+            shouldSave |= ImGui.Checkbox("Show All Entities", ref configInterface.cfg.DebugMode);
+            UiHelpers.HoverTooltip("Shows everything no matter what.\n/radar showall");
+        }
+
+
         ImGui.Separator();
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
-            "Thank you for your support! New font options for 6.41!");
+            "Thank you for your support!");
         ImGui.Separator();
 
         ImGui.TextColored(new Vector4(0xff, 0x00, 0x00, 0xff),
@@ -358,26 +363,26 @@ public class MainUi : IDisposable
     private void DrawDeepDungeonOverviewSettings()
     {
         UiHelpers.DrawSeperator($"Enemies Options", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", mobType: MobType.Character);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs", mobType: MobType.Character);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", mobType: MobType.Character);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", mobType: MobType.Character);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", mobType: MobType.Character);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
 
         UiHelpers.DrawSeperator($"Loot Options", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.BronzeChestOption, "Bronze Chest", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AccursedHoardOption, "Accursed Hoard", displayOrigination: DisplayOrigination.DeepDungeon);
 
 
         UiHelpers.DrawSeperator($"DD Specific Options", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return");
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage");
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return", displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", displayOrigination: DisplayOrigination.DeepDungeon);
     }
 
-    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "", MobType mobType = MobType.Object)
+    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "", MobType mobType = MobType.Object, DisplayOrigination displayOrigination = DisplayOrigination.OpenWorld)
     {
         bool shouldSave = false;
         shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType, ref espOption.DisplayType);
@@ -396,7 +401,7 @@ public class MainUi : IDisposable
         ImGui.SameLine(ImGui.GetWindowWidth() - 100);
         if (ImGui.Button($"More Options##button-for-type-configurator{tag}"))
         {
-            typeConfigurator.OpenUiWithType(ref espOption, tag, mobType);
+            typeConfigurator.OpenUiWithType(ref espOption, tag, mobType, displayOrigination);
         }
 
         if (shouldSave) configInterface.Save();
@@ -407,69 +412,84 @@ public class MainUi : IDisposable
         var shouldSave = false;
         var id = "##miscsettings";
         ImGui.BeginChild($"{id}-child", new Vector2(0, 0));
-        
-        UiHelpers.DrawSeperator("Hitbox Options", UtilInfo.Red);
 
-        shouldSave |= ImGui.Checkbox($"Show Hitbox{id}-hitbox", ref configInterface.cfg.HitboxOptions.HitboxEnabled);
-
-        shouldSave |= ImGui.DragFloat($"Thickness{id}", ref configInterface.cfg.HitboxOptions.Thickness, 0.1f, 0.1f, 14f);
-
-        shouldSave |= ImGui.Checkbox($"Override Mob Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.OverrideMobColor);
-        
-        if (configInterface.cfg.HitboxOptions.OverrideMobColor)
+        if (ImGui.CollapsingHeader($"Hitbox Options{id}"))
         {
-            var hitboxColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.HitboxOptions.HitboxColor);
-            if (ImGui.ColorEdit4($"Color{id}-hitbox-color", ref hitboxColor, ImGuiColorEditFlags.NoInputs))
+            shouldSave |= ImGui.Checkbox($"Show Hitbox{id}-hitbox", ref configInterface.cfg.HitboxOptions.HitboxEnabled);
+
+            shouldSave |= ImGui.DragFloat($"Thickness{id}", ref configInterface.cfg.HitboxOptions.Thickness, 0.1f, 0.1f, 14f);
+
+            shouldSave |= ImGui.Checkbox($"Override Mob Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.OverrideMobColor);
+
+            if (configInterface.cfg.HitboxOptions.OverrideMobColor)
             {
-                configInterface.cfg.HitboxOptions.HitboxColor = ImGui.ColorConvertFloat4ToU32(hitboxColor);
-                configInterface.Save();
-            }
-        }
-
-        shouldSave |= ImGui.Checkbox($"Draw Inside Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.DrawInsideCircle);
-
-        if (configInterface.cfg.HitboxOptions.DrawInsideCircle)
-        {
-            shouldSave |= ImGui.Checkbox("Use Different Inside Color", ref configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor);
-
-            if (!configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
-            {
-                var circleOpacity = (float)(configInterface.cfg.HitboxOptions.InsideCircleOpacity >> 24) / byte.MaxValue;
-                if (ImGui.DragFloat($"Inside Circle Opacity{id}", ref circleOpacity, 0.005f, 0, 1))
+                var hitboxColor = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.HitboxOptions.HitboxColor);
+                if (ImGui.ColorEdit4($"Color{id}-hitbox-color", ref hitboxColor, ImGuiColorEditFlags.NoInputs))
                 {
-                    configInterface.cfg.HitboxOptions.InsideCircleOpacity = ((uint)(circleOpacity * 255) << 24) | 0x00FFFFFF;
+                    configInterface.cfg.HitboxOptions.HitboxColor = ImGui.ColorConvertFloat4ToU32(hitboxColor);
                     configInterface.Save();
                 }
             }
 
-            if (configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
+            shouldSave |= ImGui.Checkbox($"Draw Inside Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.DrawInsideCircle);
+
+            if (configInterface.cfg.HitboxOptions.DrawInsideCircle)
             {
-                shouldSave |= UiHelpers.Vector4ColorSelector($"Inside Circle Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.InsideCircleColor);
+                shouldSave |= ImGui.Checkbox("Use Different Inside Color", ref configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor);
+
+                if (!configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
+                {
+                    var circleOpacity = (float)(configInterface.cfg.HitboxOptions.InsideCircleOpacity >> 24) / byte.MaxValue;
+                    if (ImGui.DragFloat($"Inside Circle Opacity{id}", ref circleOpacity, 0.005f, 0, 1))
+                    {
+                        configInterface.cfg.HitboxOptions.InsideCircleOpacity = ((uint)(circleOpacity * 255) << 24) | 0x00FFFFFF;
+                        configInterface.Save();
+                    }
+                }
+
+                if (configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
+                {
+                    shouldSave |= UiHelpers.Vector4ColorSelector($"Inside Circle Color{id}-hitbox", ref configInterface.cfg.HitboxOptions.InsideCircleColor);
+                }
+            }
+        }
+
+        if (ImGui.CollapsingHeader("Aggro Radius Options"))
+        {
+            DrawAggroCircleSettings();
+        }
+
+
+        if (ImGui.CollapsingHeader("Off Screen Objects Settings"))
+        {
+            shouldSave |= ImGui.Checkbox("Show Offscreen Objects", ref configInterface.cfg.ShowOffScreen);
+            UiHelpers.HoverTooltip("Show an arrow to the offscreen enemies.");
+
+            shouldSave |= ImGui.DragFloat($"Distance From Edge{id}", ref configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge, 0.2f, 2f, 80f);
+
+            shouldSave |= ImGui.DragFloat($"Size{id}", ref configInterface.cfg.OffScreenObjectsOptions.Size, 0.1f, 2f, 20f);
+
+            shouldSave |= ImGui.DragFloat($"Thickness{id}", ref configInterface.cfg.OffScreenObjectsOptions.Thickness, 0.1f, 0.4f, 20f);
+        }
+
+
+        if (ImGui.CollapsingHeader("Font Settings"))
+        {
+            shouldSave |= DrawFontOptions();
+        }
+
+
+        if (ImGui.CollapsingHeader("Level-Based Rendering"))
+        {
+            var levelRenderingSettings = configInterface.cfg.LevelRendering;
+            shouldSave |= UiHelpers.DrawCheckbox("Enabled", ref levelRenderingSettings.LevelRenderingEnabled, "Enable Relative Level-Based Rendering");
+            if (levelRenderingSettings.LevelRenderingEnabled)
+            {
+                shouldSave |= UiHelpers.DrawIntWithResetSlider(ref levelRenderingSettings.RelativeLevelsBelow, "Relative Level To Render", "level-based-rel-level", 1, 89, 20);
+                DrawSettingsOverview(levelRenderingSettings.LevelRenderEspOption, "Level-Based Enemies", "", MobType.Character);
             }
         }
         
-
-        ImGui.Separator();
-        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
-        ImGui.Text("Aggro Radius Options");
-        ImGui.PopStyleColor();
-        ImGui.Separator();
-        DrawAggroCircleSettings();
-        ImGui.Separator();
-        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
-        ImGui.Text("Off Screen Objects Settings");
-        ImGui.PopStyleColor();
-        ImGui.Separator();
-
-        shouldSave |= ImGui.Checkbox("Show Offscreen Objects", ref configInterface.cfg.ShowOffScreen);
-        UiHelpers.HoverTooltip("Show an arrow to the offscreen enemies.");
-
-        shouldSave |= ImGui.DragFloat($"Distance From Edge{id}", ref configInterface.cfg.OffScreenObjectsOptions.DistanceFromEdge, 0.2f, 2f, 80f);
-
-        shouldSave |= ImGui.DragFloat($"Size{id}", ref configInterface.cfg.OffScreenObjectsOptions.Size, 0.1f, 2f, 20f);
-
-        shouldSave |= ImGui.DragFloat($"Thickness{id}", ref configInterface.cfg.OffScreenObjectsOptions.Thickness, 0.1f, 0.4f, 20f);
-
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
     }
@@ -483,6 +503,11 @@ public class MainUi : IDisposable
         shouldSave |= ImGui.Checkbox($"Aggro Circle##{tag}-settings", ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircle);
         UiHelpers.HoverTooltip("Draws aggro circle.");
 
+        shouldSave |= UiHelpers.DrawCheckbox($"Enable Max Distance For Aggro Radius##{tag}-max-dist", ref configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool,
+            "Sets a max distance for aggro circles");
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.AggroRadiusOptions.MaxDistance, "", $"##{tag}-max-dist-slider", 1f, 2000f,
+            UtilInfo.DefaultMaxAggroRadiusDistance, "%.0fm");
+        
         shouldSave |= ImGui.Checkbox($"Aggro Circle In Combat##{tag}-settings", ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat);
 
         UiHelpers.HoverTooltip("If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");

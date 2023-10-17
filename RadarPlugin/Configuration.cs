@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Newtonsoft.Json;
 using RadarPlugin.Enums;
@@ -14,6 +14,13 @@ namespace RadarPlugin;
 [Serializable]
 public class Configuration
 {
+    public class LevelRendering
+    {
+        public bool LevelRenderingEnabled = false;
+        public int RelativeLevelsBelow = 20;
+        public ESPOption LevelRenderEspOption = new(mobOptDefault);
+    }
+    
     public class FontSettings
     {
         public bool UseCustomFont = false;
@@ -68,6 +75,8 @@ public class Configuration
     {
         public bool ShowAggroCircle = false;
         public bool ShowAggroCircleInCombat = false;
+        public bool MaxDistanceCapBool = true;
+        public float MaxDistance = UtilInfo.DefaultMaxAggroRadiusDistance;
         public uint FrontColor = UtilInfo.Red;
         public uint RearColor = UtilInfo.Green;
         public uint RightSideColor = UtilInfo.Yellow;
@@ -91,6 +100,7 @@ public class Configuration
             ColorU = espOption.ColorU;
             ShowFC = espOption.ShowFC;
             DrawDistance = espOption.DrawDistance;
+            AppendLevelToName = espOption.AppendLevelToName;
         }
 
         public bool Enabled = true;
@@ -108,6 +118,7 @@ public class Configuration
         public bool DotSizeOverride = false;
         public float DotSize = UtilInfo.DefaultDotSize;
         public bool ReplaceWithJobName = false;
+        public bool AppendLevelToName = false;
     }
 
     public class Config : IPluginConfiguration
@@ -119,6 +130,7 @@ public class Configuration
         public bool ShowBaDdObjects = true;
         public bool ShowLoot = false;
         public bool DebugMode = false;
+        public bool DebugText = false;
         public bool ShowPlayers = false;
         public bool ShowEnemies = true;
         public bool ShowEvents = false;
@@ -134,11 +146,12 @@ public class Configuration
         public bool ShowCutscene = false;
         public bool ShowNameless = false;
         public bool ShowOnlyVisible = true;
+        public bool OverrideShowInvisiblePlayerCharacters = true;
         public bool ShowOffScreen = false;
         public OffScreenObjectsOptions OffScreenObjectsOptions { get; set; } = new();
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
-        public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true };
+        public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true, AppendLevelToName = false };
         public ESPOption PlayerOption { get; set; } = new(playerOptDefault) { Enabled = true };
         public ESPOption YourPlayerOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Turquoise};
         public ESPOption FriendOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Orange};
@@ -169,6 +182,7 @@ public class Configuration
         public bool UseMaxDistance = false;
         public float MaxDistance = UtilInfo.DefaultMaxEspDistance;
         public FontSettings FontSettings { get; set; } = new();
+        public LevelRendering LevelRendering { get; set; } = new();
         public float EspPadding = UtilInfo.DefaultEspPadding;
     }
 
@@ -200,14 +214,15 @@ public class Configuration
         ColorU = 0xffffffff,
         DisplayType = DisplayTypes.HealthValueAndName,
         ShowFC = false,
-        DrawDistance = false
+        DrawDistance = false,
     };
 
     [NonSerialized] public string[] configs = new[]{""};
 
     [NonSerialized] public int selectedConfig = 0;
+    [NonSerialized] private readonly IPluginLog pluginLog;
 
-    public Configuration(DalamudPluginInterface pluginInterface)
+    public Configuration(DalamudPluginInterface pluginInterface, IPluginLog pluginLog)
     {
         this.pluginInterface = pluginInterface;
         cfg = this.pluginInterface.GetPluginConfig() as Config ?? new Config();
@@ -219,6 +234,7 @@ public class Configuration
             configDirectory.Create();
         }
 
+        this.pluginLog = pluginLog;
         UpdateConfigs();
     }
 
@@ -247,13 +263,13 @@ public class Configuration
     
     public void SaveCurrentConfig()
     {
-        PluginLog.Debug($"Saving config {cfg.ConfigName}");
+        pluginLog.Debug($"Saving config {cfg.ConfigName}");
         SavePluginConfig(cfg, cfg.ConfigName);
     }
     
     public bool LoadConfig(string configName)
     {
-        PluginLog.Debug($"Loading config {configName}");
+        pluginLog.Debug($"Loading config {configName}");
         SavePluginConfig(cfg, cfg.ConfigName);
         UpdateConfigs();
         var tempConfig = Load(configName);
@@ -264,7 +280,7 @@ public class Configuration
             Save();
             return true;
         }
-        PluginLog.Error("Config was NOT loaded!");
+        pluginLog.Error("Config was NOT loaded!");
         return false;
     }
     
@@ -298,7 +314,7 @@ public class Configuration
     
     public void DeleteConfig(string configName)
     {
-        PluginLog.Debug($"Deleting config {configName}");
+        pluginLog.Debug($"Deleting config {configName}");
         var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
         var configFile = new FileInfo(path);
         if (configFile.Exists)
@@ -313,7 +329,7 @@ public class Configuration
 
         var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
         FileInfo configFile = new FileInfo(path);
-        PluginLog.Debug(configFile.FullName);
+        pluginLog.Debug(configFile.FullName);
         return !configFile.Exists ? null : DeserializeConfig(File.ReadAllText(configFile.FullName));
     }
 
@@ -337,7 +353,7 @@ public class Configuration
     
     internal void WriteAllTextSafe(string path, string text)
     {
-        string str = path + ".tmp";
+        var str = path + ".tmp";
         if (File.Exists(str))
             File.Delete(str);
         File.WriteAllText(str, text);

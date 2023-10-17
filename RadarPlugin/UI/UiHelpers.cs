@@ -14,26 +14,96 @@ namespace RadarPlugin.UI;
 
 public static class UiHelpers
 {
+    public static bool DrawSettingsDetailed(Configuration.ESPOption option, string id, MobType mobType, DisplayOrigination displayOrigination)
+    {
+        var shouldSave = false;
+        UiHelpers.DrawSeperator($"{id} Options", UtilInfo.Red);
+        // Column 1
+        ImGui.Columns(2, $"##{id}-type-settings-columns", false);
+
+        shouldSave |= ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref option.Enabled);
+
+        shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType, ref option.DisplayType);
+
+        shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
+        
+        if (mobType == MobType.Player)
+        {
+            shouldSave |= ImGui.Checkbox($"Replace Name With Job##{id}-name-job-replacement", ref option.ReplaceWithJobName);
+            
+            shouldSave |= ImGui.Checkbox($"Show MP##{id}-mp-value-shown", ref option.ShowMp);
+        }
+
+        if (mobType == MobType.Character && displayOrigination == DisplayOrigination.OpenWorld)
+        {
+            shouldSave |= ImGui.Checkbox("Append Level To Name", ref option.AppendLevelToName);
+        }
+        // Column 2
+        ImGui.NextColumn();
+        shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
+
+        shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
+        
+        if (option.DotSizeOverride)
+        {
+            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window", UtilInfo.MinDotSize, UtilInfo.MaxDotSize,
+                UtilInfo.DefaultDotSize);
+        }
+        else
+        {
+            ImGui.Text("");
+        }
+        
+        //Reset Column
+        ImGui.Columns(1);
+        return shouldSave;
+    }
+    
     public static bool DrawDotSizeSlider(ref float dotSize, string id)
     {
         return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, UtilInfo.MinDotSize, UtilInfo.MaxDotSize, UtilInfo.DefaultDotSize);
     }
 
-    public static bool DrawFloatWithResetSlider(ref float floatToModify, string tag, string id, float min, float max, float defaultFloatValue, string format = "%.2f")
+    public static bool DrawFloatWithResetSlider(ref float floatToModify, string textDiscription, string id, float min, float max, float defaultFloatValue, string format = "%.2f")
     {
         bool shouldSave = false;
-        if (!tag.IsNullOrWhitespace())
+        if (!textDiscription.IsNullOrWhitespace())
         {
-            ImGui.Text(tag);
+            ImGui.Text(textDiscription);
             ImGui.SameLine();
         }
         ImGui.PushItemWidth(150);
 
-        shouldSave |= ImGui.SliderFloat($"##float-slider-{id}-{tag}", ref floatToModify, min, max, format);
+        shouldSave |= ImGui.SliderFloat($"##float-slider-{id}-{textDiscription}", ref floatToModify, min, max, format);
         
         ImGui.SameLine();
         ImGui.PushFont(UiBuilder.IconFont);
-        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{tag}"))
+        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{textDiscription}"))
+        {
+            floatToModify = defaultFloatValue;
+            shouldSave = true;
+        }
+        ImGui.PopFont();
+        UiHelpers.HoverTooltip($"Default: {defaultFloatValue.ToString(CultureInfo.InvariantCulture)}");
+
+        return shouldSave;
+    }
+    
+    public static bool DrawIntWithResetSlider(ref int floatToModify, string textDiscription, string id, int min, int max, int defaultFloatValue)
+    {
+        bool shouldSave = false;
+        if (!textDiscription.IsNullOrWhitespace())
+        {
+            ImGui.Text(textDiscription);
+            ImGui.SameLine();
+        }
+        ImGui.PushItemWidth(150);
+
+        shouldSave |= ImGui.SliderInt($"##float-slider-{id}-{textDiscription}", ref floatToModify, min, max);
+        
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{textDiscription}"))
         {
             floatToModify = defaultFloatValue;
             shouldSave = true;
