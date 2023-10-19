@@ -130,6 +130,7 @@ public class Configuration
         public bool ShowBaDdObjects = true;
         public bool ShowLoot = false;
         public bool DebugMode = false;
+        public bool RankText = true;
         public bool DebugText = false;
         public bool ShowPlayers = false;
         public bool ShowEnemies = true;

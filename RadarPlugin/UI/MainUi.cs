@@ -211,6 +211,9 @@ public class MainUi : IDisposable
             
             shouldSave |= ImGui.Checkbox("Show All Entities", ref configInterface.cfg.DebugMode);
             UiHelpers.HoverTooltip("Shows everything no matter what.\n/radar showall");
+            
+            shouldSave |= ImGui.Checkbox("Show Rank Text", ref configInterface.cfg.RankText);
+            UiHelpers.HoverTooltip("Shows rank text for BNpcs");
         }
 
 

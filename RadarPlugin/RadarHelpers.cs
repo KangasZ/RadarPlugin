@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -7,6 +8,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
 using Dalamud.Plugin.Services;
+using Lumina.Excel.GeneratedSheets;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin;
@@ -17,17 +19,27 @@ public class RadarHelpers
     private readonly IClientState clientState;
     private readonly ICondition conditionInterface;
     private Dictionary<uint, float> distanceDictionary;
+    private readonly IDataManager dataManager;
+    public readonly Dictionary<uint, byte> RankDictionary = new();
 
     public RadarHelpers(
         Configuration configInterface,
         IClientState clientState,
-        ICondition condition
+        ICondition condition,
+        IDataManager dataManager
     )
     {
         this.clientState = clientState;
         this.configInterface = configInterface;
         this.conditionInterface = condition;
         this.distanceDictionary = new Dictionary<uint, float>();
+        this.dataManager = dataManager;
+
+        var excelBnpcs = this.dataManager.GetExcelSheet<BNpcBase>();
+        if (excelBnpcs != null)
+        {
+            RankDictionary = excelBnpcs.ToDictionary(x => x.RowId, x => x.Rank);
+        }
     }
 
 

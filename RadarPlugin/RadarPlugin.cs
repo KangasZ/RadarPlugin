@@ -25,12 +25,13 @@ public class RadarPlugin : IDalamudPlugin
         IClientState clientState,
         IGameGui gameGui,
         IPluginLog pluginLog,
-        IChatGui chatGui)
+        IChatGui chatGui,
+        IDataManager dataManager)
     {
         Plugin = this;
         // Services and DI
         Configuration = new Configuration(pluginInterface, pluginLog);
-        radarHelpers = new RadarHelpers(Configuration, clientState, condition);
+        radarHelpers = new RadarHelpers(Configuration, clientState, condition, dataManager);
 
         // UI
         mobEditUi = new MobEditUi(pluginInterface, Configuration, radarHelpers);

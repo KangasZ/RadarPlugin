@@ -369,9 +369,22 @@ public class RadarLogic : IDisposable
             tagText = pc.ClassJob.GameData.Abbreviation.RawString;
         }
 
-        if (espOption.AppendLevelToName && gameObject is BattleNpc battleNpc)
+        if (gameObject is BattleNpc battleNpc)
         {
-            tagText += $" LV:{battleNpc.Level}";
+            if (espOption.AppendLevelToName)
+            {
+                tagText += $" LV:{battleNpc.Level}";
+            }
+
+            if (configInterface.cfg.RankText)
+            {
+                tagText += $"\nD {battleNpc.DataId}";
+                tagText += $"\nN {battleNpc.NameId}";
+                if (radarHelpers.RankDictionary.TryGetValue(battleNpc.DataId, out byte value))
+                {
+                    tagText += $"\nR {value}";
+                }
+            }
         }
         
         if (espOption.DrawDistance)
