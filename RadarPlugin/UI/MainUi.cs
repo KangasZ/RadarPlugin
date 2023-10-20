@@ -21,7 +21,7 @@ public class MainUi : IDisposable
     private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
     private readonly TypeConfigurator typeConfigurator;
-    
+
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi,
         IClientState clientState, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator)
     {
@@ -69,7 +69,6 @@ public class MainUi : IDisposable
                 ("Additional Features", UtilInfo.White, ShowMiscSettings),
                 ("Utility", UtilInfo.White, DrawUtilityTab),
                 ("Config", UtilInfo.White, DrawConfigTab)
-
             );
         }
 
@@ -103,18 +102,19 @@ public class MainUi : IDisposable
         {
             this.configInterface.LoadConfig(configInterface.configs[selectedConfig]);
         }
+
         UiHelpers.HoverTooltip("This will save your current config when loading!");
         ImGui.SameLine();
         if (ImGui.Button("Delete Selected Config"))
         {
             ImGui.OpenPopup("DeleteConfigPopup");
         }
-        
+
         if (ImGui.Button("New BLANK Config"))
         {
             this.configInterface.SaveNewDefaultConfig();
         }
-        
+
         ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
         ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
         if (ImGui.BeginPopup("DeleteConfigPopup"))
@@ -125,18 +125,21 @@ public class MainUi : IDisposable
                 this.configInterface.DeleteConfig(configInterface.configs[selectedConfig]);
                 ImGui.CloseCurrentPopup();
             }
+
             ImGui.SameLine();
             ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
             if (ImGui.Button("No"))
             {
                 ImGui.CloseCurrentPopup();
             }
+
             ImGui.PopStyleColor();
             ImGui.EndPopup();
         }
+
         ImGui.PopStyleVar();
         ImGui.PopStyleColor();
-        
+
         if (shouldSave) configInterface.Save();
     }
 
@@ -157,7 +160,7 @@ public class MainUi : IDisposable
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
 
-        
+
         if (configInterface.cfg.DebugMode)
         {
             // Todo: Debug swap text bools
@@ -184,34 +187,39 @@ public class MainUi : IDisposable
                                         "It will be under any other Dalamud plugin. This is the original behavior.\n" +
                                         "There should be practically no difference between this and normal operations");
 
-        shouldSave |= UiHelpers.DrawCheckbox("Distance Cap", ref configInterface.cfg.UseMaxDistance, "Max distance for the esp");
-
-        if (configInterface.cfg.UseMaxDistance)
-        {
-            ImGui.SameLine();
-            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.MaxDistance, "", "default-max-distance-size", 1f, 2000f,
-                UtilInfo.DefaultMaxEspDistance, "%.0fm");
-        }
 
         shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
-        
-        shouldSave |= UiHelpers.DrawCheckbox("Debug Text", ref configInterface.cfg.DebugText, "Replaces name with a debug string of:\n'Name, DataId, MobType'\n/radar showdebug");
+
+        shouldSave |= UiHelpers.DrawCheckbox("Debug Text", ref configInterface.cfg.DebugText,
+            "Replaces name with a debug string of:\n'Name, DataId, MobType'\n/radar showdebug");
 
         if (ImGui.CollapsingHeader("Filtering Rules"))
         {
-            shouldSave |= UiHelpers.DrawCheckbox("Only Show Visible Entities", ref configInterface.cfg.ShowOnlyVisible, "Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
+            shouldSave |= UiHelpers.DrawCheckbox("Maximum Distance", ref configInterface.cfg.UseMaxDistance, "Max distance for the esp");
+            if (configInterface.cfg.UseMaxDistance)
+            {
+                ImGui.SameLine();
+                shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.MaxDistance, "", "default-max-distance-size", 1f, 2000f,
+                    UtilInfo.DefaultMaxEspDistance, "%.0fm");
+            }
+
+
+            shouldSave |= UiHelpers.DrawCheckbox("Only Show Visible Entities", ref configInterface.cfg.ShowOnlyVisible,
+                "Show only visible mobs.\nUsually you want to keep this ON\nMay not remove all invisible entities currently. Use the local objects menu.");
 
             if (configInterface.cfg.ShowOnlyVisible)
             {
                 ImGui.SameLine();
-                shouldSave |= UiHelpers.DrawCheckbox("Show Invisible Player Characters", ref configInterface.cfg.OverrideShowInvisiblePlayerCharacters, "Will show invisible player characters (like GMs or players loading in).\nI have 0 proof that this works on GMs.");
+                shouldSave |= UiHelpers.DrawCheckbox("Show Invisible Player Characters", ref configInterface.cfg.OverrideShowInvisiblePlayerCharacters,
+                    "Will show invisible player characters (like GMs or players loading in).\nI have 0 proof that this works on GMs.");
             }
+
             shouldSave |= ImGui.Checkbox("Show Nameless", ref configInterface.cfg.ShowNameless);
-            UiHelpers.LabeledHelpMarker("","Show nameless mobs.\nYou probably want to keep this OFF.");
-            
+            UiHelpers.LabeledHelpMarker("", "Show nameless mobs.\nYou probably want to keep this OFF.");
+
             shouldSave |= ImGui.Checkbox("Show All Entities", ref configInterface.cfg.DebugMode);
             UiHelpers.HoverTooltip("Shows everything no matter what.\n/radar showall");
-            
+
             shouldSave |= ImGui.Checkbox("Show Rank Text", ref configInterface.cfg.RankText);
             UiHelpers.HoverTooltip("Shows rank text for BNpcs");
         }
@@ -245,63 +253,65 @@ public class MainUi : IDisposable
         var shouldSave = false;
 
         shouldSave |= ImGui.Checkbox("Use Custom Font##custom-font-selector-default", ref configInterface.cfg.FontSettings.UseCustomFont);
-        UiHelpers.LabeledHelpMarker("", "Use a custom font size and potentially type instead of the default ImGui font.\nThis may lag your game slightly when you enable it the first time.");
+        UiHelpers.LabeledHelpMarker("",
+            "Use a custom font size and potentially type instead of the default ImGui font.\nThis may lag your game slightly when you enable it the first time.");
 
         shouldSave |= ImGui.Checkbox("Use Axis Font##axis-font-selector-default", ref configInterface.cfg.FontSettings.UseAxisFont);
         UiHelpers.LabeledHelpMarker("", "Uses the axis font instead of default dalamud.\nThis is what most of the game is rendered with.");
 
-        
-        shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontSettings.FontSize, "Font Size", "font-scale-default-window", 7f, 36f, ImGui.GetFontSize(), "%.0fpx");
-        
-        
+
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.FontSettings.FontSize, "Font Size", "font-scale-default-window", 7f, 36f,
+            ImGui.GetFontSize(), "%.0fpx");
+
+
         if (ImGui.Button("12px"))
         {
             configInterface.cfg.FontSettings.FontSize = 12f;
             shouldSave = true;
         }
-        
+
         ImGui.SameLine();
         if (ImGui.Button("16px"))
         {
             configInterface.cfg.FontSettings.FontSize = 16f;
             shouldSave = true;
         }
-        
+
         ImGui.SameLine();
         if (ImGui.Button("17px"))
         {
             configInterface.cfg.FontSettings.FontSize = 17f;
             shouldSave = true;
         }
-        
+
         ImGui.SameLine();
         if (ImGui.Button("18px"))
         {
             configInterface.cfg.FontSettings.FontSize = 18f;
             shouldSave = true;
         }
-        
+
         ImGui.SameLine();
         if (ImGui.Button("20px"))
         {
             configInterface.cfg.FontSettings.FontSize = 20f;
             shouldSave = true;
         }
-        
+
         ImGui.SameLine();
         if (ImGui.Button("22px"))
         {
             configInterface.cfg.FontSettings.FontSize = 22f;
             shouldSave = true;
         }
-        
+
         ImGui.SameLine();
         if (ImGui.Button("24px"))
         {
             configInterface.cfg.FontSettings.FontSize = 24f;
             shouldSave = true;
         }
-        
+
         ImGui.SameLine();
         if (ImGui.Button("36px"))
         {
@@ -337,11 +347,11 @@ public class MainUi : IDisposable
                                         "Any player not in one of these categories will default to 'general' player option.");
         ImGui.Separator();
         shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedYourPlayer, "Your Player", MobType.Player);
-            
+
         shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedParty, "Party", MobType.Player);
-        
+
         shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedFriends, "Friends", MobType.Player);
-        
+
         shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedAlliance, "Alliance", MobType.Player);
 
         if (shouldSave) configInterface.Save();
@@ -350,10 +360,14 @@ public class MainUi : IDisposable
     private void DrawDeepDungeonOverviewSettings()
     {
         UiHelpers.DrawSeperator($"Enemies Options", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
-        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead", mobType: MobType.Character,
+            displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption, "'Catch All' mobs", mobType: MobType.Character,
+            displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.AuspiceOption, "Friendly Mobs", mobType: MobType.Character,
+            displayOrigination: DisplayOrigination.DeepDungeon);
+        DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.EasyMobOption, "Easy Mobs", mobType: MobType.Character,
+            displayOrigination: DisplayOrigination.DeepDungeon);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", mobType: MobType.Character, displayOrigination: DisplayOrigination.DeepDungeon);
 
         UiHelpers.DrawSeperator($"Loot Options", UtilInfo.Red);
@@ -369,7 +383,8 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", displayOrigination: DisplayOrigination.DeepDungeon);
     }
 
-    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string? description = null, MobType mobType = MobType.Object, DisplayOrigination displayOrigination = DisplayOrigination.OpenWorld)
+    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string? description = null, MobType mobType = MobType.Object,
+        DisplayOrigination displayOrigination = DisplayOrigination.OpenWorld)
     {
         bool shouldSave = false;
         shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType, ref espOption.DisplayType);
@@ -384,7 +399,7 @@ public class MainUi : IDisposable
         {
             UiHelpers.LabeledHelpMarker("", description);
         }
-        
+
         ImGui.SameLine(ImGui.GetWindowWidth() - 100);
         if (ImGui.Button($"More Options##button-for-type-configurator{tag}"))
         {
@@ -472,11 +487,12 @@ public class MainUi : IDisposable
             shouldSave |= UiHelpers.DrawCheckbox("Enabled", ref levelRenderingSettings.LevelRenderingEnabled, "Enable Relative Level-Based Rendering");
             if (levelRenderingSettings.LevelRenderingEnabled)
             {
-                shouldSave |= UiHelpers.DrawIntWithResetSlider(ref levelRenderingSettings.RelativeLevelsBelow, "Relative Level To Render", "level-based-rel-level", 1, 89, 20);
+                shouldSave |= UiHelpers.DrawIntWithResetSlider(ref levelRenderingSettings.RelativeLevelsBelow, "Relative Level To Render", "level-based-rel-level", 1, 89,
+                    20);
                 DrawSettingsOverview(levelRenderingSettings.LevelRenderEspOption, "Level-Based Enemies", "", MobType.Character);
             }
         }
-        
+
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
     }
@@ -494,7 +510,7 @@ public class MainUi : IDisposable
             "Sets a max distance for aggro circles");
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.AggroRadiusOptions.MaxDistance, "", $"##{tag}-max-dist-slider", 1f, 2000f,
             UtilInfo.DefaultMaxAggroRadiusDistance, "%.0fm");
-        
+
         shouldSave |= ImGui.Checkbox($"Aggro Circle In Combat##{tag}-settings", ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat);
 
         UiHelpers.HoverTooltip("If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
@@ -525,7 +541,7 @@ public class MainUi : IDisposable
         if (shouldSave) configInterface.Save();
     }
 
-    
+
     private void DrawMobsVisibilitySettings()
     {
         bool shouldSave = false;
@@ -535,16 +551,17 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.CompanionOption, "Companions");
         DrawSettingsOverview(configInterface.cfg.EventNpcOption, "Event NPCs");
         DrawSettingsOverview(configInterface.cfg.RetainerOption, "Retainers");
-        
+
         UiHelpers.DrawSeperator("Enemy Npcs", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
             description: "Shows most enemies that are considered battleable", mobType: MobType.Character);
         shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedRankOne, "Rank 1", MobType.Character, "Rank 1 is typically HUNT or NM enemies");
-        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedRankTwoAndSix, "Rank 2 and 6", MobType.Character, "Rank 2 is typically BOSSES");
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedRankTwoAndSix, "Rank 2 and 6", MobType.Character,
+            "Rank 2 and 6 are typically BOSSES");
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
     }
-    
+
     private void DrawEntitiesVisibilitySettings()
     {
         bool shouldSave = false;
@@ -569,7 +586,7 @@ public class MainUi : IDisposable
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
     }
-    
+
     private bool DrawBoolSeparatedSettingsOverview(ref Configuration.SeparatedEspOption separatedEspOption, string tag, MobType mobType, string? infoDescription = null)
     {
         var shouldSave = false;
@@ -578,6 +595,7 @@ public class MainUi : IDisposable
         {
             UiHelpers.LabeledHelpMarker($"", infoDescription);
         }
+
         if (separatedEspOption.Enabled)
         {
             DrawSettingsOverview(separatedEspOption.EspOption, tag, mobType: mobType, description: infoDescription);
