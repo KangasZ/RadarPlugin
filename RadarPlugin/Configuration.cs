@@ -195,7 +195,7 @@ public class Configuration
             { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Gold } };
 
         public SeparatedEspOption SeparatedRankTwoAndSix = new()
-            { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Red } };
+            { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Yellow } };
     }
 
     public Config cfg;

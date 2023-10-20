@@ -224,7 +224,29 @@ public class RadarHelpers
                 {
                     return configInterface.cfg.NpcOption;
                 }
-                
+
+                if (configInterface.cfg.SeparatedRankOne.Enabled || configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
+                {
+                    if (RankDictionary.TryGetValue(bnpc.DataId, out var value))
+                    {
+                        switch (value)
+                        {
+                            case 1:
+                                if (configInterface.cfg.SeparatedRankOne.Enabled)
+                                {
+                                    return configInterface.cfg.SeparatedRankOne.EspOption;
+                                }
+                                break;
+                            case 2: case 6:
+                                if (configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
+                                {
+                                    return configInterface.cfg.SeparatedRankTwoAndSix.EspOption;
+                                }
+                                break;
+                        }
+                    }
+                }
+
                 if (bnpc is BattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo })
                 {
                     return configInterface.cfg.CompanionOption;
