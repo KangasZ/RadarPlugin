@@ -316,7 +316,8 @@ public class MainUi : IDisposable
     {
         UiHelpers.DrawTabs("radar-visibility-tabs",
             ("Players", UtilInfo.Silver, DrawPlayerGeneralSettings),
-            ("Overworld", UtilInfo.Green, DrawGeneralVisibilitySettings),
+            ("Mobs", UtilInfo.Green, DrawMobsVisibilitySettings),
+            ("Entities", UtilInfo.LightBlue, DrawEntitiesVisibilitySettings),
             ("Deep Dungeons", UtilInfo.Yellow, DrawDeepDungeonOverviewSettings)
         );
     }
@@ -335,30 +336,13 @@ public class MainUi : IDisposable
         UiHelpers.LabeledHelpMarker("", "These options will dissociate the given category with the overriding player configuration.\n" +
                                         "Any player not in one of these categories will default to 'general' player option.");
         ImGui.Separator();
-        shouldSave |= ImGui.Checkbox($"Separate Your Player##player-settings", ref configInterface.cfg.SeparateYourPlayer);
-        if (configInterface.cfg.SeparateYourPlayer)
-        {
-            DrawSettingsOverview(configInterface.cfg.YourPlayerOption, "Your Player", mobType: MobType.Player);
-        }
-
-        // Todo: Make the radar path for this
-        shouldSave |= ImGui.Checkbox($"Separate Party##player-settings", ref configInterface.cfg.SeparateParty);
-        if (configInterface.cfg.SeparateParty)
-        {
-            DrawSettingsOverview(configInterface.cfg.PartyOption, "Party", mobType: MobType.Player);
-        }
-
-        shouldSave |= ImGui.Checkbox($"Separate Friends##player-settings", ref configInterface.cfg.SeparateFriends);
-        if (configInterface.cfg.SeparateFriends)
-        {
-            DrawSettingsOverview(configInterface.cfg.FriendOption, "Friends", mobType: MobType.Player);
-        }
-
-        shouldSave |= ImGui.Checkbox($"Separate Alliance##player-settings", ref configInterface.cfg.SeparateAlliance);
-        if (configInterface.cfg.SeparateAlliance)
-        {
-            DrawSettingsOverview(configInterface.cfg.AllianceOption, "Alliance", mobType: MobType.Player);
-        }
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparateYourPlayer, configInterface.cfg.YourPlayerOption, "Your Player", MobType.Player);
+            
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparateParty, configInterface.cfg.PartyOption, "Party", MobType.Player);
+        
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparateFriends, configInterface.cfg.FriendOption, "Friends", MobType.Player);
+        
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparateAlliance, configInterface.cfg.AllianceOption, "Alliance", MobType.Player);
 
         if (shouldSave) configInterface.Save();
     }
@@ -542,17 +526,27 @@ public class MainUi : IDisposable
     }
 
     
-    private void DrawGeneralVisibilitySettings()
+    private void DrawMobsVisibilitySettings()
     {
         bool shouldSave = false;
         ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
 
-        UiHelpers.DrawSeperator("Npcs", UtilInfo.Red);
-        DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
-            description: "Shows most enemies that are considered battleable", mobType: MobType.Character);
+        UiHelpers.DrawSeperator("Non-Enemy Npcs", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.CompanionOption, "Companions");
         DrawSettingsOverview(configInterface.cfg.EventNpcOption, "Event NPCs");
         DrawSettingsOverview(configInterface.cfg.RetainerOption, "Retainers");
+        
+        UiHelpers.DrawSeperator("Enemy Npcs", UtilInfo.Red);
+        DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
+            description: "Shows most enemies that are considered battleable", mobType: MobType.Character);
+        ImGui.EndChild();
+        if (shouldSave) configInterface.Save();
+    }
+    
+    private void DrawEntitiesVisibilitySettings()
+    {
+        bool shouldSave = false;
+        ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
 
         UiHelpers.DrawSeperator("Objects", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.TreasureOption, "Treasure",
@@ -572,5 +566,17 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.OrnamentOption, "Ornaments", "Shows ornaments, like wings.");
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
+    }
+    
+    private bool DrawBoolSeparatedSettingsOverview(ref bool separateBoolCheck, Configuration.ESPOption optionToModify, string tag, MobType mobType)
+    {
+        bool shouldSave = false;
+        shouldSave |= ImGui.Checkbox($"Separate {tag}##separated-settings", ref separateBoolCheck);
+        if (separateBoolCheck)
+        {
+            DrawSettingsOverview(optionToModify, tag, mobType: mobType);
+        }
+
+        return shouldSave;
     }
 }
