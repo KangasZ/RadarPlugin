@@ -135,23 +135,9 @@ public class Configuration
         public bool Enabled = true;
         public bool UseBackgroundDrawList = false;
         public bool ShowBaDdObjects = true;
-        public bool ShowLoot = false;
         public bool DebugMode = false;
         public bool RankText = true;
         public bool DebugText = false;
-        public bool ShowPlayers = false;
-        public bool ShowEnemies = true;
-        public bool ShowEvents = false;
-        public bool ShowCompanion = false;
-        public bool ShowEventNpc = false;
-        public bool ShowAreaObjects = false;
-        public bool ShowAetherytes = false;
-        public bool ShowCardStand = false;
-        public bool ShowGatheringPoint = false;
-        public bool ShowMountType = false;
-        public bool ShowRetainer = false;
-        public bool ShowHousing = false;
-        public bool ShowCutscene = false;
         public bool ShowNameless = false;
         public bool ShowOnlyVisible = true;
         public bool OverrideShowInvisiblePlayerCharacters = true;
@@ -208,7 +194,7 @@ public class Configuration
         public SeparatedEspOption SeparatedRankOne = new()
             { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Gold } };
 
-        public SeparatedEspOption SeparatedRankTwoAndSiz = new()
+        public SeparatedEspOption SeparatedRankTwoAndSix = new()
             { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Red } };
     }
 

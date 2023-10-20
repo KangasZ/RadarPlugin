@@ -192,27 +192,27 @@ public class RadarHelpers
                 if (areaObject is PlayerCharacter chara)
                 {
                     // Is the object is YOU
-                    if (configInterface.cfg.SeparateYourPlayer && clientState.LocalPlayer != null && chara.Address == clientState.LocalPlayer.Address)
+                    if (configInterface.cfg.SeparatedYourPlayer.Enabled && clientState.LocalPlayer != null && chara.Address == clientState.LocalPlayer.Address)
                     {
-                        return configInterface.cfg.YourPlayerOption;
+                        return configInterface.cfg.SeparatedYourPlayer.EspOption;
                     }
 
                     // If is friend
-                    if (configInterface.cfg.SeparateFriends && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
+                    if (configInterface.cfg.SeparatedFriends.Enabled && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
                     {
-                        return configInterface.cfg.FriendOption;
+                        return configInterface.cfg.SeparatedFriends.EspOption;
                     }
 
                     // Is in party
-                    if (configInterface.cfg.SeparateParty && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
+                    if (configInterface.cfg.SeparatedParty.Enabled && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
                     {
-                        return configInterface.cfg.PartyOption;
+                        return configInterface.cfg.SeparatedParty.EspOption;
                     }
 
                     // If in alliance
-                    if (configInterface.cfg.SeparateAlliance && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
+                    if (configInterface.cfg.SeparatedAlliance.Enabled && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
                     {
-                        return configInterface.cfg.AllianceOption;
+                        return configInterface.cfg.SeparatedAlliance.EspOption;
                     }
                 }
 

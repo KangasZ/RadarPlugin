@@ -336,13 +336,13 @@ public class MainUi : IDisposable
         UiHelpers.LabeledHelpMarker("", "These options will dissociate the given category with the overriding player configuration.\n" +
                                         "Any player not in one of these categories will default to 'general' player option.");
         ImGui.Separator();
-        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparateYourPlayer, configInterface.cfg.YourPlayerOption, "Your Player", MobType.Player);
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedYourPlayer, "Your Player", MobType.Player);
             
-        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparateParty, configInterface.cfg.PartyOption, "Party", MobType.Player);
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedParty, "Party", MobType.Player);
         
-        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparateFriends, configInterface.cfg.FriendOption, "Friends", MobType.Player);
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedFriends, "Friends", MobType.Player);
         
-        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparateAlliance, configInterface.cfg.AllianceOption, "Alliance", MobType.Player);
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedAlliance, "Alliance", MobType.Player);
 
         if (shouldSave) configInterface.Save();
     }
@@ -369,7 +369,7 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage", displayOrigination: DisplayOrigination.DeepDungeon);
     }
 
-    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string description = "", MobType mobType = MobType.Object, DisplayOrigination displayOrigination = DisplayOrigination.OpenWorld)
+    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string? description = null, MobType mobType = MobType.Object, DisplayOrigination displayOrigination = DisplayOrigination.OpenWorld)
     {
         bool shouldSave = false;
         shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType, ref espOption.DisplayType);
@@ -539,6 +539,8 @@ public class MainUi : IDisposable
         UiHelpers.DrawSeperator("Enemy Npcs", UtilInfo.Red);
         DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
             description: "Shows most enemies that are considered battleable", mobType: MobType.Character);
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedRankOne, "Rank 1", MobType.Character, "Rank 1 is typically HUNT or NM enemies");
+        shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedRankTwoAndSix, "Rank 2 and 6", MobType.Character, "Rank 2 is typically BOSSES");
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
     }
@@ -568,13 +570,17 @@ public class MainUi : IDisposable
         if (shouldSave) configInterface.Save();
     }
     
-    private bool DrawBoolSeparatedSettingsOverview(ref bool separateBoolCheck, Configuration.ESPOption optionToModify, string tag, MobType mobType)
+    private bool DrawBoolSeparatedSettingsOverview(ref Configuration.SeparatedEspOption separatedEspOption, string tag, MobType mobType, string? infoDescription = null)
     {
-        bool shouldSave = false;
-        shouldSave |= ImGui.Checkbox($"Separate {tag}##separated-settings", ref separateBoolCheck);
-        if (separateBoolCheck)
+        var shouldSave = false;
+        shouldSave |= ImGui.Checkbox($"Separate {tag}##separated-settings", ref separatedEspOption.Enabled);
+        if (infoDescription != null)
         {
-            DrawSettingsOverview(optionToModify, tag, mobType: mobType);
+            UiHelpers.LabeledHelpMarker($"", infoDescription);
+        }
+        if (separatedEspOption.Enabled)
+        {
+            DrawSettingsOverview(separatedEspOption.EspOption, tag, mobType: mobType, description: infoDescription);
         }
 
         return shouldSave;
