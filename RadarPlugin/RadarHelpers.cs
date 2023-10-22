@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -7,6 +8,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
 using Dalamud.Plugin.Services;
+using Lumina.Excel.GeneratedSheets;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin;
@@ -17,17 +19,27 @@ public class RadarHelpers
     private readonly IClientState clientState;
     private readonly ICondition conditionInterface;
     private Dictionary<uint, float> distanceDictionary;
+    private readonly IDataManager dataManager;
+    public readonly Dictionary<uint, byte> RankDictionary = new();
 
     public RadarHelpers(
         Configuration configInterface,
         IClientState clientState,
-        ICondition condition
+        ICondition condition,
+        IDataManager dataManager
     )
     {
         this.clientState = clientState;
         this.configInterface = configInterface;
         this.conditionInterface = condition;
         this.distanceDictionary = new Dictionary<uint, float>();
+        this.dataManager = dataManager;
+
+        var excelBnpcs = this.dataManager.GetExcelSheet<BNpcBase>();
+        if (excelBnpcs != null)
+        {
+            RankDictionary = excelBnpcs.ToDictionary(x => x.RowId, x => x.Rank);
+        }
     }
 
 
@@ -180,27 +192,27 @@ public class RadarHelpers
                 if (areaObject is PlayerCharacter chara)
                 {
                     // Is the object is YOU
-                    if (configInterface.cfg.SeparateYourPlayer && clientState.LocalPlayer != null && chara.Address == clientState.LocalPlayer.Address)
+                    if (configInterface.cfg.SeparatedYourPlayer.Enabled && clientState.LocalPlayer != null && chara.Address == clientState.LocalPlayer.Address)
                     {
-                        return configInterface.cfg.YourPlayerOption;
+                        return configInterface.cfg.SeparatedYourPlayer.EspOption;
                     }
 
                     // If is friend
-                    if (configInterface.cfg.SeparateFriends && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
+                    if (configInterface.cfg.SeparatedFriends.Enabled && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
                     {
-                        return configInterface.cfg.FriendOption;
+                        return configInterface.cfg.SeparatedFriends.EspOption;
                     }
 
                     // Is in party
-                    if (configInterface.cfg.SeparateParty && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
+                    if (configInterface.cfg.SeparatedParty.Enabled && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
                     {
-                        return configInterface.cfg.PartyOption;
+                        return configInterface.cfg.SeparatedParty.EspOption;
                     }
 
                     // If in alliance
-                    if (configInterface.cfg.SeparateAlliance && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
+                    if (configInterface.cfg.SeparatedAlliance.Enabled && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
                     {
-                        return configInterface.cfg.AllianceOption;
+                        return configInterface.cfg.SeparatedAlliance.EspOption;
                     }
                 }
 
@@ -212,7 +224,29 @@ public class RadarHelpers
                 {
                     return configInterface.cfg.NpcOption;
                 }
-                
+
+                if (configInterface.cfg.SeparatedRankOne.Enabled || configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
+                {
+                    if (RankDictionary.TryGetValue(bnpc.DataId, out var value))
+                    {
+                        switch (value)
+                        {
+                            case 1:
+                                if (configInterface.cfg.SeparatedRankOne.Enabled)
+                                {
+                                    return configInterface.cfg.SeparatedRankOne.EspOption;
+                                }
+                                break;
+                            case 2: case 6:
+                                if (configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
+                                {
+                                    return configInterface.cfg.SeparatedRankTwoAndSix.EspOption;
+                                }
+                                break;
+                        }
+                    }
+                }
+
                 if (bnpc is BattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo })
                 {
                     return configInterface.cfg.CompanionOption;

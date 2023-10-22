@@ -20,7 +20,7 @@ public class Configuration
         public int RelativeLevelsBelow = 20;
         public ESPOption LevelRenderEspOption = new(mobOptDefault);
     }
-    
+
     public class FontSettings
     {
         public bool UseCustomFont = false;
@@ -34,7 +34,7 @@ public class Configuration
         public bool ShowPlayers = false;
         public bool ShowNpcs = true;
     }
-    
+
     public class HitboxOptions
     {
         public bool HitboxEnabled = false;
@@ -86,6 +86,12 @@ public class Configuration
         public uint FrontConeOpacity = 0x30FFFFFF;
     }
 
+    public class SeparatedEspOption
+    {
+        public bool Enabled = false;
+        public ESPOption EspOption = new(objectOptDefault);
+    }
+
     public class ESPOption
     {
         public ESPOption()
@@ -104,13 +110,14 @@ public class Configuration
         }
 
         public bool Enabled = true;
+
         /*
         public bool ShowDot = true;
         public bool ShowHp = false;
         public bool ReplaceDotWithHP = false;
         public bool ShowName = true;*/
         public bool ShowMp = false;
-        
+
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public uint ColorU = 0xffffffff;
         public bool ShowFC = false; // Unused
@@ -123,27 +130,14 @@ public class Configuration
 
     public class Config : IPluginConfiguration
     {
-        public int Version { get; set; } = 1;
+        public int Version { get; set; } = 2;
         public string ConfigName = "default";
         public bool Enabled = true;
         public bool UseBackgroundDrawList = false;
         public bool ShowBaDdObjects = true;
-        public bool ShowLoot = false;
         public bool DebugMode = false;
+        public bool RankText = true;
         public bool DebugText = false;
-        public bool ShowPlayers = false;
-        public bool ShowEnemies = true;
-        public bool ShowEvents = false;
-        public bool ShowCompanion = false;
-        public bool ShowEventNpc= false;
-        public bool ShowAreaObjects = false;
-        public bool ShowAetherytes = false;
-        public bool ShowCardStand = false;
-        public bool ShowGatheringPoint = false;
-        public bool ShowMountType = false;
-        public bool ShowRetainer = false;
-        public bool ShowHousing = false;
-        public bool ShowCutscene = false;
         public bool ShowNameless = false;
         public bool ShowOnlyVisible = true;
         public bool OverrideShowInvisiblePlayerCharacters = true;
@@ -152,11 +146,11 @@ public class Configuration
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true, AppendLevelToName = false };
-        public ESPOption PlayerOption { get; set; } = new(playerOptDefault) { Enabled = true };
-        public ESPOption YourPlayerOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Turquoise};
-        public ESPOption FriendOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Orange};
-        public ESPOption AllianceOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Gold};
-        public ESPOption PartyOption { get; set; } = new(playerOptDefault) { Enabled = true, ColorU = UtilInfo.Turquoise};
+        public ESPOption PlayerOption { get; set; } = new(playerOptDefault);
+        public ESPOption YourPlayerOption { get; set; } = new(playerOptDefault) { ColorU = UtilInfo.Turquoise };
+        public ESPOption FriendOption { get; set; } = new(playerOptDefault) { ColorU = UtilInfo.Orange };
+        public ESPOption AllianceOption { get; set; } = new(playerOptDefault) { ColorU = UtilInfo.Gold };
+        public ESPOption PartyOption { get; set; } = new(playerOptDefault) { ColorU = UtilInfo.Turquoise };
         public ESPOption TreasureOption { get; set; } = new(objectOptDefault) { Enabled = true };
         public ESPOption CompanionOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public ESPOption AreaOption { get; set; } = new(objectOptDefault) { Enabled = false };
@@ -184,6 +178,24 @@ public class Configuration
         public FontSettings FontSettings { get; set; } = new();
         public LevelRendering LevelRendering { get; set; } = new();
         public float EspPadding = UtilInfo.DefaultEspPadding;
+
+        public SeparatedEspOption SeparatedAlliance = new()
+            { EspOption = new ESPOption(playerOptDefault) { ColorU = UtilInfo.Gold } };
+
+        public SeparatedEspOption SeparatedYourPlayer = new()
+            { EspOption = new ESPOption(playerOptDefault) { ColorU = UtilInfo.Turquoise } };
+
+        public SeparatedEspOption SeparatedParty = new()
+            { EspOption = new ESPOption(playerOptDefault) { ColorU = UtilInfo.Turquoise } };
+
+        public SeparatedEspOption SeparatedFriends = new()
+            { EspOption = new ESPOption(playerOptDefault) { ColorU = UtilInfo.Orange } };
+
+        public SeparatedEspOption SeparatedRankOne = new()
+            { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Gold } };
+
+        public SeparatedEspOption SeparatedRankTwoAndSix = new()
+            { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Yellow } };
     }
 
     public Config cfg;
@@ -217,7 +229,7 @@ public class Configuration
         DrawDistance = false,
     };
 
-    [NonSerialized] public string[] configs = new[]{""};
+    [NonSerialized] public string[] configs = new[] { "" };
 
     [NonSerialized] public int selectedConfig = 0;
     [NonSerialized] private readonly IPluginLog pluginLog;
@@ -240,33 +252,31 @@ public class Configuration
 
     private void MigrateCfg(ref Config oldConfig)
     {
-        // Migrate version 0 to 1
-        if (oldConfig.Version == 0)
+        // Migrate version 1 to 2
+
+        if (oldConfig.Version == 1)
         {
-            oldConfig.Version = 1;
-            oldConfig.NpcOption.Enabled = oldConfig.ShowEnemies;
-            oldConfig.PlayerOption.Enabled = oldConfig.ShowPlayers;
-            oldConfig.TreasureOption.Enabled = oldConfig.ShowLoot;
-            oldConfig.CompanionOption.Enabled = oldConfig.ShowCompanion;
-            oldConfig.AreaOption.Enabled = oldConfig.ShowAreaObjects;
-            oldConfig.AetheryteOption.Enabled = oldConfig.ShowAetherytes;
-            oldConfig.EventNpcOption.Enabled = oldConfig.ShowEventNpc;
-            oldConfig.EventObjOption.Enabled = oldConfig.ShowEvents;
-            oldConfig.GatheringPointOption.Enabled = oldConfig.ShowGatheringPoint;
-            oldConfig.MountOption.Enabled = oldConfig.ShowMountType;
-            oldConfig.RetainerOption.Enabled = oldConfig.ShowRetainer;
-            oldConfig.HousingOption.Enabled = oldConfig.ShowHousing;
-            oldConfig.CutsceneOption.Enabled = oldConfig.ShowCutscene;
-            oldConfig.CardStandOption.Enabled = oldConfig.ShowCardStand;
+            oldConfig.Version = 2;
+            oldConfig.SeparatedAlliance.EspOption = oldConfig.AllianceOption;
+            oldConfig.SeparatedAlliance.Enabled = oldConfig.SeparateAlliance;
+            
+            oldConfig.SeparatedFriends.EspOption = oldConfig.FriendOption;
+            oldConfig.SeparatedFriends.Enabled = oldConfig.SeparateFriends;
+            
+            oldConfig.SeparatedParty.EspOption = oldConfig.PartyOption;
+            oldConfig.SeparatedParty.Enabled = oldConfig.SeparateParty;
+            
+            oldConfig.SeparatedYourPlayer.EspOption = oldConfig.YourPlayerOption;
+            oldConfig.SeparatedYourPlayer.Enabled = oldConfig.SeparateYourPlayer;
         }
     }
-    
+
     public void SaveCurrentConfig()
     {
         pluginLog.Debug($"Saving config {cfg.ConfigName}");
         SavePluginConfig(cfg, cfg.ConfigName);
     }
-    
+
     public bool LoadConfig(string configName)
     {
         pluginLog.Debug($"Loading config {configName}");
@@ -280,17 +290,19 @@ public class Configuration
             Save();
             return true;
         }
+
         pluginLog.Error("Config was NOT loaded!");
         return false;
     }
-    
+
     public void Save()
     {
         pluginInterface.SavePluginConfig(cfg);
     }
-    
-    public void UpdateConfigs() {
-        configs = this.pluginInterface.ConfigDirectory.GetFiles().Select(x => x.Name.Substring(0, x.Name.Length-5)).ToArray();
+
+    public void UpdateConfigs()
+    {
+        configs = this.pluginInterface.ConfigDirectory.GetFiles().Select(x => x.Name.Substring(0, x.Name.Length - 5)).ToArray();
         if (selectedConfig >= configs.Length)
         {
             selectedConfig = 0;
@@ -311,7 +323,7 @@ public class Configuration
 
         SavePluginConfig(newConfig, newConfig.ConfigName);
     }
-    
+
     public void DeleteConfig(string configName)
     {
         pluginLog.Debug($"Deleting config {configName}");
@@ -321,12 +333,12 @@ public class Configuration
         {
             configFile.Delete();
         }
+
         UpdateConfigs();
     }
-    
+
     private Config? Load(string configName)
     {
-
         var path = this.pluginInterface.ConfigDirectory.FullName + "/" + configName + ".json";
         FileInfo configFile = new FileInfo(path);
         pluginLog.Debug(configFile.FullName);
@@ -341,16 +353,16 @@ public class Configuration
         this.Save(currentConfig, path);
         UpdateConfigs();
     }
-    
-    internal void Save(Config config, string path) => 
-        this.WriteAllTextSafe(path , this.SerializeConfig(config));
+
+    internal void Save(Config config, string path) =>
+        this.WriteAllTextSafe(path, this.SerializeConfig(config));
 
     internal string SerializeConfig(Config config) => JsonConvert.SerializeObject(config, Formatting.Indented, new JsonSerializerSettings()
     {
         TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         TypeNameHandling = TypeNameHandling.Objects
     });
-    
+
     internal void WriteAllTextSafe(string path, string text)
     {
         var str = path + ".tmp";
@@ -359,11 +371,10 @@ public class Configuration
         File.WriteAllText(str, text);
         File.Move(str, path, true);
     }
-    
+
     internal static Config? DeserializeConfig(string data) => JsonConvert.DeserializeObject<Config>(data, new JsonSerializerSettings()
     {
         TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
         TypeNameHandling = TypeNameHandling.None
     });
-    
 }
