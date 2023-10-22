@@ -4,5 +4,5 @@
   "Description": "3D Radar to see enemies, objects, and interactables through walls.\nThis is an ESP, please don't use it to call aliens down.\nPlease report any issues to the author.",
   "RepoUrl": "https://github.com/KangasZ/RadarPlugin",
   "Punchline": "See everything through walls",
-  "Changelog": "Moved some settings from utility to main menu\nChanged command syntax and included chat receipt\nAdded max distance to aggro radius\nAdded override invisible check for player characters\nAdded level rendering to text\nAdded level-based rendering."
+  "Changelog": "Rank 1,2 and 6 separators. Intended to benefit hunting and bossing.\nBackend changes to config."
 }
