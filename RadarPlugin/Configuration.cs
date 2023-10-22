@@ -136,7 +136,7 @@ public class Configuration
         public bool UseBackgroundDrawList = false;
         public bool ShowBaDdObjects = true;
         public bool DebugMode = false;
-        public bool RankText = true;
+        public bool RankText = false;
         public bool DebugText = false;
         public bool ShowNameless = false;
         public bool ShowOnlyVisible = true;
