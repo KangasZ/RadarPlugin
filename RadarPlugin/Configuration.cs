@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
@@ -141,7 +142,7 @@ public class Configuration
             AppendLevelToName = espOption.AppendLevelToName;
         }
 
-        public ESPOptionMobBased(ESPOption espOption, string name)
+        public ESPOptionMobBased(ESPOption espOption, string name, MobType mobType = MobType.Object)
         {
             Name = name;
             Enabled = espOption.Enabled;
@@ -150,8 +151,9 @@ public class Configuration
             ShowFC = espOption.ShowFC;
             DrawDistance = espOption.DrawDistance;
             AppendLevelToName = espOption.AppendLevelToName;
+            MobTypeValue = mobType;
         }
-
+        public MobType MobTypeValue = MobType.Object;
         public string Name = string.Empty;
     }
 
@@ -287,7 +289,8 @@ public class Configuration
         var dataId = gameObject.DataId;
         if (customizeEnabled)
         {
-            var newSettings = new ESPOptionMobBased(currentSettings, gameObject.Name.TextValue ?? "Unknown");
+            var mobtype = gameObject.ObjectKind == ObjectKind.BattleNpc ? MobType.Character : MobType.Object;
+            var newSettings = new ESPOptionMobBased(currentSettings, gameObject.Name.TextValue ?? "Unknown", mobtype);
             if (cfg.OptionOverride.ContainsKey(dataId))
             {
                 cfg.OptionOverride.Remove(dataId);

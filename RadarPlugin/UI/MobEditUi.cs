@@ -120,6 +120,7 @@ public class MobEditUi : IDisposable
                 if (isUsingCustomEspOption)
                 {
                     var configBlocked = mobOvveride.Enabled;
+                    var overriddenOption = configInterface.cfg.OptionOverride[localObject.DataId];
                     if (ImGui.Checkbox($"Enabled##{localObject.Address}", ref configBlocked))
                     {
                         configInterface.cfg.OptionOverride[localObject.DataId].Enabled = configBlocked;
@@ -131,8 +132,8 @@ public class MobEditUi : IDisposable
                         configInterface.cfg.OptionOverride[localObject.DataId].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
                         configInterface.Save();
                     }
-                    // TODO: Mobtype and display origination helpers
-                    typeConfiguration.OpenUiWithType(ref mobOvveride, localObject.Name.TextValue.ToString() ?? "Unknown", MobType.Object, DisplayOrigination.DeepDungeon);
+                    // TODO: display origination helpers
+                    typeConfiguration.OpenUiWithType(ref mobOvveride, localObject.Name.TextValue.ToString() ?? "Unknown", overriddenOption.MobTypeValue, DisplayOrigination.DeepDungeon);
                 }
             }
             

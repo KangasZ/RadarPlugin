@@ -49,33 +49,10 @@ public class CustomizedEntitiesUI : IDisposable
         var size = new Vector2(560, 500);
         ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
-        if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref drawCurrentMobsWindow))
+        if (ImGui.Begin("Radar Plugin Customized Entities Menu", ref drawCurrentMobsWindow))
         {
-            ImGui.SameLine();
-            var showPlayers = configInterface.cfg.LocalMobsUiSettings.ShowPlayers;
-            if (ImGui.Checkbox("Players##localmobsui", ref showPlayers))
-            {
-                configInterface.cfg.LocalMobsUiSettings.ShowPlayers = showPlayers;
-                configInterface.Save();
-            }
 
-            ImGui.SameLine();
-            var showDuplicates = configInterface.cfg.LocalMobsUiSettings.Duplicates;
-            if (ImGui.Checkbox("Duplicates##localmobsui", ref showDuplicates))
-            {
-                configInterface.cfg.LocalMobsUiSettings.Duplicates = showDuplicates;
-                configInterface.Save();
-            }
-
-            ImGui.SameLine();
-            var showNpcs = configInterface.cfg.LocalMobsUiSettings.ShowNpcs;
-            if (ImGui.Checkbox("NPCs##localmobsui", ref showNpcs))
-            {
-                configInterface.cfg.LocalMobsUiSettings.ShowNpcs = showNpcs;
-                configInterface.Save();
-            }
-
-            ImGui.BeginTable("customizedEntitiesTable", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.BeginTable("customizedEntitiesTable", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
             ImGui.TableSetupColumn("DataId");
             ImGui.TableSetupColumn("Name When Added");
             ImGui.TableSetupColumn("Enabled");
@@ -97,6 +74,7 @@ public class CustomizedEntitiesUI : IDisposable
                     configInterface.Save();
                 }
                 //Color
+                //shouldSave |= UiHelpers.Vector4ColorSelector($"##{x.Key}-color", ref x.Value.ColorU, ImGuiColorEditFlags.NoInputs);
                 var colorChange = ImGui.ColorConvertU32ToFloat4(x.Value.ColorU);
                 if (ImGui.ColorEdit4($"##{x.Key}-color", ref colorChange,
                         ImGuiColorEditFlags.NoInputs))
@@ -109,10 +87,8 @@ public class CustomizedEntitiesUI : IDisposable
                 if (ImGui.Button($"Edit##{x.Key}"))
                 {
                     var optionOverride = (Configuration.ESPOption)configInterface.cfg.OptionOverride[x.Key];
-                    //TODO: mobtype and display origination
-                    typeConfigurator.OpenUiWithType(ref optionOverride, x.Value.Name, MobType.Object, DisplayOrigination.DeepDungeon);
+                    typeConfigurator.OpenUiWithType(ref optionOverride, x.Value.Name, ((Configuration.ESPOptionMobBased)optionOverride).MobTypeValue, DisplayOrigination.DeepDungeon);
                 }
-                
             }
 
             ImGui.EndTable();

@@ -28,7 +28,7 @@ public class PluginCommands : IDisposable
         });
         this.commandManager.AddHandler("/radarcfg", new CommandInfo(RadarCfgCommand)
         {
-            HelpMessage = "Opens configuration. Subcommands: /radarcfg [ load ] { fileName }",
+            HelpMessage = "Loads config manually. Subcommands: /radarcfg [ load ] { fileName }",
             ShowInHelp = true
         });
     }

@@ -226,17 +226,6 @@ public class RadarHelpers
         }
     }
 
-    public uint? GetColorOverride(GameObject gameObject)
-    {
-        // Override over all
-        if (configInterface.cfg.ColorOverride.TryGetValue(gameObject.DataId, out var colorOverride))
-        {
-            return colorOverride;
-        }
-
-        return null;
-    }
-
     public Configuration.ESPOption GetParamsWithOverride(GameObject areaObject)
     {
         // If overridden
