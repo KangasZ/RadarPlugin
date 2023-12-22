@@ -91,6 +91,7 @@ public class RadarLogic : IDisposable
         if (CheckDraw()) return;
         DrawRadar();
         radarHelpers.ResetDistance();
+        radarHelpers.CullOldMobMovement();
     }
 
     private ImFontPtr LoadFont()
@@ -381,35 +382,7 @@ public class RadarLogic : IDisposable
     private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, uint objectOptionColor,
         GameObject gameObject, Configuration.ESPOption espOption)
     {
-        var tagText = radarHelpers.GetText(gameObject);
-        if (espOption.ReplaceWithJobName && gameObject is PlayerCharacter { ClassJob.GameData: { } } pc)
-        {
-            tagText = pc.ClassJob.GameData.Abbreviation.RawString;
-        }
-
-        if (gameObject is BattleNpc battleNpc)
-        {
-            if (espOption.AppendLevelToName)
-            {
-                tagText += $" LV:{battleNpc.Level}";
-            }
-
-            if (configInterface.cfg.RankText)
-            {
-                tagText += $"\nD {battleNpc.DataId}";
-                tagText += $"\nN {battleNpc.NameId}";
-                if (radarHelpers.RankDictionary.TryGetValue(battleNpc.DataId, out byte value))
-                {
-                    tagText += $"\nR {value}";
-                }
-            }
-        }
-
-        if (espOption.DrawDistance)
-        {
-            if (clientState.LocalPlayer != null)
-                tagText += radarHelpers.GetDistanceFromPlayer(gameObject).ToString(" 0.0m");
-        }
+        var tagText = radarHelpers.GetText(gameObject, espOption);
 
         var tagTextSize = ImGui.CalcTextSize(tagText);
         imDrawListPtr.AddText(

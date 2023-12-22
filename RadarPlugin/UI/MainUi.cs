@@ -497,7 +497,10 @@ public class MainUi : IDisposable
                 DrawSettingsOverview(levelRenderingSettings.LevelRenderEspOption, "Level-Based Enemies", "", MobType.Character);
             }
         }
-
+        
+        ImGui.Text("EXPERIMENTAL");
+        shouldSave |= UiHelpers.DrawCheckbox("Mob Timers", ref configInterface.cfg.EXPERIMENTALEnableMobTimerTracking, "Enable Mob Timer Tracking in deep dungeons and eureka");
+        
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
     }

@@ -227,6 +227,7 @@ public class Configuration
 
         public SeparatedEspOption SeparatedRankTwoAndSix = new()
             { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Yellow } };
+        public bool EXPERIMENTALEnableMobTimerTracking = false;
     }
 
     public Config cfg;

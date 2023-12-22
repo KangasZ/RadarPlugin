@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -21,6 +22,8 @@ public class RadarHelpers
     private Dictionary<uint, float> distanceDictionary;
     private readonly IDataManager dataManager;
     public readonly Dictionary<uint, byte> RankDictionary = new();
+
+    private Dictionary<uint, (Vector4 Position, DateTime Time)> lastMovementDictionary = new();
 
     public RadarHelpers(
         Configuration configInterface,
@@ -123,24 +126,95 @@ public class RadarHelpers
     /**
      * TODO: Refactor this to be done once per second instead of on each render.
      */
-    public string GetText(GameObject obj)
+    public string GetText(GameObject gameObject, Configuration.ESPOption espOption)
     {
-        var text = "";
-        if (obj.DataId != 0 && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
-            UtilInfo.RenameList.ContainsKey(obj.DataId))
+        var tagText = "";
+        if (gameObject.DataId != 0 && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+            UtilInfo.RenameList.ContainsKey(gameObject.DataId))
         {
-            text = UtilInfo.RenameList[obj.DataId];
+            tagText = UtilInfo.RenameList[gameObject.DataId];
         }
-        else if (string.IsNullOrWhiteSpace(obj.Name.TextValue))
+        else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))
         {
-            text = "''";
+            tagText = "''";
         }
         else
         {
-            text = obj.Name.TextValue;
+            tagText = gameObject.Name.TextValue;
         }
 
-        return configInterface.cfg.DebugText ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
+        // Replace player names with job abbreviations
+        if (espOption.ReplaceWithJobName && gameObject is PlayerCharacter { ClassJob.GameData: { } } pc)
+        {
+            tagText = pc.ClassJob.GameData.Abbreviation.RawString;
+        }
+
+        // Append LEVEL and RANK to name
+        if (gameObject is BattleNpc battleNpc)
+        {
+            if (espOption.AppendLevelToName)
+            {
+                tagText += $" LV:{battleNpc.Level}";
+            }
+
+            // DEBUG rank text
+            if (configInterface.cfg.RankText)
+            {
+                tagText += $"\nD {battleNpc.DataId}";
+                tagText += $"\nN {battleNpc.NameId}";
+                if (RankDictionary.TryGetValue(battleNpc.DataId, out byte value))
+                {
+                    tagText += $"\nR {value}";
+                }
+            }
+        }
+
+        // Draw distance
+        if (espOption.DrawDistance)
+        {
+            if (clientState.LocalPlayer != null)
+                tagText += GetDistanceFromPlayer(gameObject).ToString(" 0.0m");
+        }
+
+        if (configInterface.cfg.EXPERIMENTALEnableMobTimerTracking
+            && gameObject.ObjectKind == ObjectKind.BattleNpc
+            && (((BattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) != 0)
+        {
+            tagText += (GetTimeElapsedFromMovement(gameObject).Milliseconds/1000).ToString(" 0.0m");
+        }
+
+        return configInterface.cfg.DebugText
+            ? $"{gameObject.Name}, {gameObject.DataId}, {gameObject.ObjectKind}"
+            : $"{tagText}";
+    }
+
+    private TimeSpan GetTimeElapsedFromMovement(GameObject gameObject)
+    {
+        if (lastMovementDictionary.TryGetValue(gameObject.ObjectId, out var value))
+        {
+            // Fuzzy equals on stuff
+            if (!value.Position.X.FuzzyEquals(gameObject.Position.X) ||
+                !value.Position.Y.FuzzyEquals(gameObject.Position.Y) ||
+                !value.Position.Z.FuzzyEquals(gameObject.Position.Z) ||
+                !value.Position.W.FuzzyEquals(gameObject.Rotation))
+            {
+                var positionVector = new Vector4(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z,
+                    gameObject.Rotation);
+                lastMovementDictionary[gameObject.ObjectId] = (positionVector, DateTime.Now);
+                return TimeSpan.Zero;
+            }
+            else
+            {
+                return DateTime.Now - value.Time;
+            }
+        }
+        else
+        {
+            var positionVector = new Vector4(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z,
+                gameObject.Rotation);
+            lastMovementDictionary.Add(gameObject.ObjectId, (positionVector, DateTime.Now));
+            return TimeSpan.Zero;
+        }
     }
 
     public uint? GetColorOverride(GameObject gameObject)
@@ -164,7 +238,7 @@ public class RadarHelpers
 
         return GetParams(areaObject);
     }
-    
+
     public Configuration.ESPOption GetParams(GameObject areaObject)
     {
         // If Deep Dungeon
@@ -323,6 +397,17 @@ public class RadarHelpers
             case ObjectKind.None:
             default:
                 return configInterface.cfg.NpcOption;
+        }
+    }
+
+    public void CullOldMobMovement()
+    {
+        foreach (var mobMovement in lastMovementDictionary)
+        {
+            if (DateTime.Now - mobMovement.Value.Time > TimeSpan.FromSeconds(100))
+            {
+                lastMovementDictionary.Remove(mobMovement.Key);
+            }
         }
     }
 }

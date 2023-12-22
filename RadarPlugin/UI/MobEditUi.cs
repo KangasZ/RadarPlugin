@@ -61,7 +61,7 @@ public class MobEditUi : IDisposable
             ImGui.TableNextColumn();
             ImGui.Text("Given Name");
             ImGui.TableNextColumn();
-            ImGui.Text($"{radarHelpers.GetText(localObject)}");
+            ImGui.Text($"{radarHelpers.GetText(localObject, mobOvveride)}");
             ImGui.TableNextColumn();
             ImGui.Text("Data ID");
             ImGui.TableNextColumn();
