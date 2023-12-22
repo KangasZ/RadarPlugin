@@ -39,7 +39,7 @@ public class RadarPlugin : IDalamudPlugin
         mobEditUi = new MobEditUi(pluginInterface, Configuration, radarHelpers, typeConfiguratorUi);
         localMobsUi = new LocalMobsUi(pluginInterface, Configuration, objectTable, mobEditUi, radarHelpers, pluginLog);
         customizedEntitiesUi = new CustomizedEntitiesUI(pluginInterface, Configuration, radarHelpers, pluginLog, typeConfiguratorUi);
-        mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers, typeConfiguratorUi, customizedEntitiesUi);
+        mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers, typeConfiguratorUi, customizedEntitiesUi, pluginLog);
 
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi, Configuration, chatGui);

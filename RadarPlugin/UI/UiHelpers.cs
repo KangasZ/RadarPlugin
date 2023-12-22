@@ -14,6 +14,12 @@ namespace RadarPlugin.UI;
 
 public static class UiHelpers
 {
+    public static void TextColored(string text, uint color)
+    {
+        ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color),
+            "1. Use tabs to customize experience and fix invisible mobs.\n" +
+            "2. Bring bugs or feature requests up\n");
+    }
     public static bool DrawSettingsDetailed(Configuration.ESPOption option, string id, MobType mobType, DisplayOrigination displayOrigination)
     {
         var shouldSave = false;
@@ -194,7 +200,7 @@ public static class UiHelpers
         return true;
     }
 
-    public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText)
+    public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText = null)
     {
         var retStatement = false;
         var tempVar = boxValue;
