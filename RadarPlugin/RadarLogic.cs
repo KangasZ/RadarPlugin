@@ -184,7 +184,8 @@ public class RadarLogic : IDisposable
         {
             var espOption = radarHelpers.GetParamsWithOverride(areaObject);
             // Temporary script that updates the new option override with current settings if it hasn't been migrated
-            if (configInterface.cfg.ColorOverride.TryGetValue(areaObject.DataId, out var optionOverride) && !configInterface.cfg.OptionOverride.ContainsKey(areaObject.DataId))
+            if (configInterface.cfg.ColorOverride.TryGetValue(areaObject.DataId, out var optionOverride) &&
+                !configInterface.cfg.OptionOverride.ContainsKey(areaObject.DataId))
             {
                 espOption.ColorU = optionOverride;
                 configInterface.cfg.ColorOverride.Remove(areaObject.DataId);
@@ -331,7 +332,7 @@ public class RadarLogic : IDisposable
 
                     DrawAggroRadius(drawListPtr, gameObject.Position, aggroRadius + gameObject.HitboxRadius,
                         gameObject.Rotation,
-                        uint.MaxValue);
+                        uint.MaxValue, npc2);
                 }
 
                 break;
@@ -407,7 +408,7 @@ public class RadarLogic : IDisposable
     }
 
     private void DrawAggroRadius(ImDrawListPtr imDrawListPtr, Vector3 position, float radius, float rotation,
-        uint objectOptionColor)
+        uint objectOptionColor, BattleNpc battleNpc)
     {
         var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
         rotation += MathF.PI / 4;
@@ -417,21 +418,44 @@ public class RadarLogic : IDisposable
 
         //todo: handle CONE
         //todo: shove opacity into color 
-        var frontColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
-        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI / 2, radius, frontColor,
-            thickness, numSegments);
-        var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity;
-        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI / 2, MathF.PI / 2, radius,
-            rightColor, thickness, numSegments);
-        var backColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
-        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI, MathF.PI / 2, radius,
-            backColor, thickness, numSegments);
-        var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity;
-        DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + (MathF.PI * 1.5f), MathF.PI / 2, radius,
-            leftColor, thickness, numSegments);
-        var coneColor = configInterface.cfg.AggroRadiusOptions.FrontConeColor &
-                        configInterface.cfg.AggroRadiusOptions.FrontConeOpacity;
-        DrawConeAtCenterPointFromRotation(imDrawListPtr, position, rotation, MathF.PI / 2, radius, coneColor, 50);
+        radarHelpers.AggroTypeDictionary.TryGetValue(battleNpc.NameId, out var aggroType);
+        switch (aggroType)
+        {
+            case AggroType.Proximity:
+                var proximityColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
+                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI * 2, radius,
+                    proximityColor,
+                    thickness, numSegments);
+                break;
+            case AggroType.Sound:
+                var soundColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
+                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI * 2, radius,
+                    soundColor, thickness, numSegments);
+                break;
+            case AggroType.Sight:
+                var frontColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
+                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI / 2, radius, frontColor,
+                    thickness, numSegments);
+                var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity;
+                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI / 2, MathF.PI / 2,
+                    radius,
+                    rightColor, thickness, numSegments);
+                var backColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
+                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI, MathF.PI / 2, radius,
+                    backColor, thickness, numSegments);
+                var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity;
+                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + (MathF.PI * 1.5f), MathF.PI / 2,
+                    radius,
+                    leftColor, thickness, numSegments);
+                var coneColor = configInterface.cfg.AggroRadiusOptions.FrontConeColor &
+                                configInterface.cfg.AggroRadiusOptions.FrontConeOpacity;
+                DrawConeAtCenterPointFromRotation(imDrawListPtr, position, rotation, MathF.PI / 2, radius, coneColor,
+                    50);
+
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
 
         imDrawListPtr.PathClear();
     }

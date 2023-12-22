@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Text.Json;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -11,6 +13,7 @@ using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using RadarPlugin.Enums;
+using RadarPlugin.Models;
 
 namespace RadarPlugin;
 
@@ -22,7 +25,7 @@ public class RadarHelpers
     private Dictionary<uint, float> distanceDictionary;
     private readonly IDataManager dataManager;
     public readonly Dictionary<uint, byte> RankDictionary = new();
-
+    public readonly Dictionary<uint, AggroType> AggroTypeDictionary = new();
     private Dictionary<uint, (Vector4 Position, DateTime Time)> lastMovementDictionary = new();
 
     public RadarHelpers(
@@ -43,9 +46,15 @@ public class RadarHelpers
         {
             RankDictionary = excelBnpcs.ToDictionary(x => x.RowId, x => x.Rank);
         }
+
+        var json = File.ReadAllText("Data/allMobs.json");
+        var mobs = JsonSerializer.Deserialize<List<AggroInfo>>(json);
+        if (mobs.Count > 0)
+        {
+            AggroTypeDictionary = mobs.ToDictionary(mob => mob.NameId, mob => mob.AggroType);
+        }
     }
-
-
+    
     public unsafe bool ShouldRender(GameObject obj)
     {
         // Objest valid check
