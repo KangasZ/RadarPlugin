@@ -50,11 +50,12 @@ public class RadarHelpers
         //if (obj.DataId == GameObject.InvalidGameObjectId) return false;
 
         // Object within ignore lists
-        if (UtilInfo.DataIdIgnoreList.Contains(obj.DataId) || configInterface.cfg.DataIdIgnoreList.Contains(obj.DataId)) return false;
+        if (UtilInfo.DataIdIgnoreList.Contains(obj.DataId)) return false;
 
         // Object visible & config check
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
-        if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))// || !clientstructobj->GetIsTargetable()))
+        if (configInterface.cfg.ShowOnlyVisible &&
+            (clientstructobj->RenderFlags != 0)) // || !clientstructobj->GetIsTargetable()))
         {
             // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still. 
             if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters) return false;
@@ -63,12 +64,15 @@ public class RadarHelpers
         // Distance check
 
         // Eureka DD STQ
-        if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
+        if (configInterface.cfg.ShowBaDdObjects && GetCurrentZoneType() == LocationKind.DeepDungeon)
         {
             // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
             if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)) return true;
             if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob) return true;
+            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not BattleNpc
+                {
+                    BattleNpcKind: BattleNpcSubKind.Enemy
+                } mob) return true;
             if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
             return !mob.IsDead;
         }
@@ -102,10 +106,18 @@ public class RadarHelpers
         return distance;
     }
 
-    public bool IsSpecialZone()
+    public LocationKind GetCurrentZoneType()
     {
-        return UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) ||
-               this.conditionInterface[ConditionFlag.InDeepDungeon];
+        if (UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) ||
+            this.conditionInterface[ConditionFlag.InDeepDungeon])
+        {
+            return LocationKind.DeepDungeon;
+        }
+        else
+        {
+            //todo: handle eureka differently
+            return LocationKind.Overworld;
+        }
     }
 
     /**
@@ -127,7 +139,7 @@ public class RadarHelpers
         {
             text = obj.Name.TextValue;
         }
-        
+
         return configInterface.cfg.DebugText ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
     }
 
@@ -142,10 +154,22 @@ public class RadarHelpers
         return null;
     }
 
+    public Configuration.ESPOption GetParamsWithOverride(GameObject areaObject)
+    {
+        // If overridden
+        if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
+        {
+            return optionOverride;
+        }
+
+        return GetParams(areaObject);
+    }
+    
     public Configuration.ESPOption GetParams(GameObject areaObject)
     {
         // If Deep Dungeon
-        if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
+        var zoneType = GetCurrentZoneType();
+        if (configInterface.cfg.ShowBaDdObjects && zoneType == LocationKind.DeepDungeon)
         {
             if (UtilInfo.DeepDungeonMobTypesMap.TryGetValue(areaObject.DataId, out var value))
             {
@@ -180,7 +204,10 @@ public class RadarHelpers
                 }
             }
 
-            if (areaObject.ObjectKind == ObjectKind.BattleNpc && areaObject is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
+            if (areaObject.ObjectKind == ObjectKind.BattleNpc && areaObject is BattleNpc
+                {
+                    BattleNpcKind: BattleNpcSubKind.Enemy
+                } mob)
             {
                 return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
             }
@@ -192,25 +219,29 @@ public class RadarHelpers
                 if (areaObject is PlayerCharacter chara)
                 {
                     // Is the object is YOU
-                    if (configInterface.cfg.SeparatedYourPlayer.Enabled && clientState.LocalPlayer != null && chara.Address == clientState.LocalPlayer.Address)
+                    if (configInterface.cfg.SeparatedYourPlayer.Enabled && clientState.LocalPlayer != null &&
+                        chara.Address == clientState.LocalPlayer.Address)
                     {
                         return configInterface.cfg.SeparatedYourPlayer.EspOption;
                     }
 
                     // If is friend
-                    if (configInterface.cfg.SeparatedFriends.Enabled && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
+                    if (configInterface.cfg.SeparatedFriends.Enabled &&
+                        chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
                     {
                         return configInterface.cfg.SeparatedFriends.EspOption;
                     }
 
                     // Is in party
-                    if (configInterface.cfg.SeparatedParty.Enabled && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
+                    if (configInterface.cfg.SeparatedParty.Enabled &&
+                        chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
                     {
                         return configInterface.cfg.SeparatedParty.EspOption;
                     }
 
                     // If in alliance
-                    if (configInterface.cfg.SeparatedAlliance.Enabled && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
+                    if (configInterface.cfg.SeparatedAlliance.Enabled &&
+                        chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
                     {
                         return configInterface.cfg.SeparatedAlliance.EspOption;
                     }
@@ -236,12 +267,15 @@ public class RadarHelpers
                                 {
                                     return configInterface.cfg.SeparatedRankOne.EspOption;
                                 }
+
                                 break;
-                            case 2: case 6:
+                            case 2:
+                            case 6:
                                 if (configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
                                 {
                                     return configInterface.cfg.SeparatedRankTwoAndSix.EspOption;
                                 }
+
                                 break;
                         }
                     }
@@ -254,12 +288,13 @@ public class RadarHelpers
 
                 if (configInterface.cfg.LevelRendering.LevelRenderingEnabled)
                 {
-                    if (clientState.LocalPlayer!.Level - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow > bnpc.Level)
+                    if (clientState.LocalPlayer!.Level - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow >
+                        bnpc.Level)
                     {
                         return configInterface.cfg.LevelRendering.LevelRenderEspOption;
                     }
                 }
-                
+
                 return configInterface.cfg.NpcOption;
             case ObjectKind.EventNpc:
                 return configInterface.cfg.EventNpcOption;

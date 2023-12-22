@@ -37,7 +37,8 @@ public class RadarLogic : IDisposable
     private bool fontBuilt = false;
 
     public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, IObjectTable objectTable,
-        ICondition condition, IClientState clientState, IGameGui gameGui, RadarHelpers radarHelpers, IPluginLog pluginLog)
+        ICondition condition, IClientState clientState, IGameGui gameGui, RadarHelpers radarHelpers,
+        IPluginLog pluginLog)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -58,12 +59,14 @@ public class RadarLogic : IDisposable
     private void BuildFont()
     {
         fontBuilt = false;
-        var fontFile = Path.Combine(pluginInterface.DalamudAssetDirectory.FullName, "UIRes", "NotoSansCJKjp-Medium.otf");
+        var fontFile = Path.Combine(pluginInterface.DalamudAssetDirectory.FullName, "UIRes",
+            "NotoSansCJKjp-Medium.otf");
         if (File.Exists(fontFile))
         {
             try
             {
-                dalamudFont = ImGui.GetIO().Fonts.AddFontFromFileTTF(fontFile, configInterface.cfg.FontSettings.FontSize);
+                dalamudFont = ImGui.GetIO().Fonts
+                    .AddFontFromFileTTF(fontFile, configInterface.cfg.FontSettings.FontSize);
                 fontBuilt = true;
                 this.pluginLog.Debug("Custom dalamud font loaded sucesffully");
             }
@@ -100,13 +103,15 @@ public class RadarLogic : IDisposable
                 if (this.gameFont != null && this.gameFont.Available)
                 {
                     var tempPointer = gameFont.ImFont;
-                    if (tempPointer.IsLoaded() && Math.Abs(tempPointer.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
+                    if (tempPointer.IsLoaded() &&
+                        Math.Abs(tempPointer.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
                     {
                         return this.gameFont.ImFont;
                     }
                 }
 
-                gameFont = pluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis, configInterface.cfg.FontSettings.FontSize));
+                gameFont = pluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis,
+                    configInterface.cfg.FontSettings.FontSize));
                 return gameFont.ImFont;
             }
 
@@ -129,7 +134,7 @@ public class RadarLogic : IDisposable
     {
         // Setup Drawlist
         var bgDl = configInterface.cfg.UseBackgroundDrawList;
-
+        var requiresSave = false;
         ImDrawListPtr drawListPtr;
         if (bgDl)
         {
@@ -169,16 +174,26 @@ public class RadarLogic : IDisposable
             objectTableRef = objectTable.Where(obj => radarHelpers.ShouldRender(obj));
             if (configInterface.cfg.UseMaxDistance && clientState.LocalPlayer != null)
             {
-                objectTableRef = objectTableRef.Where(x => radarHelpers.GetDistanceFromPlayer(x) < configInterface.cfg.MaxDistance);
+                objectTableRef = objectTableRef.Where(x =>
+                    radarHelpers.GetDistanceFromPlayer(x) < configInterface.cfg.MaxDistance);
             }
         }
 
         foreach (var areaObject in objectTableRef)
         {
-            var espOption = radarHelpers.GetParams(areaObject);
+            var espOption = radarHelpers.GetParamsWithOverride(areaObject);
+            // Temporary script that updates the new option override with current settings if it hasn't been migrated
+            if (configInterface.cfg.ColorOverride.TryGetValue(areaObject.DataId, out var optionOverride) && !configInterface.cfg.OptionOverride.ContainsKey(areaObject.DataId))
+            {
+                espOption.ColorU = optionOverride;
+                configInterface.cfg.ColorOverride.Remove(areaObject.DataId);
+                var name = areaObject.Name.TextValue ?? "Unknown";
+                pluginLog.Information("Migrated {Name} to new override system", name);
+                configInterface.CustomizeMob(areaObject, true, espOption);
+            }
+
             if (!espOption.Enabled && !configInterface.cfg.DebugMode) continue;
-            var color = radarHelpers.GetColorOverride(areaObject);
-            DrawEsp(drawListPtr, areaObject, color, espOption);
+            DrawEsp(drawListPtr, areaObject, espOption.ColorU, espOption);
         }
 
         if (!bgDl)
@@ -289,7 +304,8 @@ public class RadarLogic : IDisposable
                             insideColorResolved = colorResolved & configInterface.cfg.HitboxOptions.InsideCircleOpacity;
                         }
 
-                        DrawConeAtCenterPointFromRotation(drawListPtr, gameObject.Position, gameObject.Rotation, MathF.PI * 2, gameObject.HitboxRadius,
+                        DrawConeAtCenterPointFromRotation(drawListPtr, gameObject.Position, gameObject.Rotation,
+                            MathF.PI * 2, gameObject.HitboxRadius,
                             insideColorResolved, 100);
                     }
                 }
@@ -297,10 +313,12 @@ public class RadarLogic : IDisposable
                 if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
                 {
                     // Aggro radius max distance check
-                    if (configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool && radarHelpers.GetDistanceFromPlayer(npc2) > configInterface.cfg.AggroRadiusOptions.MaxDistance)
+                    if (configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool &&
+                        radarHelpers.GetDistanceFromPlayer(npc2) > configInterface.cfg.AggroRadiusOptions.MaxDistance)
                     {
-                            return;
+                        return;
                     }
+
                     if (!configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat &&
                         (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
                     if (npc2.BattleNpcKind != BattleNpcSubKind.Enemy) return;
@@ -386,7 +404,7 @@ public class RadarLogic : IDisposable
                 }
             }
         }
-        
+
         if (espOption.DrawDistance)
         {
             if (clientState.LocalPlayer != null)
@@ -508,7 +526,7 @@ public class RadarLogic : IDisposable
     {
         pluginInterface.UiBuilder.Draw -= OnTick;
         this.pluginInterface.UiBuilder.BuildFonts -= BuildFont;
-        PluginLog.Information("Radar Unloaded");
+        pluginLog.Information("Radar Unloaded");
     }
 
     #endregion

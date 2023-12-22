@@ -21,9 +21,10 @@ public class MainUi : IDisposable
     private readonly RadarHelpers radarHelper;
     private const int ChildHeight = 280;
     private readonly TypeConfigurator typeConfigurator;
+    private readonly CustomizedEntitiesUI customizedEntitiesUi;
 
     public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi,
-        IClientState clientState, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator)
+        IClientState clientState, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator, CustomizedEntitiesUI customizedEntitiesUi)
     {
         this.clientState = clientState;
         this.localMobsUi = localMobsUi;
@@ -33,6 +34,7 @@ public class MainUi : IDisposable
         this.typeConfigurator = typeConfigurator;
         this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.dalamudPluginInterface.UiBuilder.OpenConfigUi += OpenUi;
+        this.customizedEntitiesUi = customizedEntitiesUi;
     }
 
     public void Dispose()
@@ -158,8 +160,11 @@ public class MainUi : IDisposable
         ImGui.Separator();
 
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
-        ImGui.Text($"In special zone (dd/eureka?): {radarHelper.IsSpecialZone()}");
-
+        ImGui.Text($"Zone Type: {radarHelper.GetCurrentZoneType()}");
+        if (ImGui.Button("Show Current Customizations"))
+        {
+            customizedEntitiesUi.ShowCustomizedEntitiesUI();
+        }
 
         if (configInterface.cfg.DebugMode)
         {

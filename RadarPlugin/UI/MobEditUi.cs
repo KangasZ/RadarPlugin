@@ -3,6 +3,7 @@ using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using ImGuiNET;
+using RadarPlugin.Enums;
 
 namespace RadarPlugin.UI;
 
@@ -14,13 +15,15 @@ public class MobEditUi : IDisposable
 
     private bool mobEditVisible = false;
     private readonly RadarHelpers radarHelpers;
+    private readonly TypeConfigurator typeConfiguration;
 
-    public MobEditUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, RadarHelpers radarHelpers)
+    public MobEditUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator)
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.dalamudPluginInterface.UiBuilder.Draw += DrawMobEditWindow;
         this.radarHelpers = radarHelpers;
+        this.typeConfiguration = typeConfigurator;
     }
 
     private void DrawMobEditWindow()
@@ -40,7 +43,10 @@ public class MobEditUi : IDisposable
 #endif
             ImGui.Columns(2);
             var utilIgnored = UtilInfo.DataIdIgnoreList.Contains(localObject.DataId);
-            var userIgnored = configInterface.cfg.DataIdIgnoreList.Contains(localObject.DataId);
+            var defaulParams = radarHelpers.GetParams(localObject);
+            var mobOvveride = radarHelpers.GetParamsWithOverride(localObject);
+            var isUsingCustomEspOption = defaulParams != mobOvveride;
+
             ImGui.SetColumnWidth(0, ImGui.GetWindowWidth() / 2);
             // Setup First column
             ImGui.Text("Information Table");
@@ -78,11 +84,21 @@ public class MobEditUi : IDisposable
             ImGui.TableNextColumn();
             ImGui.Text("User");
             ImGui.TableNextColumn();
-            ImGui.Text($"{userIgnored}");
+            string userCustomOptionsText;
+            if (isUsingCustomEspOption)
+            {
+                userCustomOptionsText = mobOvveride!.Enabled.ToString();
+            }
+            else
+            {
+                userCustomOptionsText = "N/A";
+            }
+            ImGui.Text($"{userCustomOptionsText}");
             ImGui.TableNextColumn();
             ImGui.Text("Overall");
             ImGui.TableNextColumn();
-            ImGui.Text($"{userIgnored || utilIgnored}");
+            
+            ImGui.Text($"NOT WORKING ATM, figure it out :)");
             ImGui.TableNextColumn();
             ImGui.Text("Disablable?");
             ImGui.TableNextColumn();
@@ -91,28 +107,34 @@ public class MobEditUi : IDisposable
 
             // Setup second column
             ImGui.NextColumn();
-            ImGui.Text("You cannot disable a mod with a data id of 0");
-            if (ImGui.Button($"Add to block list"))
+            ImGui.Text("You cannot modify a mob with a data id of 0");
+            if (localObject.DataId != 0)
             {
-                if (!configInterface.cfg.DataIdIgnoreList.Contains(localObject.DataId))
+                //TODO: Grab the custom overridden thingy
+                ImGui.TableNextColumn();
+                if (ImGui.Checkbox($"Custom Settings Enable##custom-settings-{localObject.Address}", ref isUsingCustomEspOption))
                 {
-                    if (localObject.DataId != 0)
+                    configInterface.CustomizeMob(localObject, isUsingCustomEspOption, defaulParams);
+                }
+
+                if (isUsingCustomEspOption)
+                {
+                    var configBlocked = mobOvveride.Enabled;
+                    if (ImGui.Checkbox($"Enabled##{localObject.Address}", ref configBlocked))
                     {
-                        configInterface.cfg.DataIdIgnoreList.Add(localObject.DataId);
+                        configInterface.cfg.OptionOverride[localObject.DataId].Enabled = configBlocked;
+                    }
+                    var colorChange = ImGui.ColorConvertU32ToFloat4(mobOvveride.ColorU);
+                    if (ImGui.ColorEdit4($"Color##{localObject.Address}-color", ref colorChange,
+                            ImGuiColorEditFlags.NoInputs))
+                    {
+                        configInterface.cfg.OptionOverride[localObject.DataId].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
                         configInterface.Save();
                     }
+                    // TODO: Mobtype and display origination helpers
+                    typeConfiguration.OpenUiWithType(ref mobOvveride, localObject.Name.TextValue.ToString() ?? "Unknown", MobType.Object, DisplayOrigination.DeepDungeon);
                 }
             }
-
-            if (ImGui.Button($"Remove from block list"))
-            {
-                if (configInterface.cfg.DataIdIgnoreList.Contains(localObject.DataId))
-                {
-                    configInterface.cfg.DataIdIgnoreList.Remove(localObject.DataId);
-                    configInterface.Save();
-                }
-            }
-            
             
         }
 
@@ -129,4 +151,4 @@ public class MobEditUi : IDisposable
         this.localObject = gameObject;
         mobEditVisible = true;
     }
-}
+} 

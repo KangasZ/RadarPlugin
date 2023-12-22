@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Newtonsoft.Json;
@@ -128,9 +129,35 @@ public class Configuration
         public bool AppendLevelToName = false;
     }
 
+    public class ESPOptionMobBased : ESPOption
+    {
+        public ESPOptionMobBased(ESPOption espOption)
+        {
+            Enabled = espOption.Enabled;
+            DisplayType = espOption.DisplayType;
+            ColorU = espOption.ColorU;
+            ShowFC = espOption.ShowFC;
+            DrawDistance = espOption.DrawDistance;
+            AppendLevelToName = espOption.AppendLevelToName;
+        }
+
+        public ESPOptionMobBased(ESPOption espOption, string name)
+        {
+            Name = name;
+            Enabled = espOption.Enabled;
+            DisplayType = espOption.DisplayType;
+            ColorU = espOption.ColorU;
+            ShowFC = espOption.ShowFC;
+            DrawDistance = espOption.DrawDistance;
+            AppendLevelToName = espOption.AppendLevelToName;
+        }
+
+        public string Name = string.Empty;
+    }
+
     public class Config : IPluginConfiguration
     {
-        public int Version { get; set; } = 2;
+        public int Version { get; set; } = 3;
         public string ConfigName = "default";
         public bool Enabled = true;
         public bool UseBackgroundDrawList = false;
@@ -166,6 +193,10 @@ public class Configuration
         public ESPOption OrnamentOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
         public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
+
+        public Dictionary<uint, ESPOptionMobBased> OptionOverride { get; set; } =
+            new Dictionary<uint, ESPOptionMobBased>();
+
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
         public float DotSize = UtilInfo.DefaultDotSize;
@@ -250,6 +281,24 @@ public class Configuration
         UpdateConfigs();
     }
 
+    public void CustomizeMob(GameObject gameObject, bool customizeEnabled, ESPOption currentSettings)
+    {
+        var dataId = gameObject.DataId;
+        if (customizeEnabled)
+        {
+            var newSettings = new ESPOptionMobBased(currentSettings, gameObject.Name.TextValue ?? "Unknown");
+            if (cfg.OptionOverride.ContainsKey(dataId))
+            {
+                cfg.OptionOverride.Remove(dataId);
+            }
+            cfg.OptionOverride.Add(dataId, newSettings);
+        }
+        else
+        {
+            cfg.OptionOverride.Remove(dataId);
+        }
+    }
+
     private void MigrateCfg(ref Config oldConfig)
     {
         // Migrate version 1 to 2
@@ -259,15 +308,30 @@ public class Configuration
             oldConfig.Version = 2;
             oldConfig.SeparatedAlliance.EspOption = oldConfig.AllianceOption;
             oldConfig.SeparatedAlliance.Enabled = oldConfig.SeparateAlliance;
-            
+
             oldConfig.SeparatedFriends.EspOption = oldConfig.FriendOption;
             oldConfig.SeparatedFriends.Enabled = oldConfig.SeparateFriends;
-            
+
             oldConfig.SeparatedParty.EspOption = oldConfig.PartyOption;
             oldConfig.SeparatedParty.Enabled = oldConfig.SeparateParty;
-            
+
             oldConfig.SeparatedYourPlayer.EspOption = oldConfig.YourPlayerOption;
             oldConfig.SeparatedYourPlayer.Enabled = oldConfig.SeparateYourPlayer;
+        }
+
+        if (oldConfig.Version == 2)
+        {
+            foreach (var previouslyBlocked in oldConfig.DataIdIgnoreList)
+            {
+                oldConfig.OptionOverride.Add(previouslyBlocked, new ESPOptionMobBased(objectOptDefault)
+                {
+                    Name = "Unknown",
+                    Enabled = false
+                });
+            }
+
+            oldConfig.DataIdIgnoreList.Clear();
+            oldConfig.Version = 3;
         }
     }
 
@@ -302,7 +366,8 @@ public class Configuration
 
     public void UpdateConfigs()
     {
-        configs = this.pluginInterface.ConfigDirectory.GetFiles().Select(x => x.Name.Substring(0, x.Name.Length - 5)).ToArray();
+        configs = this.pluginInterface.ConfigDirectory.GetFiles().Select(x => x.Name.Substring(0, x.Name.Length - 5))
+            .ToArray();
         if (selectedConfig >= configs.Length)
         {
             selectedConfig = 0;
@@ -357,11 +422,12 @@ public class Configuration
     internal void Save(Config config, string path) =>
         this.WriteAllTextSafe(path, this.SerializeConfig(config));
 
-    internal string SerializeConfig(Config config) => JsonConvert.SerializeObject(config, Formatting.Indented, new JsonSerializerSettings()
-    {
-        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-        TypeNameHandling = TypeNameHandling.Objects
-    });
+    internal string SerializeConfig(Config config) => JsonConvert.SerializeObject(config, Formatting.Indented,
+        new JsonSerializerSettings()
+        {
+            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+            TypeNameHandling = TypeNameHandling.Objects
+        });
 
     internal void WriteAllTextSafe(string path, string text)
     {
@@ -372,9 +438,10 @@ public class Configuration
         File.Move(str, path, true);
     }
 
-    internal static Config? DeserializeConfig(string data) => JsonConvert.DeserializeObject<Config>(data, new JsonSerializerSettings()
-    {
-        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-        TypeNameHandling = TypeNameHandling.None
-    });
+    internal static Config? DeserializeConfig(string data) => JsonConvert.DeserializeObject<Config>(data,
+        new JsonSerializerSettings()
+        {
+            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+            TypeNameHandling = TypeNameHandling.None
+        });
 }

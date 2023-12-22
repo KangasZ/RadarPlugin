@@ -16,6 +16,7 @@ public class RadarPlugin : IDalamudPlugin
     private readonly LocalMobsUi localMobsUi;
     private readonly RadarHelpers radarHelpers;
     private readonly TypeConfigurator typeConfiguratorUi;
+    private readonly CustomizedEntitiesUI customizedEntitiesUi;
 
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
@@ -34,11 +35,12 @@ public class RadarPlugin : IDalamudPlugin
         radarHelpers = new RadarHelpers(Configuration, clientState, condition, dataManager);
 
         // UI
-        mobEditUi = new MobEditUi(pluginInterface, Configuration, radarHelpers);
-        localMobsUi = new LocalMobsUi(pluginInterface, Configuration, objectTable, mobEditUi, radarHelpers);
         typeConfiguratorUi = new TypeConfigurator(pluginInterface, Configuration, radarHelpers);
-        mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers, typeConfiguratorUi);
-        
+        mobEditUi = new MobEditUi(pluginInterface, Configuration, radarHelpers, typeConfiguratorUi);
+        localMobsUi = new LocalMobsUi(pluginInterface, Configuration, objectTable, mobEditUi, radarHelpers, pluginLog);
+        customizedEntitiesUi = new CustomizedEntitiesUI(pluginInterface, Configuration, radarHelpers, pluginLog, typeConfiguratorUi);
+        mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers, typeConfiguratorUi, customizedEntitiesUi);
+
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi, Configuration, chatGui);
         radarLogic = new RadarLogic(pluginInterface, Configuration, objectTable, condition, clientState, gameGui, radarHelpers, pluginLog);
