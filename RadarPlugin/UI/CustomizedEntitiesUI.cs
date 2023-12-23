@@ -10,6 +10,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using RadarPlugin.Enums;
+using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.UI;
 
@@ -17,19 +18,16 @@ public class CustomizedEntitiesUI : IDisposable
 {
     private bool drawCurrentMobsWindow = false;
     private readonly DalamudPluginInterface dalamudPluginInterface;
-    private readonly Configuration configInterface;
-    private readonly RadarHelpers helpers;
+    private readonly Configuration.Configuration configInterface;
     private readonly IPluginLog pluginLog;
     private readonly TypeConfigurator typeConfigurator;
-    
+
     public CustomizedEntitiesUI(
         DalamudPluginInterface dalamudPluginInterface,
-        Configuration configInterface,
-        RadarHelpers helpers,
+        Configuration.Configuration configInterface,
         IPluginLog pluginLog,
         TypeConfigurator typeConfigurator)
     {
-        this.helpers = helpers;
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.dalamudPluginInterface.UiBuilder.Draw += DrawCustomizedEntitiesMenu;
@@ -86,8 +84,8 @@ public class CustomizedEntitiesUI : IDisposable
                 ImGui.TableNextColumn();
                 if (ImGui.Button($"Edit##{x.Key}"))
                 {
-                    var optionOverride = (Configuration.ESPOption)configInterface.cfg.OptionOverride[x.Key];
-                    typeConfigurator.OpenUiWithType(ref optionOverride, x.Value.Name, ((Configuration.ESPOptionMobBased)optionOverride).MobTypeValue, DisplayOrigination.DeepDungeon);
+                    var optionOverride = (Configuration.Configuration.ESPOption)configInterface.cfg.OptionOverride[x.Key];
+                    typeConfigurator.OpenUiWithType(ref optionOverride, x.Value.Name, ((Configuration.Configuration.ESPOptionMobBased)optionOverride).MobTypeValue, DisplayOrigination.DeepDungeon);
                 }
             }
 

@@ -12,10 +12,10 @@ public class PluginCommands : IDisposable
 {
     private readonly ICommandManager commandManager;
     private readonly MainUi mainUi;
-    private readonly Configuration configInterface;
+    private readonly Configuration.Configuration configInterface;
     private readonly IChatGui chatGui;
 
-    public PluginCommands(ICommandManager commandManager, MainUi mainUi, Configuration configuration, IChatGui chatGui)
+    public PluginCommands(ICommandManager commandManager, MainUi mainUi, Configuration.Configuration configuration, IChatGui chatGui)
     {
         this.mainUi = mainUi;
         this.chatGui = chatGui;

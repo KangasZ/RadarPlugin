@@ -1,5 +1,6 @@
 ﻿using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using RadarPlugin.RadarLogic;
 using RadarPlugin.UI;
 
 namespace RadarPlugin;
@@ -7,17 +8,19 @@ namespace RadarPlugin;
 public class RadarPlugin : IDalamudPlugin
 {
     public string Name => "Radar Plugin";
-    private readonly Configuration Configuration;
+    private readonly Configuration.Configuration Configuration;
     private readonly RadarPlugin Plugin;
-    private readonly RadarLogic radarLogic;
+    private readonly Radar radar;
     private readonly PluginCommands pluginCommands;
     private readonly MainUi mainUi;
     private readonly MobEditUi mobEditUi;
     private readonly LocalMobsUi localMobsUi;
-    private readonly RadarHelpers radarHelpers;
     private readonly TypeConfigurator typeConfiguratorUi;
     private readonly CustomizedEntitiesUI customizedEntitiesUi;
-
+    private readonly RadarModules radarModules;
+    private readonly IFramework framework;
+    private readonly DalamudPluginInterface pluginInterface;
+    
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
         ICommandManager commandManager,
@@ -27,23 +30,29 @@ public class RadarPlugin : IDalamudPlugin
         IGameGui gameGui,
         IPluginLog pluginLog,
         IChatGui chatGui,
-        IDataManager dataManager)
+        IDataManager dataManager,
+        IFramework framework)
     {
         Plugin = this;
+        this.framework = framework;
+        this.pluginInterface = pluginInterface;
         // Services and DI
-        Configuration = new Configuration(pluginInterface, pluginLog);
-        radarHelpers = new RadarHelpers(Configuration, clientState, condition, dataManager);
+        Configuration = new Configuration.Configuration(this.pluginInterface, pluginLog);
+        radarModules = new RadarModules(condition, clientState, Configuration, dataManager);
 
         // UI
-        typeConfiguratorUi = new TypeConfigurator(pluginInterface, Configuration, radarHelpers);
-        mobEditUi = new MobEditUi(pluginInterface, Configuration, radarHelpers, typeConfiguratorUi);
-        localMobsUi = new LocalMobsUi(pluginInterface, Configuration, objectTable, mobEditUi, radarHelpers, pluginLog);
-        customizedEntitiesUi = new CustomizedEntitiesUI(pluginInterface, Configuration, radarHelpers, pluginLog, typeConfiguratorUi);
-        mainUi = new MainUi(pluginInterface, Configuration, localMobsUi, clientState, radarHelpers, typeConfiguratorUi, customizedEntitiesUi, pluginLog);
+        typeConfiguratorUi = new TypeConfigurator(this.pluginInterface, Configuration);
+        mobEditUi = new MobEditUi(this.pluginInterface, Configuration, typeConfiguratorUi, radarModules);
+        localMobsUi = new LocalMobsUi(this.pluginInterface, Configuration, objectTable, mobEditUi, pluginLog, radarModules);
+        customizedEntitiesUi = new CustomizedEntitiesUI(this.pluginInterface, Configuration, pluginLog, typeConfiguratorUi);
+        mainUi = new MainUi(this.pluginInterface, Configuration, localMobsUi, clientState, typeConfiguratorUi, customizedEntitiesUi, pluginLog, radarModules);
 
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi, Configuration, chatGui);
-        radarLogic = new RadarLogic(pluginInterface, Configuration, objectTable, condition, clientState, gameGui, radarHelpers, pluginLog);
+        radar = new Radar(this.pluginInterface, Configuration, objectTable, condition, clientState, gameGui, pluginLog, radarModules);
+
+        this.framework.Update += radarModules.StartTick;
+        this.pluginInterface.UiBuilder.Draw += radarModules.EndTick;
     }
 
     public void Dispose()
@@ -55,6 +64,8 @@ public class RadarPlugin : IDalamudPlugin
         
         // Customer services
         pluginCommands.Dispose();
-        radarLogic.Dispose();
+        radar.Dispose();
+        this.framework.Update -= radarModules.StartTick;
+        this.pluginInterface.UiBuilder.Draw -= radarModules.EndTick;
     }
 }

@@ -1,17 +1,18 @@
-﻿using Dalamud.Configuration;
-using Dalamud.Plugin;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dalamud.Configuration;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Newtonsoft.Json;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 
-namespace RadarPlugin;
+namespace RadarPlugin.Configuration;
 
 [Serializable]
 public class Configuration
@@ -41,13 +42,13 @@ public class Configuration
     {
         public bool HitboxEnabled = false;
         public bool OverrideMobColor = false;
-        public uint HitboxColor = UtilInfo.Turquoise;
+        public uint HitboxColor = ConfigConstants.Turquoise;
         public float Thickness = 2.2f;
 
         public bool DrawInsideCircle = false;
         public uint InsideCircleOpacity = 0xffffffff;
         public bool UseDifferentInsideCircleColor = false;
-        public uint InsideCircleColor = UtilInfo.Turquoise & 0x50ffffff;
+        public uint InsideCircleColor = ConfigConstants.Turquoise & 0x50ffffff;
     }
 
     public class OffScreenObjectsOptions
@@ -59,18 +60,18 @@ public class Configuration
 
     public class DeepDungeonOptions
     {
-        public ESPOption SpecialUndeadOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Yellow };
-        public ESPOption AuspiceOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Green };
-        public ESPOption EasyMobOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.LightBlue };
-        public ESPOption TrapOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Orange };
-        public ESPOption ReturnOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Blue };
-        public ESPOption PassageOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Blue };
-        public ESPOption GoldChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Gold };
-        public ESPOption SilverChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Silver };
-        public ESPOption BronzeChestOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Bronze };
-        public ESPOption MimicOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.Red };
-        public ESPOption AccursedHoardOption { get; set; } = new(objectOptDefault) { ColorU = UtilInfo.Turquoise };
-        public ESPOption DefaultEnemyOption { get; set; } = new(mobOptDefault) { ColorU = UtilInfo.White };
+        public ESPOption SpecialUndeadOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.Yellow };
+        public ESPOption AuspiceOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.Green };
+        public ESPOption EasyMobOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.LightBlue };
+        public ESPOption TrapOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Orange };
+        public ESPOption ReturnOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Blue };
+        public ESPOption PassageOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Blue };
+        public ESPOption GoldChestOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Gold };
+        public ESPOption SilverChestOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Silver };
+        public ESPOption BronzeChestOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Bronze };
+        public ESPOption MimicOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.Red };
+        public ESPOption AccursedHoardOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Turquoise };
+        public ESPOption DefaultEnemyOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.White };
     }
 
     public class AggroRadiusOptions
@@ -78,14 +79,16 @@ public class Configuration
         public bool ShowAggroCircle = false;
         public bool ShowAggroCircleInCombat = false;
         public bool MaxDistanceCapBool = true;
-        public float MaxDistance = UtilInfo.DefaultMaxAggroRadiusDistance;
-        public uint FrontColor = UtilInfo.Red;
-        public uint RearColor = UtilInfo.Green;
-        public uint RightSideColor = UtilInfo.Yellow;
-        public uint LeftSideColor = UtilInfo.Yellow;
-        public uint FrontConeColor = UtilInfo.Red;
+        public float MaxDistance = ConfigConstants.DefaultMaxAggroRadiusDistance;
+        public uint FrontColor = ConfigConstants.Red;
+        public uint RearColor = ConfigConstants.Green;
+        public uint RightSideColor = ConfigConstants.Yellow;
+        public uint LeftSideColor = ConfigConstants.Yellow;
+        public uint FrontConeColor = ConfigConstants.Red;
         public uint CircleOpacity = 0xBEFFFFFF;
         public uint FrontConeOpacity = 0x30FFFFFF;
+        public uint SoundAggroColor = ConfigConstants.Turquoise;
+        public uint ProximityAggroColor = ConfigConstants.Red;
     }
 
     public class SeparatedEspOption
@@ -125,7 +128,7 @@ public class Configuration
         public bool ShowFC = false; // Unused
         public bool DrawDistance = false;
         public bool DotSizeOverride = false;
-        public float DotSize = UtilInfo.DefaultDotSize;
+        public float DotSize = ConfigConstants.DefaultDotSize;
         public bool ReplaceWithJobName = false;
         public bool AppendLevelToName = false;
     }
@@ -176,10 +179,10 @@ public class Configuration
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true, AppendLevelToName = false };
         public ESPOption PlayerOption { get; set; } = new(playerOptDefault);
-        public ESPOption YourPlayerOption { get; set; } = new(playerOptDefault) { ColorU = UtilInfo.Turquoise };
-        public ESPOption FriendOption { get; set; } = new(playerOptDefault) { ColorU = UtilInfo.Orange };
-        public ESPOption AllianceOption { get; set; } = new(playerOptDefault) { ColorU = UtilInfo.Gold };
-        public ESPOption PartyOption { get; set; } = new(playerOptDefault) { ColorU = UtilInfo.Turquoise };
+        public ESPOption YourPlayerOption { get; set; } = new(playerOptDefault) { ColorU = ConfigConstants.Turquoise };
+        public ESPOption FriendOption { get; set; } = new(playerOptDefault) { ColorU = ConfigConstants.Orange };
+        public ESPOption AllianceOption { get; set; } = new(playerOptDefault) { ColorU = ConfigConstants.Gold };
+        public ESPOption PartyOption { get; set; } = new(playerOptDefault) { ColorU = ConfigConstants.Turquoise };
         public ESPOption TreasureOption { get; set; } = new(objectOptDefault) { Enabled = true };
         public ESPOption CompanionOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public ESPOption AreaOption { get; set; } = new(objectOptDefault) { Enabled = false };
@@ -201,34 +204,34 @@ public class Configuration
 
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
-        public float DotSize = UtilInfo.DefaultDotSize;
+        public float DotSize = ConfigConstants.DefaultDotSize;
         public bool SeparateAlliance = false;
         public bool SeparateYourPlayer = false;
         public bool SeparateParty = false;
         public bool SeparateFriends = false;
         public bool UseMaxDistance = false;
-        public float MaxDistance = UtilInfo.DefaultMaxEspDistance;
+        public float MaxDistance = ConfigConstants.DefaultMaxEspDistance;
         public FontSettings FontSettings { get; set; } = new();
         public LevelRendering LevelRendering { get; set; } = new();
-        public float EspPadding = UtilInfo.DefaultEspPadding;
+        public float EspPadding = ConfigConstants.DefaultEspPadding;
 
         public SeparatedEspOption SeparatedAlliance = new()
-            { EspOption = new ESPOption(playerOptDefault) { ColorU = UtilInfo.Gold } };
+            { EspOption = new ESPOption(playerOptDefault) { ColorU = ConfigConstants.Gold } };
 
         public SeparatedEspOption SeparatedYourPlayer = new()
-            { EspOption = new ESPOption(playerOptDefault) { ColorU = UtilInfo.Turquoise } };
+            { EspOption = new ESPOption(playerOptDefault) { ColorU = ConfigConstants.Turquoise } };
 
         public SeparatedEspOption SeparatedParty = new()
-            { EspOption = new ESPOption(playerOptDefault) { ColorU = UtilInfo.Turquoise } };
+            { EspOption = new ESPOption(playerOptDefault) { ColorU = ConfigConstants.Turquoise } };
 
         public SeparatedEspOption SeparatedFriends = new()
-            { EspOption = new ESPOption(playerOptDefault) { ColorU = UtilInfo.Orange } };
+            { EspOption = new ESPOption(playerOptDefault) { ColorU = ConfigConstants.Orange } };
 
         public SeparatedEspOption SeparatedRankOne = new()
-            { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Gold } };
+            { EspOption = new ESPOption(mobOptDefault) { ColorU = ConfigConstants.Gold } };
 
         public SeparatedEspOption SeparatedRankTwoAndSix = new()
-            { EspOption = new ESPOption(mobOptDefault) { ColorU = UtilInfo.Yellow } };
+            { EspOption = new ESPOption(mobOptDefault) { ColorU = ConfigConstants.Yellow } };
         public bool EXPERIMENTALEnableMobTimerTracking = false;
     }
 

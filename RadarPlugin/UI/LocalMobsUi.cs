@@ -5,10 +5,13 @@ using System.Numerics;
 using Dalamud.Game.ClientState.JobGauge.Types;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using RadarPlugin.Constants;
+using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.UI;
 
@@ -17,28 +20,28 @@ public class LocalMobsUi : IDisposable
     private List<GameObject> areaObjects;
     private bool currentMobsVisible = false;
     private readonly DalamudPluginInterface dalamudPluginInterface;
-    private readonly Configuration configInterface;
+    private readonly Configuration.Configuration configInterface;
     private readonly IObjectTable objectTable;
     private readonly MobEditUi mobEditUi;
-    private readonly RadarHelpers helpers;
     private readonly IPluginLog pluginLog;
+    private readonly RadarModules radarModules;
     
     public LocalMobsUi(
         DalamudPluginInterface dalamudPluginInterface,
-        Configuration configInterface,
+        Configuration.Configuration configInterface,
         IObjectTable objectTable,
         MobEditUi mobEditUi,
-        RadarHelpers helpers,
-        IPluginLog pluginLog)
+        IPluginLog pluginLog,
+        RadarModules radarModules)
     {
         areaObjects = new List<GameObject>();
-        this.helpers = helpers;
         this.mobEditUi = mobEditUi;
         this.configInterface = configInterface;
         this.objectTable = objectTable;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.dalamudPluginInterface.UiBuilder.Draw += DrawCurrentMobsWindow;
         this.pluginLog = pluginLog;
+        this.radarModules = radarModules;
     }
 
     public void DrawLocalMobsUi()
@@ -114,8 +117,8 @@ public class LocalMobsUi : IDisposable
             ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
             {
-                var espOption = helpers.GetParams(x);
-                var customEspOption = helpers.GetParamsWithOverride(x);
+                var espOption = radarModules.radarConfigurationModule.GetParams(x);
+                var customEspOption = radarModules.radarConfigurationModule.GetParamsWithOverride(x);
                 var isUsingCustomEspOption = espOption != customEspOption;
                 //Kind
                 ImGui.TableNextColumn();
@@ -140,7 +143,7 @@ public class LocalMobsUi : IDisposable
                 }
                 // Blocked
                 ImGui.TableNextColumn();
-                if (UtilInfo.DataIdIgnoreList.Contains(x.DataId))
+                if (MobConstants.DataIdIgnoreList.Contains(x.DataId))
                 {
                     ImGui.Text($"Default Blocked");
                 }

@@ -3,27 +3,29 @@ using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using ImGuiNET;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
+using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.UI;
 
 public class MobEditUi : IDisposable
 {
-    private Configuration configInterface;
+    private Configuration.Configuration configInterface;
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private GameObject localObject;
 
     private bool mobEditVisible = false;
-    private readonly RadarHelpers radarHelpers;
     private readonly TypeConfigurator typeConfiguration;
+    private readonly RadarModules radarModules;
 
-    public MobEditUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator)
+    public MobEditUi(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface, TypeConfigurator typeConfigurator, RadarModules radarModules)
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.dalamudPluginInterface.UiBuilder.Draw += DrawMobEditWindow;
-        this.radarHelpers = radarHelpers;
         this.typeConfiguration = typeConfigurator;
+        this.radarModules = radarModules;
     }
 
     private void DrawMobEditWindow()
@@ -42,9 +44,9 @@ public class MobEditUi : IDisposable
             Dalamud.Utility.Util.ShowObject(localObject);
 #endif
             ImGui.Columns(2);
-            var utilIgnored = UtilInfo.DataIdIgnoreList.Contains(localObject.DataId);
-            var defaulParams = radarHelpers.GetParams(localObject);
-            var mobOvveride = radarHelpers.GetParamsWithOverride(localObject);
+            var utilIgnored = MobConstants.DataIdIgnoreList.Contains(localObject.DataId);
+            var defaulParams = radarModules.radarConfigurationModule.GetParams(localObject);
+            var mobOvveride = radarModules.radarConfigurationModule.GetParamsWithOverride(localObject);
             var isUsingCustomEspOption = defaulParams != mobOvveride;
 
             ImGui.SetColumnWidth(0, ImGui.GetWindowWidth() / 2);
@@ -61,7 +63,7 @@ public class MobEditUi : IDisposable
             ImGui.TableNextColumn();
             ImGui.Text("Given Name");
             ImGui.TableNextColumn();
-            ImGui.Text($"{radarHelpers.GetText(localObject, mobOvveride)}");
+            ImGui.Text($"{radarModules.radarConfigurationModule.GetText(localObject, mobOvveride)}");
             ImGui.TableNextColumn();
             ImGui.Text("Data ID");
             ImGui.TableNextColumn();

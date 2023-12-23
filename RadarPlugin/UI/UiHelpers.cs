@@ -8,6 +8,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Logging;
 using Dalamud.Utility;
 using ImGuiNET;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin.UI;
@@ -20,10 +21,10 @@ public static class UiHelpers
             "1. Use tabs to customize experience and fix invisible mobs.\n" +
             "2. Bring bugs or feature requests up\n");
     }
-    public static bool DrawSettingsDetailed(Configuration.ESPOption option, string id, MobType mobType, DisplayOrigination displayOrigination)
+    public static bool DrawSettingsDetailed(Configuration.Configuration.ESPOption option, string id, MobType mobType, DisplayOrigination displayOrigination)
     {
         var shouldSave = false;
-        UiHelpers.DrawSeperator($"{id} Options", UtilInfo.Red);
+        UiHelpers.DrawSeperator($"{id} Options", ConfigConstants.Red);
         // Column 1
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
 
@@ -52,8 +53,8 @@ public static class UiHelpers
         
         if (option.DotSizeOverride)
         {
-            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window", UtilInfo.MinDotSize, UtilInfo.MaxDotSize,
-                UtilInfo.DefaultDotSize);
+            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window", ConfigConstants.MinDotSize, ConfigConstants.MaxDotSize,
+                ConfigConstants.DefaultDotSize);
         }
         else
         {
@@ -67,7 +68,7 @@ public static class UiHelpers
     
     public static bool DrawDotSizeSlider(ref float dotSize, string id)
     {
-        return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, UtilInfo.MinDotSize, UtilInfo.MaxDotSize, UtilInfo.DefaultDotSize);
+        return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, ConfigConstants.MinDotSize, ConfigConstants.MaxDotSize, ConfigConstants.DefaultDotSize);
     }
 
     public static bool DrawFloatWithResetSlider(ref float floatToModify, string textDiscription, string id, float min, float max, float defaultFloatValue, string format = "%.2f")

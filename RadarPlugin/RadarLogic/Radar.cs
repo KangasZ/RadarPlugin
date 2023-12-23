@@ -1,5 +1,4 @@
-﻿using Dalamud.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,32 +12,34 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
+using RadarPlugin.RadarLogic.Modules;
 using RadarPlugin.UI;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
-using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 
-namespace RadarPlugin;
+namespace RadarPlugin.RadarLogic;
 
-public class RadarLogic : IDisposable
+public class Radar : IDisposable
 {
-    private const float PI = 3.14159265359f;
     private readonly DalamudPluginInterface pluginInterface;
-    private Configuration configInterface;
+    private Configuration.Configuration configInterface;
     private readonly ICondition conditionInterface;
     private readonly IObjectTable objectTable;
     private readonly IClientState clientState;
     private readonly IGameGui gameGui;
-    private readonly RadarHelpers radarHelpers;
     private readonly IPluginLog pluginLog;
 
     private GameFontHandle? gameFont;
     private ImFontPtr? dalamudFont;
     private bool fontBuilt = false;
 
-    public RadarLogic(DalamudPluginInterface pluginInterface, Configuration configuration, IObjectTable objectTable,
-        ICondition condition, IClientState clientState, IGameGui gameGui, RadarHelpers radarHelpers,
-        IPluginLog pluginLog)
+    private RadarModules radarModules;
+    
+    public Radar(DalamudPluginInterface pluginInterface, Configuration.Configuration configuration,
+        IObjectTable objectTable,
+        ICondition condition, IClientState clientState, IGameGui gameGui,
+        IPluginLog pluginLog, RadarModules radarModules)
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -46,13 +47,14 @@ public class RadarLogic : IDisposable
         this.configInterface = configuration;
         this.conditionInterface = condition;
         this.gameGui = gameGui;
-        this.radarHelpers = radarHelpers;
+        this.radarModules = radarModules;
         this.pluginLog = pluginLog;
         // Loads plugin
         this.pluginLog.Debug("Radar Loaded");
 
         this.clientState = clientState;
-        this.pluginInterface.UiBuilder.Draw += OnTick;
+
+        this.pluginInterface.UiBuilder.Draw += OnUiTick;
         this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
     }
 
@@ -81,7 +83,7 @@ public class RadarLogic : IDisposable
         }
     }
 
-    private void OnTick()
+    private void OnUiTick()
     {
         if (!configInterface.cfg.Enabled) return;
 
@@ -89,10 +91,9 @@ public class RadarLogic : IDisposable
         using var font = ImRaii.PushFont(fontPtr);
         if (objectTable.Length == 0) return;
         if (CheckDraw()) return;
-        DrawRadar();
-        radarHelpers.ResetDistance();
-        radarHelpers.CullOldMobMovement();
+        RadarOnTick();
     }
+
 
     private ImFontPtr LoadFont()
     {
@@ -131,7 +132,7 @@ public class RadarLogic : IDisposable
         return fontPtr;
     }
 
-    private void DrawRadar()
+    private void RadarOnTick()
     {
         // Setup Drawlist
         var bgDl = configInterface.cfg.UseBackgroundDrawList;
@@ -172,17 +173,18 @@ public class RadarLogic : IDisposable
         }
         else
         {
-            objectTableRef = objectTable.Where(obj => radarHelpers.ShouldRender(obj));
+            objectTableRef = objectTable.Where(ShouldRenderObject);
             if (configInterface.cfg.UseMaxDistance && clientState.LocalPlayer != null)
             {
-                objectTableRef = objectTableRef.Where(x =>
-                    radarHelpers.GetDistanceFromPlayer(x) < configInterface.cfg.MaxDistance);
+                objectTableRef = objectTableRef.Where(objectToFind =>
+                    radarModules.distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, objectToFind) <
+                    configInterface.cfg.MaxDistance);
             }
         }
 
         foreach (var areaObject in objectTableRef)
         {
-            var espOption = radarHelpers.GetParamsWithOverride(areaObject);
+            var espOption = radarModules.radarConfigurationModule.GetParamsWithOverride(areaObject);
             // Temporary script that updates the new option override with current settings if it hasn't been migrated
             if (configInterface.cfg.ColorOverride.TryGetValue(areaObject.DataId, out var optionOverride) &&
                 !configInterface.cfg.OptionOverride.ContainsKey(areaObject.DataId))
@@ -215,7 +217,7 @@ public class RadarLogic : IDisposable
     }
 
     private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint? overrideColor,
-        Configuration.ESPOption espOption)
+        Configuration.Configuration.ESPOption espOption)
     {
         var color = overrideColor ?? espOption.ColorU;
         var visibleOnScreen = gameGui.WorldToScreen(gameObject.Position, out var onScreenPosition);
@@ -225,37 +227,47 @@ public class RadarLogic : IDisposable
             switch (espOption.DisplayType)
             {
                 case DisplayTypes.DotOnly:
-                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
+                    DrawRadarHelper.DrawDot(drawListPtr, onScreenPosition, dotSize, color);
                     break;
                 case DisplayTypes.NameOnly:
-                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
+                    var nameOnlyText = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
+                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, nameOnlyText, color,
+                        espOption);
                     break;
                 case DisplayTypes.DotAndName:
-                    DrawDot(drawListPtr, onScreenPosition, dotSize, color);
-                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
+                    DrawRadarHelper.DrawDot(drawListPtr, onScreenPosition, dotSize, color);
+                    var dotAndNameText = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
+                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, dotAndNameText, color,
+                        espOption);
                     break;
                 case DisplayTypes.HealthBarOnly:
-                    DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
                     break;
                 case DisplayTypes.HealthBarAndValue:
-                    DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
                     break;
                 case DisplayTypes.HealthBarAndName:
-                    DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
+                    DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+                    var healthBarAndName = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
+                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, healthBarAndName, color,
+                        espOption);
                     break;
                 case DisplayTypes.HealthBarAndValueAndName:
-                    DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
-                    DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+                    var healthBarAndValueAndName = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
+                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, healthBarAndValueAndName,
+                        color, espOption);
+                    DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
                     break;
                 case DisplayTypes.HealthValueOnly:
-                    DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
+                    DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
                     break;
                 case DisplayTypes.HealthValueAndName:
-                    DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawName(drawListPtr, onScreenPosition, color, gameObject, espOption);
+                    DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
+                    var healthValueAndName = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
+                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, healthValueAndName, color,
+                        espOption);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -306,17 +318,19 @@ public class RadarLogic : IDisposable
                             insideColorResolved = colorResolved & configInterface.cfg.HitboxOptions.InsideCircleOpacity;
                         }
 
-                        DrawConeAtCenterPointFromRotation(drawListPtr, gameObject.Position, gameObject.Rotation,
+                        DrawRadarHelper.DrawConeAtCenterPointFromRotation(drawListPtr, gameObject.Position,
+                            gameObject.Rotation,
                             MathF.PI * 2, gameObject.HitboxRadius,
-                            insideColorResolved, 100);
+                            insideColorResolved, 100, gameGui);
                     }
                 }
 
                 if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircle)
                 {
                     // Aggro radius max distance check
-                    if (configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool &&
-                        radarHelpers.GetDistanceFromPlayer(npc2) > configInterface.cfg.AggroRadiusOptions.MaxDistance)
+                    if (configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool && clientState.LocalPlayer != null &&
+                        radarModules.distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, npc2) >
+                        configInterface.cfg.AggroRadiusOptions.MaxDistance)
                     {
                         return;
                     }
@@ -325,7 +339,7 @@ public class RadarLogic : IDisposable
                         (npc2.StatusFlags & StatusFlags.InCombat) != 0) return;
                     if (npc2.BattleNpcKind != BattleNpcSubKind.Enemy) return;
                     float aggroRadius = 10;
-                    if (UtilInfo.AggroDistance.TryGetValue(gameObject.DataId, out var range))
+                    if (MobConstants.AggroDistance.TryGetValue(gameObject.DataId, out var range))
                     {
                         aggroRadius = range;
                     }
@@ -358,53 +372,9 @@ public class RadarLogic : IDisposable
     private void DrawHitbox(ImDrawListPtr drawListPtr, Vector3 gameObjectPosition, float gameObjectHitboxRadius,
         uint color, float thickness)
     {
-        DrawArcAtCenterPointFromRotations(drawListPtr, gameObjectPosition, 0, 2 * MathF.PI, gameObjectHitboxRadius,
-            color, thickness, 400);
-    }
-
-    private void DrawDot(ImDrawListPtr imDrawListPtr, Vector2 position, float radius, uint npcOptColor)
-    {
-        imDrawListPtr.AddCircleFilled(position, radius, npcOptColor, 100);
-    }
-
-    private void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
-        uint playerOptColor)
-    {
-        if (gameObject is not BattleChara npc) return;
-        var health = ((uint)(((double)npc.CurrentHp / npc.MaxHp) * 100));
-        var healthText = health.ToString();
-        var healthTextSize = ImGui.CalcTextSize(healthText);
-        imDrawListPtr.AddText(
-            new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
-            playerOptColor,
-            healthText);
-    }
-
-    private void DrawName(ImDrawListPtr imDrawListPtr, Vector2 position, uint objectOptionColor,
-        GameObject gameObject, Configuration.ESPOption espOption)
-    {
-        var tagText = radarHelpers.GetText(gameObject, espOption);
-
-        var tagTextSize = ImGui.CalcTextSize(tagText);
-        imDrawListPtr.AddText(
-            new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
-            objectOptionColor,
-            tagText);
-    }
-
-
-    private void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
-        uint playerOptColor)
-    {
-        const float radius = 13f;
-        if (gameObject is not BattleChara npc) return;
-
-        var v1 = (float)npc.CurrentHp / (float)npc.MaxHp;
-        var aMax = PI * 2.0f;
-        var difference = v1 - 1.0f;
-        imDrawListPtr.PathArcTo(position, radius,
-            (-(aMax / 4.0f)) + (aMax / npc.MaxHp) * (npc.MaxHp - npc.CurrentHp), aMax - (aMax / 4.0f), 200 - 1);
-        imDrawListPtr.PathStroke(playerOptColor, ImDrawFlags.None, 2.0f);
+        DrawRadarHelper.DrawArcAtCenterPointFromRotations(drawListPtr, gameObjectPosition, 0, 2 * MathF.PI,
+            gameObjectHitboxRadius,
+            color, thickness, 400, gameGui);
     }
 
     private void DrawAggroRadius(ImDrawListPtr imDrawListPtr, Vector3 position, float radius, float rotation,
@@ -418,110 +388,105 @@ public class RadarLogic : IDisposable
 
         //todo: handle CONE
         //todo: shove opacity into color 
-        radarHelpers.AggroTypeDictionary.TryGetValue(battleNpc.NameId, out var aggroType);
+        var aggroType = radarModules.aggroTypeModule.GetAggroType(battleNpc.NameId);
         switch (aggroType)
         {
             case AggroType.Proximity:
                 var proximityColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
-                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI * 2, radius,
+                DrawRadarHelper.DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI * 2,
+                    radius,
                     proximityColor,
-                    thickness, numSegments);
+                    thickness, numSegments, gameGui);
                 break;
             case AggroType.Sound:
                 var soundColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
-                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI * 2, radius,
-                    soundColor, thickness, numSegments);
+                DrawRadarHelper.DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI * 2,
+                    radius,
+                    soundColor, thickness, numSegments, gameGui);
                 break;
             case AggroType.Sight:
+            default:
                 var frontColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
-                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI / 2, radius, frontColor,
-                    thickness, numSegments);
+                DrawRadarHelper.DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation, MathF.PI / 2,
+                    radius, frontColor,
+                    thickness, numSegments, gameGui);
                 var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity;
-                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI / 2, MathF.PI / 2,
+                DrawRadarHelper.DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI / 2,
+                    MathF.PI / 2,
                     radius,
-                    rightColor, thickness, numSegments);
+                    rightColor, thickness, numSegments, gameGui);
                 var backColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
-                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI, MathF.PI / 2, radius,
-                    backColor, thickness, numSegments);
+                DrawRadarHelper.DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + MathF.PI,
+                    MathF.PI / 2, radius,
+                    backColor, thickness, numSegments, gameGui);
                 var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity;
-                DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + (MathF.PI * 1.5f), MathF.PI / 2,
+                DrawRadarHelper.DrawArcAtCenterPointFromRotations(imDrawListPtr, position, rotation + (MathF.PI * 1.5f),
+                    MathF.PI / 2,
                     radius,
-                    leftColor, thickness, numSegments);
+                    leftColor, thickness, numSegments, gameGui);
                 var coneColor = configInterface.cfg.AggroRadiusOptions.FrontConeColor &
                                 configInterface.cfg.AggroRadiusOptions.FrontConeOpacity;
-                DrawConeAtCenterPointFromRotation(imDrawListPtr, position, rotation, MathF.PI / 2, radius, coneColor,
-                    50);
-
+                DrawRadarHelper.DrawConeAtCenterPointFromRotation(imDrawListPtr, position, rotation, MathF.PI / 2,
+                    radius, coneColor,
+                    50, gameGui);
                 break;
-            default:
-                throw new ArgumentOutOfRangeException();
         }
 
         imDrawListPtr.PathClear();
     }
 
-    private void DrawArcAtCenterPointFromRotations(ImDrawListPtr imDrawListPtr, Vector3 originPosition,
-        float rotationStart, float totalRotationCw, float radius, uint color, float thickness, int numSegments)
+    private unsafe bool ShouldRenderObject(GameObject obj)
     {
-        var rotationPerSegment = totalRotationCw / numSegments;
-        Vector2 segmentVectorOnCircle;
-        bool isOnScreen;
-        for (var i = 0; i <= numSegments; i++)
-        {
-            var currentRotation = rotationStart - i * rotationPerSegment;
-            var xValue = radius * MathF.Sin(currentRotation);
-            var yValue = radius * MathF.Cos(currentRotation);
-            isOnScreen = gameGui.WorldToScreen(
-                new Vector3(originPosition.X + xValue,
-                    originPosition.Y,
-                    originPosition.Z + yValue),
-                out segmentVectorOnCircle);
-            if (!isOnScreen)
-            {
-                imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
-                continue;
-            }
+        // Objest valid check
+        if (!obj.IsValid()) return false;
+        //if (obj.DataId == GameObject.InvalidGameObjectId) return false;
 
-            imDrawListPtr.PathLineTo(segmentVectorOnCircle);
+        // Object within ignore lists
+        if (MobConstants.DataIdIgnoreList.Contains(obj.DataId)) return false;
+
+        // Object visible & config check
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
+        if (configInterface.cfg.ShowOnlyVisible &&
+            (clientstructobj->RenderFlags != 0)) // || !clientstructobj->GetIsTargetable()))
+        {
+            // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still. 
+            if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters) return false;
+            if (obj.ObjectKind != ObjectKind.Player) return false;
+        }
+        // Distance check
+
+        // Eureka DD STQ
+        if (configInterface.cfg.ShowBaDdObjects && radarModules.zoneTypeModule.GetLocationType() == LocationKind.DeepDungeon)
+        {
+            // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
+            if (MobConstants.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)) return true;
+            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not BattleNpc
+                {
+                    BattleNpcKind: BattleNpcSubKind.Enemy
+                } mob) return true;
+            if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
+            return !mob.IsDead;
         }
 
-        imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
-    }
 
-    private void DrawConeAtCenterPointFromRotation(ImDrawListPtr imDrawListPtr, Vector3 originPosition,
-        float rotationStart, float totalRotationCw, float radius, uint color, int numSegments)
-    {
-        var rotationPerSegment = totalRotationCw / numSegments;
-        var originOnScreen = gameGui.WorldToScreen(
-            new Vector3(originPosition.X,
-                originPosition.Y,
-                originPosition.Z),
-            out var originPositionOnScreen);
-        if (!originOnScreen) return;
-        imDrawListPtr.PathLineTo(originPositionOnScreen);
-        for (var i = 0; i <= numSegments; i++)
+        if (obj is BattleChara mobNpc)
         {
-            var currentRotation = rotationStart - i * rotationPerSegment;
-            var xValue = radius * MathF.Sin(currentRotation);
-            var yValue = radius * MathF.Cos(currentRotation);
-            var isOnScreen = gameGui.WorldToScreen(
-                new Vector3(originPosition.X + xValue,
-                    originPosition.Y,
-                    originPosition.Z + yValue),
-                out var segmentVectorOnCircle);
-            //if (!isOnScreen) continue;
-            imDrawListPtr.PathLineTo(segmentVectorOnCircle);
+            //if (!clientstructobj->GetIsTargetable()) continue;
+            //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
+            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
+            if (mobNpc.IsDead) return false;
         }
 
-        imDrawListPtr.PathFillConvex(color);
+        return true;
     }
-
-
+    
+    
     #region CLEANUP REGION
 
     public void Dispose()
     {
-        pluginInterface.UiBuilder.Draw -= OnTick;
+        pluginInterface.UiBuilder.Draw -= OnUiTick;
         this.pluginInterface.UiBuilder.BuildFonts -= BuildFont;
         pluginLog.Information("Radar Unloaded");
     }

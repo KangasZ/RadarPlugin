@@ -4,36 +4,38 @@ using System.Numerics;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
+using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.UI;
 
 public class MainUi : IDisposable
 {
-    private Configuration configInterface;
+    private Configuration.Configuration configInterface;
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible;
     private readonly IClientState clientState;
-    private readonly RadarHelpers radarHelper;
     private readonly TypeConfigurator typeConfigurator;
     private readonly CustomizedEntitiesUI customizedEntitiesUi;
     private readonly IPluginLog pluginLog;
+    private readonly RadarModules radarModules;
 
-    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, LocalMobsUi localMobsUi,
-        IClientState clientState, RadarHelpers radarHelpers, TypeConfigurator typeConfigurator,
-        CustomizedEntitiesUI customizedEntitiesUi, IPluginLog pluginLog)
+    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface, LocalMobsUi localMobsUi,
+        IClientState clientState, TypeConfigurator typeConfigurator,
+        CustomizedEntitiesUI customizedEntitiesUi, IPluginLog pluginLog, RadarModules radarModules)
     {
         this.clientState = clientState;
         this.localMobsUi = localMobsUi;
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
-        this.radarHelper = radarHelpers;
         this.typeConfigurator = typeConfigurator;
         this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.dalamudPluginInterface.UiBuilder.OpenConfigUi += OpenUi;
         this.customizedEntitiesUi = customizedEntitiesUi;
         this.pluginLog = pluginLog;
+        this.radarModules = radarModules;
     }
 
     public void Dispose()
@@ -65,11 +67,11 @@ public class MainUi : IDisposable
         if (ImGui.Begin("Radar Plugin", ref mainWindowVisible))
         {
             UiHelpers.DrawTabs("radar-settings-tabs",
-                ("General", UtilInfo.White, DrawGeneralSettings),
-                ("Overview", UtilInfo.Red, DrawVisibilitySettings),
-                ("Additional Features", UtilInfo.White, ShowMiscSettings),
-                ("Utility", UtilInfo.White, DrawUtilityTab),
-                ("Config", UtilInfo.White, DrawConfigTab)
+                ("General", ConfigConstants.White, DrawGeneralSettings),
+                ("Overview", ConfigConstants.Red, DrawVisibilitySettings),
+                ("Additional Features", ConfigConstants.White, ShowMiscSettings),
+                ("Utility", ConfigConstants.White, DrawUtilityTab),
+                ("Config", ConfigConstants.White, DrawConfigTab)
             );
         }
 
@@ -119,7 +121,7 @@ public class MainUi : IDisposable
         ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
         if (ImGui.BeginPopup("DeleteConfigPopup"))
         {
-            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(UtilInfo.White),
+            ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(ConfigConstants.White),
                 $"Do you really want to delete the config: \"{configInterface.configs[selectedConfig]}\"?");
             if (ImGui.Button("Yes"))
             {
@@ -128,7 +130,7 @@ public class MainUi : IDisposable
             }
 
             ImGui.SameLine();
-            ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
+            ImGui.PushStyleColor(ImGuiCol.Text, ConfigConstants.Red);
             if (ImGui.Button("No"))
             {
                 ImGui.CloseCurrentPopup();
@@ -159,7 +161,7 @@ public class MainUi : IDisposable
         ImGui.Separator();
 
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
-        ImGui.Text($"Zone Type: {radarHelper.GetCurrentZoneType()}");
+        ImGui.Text($"Zone Type: {radarModules.zoneTypeModule.GetLocationType()}");
         if (ImGui.Button("Show Current Customizations"))
         {
             customizedEntitiesUi.ShowCustomizedEntitiesUI();
@@ -176,7 +178,7 @@ public class MainUi : IDisposable
     private void DrawGeneralSettings()
     {
         bool shouldSave = false;
-        UiHelpers.TextColored("This is made by KangasZ for use in FFXIV.", UtilInfo.Yellow);
+        UiHelpers.TextColored("This is made by KangasZ for use in FFXIV.", ConfigConstants.Yellow);
 
         shouldSave |= ImGui.Checkbox("Enabled", ref configInterface.cfg.Enabled);
 
@@ -206,7 +208,7 @@ public class MainUi : IDisposable
                 ImGui.SameLine();
                 shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.MaxDistance, "",
                     "default-max-distance-size", 1f, 2000f,
-                    UtilInfo.DefaultMaxEspDistance, "%.0fm");
+                    ConfigConstants.DefaultMaxEspDistance, "%.0fm");
             }
 
 
@@ -230,14 +232,14 @@ public class MainUi : IDisposable
 
 
         ImGui.Separator();
-        UiHelpers.TextColored("Thank you for your support!", UtilInfo.Red);
+        UiHelpers.TextColored("Thank you for your support!", ConfigConstants.Red);
         ImGui.Separator();
-        UiHelpers.TextColored("Issues or Feedback:", UtilInfo.Red);
+        UiHelpers.TextColored("Issues or Feedback:", ConfigConstants.Red);
         ImGui.SameLine();
         UiHelpers.TextURL("GitHub", "https://github.com/KangasZ/RadarPlugin", ImGui.GetColorU32(ImGuiCol.Text));
         ImGui.Indent();
         UiHelpers.TextColored("1. Use tabs to customize experience and fix invisible mobs.\n" +
-                              "2. Bring bugs or feature requests up\n", UtilInfo.Yellow);
+                              "2. Bring bugs or feature requests up\n", ConfigConstants.Yellow);
         ImGui.Unindent();
         ImGui.Spacing();
         ImGui.TextWrapped(
@@ -329,22 +331,22 @@ public class MainUi : IDisposable
     private void DrawVisibilitySettings()
     {
         UiHelpers.DrawTabs("radar-visibility-tabs",
-            ("Players", UtilInfo.Silver, DrawPlayerGeneralSettings),
-            ("Mobs", UtilInfo.Green, DrawMobsVisibilitySettings),
-            ("Entities", UtilInfo.LightBlue, DrawEntitiesVisibilitySettings),
-            ("Deep Dungeons", UtilInfo.Yellow, DrawDeepDungeonOverviewSettings)
+            ("Players", ConfigConstants.Silver, DrawPlayerGeneralSettings),
+            ("Mobs", ConfigConstants.Green, DrawMobsVisibilitySettings),
+            ("Entities", ConfigConstants.LightBlue, DrawEntitiesVisibilitySettings),
+            ("Deep Dungeons", ConfigConstants.Yellow, DrawDeepDungeonOverviewSettings)
         );
     }
 
     private void DrawPlayerGeneralSettings()
     {
         var shouldSave = false;
-        UiHelpers.DrawSeperator("Players", UtilInfo.Red);
+        UiHelpers.DrawSeperator("Players", ConfigConstants.Red);
         DrawSettingsOverview(configInterface.cfg.PlayerOption, "Players", mobType: MobType.Player);
 
         // Custom YOUR PLAYER that I don't want to deal with yet.\
         ImGui.Separator();
-        ImGui.PushStyleColor(ImGuiCol.Text, UtilInfo.Red);
+        ImGui.PushStyleColor(ImGuiCol.Text, ConfigConstants.Red);
         ImGui.Text("Separators");
         ImGui.PopStyleColor();
         UiHelpers.LabeledHelpMarker("",
@@ -368,7 +370,7 @@ public class MainUi : IDisposable
 
     private void DrawDeepDungeonOverviewSettings()
     {
-        UiHelpers.DrawSeperator($"Enemies Options", UtilInfo.Red);
+        UiHelpers.DrawSeperator($"Enemies Options", ConfigConstants.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption, "Special Undead",
             mobType: MobType.Character,
             displayOrigination: DisplayOrigination.DeepDungeon);
@@ -384,7 +386,7 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.MimicOption, "Mimic", mobType: MobType.Character,
             displayOrigination: DisplayOrigination.DeepDungeon);
 
-        UiHelpers.DrawSeperator($"Loot Options", UtilInfo.Red);
+        UiHelpers.DrawSeperator($"Loot Options", ConfigConstants.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.GoldChestOption, "Gold Chest",
             displayOrigination: DisplayOrigination.DeepDungeon);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.SilverChestOption, "Silver Chest",
@@ -395,7 +397,7 @@ public class MainUi : IDisposable
             displayOrigination: DisplayOrigination.DeepDungeon);
 
 
-        UiHelpers.DrawSeperator($"DD Specific Options", UtilInfo.Red);
+        UiHelpers.DrawSeperator($"DD Specific Options", ConfigConstants.Red);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.TrapOption, "Traps",
             displayOrigination: DisplayOrigination.DeepDungeon);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return",
@@ -404,7 +406,7 @@ public class MainUi : IDisposable
             displayOrigination: DisplayOrigination.DeepDungeon);
     }
 
-    private void DrawSettingsOverview(Configuration.ESPOption espOption, string tag, string? description = null,
+    private void DrawSettingsOverview(Configuration.Configuration.ESPOption espOption, string tag, string? description = null,
         MobType mobType = MobType.Object,
         DisplayOrigination displayOrigination = DisplayOrigination.OpenWorld)
     {
@@ -544,23 +546,19 @@ public class MainUi : IDisposable
 
         var tag = "aggroradiusoptions";
 
-        shouldSave |= ImGui.Checkbox($"Aggro Circle##{tag}-settings",
-            ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircle);
-        UiHelpers.HoverTooltip("Draws aggro circle.");
+        shouldSave |= UiHelpers.DrawCheckbox($"Aggro Circle##{tag}-settings",
+            ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircle, "Draws aggro circle.");
 
         shouldSave |= UiHelpers.DrawCheckbox($"Enable Max Distance For Aggro Radius##{tag}-max-dist",
             ref configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool,
             "Sets a max distance for aggro circles");
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.AggroRadiusOptions.MaxDistance, "",
             $"##{tag}-max-dist-slider", 1f, 2000f,
-            UtilInfo.DefaultMaxAggroRadiusDistance, "%.0fm");
-
-        shouldSave |= ImGui.Checkbox($"Aggro Circle In Combat##{tag}-settings",
-            ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat);
-
-        UiHelpers.HoverTooltip(
-            "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
-
+            ConfigConstants.DefaultMaxAggroRadiusDistance, "%.0fm");
+        
+        shouldSave |= UiHelpers.DrawCheckbox($"Aggro Circle In Combat##{tag}-settings",
+            ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat, "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
+        UiHelpers.DrawSeperator("Sight Aggro Settings:", ConfigConstants.White);
         shouldSave |=
             UiHelpers.Vector4ColorSelector($"Front##{tag}", ref configInterface.cfg.AggroRadiusOptions.FrontColor);
         ImGui.SameLine();
@@ -572,21 +570,14 @@ public class MainUi : IDisposable
         ImGui.SameLine();
         shouldSave |=
             UiHelpers.Vector4ColorSelector($"Right##{tag}", ref configInterface.cfg.AggroRadiusOptions.RightSideColor);
+        UiHelpers.DrawSeperator("Sound Aggro Settings:", ConfigConstants.White);
+        shouldSave |=
+            UiHelpers.Vector4ColorSelector($"Sound##{tag}", ref configInterface.cfg.AggroRadiusOptions.SoundAggroColor);
+        
+        UiHelpers.DrawSeperator("Proximity Aggro Settings:", ConfigConstants.White);
+        shouldSave |=
+            UiHelpers.Vector4ColorSelector($"Proximity##{tag}", ref configInterface.cfg.AggroRadiusOptions.ProximityAggroColor);
 
-
-        var circleOpacity = (float)(configInterface.cfg.AggroRadiusOptions.CircleOpacity >> 24) / byte.MaxValue;
-        if (ImGui.DragFloat($"Circle Opacity##{tag}", ref circleOpacity, 0.005f, 0, 1))
-        {
-            configInterface.cfg.AggroRadiusOptions.CircleOpacity = ((uint)(circleOpacity * 255) << 24) | 0x00FFFFFF;
-            configInterface.Save();
-        }
-
-        var coneOpacity = (float)(configInterface.cfg.AggroRadiusOptions.FrontConeOpacity >> 24) / byte.MaxValue;
-        if (ImGui.DragFloat($"Cone Opacity##{tag}", ref coneOpacity, 0.005f, 0, 1))
-        {
-            configInterface.cfg.AggroRadiusOptions.FrontConeOpacity = ((uint)(coneOpacity * 255) << 24) | 0x00FFFFFF;
-            configInterface.Save();
-        }
 
         if (shouldSave) configInterface.Save();
     }
@@ -597,12 +588,12 @@ public class MainUi : IDisposable
         bool shouldSave = false;
         ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
 
-        UiHelpers.DrawSeperator("Non-Enemy Npcs", UtilInfo.Red);
+        UiHelpers.DrawSeperator("Non-Enemy Npcs", ConfigConstants.Red);
         DrawSettingsOverview(configInterface.cfg.CompanionOption, "Companions");
         DrawSettingsOverview(configInterface.cfg.EventNpcOption, "Event NPCs");
         DrawSettingsOverview(configInterface.cfg.RetainerOption, "Retainers");
 
-        UiHelpers.DrawSeperator("Enemy Npcs", UtilInfo.Red);
+        UiHelpers.DrawSeperator("Enemy Npcs", ConfigConstants.Red);
         DrawSettingsOverview(configInterface.cfg.NpcOption, "Enemies",
             description: "Shows most enemies that are considered battleable", mobType: MobType.Character);
         shouldSave |= DrawBoolSeparatedSettingsOverview(ref configInterface.cfg.SeparatedRankOne, "Rank 1",
@@ -619,7 +610,7 @@ public class MainUi : IDisposable
         bool shouldSave = false;
         ImGui.BeginChild($"##visiblitygeneralsettings-radar-tabs-child", new Vector2(0, 0));
 
-        UiHelpers.DrawSeperator("Objects", UtilInfo.Red);
+        UiHelpers.DrawSeperator("Objects", ConfigConstants.Red);
         DrawSettingsOverview(configInterface.cfg.TreasureOption, "Treasure",
             "Shows most loot. The loot classification is via the dalamud's association.");
         DrawSettingsOverview(configInterface.cfg.EventObjOption, "Event Objects");
@@ -628,7 +619,7 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.CutsceneOption, "Cutscene Objs",
             "Shows cutscene objects. I have no idea what these are!");
 
-        UiHelpers.DrawSeperator("Misc", UtilInfo.Red);
+        UiHelpers.DrawSeperator("Misc", ConfigConstants.Red);
         DrawSettingsOverview(configInterface.cfg.CardStandOption, "Card Stand",
             "Show card stand. This includes island sanctuary stuff (mostly).");
         DrawSettingsOverview(configInterface.cfg.GatheringPointOption, "Gathering Point",
@@ -639,7 +630,7 @@ public class MainUi : IDisposable
         if (shouldSave) configInterface.Save();
     }
 
-    private bool DrawBoolSeparatedSettingsOverview(ref Configuration.SeparatedEspOption separatedEspOption, string tag,
+    private bool DrawBoolSeparatedSettingsOverview(ref Configuration.Configuration.SeparatedEspOption separatedEspOption, string tag,
         MobType mobType, string? infoDescription = null)
     {
         var shouldSave = false;

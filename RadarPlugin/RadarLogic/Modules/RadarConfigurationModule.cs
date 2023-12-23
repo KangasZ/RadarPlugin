@@ -1,147 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text.Json;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
-using RadarPlugin.Models;
 
-namespace RadarPlugin;
+namespace RadarPlugin.RadarLogic.Modules;
 
-public class RadarHelpers
+public class RadarConfigurationModule : IModuleInterface
 {
-    private readonly Configuration configInterface;
+    private readonly Configuration.Configuration configInterface;
+    private readonly PlayerCharacter localPlayer;
+    private readonly ZoneTypeModule zoneTypeModule;
     private readonly IClientState clientState;
-    private readonly ICondition conditionInterface;
-    private Dictionary<uint, float> distanceDictionary;
-    private readonly IDataManager dataManager;
-    public readonly Dictionary<uint, byte> RankDictionary = new();
-    public readonly Dictionary<uint, AggroType> AggroTypeDictionary = new();
-    private Dictionary<uint, (Vector4 Position, DateTime Time)> lastMovementDictionary = new();
+    private readonly RankModule rankModule;
+    private readonly DistanceModule distanceModule;
+    private readonly MobLastMovement mobLastMovement;
 
-    public RadarHelpers(
-        Configuration configInterface,
-        IClientState clientState,
-        ICondition condition,
-        IDataManager dataManager
-    )
+    public RadarConfigurationModule(IClientState clientState, Configuration.Configuration configInterface,
+        ZoneTypeModule zoneTypeModule, RankModule rankModule, DistanceModule distanceModule, MobLastMovement mobLastMovement)
     {
-        this.clientState = clientState;
         this.configInterface = configInterface;
-        this.conditionInterface = condition;
-        this.distanceDictionary = new Dictionary<uint, float>();
-        this.dataManager = dataManager;
-
-        var excelBnpcs = this.dataManager.GetExcelSheet<BNpcBase>();
-        if (excelBnpcs != null)
-        {
-            RankDictionary = excelBnpcs.ToDictionary(x => x.RowId, x => x.Rank);
-        }
-
-        var json = File.ReadAllText("Data/allMobs.json");
-        var mobs = JsonSerializer.Deserialize<List<AggroInfo>>(json);
-        if (mobs.Count > 0)
-        {
-            AggroTypeDictionary = mobs.ToDictionary(mob => mob.NameId, mob => mob.AggroType);
-        }
-    }
-    
-    public unsafe bool ShouldRender(GameObject obj)
-    {
-        // Objest valid check
-        if (!obj.IsValid()) return false;
-        //if (obj.DataId == GameObject.InvalidGameObjectId) return false;
-
-        // Object within ignore lists
-        if (UtilInfo.DataIdIgnoreList.Contains(obj.DataId)) return false;
-
-        // Object visible & config check
-        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
-        if (configInterface.cfg.ShowOnlyVisible &&
-            (clientstructobj->RenderFlags != 0)) // || !clientstructobj->GetIsTargetable()))
-        {
-            // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still. 
-            if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters) return false;
-            if (obj.ObjectKind != ObjectKind.Player) return false;
-        }
-        // Distance check
-
-        // Eureka DD STQ
-        if (configInterface.cfg.ShowBaDdObjects && GetCurrentZoneType() == LocationKind.DeepDungeon)
-        {
-            // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
-            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)) return true;
-            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not BattleNpc
-                {
-                    BattleNpcKind: BattleNpcSubKind.Enemy
-                } mob) return true;
-            if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
-            return !mob.IsDead;
-        }
-
-
-        if (obj is BattleChara mobNpc)
-        {
-            //if (!clientstructobj->GetIsTargetable()) continue;
-            //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (mobNpc.IsDead) return false;
-        }
-
-        return true;
-    }
-
-    public void ResetDistance()
-    {
-        this.distanceDictionary = new Dictionary<uint, float>();
-    }
-
-    public float GetDistanceFromPlayer(GameObject obj)
-    {
-        if (distanceDictionary.TryGetValue(obj.ObjectId, out var value))
-        {
-            return value;
-        }
-
-        var distance = obj.Position.Distance2D(clientState.LocalPlayer!.Position);
-        distanceDictionary[obj.ObjectId] = distance;
-        return distance;
-    }
-
-    public LocationKind GetCurrentZoneType()
-    {
-        if (UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) ||
-            this.conditionInterface[ConditionFlag.InDeepDungeon])
-        {
-            return LocationKind.DeepDungeon;
-        }
-        else
-        {
-            //todo: handle eureka differently
-            return LocationKind.Overworld;
-        }
+        this.zoneTypeModule = zoneTypeModule;
+        this.clientState = clientState;
+        this.rankModule = rankModule;
+        this.distanceModule = distanceModule;
+        this.mobLastMovement = mobLastMovement;
     }
 
     /**
-     * TODO: Refactor this to be done once per second instead of on each render.
-     */
-    public string GetText(GameObject gameObject, Configuration.ESPOption espOption)
+ * TODO: Refactor this to be done once per second instead of on each render.
+ */
+    public string GetText(GameObject gameObject, Configuration.Configuration.ESPOption espOption)
     {
         var tagText = "";
-        if (gameObject.DataId != 0 && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
-            UtilInfo.RenameList.ContainsKey(gameObject.DataId))
+        if (gameObject.DataId != 0 && MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+            MobConstants.RenameList.ContainsKey(gameObject.DataId))
         {
-            tagText = UtilInfo.RenameList[gameObject.DataId];
+            tagText = MobConstants.RenameList[gameObject.DataId];
         }
         else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))
         {
@@ -171,7 +67,7 @@ public class RadarHelpers
             {
                 tagText += $"\nD {battleNpc.DataId}";
                 tagText += $"\nN {battleNpc.NameId}";
-                if (RankDictionary.TryGetValue(battleNpc.DataId, out byte value))
+                if (rankModule.TryGetRank(battleNpc.DataId, out byte value))
                 {
                     tagText += $"\nR {value}";
                 }
@@ -182,14 +78,15 @@ public class RadarHelpers
         if (espOption.DrawDistance)
         {
             if (clientState.LocalPlayer != null)
-                tagText += GetDistanceFromPlayer(gameObject).ToString(" 0.0m");
+                tagText += distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, gameObject).ToString(" 0.0m");
         }
 
         if (configInterface.cfg.EXPERIMENTALEnableMobTimerTracking
             && gameObject.ObjectKind == ObjectKind.BattleNpc
             && (((BattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) != 0)
         {
-            tagText += (GetTimeElapsedFromMovement(gameObject).Milliseconds/1000).ToString(" 0.0m");
+            tagText += (mobLastMovement.GetTimeElapsedFromMovement(gameObject).Milliseconds / 1000)
+                .ToString(" 0.0m");
         }
 
         return configInterface.cfg.DebugText
@@ -197,36 +94,7 @@ public class RadarHelpers
             : $"{tagText}";
     }
 
-    private TimeSpan GetTimeElapsedFromMovement(GameObject gameObject)
-    {
-        if (lastMovementDictionary.TryGetValue(gameObject.ObjectId, out var value))
-        {
-            // Fuzzy equals on stuff
-            if (!value.Position.X.FuzzyEquals(gameObject.Position.X) ||
-                !value.Position.Y.FuzzyEquals(gameObject.Position.Y) ||
-                !value.Position.Z.FuzzyEquals(gameObject.Position.Z) ||
-                !value.Position.W.FuzzyEquals(gameObject.Rotation))
-            {
-                var positionVector = new Vector4(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z,
-                    gameObject.Rotation);
-                lastMovementDictionary[gameObject.ObjectId] = (positionVector, DateTime.Now);
-                return TimeSpan.Zero;
-            }
-            else
-            {
-                return DateTime.Now - value.Time;
-            }
-        }
-        else
-        {
-            var positionVector = new Vector4(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z,
-                gameObject.Rotation);
-            lastMovementDictionary.Add(gameObject.ObjectId, (positionVector, DateTime.Now));
-            return TimeSpan.Zero;
-        }
-    }
-
-    public Configuration.ESPOption GetParamsWithOverride(GameObject areaObject)
+    public Configuration.Configuration.ESPOption GetParamsWithOverride(GameObject areaObject)
     {
         // If overridden
         if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
@@ -237,13 +105,13 @@ public class RadarHelpers
         return GetParams(areaObject);
     }
 
-    public Configuration.ESPOption GetParams(GameObject areaObject)
+    public Configuration.Configuration.ESPOption GetParams(GameObject areaObject)
     {
         // If Deep Dungeon
-        var zoneType = GetCurrentZoneType();
+        var zoneType = zoneTypeModule.GetLocationType();
         if (configInterface.cfg.ShowBaDdObjects && zoneType == LocationKind.DeepDungeon)
         {
-            if (UtilInfo.DeepDungeonMobTypesMap.TryGetValue(areaObject.DataId, out var value))
+            if (MobConstants.DeepDungeonMobTypesMap.TryGetValue(areaObject.DataId, out var value))
             {
                 switch (value)
                 {
@@ -330,7 +198,7 @@ public class RadarHelpers
 
                 if (configInterface.cfg.SeparatedRankOne.Enabled || configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
                 {
-                    if (RankDictionary.TryGetValue(bnpc.DataId, out var value))
+                    if (rankModule.TryGetRank(bnpc.DataId, out var value))
                     {
                         switch (value)
                         {
@@ -398,14 +266,18 @@ public class RadarHelpers
         }
     }
 
-    public void CullOldMobMovement()
+    public void Dispose()
     {
-        foreach (var mobMovement in lastMovementDictionary)
-        {
-            if (DateTime.Now - mobMovement.Value.Time > TimeSpan.FromSeconds(100))
-            {
-                lastMovementDictionary.Remove(mobMovement.Key);
-            }
-        }
+        //Do nothing
+    }
+
+    public void StartTick()
+    {
+        //Do Nothing
+    }
+
+    public void EndTick()
+    {
+        //do nothing
     }
 }
