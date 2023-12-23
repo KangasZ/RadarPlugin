@@ -248,7 +248,7 @@ public class Configuration
         DrawDistance = false
     };
 
-    [NonSerialized] private static readonly ESPOption objectOptDefault = new ESPOption
+    [NonSerialized] public static readonly ESPOption objectOptDefault = new ESPOption
     {
         Enabled = true,
         ColorU = 0xffFFFF00,

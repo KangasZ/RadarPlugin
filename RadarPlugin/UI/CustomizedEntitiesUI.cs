@@ -9,6 +9,7 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 using RadarPlugin.RadarLogic;
 
@@ -16,6 +17,7 @@ namespace RadarPlugin.UI;
 
 public class CustomizedEntitiesUI : IDisposable
 {
+    private string currentTypedDataId = "";
     private bool drawCurrentMobsWindow = false;
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly Configuration.Configuration configInterface;
@@ -49,7 +51,45 @@ public class CustomizedEntitiesUI : IDisposable
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Customized Entities Menu", ref drawCurrentMobsWindow))
         {
+            ImGui.Text("Add Customized Entity dataId:");
+            ImGui.SameLine();
+            ImGui.InputText("", ref currentTypedDataId, 10, ImGuiInputTextFlags.CharsDecimal | ImGuiInputTextFlags.CharsNoBlank);
+            if (ImGui.Button("Add As Object"))
+            {
+                var parsed = uint.TryParse(currentTypedDataId, out var dataId);
+                if (!parsed)
+                {
+                    ImGui.OpenPopup("FailedDataIdParsePopup");
+                }
+                else
+                {
+                    configInterface.cfg.OptionOverride.Add(dataId, new Configuration.Configuration.ESPOptionMobBased(Configuration.Configuration.objectOptDefault)
+                    {
+                        Enabled = true,
+                        ColorU = ConfigConstants.White,
+                        Name = "Customized Entity",
+                        MobTypeValue = MobType.Object
+                    });
+                }
+            }
+            //Popup
+            ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
+            ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
+            if (ImGui.BeginPopup("FailedDataIdParsePopup"))
+            {
+                UiHelpers.TextColored("Beep Beep: You didnt enter a uint :(", ConfigConstants.Red);
+                if (ImGui.Button("OK"))
+                {
+                    ImGui.CloseCurrentPopup();
+                }
+                        
+                ImGui.EndPopup();
+            }
 
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
+            //Popup End
+            UiHelpers.HoverTooltip("YES ITS ONLY AN OBJECT ATM,\nTHIS MIGHT BE DANGEROUS IF YOU ADD A MOB THAT ISNT A MOB.\nWill require some engineering");
             ImGui.BeginTable("customizedEntitiesTable", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
             ImGui.TableSetupColumn("DataId");
             ImGui.TableSetupColumn("Name When Added");
