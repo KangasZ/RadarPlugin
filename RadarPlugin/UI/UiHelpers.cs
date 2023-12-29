@@ -178,8 +178,6 @@ public static class UiHelpers
 
                 return lb2;
             default:
-                PluginLog.Error(
-                    "Mob Type Is Wrong. This literally should never occur. Please dear god help me if it does.");
                 return false;
         }
     }
@@ -266,7 +264,6 @@ public static class UiHelpers
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
-                PluginLog.Log("Opening RadarPlugin GitHub");
                 Process.Start(new ProcessStartInfo(url)
                 {
                     UseShellExecute = true

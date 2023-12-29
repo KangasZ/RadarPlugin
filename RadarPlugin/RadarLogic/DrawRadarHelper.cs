@@ -3,20 +3,20 @@ using System.Numerics;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using RadarPlugin.Constants;
 
 namespace RadarPlugin.RadarLogic;
 
 public static class DrawRadarHelper
 {
-    private static readonly float PI = 3.14159265359f;
-
     public static void DrawDot(ImDrawListPtr imDrawListPtr, Vector2 onScreenPosition, float radius, uint color)
     {
         //TODO: Num Segments should be configurable
         imDrawListPtr.AddCircleFilled(onScreenPosition, radius, color, 100);
     }
-    
-    public static void DrawTextCenteredUnder(ImDrawListPtr imDrawListPtr, Vector2 onScreenPosition, string textToDraw, uint color, Configuration.Configuration.ESPOption espOption)
+
+    public static void DrawTextCenteredUnder(ImDrawListPtr imDrawListPtr, Vector2 onScreenPosition, string textToDraw,
+        uint color, Configuration.Configuration.ESPOption espOption)
     {
         var tagTextSize = ImGui.CalcTextSize(textToDraw);
         imDrawListPtr.AddText(
@@ -24,7 +24,7 @@ public static class DrawRadarHelper
             color,
             textToDraw);
     }
-    
+
     public static void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
         uint playerOptColor)
     {
@@ -32,13 +32,13 @@ public static class DrawRadarHelper
         if (gameObject is not BattleChara npc) return;
 
         var v1 = (float)npc.CurrentHp / (float)npc.MaxHp;
-        var aMax = PI * 2.0f;
+        var aMax = MathF.PI * 2.0f;
         var difference = v1 - 1.0f;
         imDrawListPtr.PathArcTo(position, radius,
             (-(aMax / 4.0f)) + (aMax / npc.MaxHp) * (npc.MaxHp - npc.CurrentHp), aMax - (aMax / 4.0f), 200 - 1);
         imDrawListPtr.PathStroke(playerOptColor, ImDrawFlags.None, 2.0f);
     }
-    
+
     public static void DrawConeAtCenterPointFromRotation(ImDrawListPtr imDrawListPtr, Vector3 originPosition,
         float rotationStart, float totalRotationCw, float radius, uint color, int numSegments, IGameGui gameGui)
     {
@@ -66,9 +66,10 @@ public static class DrawRadarHelper
 
         imDrawListPtr.PathFillConvex(color);
     }
-    
+
     public static void DrawArcAtCenterPointFromRotations(ImDrawListPtr imDrawListPtr, Vector3 originPosition,
-        float rotationStart, float totalRotationCw, float radius, uint color, float thickness, int numSegments, IGameGui gameGui)
+        float rotationStart, float totalRotationCw, float radius, uint color, float thickness, int numSegments,
+        IGameGui gameGui)
     {
         var rotationPerSegment = totalRotationCw / numSegments;
         Vector2 segmentVectorOnCircle;
@@ -94,7 +95,7 @@ public static class DrawRadarHelper
 
         imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
     }
-    
+
     public static void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
         uint playerOptColor)
     {
@@ -106,5 +107,23 @@ public static class DrawRadarHelper
             new Vector2((position.X - healthTextSize.X / 2.0f), (position.Y - healthTextSize.Y / 2.0f)),
             playerOptColor,
             healthText);
+    }
+
+    public static void DrawHealthBar(ImDrawListPtr imDrawListPtr, Vector2 onScreenPositon, GameObject gameObject)
+    {
+        if (gameObject is not BattleChara npc) return;
+        var color = ConfigConstants.Black;
+        var hp = npc.CurrentHp;
+        var maxHp = npc.MaxHp;
+        var height = 100f;
+        var width = 10f;
+        imDrawListPtr.PushClipRect(onScreenPositon + new Vector2(0.0f, (maxHp - hp) / 100.0f * height),
+            onScreenPositon + new Vector2(width + 1.0f, height + 1.0f));
+        imDrawListPtr.AddRectFilled(onScreenPositon + new Vector2(1.0f, 1.0f), onScreenPositon + new Vector2(
+            width + 1.0f, height + 1.0f
+        ), ConfigConstants.Green);
+        imDrawListPtr.AddRectFilled(onScreenPositon, onScreenPositon + new Vector2(
+            width, height
+        ), ConfigConstants.Blue);
     }
 }

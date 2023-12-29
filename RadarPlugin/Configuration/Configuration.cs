@@ -213,6 +213,8 @@ public class Configuration
         public float MaxDistance = ConfigConstants.DefaultMaxEspDistance;
         public FontSettings FontSettings { get; set; } = new();
         public LevelRendering LevelRendering { get; set; } = new();
+        public bool ShowOverworldObjects = true;
+
         public float EspPadding = ConfigConstants.DefaultEspPadding;
 
         public SeparatedEspOption SeparatedAlliance = new()

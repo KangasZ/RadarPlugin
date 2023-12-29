@@ -453,8 +453,15 @@ public class Radar : IDisposable
             if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters) return false;
             if (obj.ObjectKind != ObjectKind.Player) return false;
         }
-        // Distance check
 
+        var locationType = radarModules.zoneTypeModule.GetLocationType();
+        
+        // Overworld Enable Check
+        if (!configInterface.cfg.ShowOverworldObjects && locationType == LocationKind.Overworld)
+        {
+            return false;
+        }
+        
         // Eureka DD STQ
         if (configInterface.cfg.ShowBaDdObjects && radarModules.zoneTypeModule.GetLocationType() == LocationKind.DeepDungeon)
         {
@@ -468,8 +475,7 @@ public class Radar : IDisposable
             if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
             return !mob.IsDead;
         }
-
-
+        
         if (obj is BattleChara mobNpc)
         {
             //if (!clientstructobj->GetIsTargetable()) continue;

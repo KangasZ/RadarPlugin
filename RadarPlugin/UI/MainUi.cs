@@ -22,7 +22,8 @@ public class MainUi : IDisposable
     private readonly IPluginLog pluginLog;
     private readonly RadarModules radarModules;
 
-    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface, LocalMobsUi localMobsUi,
+    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface,
+        LocalMobsUi localMobsUi,
         IClientState clientState, TypeConfigurator typeConfigurator,
         CustomizedEntitiesUI customizedEntitiesUi, IPluginLog pluginLog, RadarModules radarModules)
     {
@@ -177,22 +178,23 @@ public class MainUi : IDisposable
 
     private void DrawGeneralSettings()
     {
-        bool shouldSave = false;
+        var shouldSave = false;
         UiHelpers.TextColored("This is made by KangasZ for use in FFXIV.", ConfigConstants.Yellow);
+        UiHelpers.DrawSeperator("Radar Plugin 2.0 Update. Please report bugs!", ConfigConstants.Red);
+        shouldSave |= UiHelpers.DrawCheckbox("Plugin Enabled", ref configInterface.cfg.Enabled);
 
-        shouldSave |= ImGui.Checkbox("Enabled", ref configInterface.cfg.Enabled);
+        shouldSave |= UiHelpers.DrawCheckbox("Overworld Enabled", ref configInterface.cfg.ShowOverworldObjects,
+            "This will be enabled when you want to view overworld objects." +
+            "Otherwise it will not show objects in the overworld");
 
         shouldSave |= UiHelpers.DrawCheckbox("Eureka/Deep Dungeons Support", ref configInterface.cfg.ShowBaDdObjects,
             "This focuses on giving support to eureka and deep dungeons.\n" +
             "Will display things such as portals, chests, and traps.");
 
-        shouldSave |= ImGui.Checkbox("Use Background Draw List", ref configInterface.cfg.UseBackgroundDrawList);
-
-        UiHelpers.LabeledHelpMarker("",
+        shouldSave |= UiHelpers.DrawCheckbox("Use Background Draw List", ref configInterface.cfg.UseBackgroundDrawList,
             "This feature will use a background draw list from ImGui to render the 3d radar.\n" +
             "It will be under any other Dalamud plugin. This is the original behavior.\n" +
             "There should be practically no difference between this and normal operations");
-
 
         shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
 
@@ -406,7 +408,8 @@ public class MainUi : IDisposable
             displayOrigination: DisplayOrigination.DeepDungeon);
     }
 
-    private void DrawSettingsOverview(Configuration.Configuration.ESPOption espOption, string tag, string? description = null,
+    private void DrawSettingsOverview(Configuration.Configuration.ESPOption espOption, string tag,
+        string? description = null,
         MobType mobType = MobType.Object,
         DisplayOrigination displayOrigination = DisplayOrigination.OpenWorld)
     {
@@ -555,9 +558,10 @@ public class MainUi : IDisposable
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref configInterface.cfg.AggroRadiusOptions.MaxDistance, "",
             $"##{tag}-max-dist-slider", 1f, 2000f,
             ConfigConstants.DefaultMaxAggroRadiusDistance, "%.0fm");
-        
+
         shouldSave |= UiHelpers.DrawCheckbox($"Aggro Circle In Combat##{tag}-settings",
-            ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat, "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
+            ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat,
+            "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat.");
         UiHelpers.DrawSeperator("Sight Aggro Settings:", ConfigConstants.White);
         shouldSave |=
             UiHelpers.Vector4ColorSelector($"Front##{tag}", ref configInterface.cfg.AggroRadiusOptions.FrontColor);
@@ -573,10 +577,11 @@ public class MainUi : IDisposable
         UiHelpers.DrawSeperator("Sound Aggro Settings:", ConfigConstants.White);
         shouldSave |=
             UiHelpers.Vector4ColorSelector($"Sound##{tag}", ref configInterface.cfg.AggroRadiusOptions.SoundAggroColor);
-        
+
         UiHelpers.DrawSeperator("Proximity Aggro Settings:", ConfigConstants.White);
         shouldSave |=
-            UiHelpers.Vector4ColorSelector($"Proximity##{tag}", ref configInterface.cfg.AggroRadiusOptions.ProximityAggroColor);
+            UiHelpers.Vector4ColorSelector($"Proximity##{tag}",
+                ref configInterface.cfg.AggroRadiusOptions.ProximityAggroColor);
 
 
         if (shouldSave) configInterface.Save();
@@ -630,7 +635,8 @@ public class MainUi : IDisposable
         if (shouldSave) configInterface.Save();
     }
 
-    private bool DrawBoolSeparatedSettingsOverview(ref Configuration.Configuration.SeparatedEspOption separatedEspOption, string tag,
+    private bool DrawBoolSeparatedSettingsOverview(
+        ref Configuration.Configuration.SeparatedEspOption separatedEspOption, string tag,
         MobType mobType, string? infoDescription = null)
     {
         var shouldSave = false;

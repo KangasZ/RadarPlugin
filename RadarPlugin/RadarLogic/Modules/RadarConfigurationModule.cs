@@ -86,7 +86,7 @@ public class RadarConfigurationModule : IModuleInterface
             && (((BattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) != 0)
         {
             tagText += (mobLastMovement.GetTimeElapsedFromMovement(gameObject).Milliseconds / 1000)
-                .ToString(" 0.0m");
+                .ToString(" 0.0s");
         }
 
         return configInterface.cfg.DebugText
