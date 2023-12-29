@@ -15,7 +15,7 @@ public static class ConfigConstants
     public const uint LightBlue = 0xFFE6D8AD;
     public const uint Bronze = 0xFF327FCD;
     public const uint Turquoise = 0xffc8d530;
-    public const uint Black = 0xffffffff;
+    public const uint Black = 0xff000000;
     
     //Config Constants
     public const float MinDotSize = 0.6f;
