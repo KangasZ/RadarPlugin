@@ -3,7 +3,7 @@ namespace RadarPlugin.Constants;
 public static class ConfigConstants
 {
     //Colors
-    // These are all in ARGB format
+    // These are all in ABGR format
     public const uint Green = 0xFF00FF00;
     public const uint Red = 0xFF0000FF;
     public const uint Blue = 0xFFFF0000;
