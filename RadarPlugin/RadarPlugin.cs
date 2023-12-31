@@ -38,7 +38,7 @@ public class RadarPlugin : IDalamudPlugin
         this.pluginInterface = pluginInterface;
         // Services and DI
         Configuration = new Configuration.Configuration(this.pluginInterface, pluginLog);
-        radarModules = new RadarModules(condition, clientState, Configuration, dataManager);
+        radarModules = new RadarModules(condition, clientState, Configuration, dataManager, pluginInterface);
 
         // UI
         typeConfiguratorUi = new TypeConfigurator(this.pluginInterface, Configuration);

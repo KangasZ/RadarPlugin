@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin;
 using RadarPlugin.Enums;
 using RadarPlugin.Models;
 
@@ -12,9 +13,9 @@ public class AggroTypeModule : IModuleInterface
 {
     private readonly Dictionary<uint, AggroType> AggroTypeDictionary = new();
 
-    public AggroTypeModule()
+    public AggroTypeModule(DalamudPluginInterface pluginInterface)
     {
-        var json = File.ReadAllText("Data/allMobs.json");
+        var json = File.ReadAllText(Path.Combine(pluginInterface.AssemblyLocation.Directory?.FullName, "data/allMobs.json"));
         var mobs = JsonSerializer.Deserialize<List<AggroInfo>>(json);
         if (mobs.Count > 0)
         {

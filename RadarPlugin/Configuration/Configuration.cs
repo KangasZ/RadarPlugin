@@ -70,7 +70,10 @@ public class Configuration
         public ESPOption SilverChestOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Silver };
         public ESPOption BronzeChestOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Bronze };
         public ESPOption MimicOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.Red };
-        public ESPOption AccursedHoardOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Turquoise };
+
+        public ESPOption AccursedHoardOption { get; set; } =
+            new(objectOptDefault) { ColorU = ConfigConstants.Turquoise };
+
         public ESPOption DefaultEnemyOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.White };
     }
 
@@ -135,6 +138,10 @@ public class Configuration
 
     public class ESPOptionMobBased : ESPOption
     {
+        public ESPOptionMobBased()
+        {
+        }
+
         public ESPOptionMobBased(ESPOption espOption)
         {
             Enabled = espOption.Enabled;
@@ -156,6 +163,8 @@ public class Configuration
             AppendLevelToName = espOption.AppendLevelToName;
             MobTypeValue = mobType;
         }
+
+        public string LastSeenName = string.Empty;
         public MobType MobTypeValue = MobType.Object;
         public string Name = string.Empty;
     }
@@ -234,6 +243,7 @@ public class Configuration
 
         public SeparatedEspOption SeparatedRankTwoAndSix = new()
             { EspOption = new ESPOption(mobOptDefault) { ColorU = ConfigConstants.Yellow } };
+
         public bool EXPERIMENTALEnableMobTimerTracking = false;
     }
 
@@ -300,6 +310,7 @@ public class Configuration
             {
                 cfg.OptionOverride.Remove(dataId);
             }
+
             cfg.OptionOverride.Add(dataId, newSettings);
         }
         else

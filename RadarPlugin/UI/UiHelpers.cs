@@ -18,8 +18,7 @@ public static class UiHelpers
     public static void TextColored(string text, uint color)
     {
         ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color),
-            "1. Use tabs to customize experience and fix invisible mobs.\n" +
-            "2. Bring bugs or feature requests up\n");
+            text);
     }
     public static bool DrawSettingsDetailed(Configuration.Configuration.ESPOption option, string id, MobType mobType, DisplayOrigination displayOrigination)
     {

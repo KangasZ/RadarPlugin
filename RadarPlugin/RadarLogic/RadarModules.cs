@@ -1,3 +1,4 @@
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using RadarPlugin.RadarLogic.Modules;
 
@@ -12,9 +13,9 @@ public class RadarModules : IModuleInterface
     public RankModule rankModule;
     public ZoneTypeModule zoneTypeModule;
 
-    public RadarModules(ICondition conditionInterface, IClientState clientState, Configuration.Configuration configInterface, IDataManager dataManager)
+    public RadarModules(ICondition conditionInterface, IClientState clientState, Configuration.Configuration configInterface, IDataManager dataManager, DalamudPluginInterface pluginInterface)
     {
-        aggroTypeModule = new AggroTypeModule();
+        aggroTypeModule = new AggroTypeModule(pluginInterface);
         distanceModule = new DistanceModule();
         moduleMobLastMovement = new MobLastMovement();
         rankModule = new RankModule(dataManager);

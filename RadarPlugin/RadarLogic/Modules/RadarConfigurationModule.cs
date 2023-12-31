@@ -83,9 +83,9 @@ public class RadarConfigurationModule : IModuleInterface
 
         if (configInterface.cfg.EXPERIMENTALEnableMobTimerTracking
             && gameObject.ObjectKind == ObjectKind.BattleNpc
-            && (((BattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) != 0)
+            && (((BattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) == 0)
         {
-            tagText += (mobLastMovement.GetTimeElapsedFromMovement(gameObject).Milliseconds / 1000)
+            tagText += (mobLastMovement.GetTimeElapsedFromMovement(gameObject).TotalSeconds)
                 .ToString(" 0.0s");
         }
 
@@ -99,6 +99,7 @@ public class RadarConfigurationModule : IModuleInterface
         // If overridden
         if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
         {
+            optionOverride.LastSeenName = areaObject.Name?.TextValue ?? "Unknown";
             return optionOverride;
         }
 

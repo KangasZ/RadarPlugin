@@ -113,6 +113,7 @@ public class CustomizedEntitiesUI : IDisposable
                 }
                 //Color
                 //shouldSave |= UiHelpers.Vector4ColorSelector($"##{x.Key}-color", ref x.Value.ColorU, ImGuiColorEditFlags.NoInputs);
+                ImGui.TableNextColumn();
                 var colorChange = ImGui.ColorConvertU32ToFloat4(x.Value.ColorU);
                 if (ImGui.ColorEdit4($"##{x.Key}-color", ref colorChange,
                         ImGuiColorEditFlags.NoInputs))
