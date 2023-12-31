@@ -164,6 +164,7 @@ public class Configuration
             MobTypeValue = mobType;
         }
 
+        public DateTime UtcLastSeenTime = DateTime.UtcNow;
         public string LastSeenName = string.Empty;
         public MobType MobTypeValue = MobType.Object;
         public string Name = string.Empty;

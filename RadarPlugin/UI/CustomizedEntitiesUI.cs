@@ -90,9 +90,10 @@ public class CustomizedEntitiesUI : IDisposable
             ImGui.PopStyleColor();
             //Popup End
             UiHelpers.HoverTooltip("YES ITS ONLY AN OBJECT ATM,\nTHIS MIGHT BE DANGEROUS IF YOU ADD A MOB THAT ISNT A MOB.\nWill require some engineering");
-            ImGui.BeginTable("customizedEntitiesTable", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.BeginTable("customizedEntitiesTable", 6, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable);
             ImGui.TableSetupColumn("DataId");
             ImGui.TableSetupColumn("Name When Added");
+            ImGui.TableSetupColumn("Name Last Seen");
             ImGui.TableSetupColumn("Enabled");
             ImGui.TableSetupColumn("Color");
             ImGui.TableSetupColumn("Edit");
@@ -102,9 +103,11 @@ public class CustomizedEntitiesUI : IDisposable
                 //DataId
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.Key}");
-                //Name
+                //Names
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.Value.Name}");
+                ImGui.TableNextColumn();
+                ImGui.Text($"{x.Value.LastSeenName} - {x.Value.UtcLastSeenTime.ToLocalTime()}");
                 //Enabled
                 ImGui.TableNextColumn();
                 if (ImGui.Checkbox($"##{x.Key}", ref x.Value.Enabled))

@@ -1,6 +1,8 @@
+using System;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
@@ -18,7 +20,8 @@ public class RadarConfigurationModule : IModuleInterface
     private readonly MobLastMovement mobLastMovement;
 
     public RadarConfigurationModule(IClientState clientState, Configuration.Configuration configInterface,
-        ZoneTypeModule zoneTypeModule, RankModule rankModule, DistanceModule distanceModule, MobLastMovement mobLastMovement)
+        ZoneTypeModule zoneTypeModule, RankModule rankModule, DistanceModule distanceModule,
+        MobLastMovement mobLastMovement)
     {
         this.configInterface = configInterface;
         this.zoneTypeModule = zoneTypeModule;
@@ -99,7 +102,12 @@ public class RadarConfigurationModule : IModuleInterface
         // If overridden
         if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
         {
-            optionOverride.LastSeenName = areaObject.Name?.TextValue ?? "Unknown";
+            if ((DateTime.UtcNow - optionOverride.UtcLastSeenTime).TotalSeconds > 100)
+            {
+                optionOverride.UtcLastSeenTime = DateTime.UtcNow;
+                optionOverride.LastSeenName = areaObject.Name?.TextValue ?? "Unknown";
+            }
+
             return optionOverride;
         }
 

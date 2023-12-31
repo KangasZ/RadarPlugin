@@ -134,8 +134,12 @@ public class MobEditUi : IDisposable
                         configInterface.cfg.OptionOverride[localObject.DataId].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
                         configInterface.Save();
                     }
-                    // TODO: display origination helpers
-                    typeConfiguration.OpenUiWithType(ref mobOvveride, localObject.Name.TextValue.ToString() ?? "Unknown", overriddenOption.MobTypeValue, DisplayOrigination.DeepDungeon);
+                    if (ImGui.Button("Open Up Modification UI"))
+                    {
+                        typeConfiguration.OpenUiWithType(ref mobOvveride,
+                            localObject.Name.TextValue, overriddenOption.MobTypeValue,
+                            DisplayOrigination.DeepDungeon);
+                    }
                 }
             }
             
