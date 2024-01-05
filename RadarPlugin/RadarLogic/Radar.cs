@@ -189,11 +189,13 @@ public class Radar : IDisposable
             if (configInterface.cfg.ColorOverride.TryGetValue(areaObject.DataId, out var optionOverride) &&
                 !configInterface.cfg.OptionOverride.ContainsKey(areaObject.DataId))
             {
-                espOption.ColorU = optionOverride;
+                var newcolor = new Configuration.Configuration.ESPOptionMobBased(espOption);
+                newcolor.ColorU = optionOverride;
                 configInterface.cfg.ColorOverride.Remove(areaObject.DataId);
                 var name = areaObject.Name.TextValue ?? "Unknown";
                 pluginLog.Information("Migrated {Name} to new override system", name);
-                configInterface.CustomizeMob(areaObject, true, espOption);
+                configInterface.CustomizeMob(areaObject, true, newcolor);
+                espOption = newcolor;
             }
 
             if (!espOption.Enabled && !configInterface.cfg.DebugMode) continue;
