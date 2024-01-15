@@ -104,7 +104,8 @@ public class LocalMobsUi : IDisposable
                 configInterface.Save();
             }
 
-            ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable);
+            ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            //TODO: Sortable
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
             ImGui.TableSetupColumn("DataID");

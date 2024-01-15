@@ -102,6 +102,7 @@ public class RadarConfigurationModule : IModuleInterface
         // If overridden
         if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
         {
+            // If the mob hasnt been updated in 100 seconds, update the name and time last seen
             if ((DateTime.UtcNow - optionOverride.UtcLastSeenTime).TotalSeconds > 100)
             {
                 optionOverride.UtcLastSeenTime = DateTime.UtcNow;
