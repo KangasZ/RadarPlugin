@@ -46,8 +46,13 @@ public class LocalMobsUi : IDisposable
 
     public void DrawLocalMobsUi()
     {
+        currentMobsVisible = true;
+    }
+
+    private void RefreshMobList()
+    {
         areaObjects.Clear();
-        IEnumerable<GameObject> tempObjects = objectTable;
+        
         if (configInterface.cfg.LocalMobsUiSettings.ShowPlayers)
         {
             areaObjects.AddRange(objectTable.Where(x => x.DataId == 0));
@@ -62,24 +67,17 @@ public class LocalMobsUi : IDisposable
         {
             areaObjects.AddRange(objectTable.Where(x => x.DataId != 0));
         }
-
-        currentMobsVisible = true;
     }
-
+    
     private void DrawCurrentMobsWindow()
     {
         if (!currentMobsVisible) return;
-
+        RefreshMobList();
         var size = new Vector2(560, 500);
         ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
-            if (ImGui.Button("Reload Mobs"))
-            {
-                DrawLocalMobsUi();
-            }
-
             ImGui.SameLine();
             var showPlayers = configInterface.cfg.LocalMobsUiSettings.ShowPlayers;
             if (ImGui.Checkbox("Players##localmobsui", ref showPlayers))
@@ -95,6 +93,8 @@ public class LocalMobsUi : IDisposable
                 configInterface.cfg.LocalMobsUiSettings.Duplicates = showDuplicates;
                 configInterface.Save();
             }
+            ImGui.SameLine();
+            UiHelpers.LabeledHelpMarker("","Duplicates are mobs with the same dataId");
 
             ImGui.SameLine();
             var showNpcs = configInterface.cfg.LocalMobsUiSettings.ShowNpcs;
@@ -104,16 +104,15 @@ public class LocalMobsUi : IDisposable
                 configInterface.Save();
             }
 
-            ImGui.BeginTable("objecttable", 9, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable);
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
             ImGui.TableSetupColumn("DataID");
-            ImGui.TableSetupColumn("CurrHP");
+            ImGui.TableSetupColumn("Mob Info", ImGuiTableColumnFlags.NoSort);
             ImGui.TableSetupColumn("Blocked");
-            ImGui.TableSetupColumn("Settings");
             ImGui.TableSetupColumn("Use Custom Settings");
             ImGui.TableSetupColumn("Quick Block");
-            ImGui.TableSetupColumn("Color");
+            ImGui.TableSetupColumn("Custom Color");
             ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
             {
@@ -129,12 +128,6 @@ public class LocalMobsUi : IDisposable
                 //DataId
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.DataId}");
-                //Current HP
-                ImGui.TableNextColumn();
-                if (x is BattleNpc mob)
-                {
-                    ImGui.Text($"{mob.CurrentHp}");
-                }
                 //Settings
                 ImGui.TableNextColumn();
                 if (ImGui.Button($"Edit##{x.Address}"))
@@ -166,7 +159,6 @@ public class LocalMobsUi : IDisposable
                 ImGui.TableNextColumn();
                 if (x.DataId != 0)
                 {
-                    ImGui.TableNextColumn();
                     if (ImGui.Checkbox($"##custom-settings-{x.Address}", ref isUsingCustomEspOption))
                     {
                         configInterface.CustomizeMob(x, isUsingCustomEspOption, espOption);

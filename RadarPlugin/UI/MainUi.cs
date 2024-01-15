@@ -180,7 +180,7 @@ public class MainUi : IDisposable
     {
         var shouldSave = false;
         UiHelpers.TextColored("This is made by KangasZ for use in FFXIV.", ConfigConstants.Yellow);
-        UiHelpers.DrawSeperator("Radar Plugin 2.0 Update. Please report bugs!", ConfigConstants.Red);
+        UiHelpers.DrawSeperator("Radar Plugin 2.0 Update. Please report bugs! Ideally nothing breaks....", ConfigConstants.Red);
         shouldSave |= UiHelpers.DrawCheckbox("Plugin Enabled", ref configInterface.cfg.Enabled);
 
         shouldSave |= UiHelpers.DrawCheckbox("Overworld Enabled", ref configInterface.cfg.ShowOverworldObjects,
@@ -229,7 +229,7 @@ public class MainUi : IDisposable
                 "Show nameless mobs.\nYou probably want to keep this OFF.");
             UiHelpers.DrawCheckbox("Show All Entities", ref configInterface.cfg.DebugMode,
                 "Shows everything no matter what.\n/radar showall");
-            UiHelpers.DrawCheckbox("Show Rank Text", ref configInterface.cfg.RankText, "Shows rank text for BNpcs");
+            UiHelpers.DrawCheckbox("Show Rank Text", ref configInterface.cfg.RankText, "Shows rank text for Battle NPCS. Rank text is loosely associated with hunt and boss mobs.\nThis is a DEBUGGING thing");
         }
 
 

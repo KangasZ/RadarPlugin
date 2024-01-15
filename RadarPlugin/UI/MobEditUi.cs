@@ -40,9 +40,6 @@ public class MobEditUi : IDisposable
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible))
         {
-#if DEBUG
-            Dalamud.Utility.Util.ShowObject(localObject);
-#endif
             ImGui.Columns(2);
             var utilIgnored = MobConstants.DataIdIgnoreList.Contains(localObject.DataId);
             var defaulParams = radarModules.radarConfigurationModule.GetParams(localObject);
@@ -56,6 +53,7 @@ public class MobEditUi : IDisposable
             ImGui.TableSetupColumn("Setting");
             ImGui.TableSetupColumn("Value");
             ImGui.TableHeadersRow();
+            
             ImGui.TableNextColumn();
             ImGui.Text("Name");
             ImGui.TableNextColumn();
@@ -109,11 +107,11 @@ public class MobEditUi : IDisposable
 
             // Setup second column
             ImGui.NextColumn();
-            ImGui.Text("You cannot modify a mob with a data id of 0");
+            
+            ImGui.Text("You cannot modify a mob with a data id of 0!");
             if (localObject.DataId != 0)
             {
                 //TODO: Grab the custom overridden thingy
-                ImGui.TableNextColumn();
                 if (ImGui.Checkbox($"Custom Settings Enable##custom-settings-{localObject.Address}", ref isUsingCustomEspOption))
                 {
                     configInterface.CustomizeMob(localObject, isUsingCustomEspOption, defaulParams);
@@ -142,7 +140,9 @@ public class MobEditUi : IDisposable
                     }
                 }
             }
-            
+#if DEBUG
+            Dalamud.Utility.Util.ShowObject(localObject);
+#endif
         }
 
         ImGui.End();

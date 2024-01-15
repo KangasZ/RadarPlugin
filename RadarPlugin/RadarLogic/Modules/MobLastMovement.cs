@@ -47,6 +47,9 @@ public class MobLastMovement : IModuleInterface
     {
         // Maybe do (IF NOT AVAILABLE THEN CULL MOB)
         // Idk, needs testing :(
+        // It just uses object ids so, theroretically if theres a single frame the object isnt viewable
+        // (ie, switching between zones) itll be fine :)
+        // Surely... Right?
         //nothing
     }
 

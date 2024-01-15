@@ -346,7 +346,7 @@ public class Configuration
             {
                 oldConfig.OptionOverride.Add(previouslyBlocked, new ESPOptionMobBased(objectOptDefault)
                 {
-                    Name = "Unknown",
+                    Name = "Migrated",
                     Enabled = false
                 });
             }
