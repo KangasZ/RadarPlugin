@@ -8,16 +8,22 @@ using Dalamud.Interface.Utility;
 using Dalamud.Logging;
 using Dalamud.Utility;
 using ImGuiNET;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin.UI;
 
 public static class UiHelpers
 {
-    public static bool DrawSettingsDetailed(Configuration.ESPOption option, string id, MobType mobType, DisplayOrigination displayOrigination)
+    public static void TextColored(string text, uint color)
+    {
+        ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color),
+            text);
+    }
+    public static bool DrawSettingsDetailed(Configuration.Configuration.ESPOption option, string id, MobType mobType, DisplayOrigination displayOrigination)
     {
         var shouldSave = false;
-        UiHelpers.DrawSeperator($"{id} Options", UtilInfo.Red);
+        UiHelpers.DrawSeperator($"{id} Options", ConfigConstants.Red);
         // Column 1
         ImGui.Columns(2, $"##{id}-type-settings-columns", false);
 
@@ -46,8 +52,8 @@ public static class UiHelpers
         
         if (option.DotSizeOverride)
         {
-            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window", UtilInfo.MinDotSize, UtilInfo.MaxDotSize,
-                UtilInfo.DefaultDotSize);
+            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window", ConfigConstants.MinDotSize, ConfigConstants.MaxDotSize,
+                ConfigConstants.DefaultDotSize);
         }
         else
         {
@@ -61,7 +67,7 @@ public static class UiHelpers
     
     public static bool DrawDotSizeSlider(ref float dotSize, string id)
     {
-        return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, UtilInfo.MinDotSize, UtilInfo.MaxDotSize, UtilInfo.DefaultDotSize);
+        return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, ConfigConstants.MinDotSize, ConfigConstants.MaxDotSize, ConfigConstants.DefaultDotSize);
     }
 
     public static bool DrawFloatWithResetSlider(ref float floatToModify, string textDiscription, string id, float min, float max, float defaultFloatValue, string format = "%.2f")
@@ -171,8 +177,6 @@ public static class UiHelpers
 
                 return lb2;
             default:
-                PluginLog.Error(
-                    "Mob Type Is Wrong. This literally should never occur. Please dear god help me if it does.");
                 return false;
         }
     }
@@ -194,7 +198,7 @@ public static class UiHelpers
         return true;
     }
 
-    public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText)
+    public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText = null)
     {
         var retStatement = false;
         var tempVar = boxValue;
@@ -259,7 +263,6 @@ public static class UiHelpers
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
-                PluginLog.Log("Opening RadarPlugin GitHub");
                 Process.Start(new ProcessStartInfo(url)
                 {
                     UseShellExecute = true

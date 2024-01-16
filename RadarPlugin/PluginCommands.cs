@@ -12,10 +12,10 @@ public class PluginCommands : IDisposable
 {
     private readonly ICommandManager commandManager;
     private readonly MainUi mainUi;
-    private readonly Configuration configInterface;
+    private readonly Configuration.Configuration configInterface;
     private readonly IChatGui chatGui;
 
-    public PluginCommands(ICommandManager commandManager, MainUi mainUi, Configuration configuration, IChatGui chatGui)
+    public PluginCommands(ICommandManager commandManager, MainUi mainUi, Configuration.Configuration configuration, IChatGui chatGui)
     {
         this.mainUi = mainUi;
         this.chatGui = chatGui;
@@ -28,7 +28,7 @@ public class PluginCommands : IDisposable
         });
         this.commandManager.AddHandler("/radarcfg", new CommandInfo(RadarCfgCommand)
         {
-            HelpMessage = "Opens configuration. Subcommands: /radarcfg [ load ] { fileName }",
+            HelpMessage = "Loads config manually. Subcommands: /radarcfg [ load ] { fileName }",
             ShowInHelp = true
         });
     }

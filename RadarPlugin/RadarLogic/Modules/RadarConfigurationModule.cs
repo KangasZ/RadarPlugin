@@ -1,153 +1,127 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
+using System;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 
-namespace RadarPlugin;
+namespace RadarPlugin.RadarLogic.Modules;
 
-public class RadarHelpers
+public class RadarConfigurationModule : IModuleInterface
 {
-    private readonly Configuration configInterface;
+    private readonly Configuration.Configuration configInterface;
+    private readonly PlayerCharacter localPlayer;
+    private readonly ZoneTypeModule zoneTypeModule;
     private readonly IClientState clientState;
-    private readonly ICondition conditionInterface;
-    private Dictionary<uint, float> distanceDictionary;
-    private readonly IDataManager dataManager;
-    public readonly Dictionary<uint, byte> RankDictionary = new();
+    private readonly RankModule rankModule;
+    private readonly DistanceModule distanceModule;
+    private readonly MobLastMovement mobLastMovement;
 
-    public RadarHelpers(
-        Configuration configInterface,
-        IClientState clientState,
-        ICondition condition,
-        IDataManager dataManager
-    )
+    public RadarConfigurationModule(IClientState clientState, Configuration.Configuration configInterface,
+        ZoneTypeModule zoneTypeModule, RankModule rankModule, DistanceModule distanceModule,
+        MobLastMovement mobLastMovement)
     {
-        this.clientState = clientState;
         this.configInterface = configInterface;
-        this.conditionInterface = condition;
-        this.distanceDictionary = new Dictionary<uint, float>();
-        this.dataManager = dataManager;
-
-        var excelBnpcs = this.dataManager.GetExcelSheet<BNpcBase>();
-        if (excelBnpcs != null)
-        {
-            RankDictionary = excelBnpcs.ToDictionary(x => x.RowId, x => x.Rank);
-        }
-    }
-
-
-    public unsafe bool ShouldRender(GameObject obj)
-    {
-        // Objest valid check
-        if (!obj.IsValid()) return false;
-        //if (obj.DataId == GameObject.InvalidGameObjectId) return false;
-
-        // Object within ignore lists
-        if (UtilInfo.DataIdIgnoreList.Contains(obj.DataId) || configInterface.cfg.DataIdIgnoreList.Contains(obj.DataId)) return false;
-
-        // Object visible & config check
-        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
-        if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0))// || !clientstructobj->GetIsTargetable()))
-        {
-            // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still. 
-            if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters) return false;
-            if (obj.ObjectKind != ObjectKind.Player) return false;
-        }
-        // Distance check
-
-        // Eureka DD STQ
-        if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
-        {
-            // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
-            if (UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)) return true;
-            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob) return true;
-            if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
-            return !mob.IsDead;
-        }
-
-
-        if (obj is BattleChara mobNpc)
-        {
-            //if (!clientstructobj->GetIsTargetable()) continue;
-            //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (mobNpc.IsDead) return false;
-        }
-
-        return true;
-    }
-
-    public void ResetDistance()
-    {
-        this.distanceDictionary = new Dictionary<uint, float>();
-    }
-
-    public float GetDistanceFromPlayer(GameObject obj)
-    {
-        if (distanceDictionary.TryGetValue(obj.ObjectId, out var value))
-        {
-            return value;
-        }
-
-        var distance = obj.Position.Distance2D(clientState.LocalPlayer!.Position);
-        distanceDictionary[obj.ObjectId] = distance;
-        return distance;
-    }
-
-    public bool IsSpecialZone()
-    {
-        return UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) ||
-               this.conditionInterface[ConditionFlag.InDeepDungeon];
+        this.zoneTypeModule = zoneTypeModule;
+        this.clientState = clientState;
+        this.rankModule = rankModule;
+        this.distanceModule = distanceModule;
+        this.mobLastMovement = mobLastMovement;
     }
 
     /**
-     * TODO: Refactor this to be done once per second instead of on each render.
-     */
-    public string GetText(GameObject obj)
+ * TODO: Refactor this to be done once per second instead of on each render.
+ */
+    public string GetText(GameObject gameObject, Configuration.Configuration.ESPOption espOption)
     {
-        var text = "";
-        if (obj.DataId != 0 && UtilInfo.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
-            UtilInfo.RenameList.ContainsKey(obj.DataId))
+        var tagText = "";
+        if (gameObject.DataId != 0 && MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+            MobConstants.RenameList.ContainsKey(gameObject.DataId))
         {
-            text = UtilInfo.RenameList[obj.DataId];
+            tagText = MobConstants.RenameList[gameObject.DataId];
         }
-        else if (string.IsNullOrWhiteSpace(obj.Name.TextValue))
+        else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))
         {
-            text = "''";
+            tagText = "''";
         }
         else
         {
-            text = obj.Name.TextValue;
+            tagText = gameObject.Name.TextValue;
         }
-        
-        return configInterface.cfg.DebugText ? $"{obj.Name}, {obj.DataId}, {obj.ObjectKind}" : $"{text}";
-    }
 
-    public uint? GetColorOverride(GameObject gameObject)
-    {
-        // Override over all
-        if (configInterface.cfg.ColorOverride.TryGetValue(gameObject.DataId, out var colorOverride))
+        // Replace player names with job abbreviations
+        if (espOption.ReplaceWithJobName && gameObject is PlayerCharacter { ClassJob.GameData: { } } pc)
         {
-            return colorOverride;
+            tagText = pc.ClassJob.GameData.Abbreviation.RawString;
         }
 
-        return null;
+        // Append LEVEL and RANK to name
+        if (gameObject is BattleNpc battleNpc)
+        {
+            if (espOption.AppendLevelToName)
+            {
+                tagText += $" LV:{battleNpc.Level}";
+            }
+
+            // DEBUG rank text
+            if (configInterface.cfg.RankText)
+            {
+                tagText += $"\nD {battleNpc.DataId}";
+                tagText += $"\nN {battleNpc.NameId}";
+                if (rankModule.TryGetRank(battleNpc.DataId, out byte value))
+                {
+                    tagText += $"\nR {value}";
+                }
+            }
+        }
+
+        // Draw distance
+        if (espOption.DrawDistance)
+        {
+            if (clientState.LocalPlayer != null)
+                tagText += distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, gameObject).ToString(" 0.0m");
+        }
+
+        if (configInterface.cfg.EXPERIMENTALEnableMobTimerTracking
+            && gameObject.ObjectKind == ObjectKind.BattleNpc
+            && (((BattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) == 0)
+        {
+            tagText += (mobLastMovement.GetTimeElapsedFromMovement(gameObject).TotalSeconds)
+                .ToString(" 0.0s");
+        }
+
+        return configInterface.cfg.DebugText
+            ? $"{gameObject.Name}, {gameObject.DataId}, {gameObject.ObjectKind}"
+            : $"{tagText}";
     }
 
-    public Configuration.ESPOption GetParams(GameObject areaObject)
+    public Configuration.Configuration.ESPOption GetParamsWithOverride(GameObject areaObject)
+    {
+        // If overridden
+        if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
+        {
+            // If the mob hasnt been updated in 100 seconds, update the name and time last seen
+            if ((DateTime.UtcNow - optionOverride.UtcLastSeenTime).TotalSeconds > 100)
+            {
+                optionOverride.UtcLastSeenTime = DateTime.UtcNow;
+                optionOverride.LastSeenName = areaObject.Name?.TextValue ?? "Unknown";
+            }
+
+            return optionOverride;
+        }
+
+        return GetParams(areaObject);
+    }
+
+    public Configuration.Configuration.ESPOption GetParams(GameObject areaObject)
     {
         // If Deep Dungeon
-        if (configInterface.cfg.ShowBaDdObjects && IsSpecialZone())
+        var zoneType = zoneTypeModule.GetLocationType();
+        if (configInterface.cfg.ShowBaDdObjects && zoneType == LocationKind.DeepDungeon)
         {
-            if (UtilInfo.DeepDungeonMobTypesMap.TryGetValue(areaObject.DataId, out var value))
+            if (MobConstants.DeepDungeonMobTypesMap.TryGetValue(areaObject.DataId, out var value))
             {
                 switch (value)
                 {
@@ -180,7 +154,10 @@ public class RadarHelpers
                 }
             }
 
-            if (areaObject.ObjectKind == ObjectKind.BattleNpc && areaObject is BattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob)
+            if (areaObject.ObjectKind == ObjectKind.BattleNpc && areaObject is BattleNpc
+                {
+                    BattleNpcKind: BattleNpcSubKind.Enemy
+                } mob)
             {
                 return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
             }
@@ -192,25 +169,29 @@ public class RadarHelpers
                 if (areaObject is PlayerCharacter chara)
                 {
                     // Is the object is YOU
-                    if (configInterface.cfg.SeparatedYourPlayer.Enabled && clientState.LocalPlayer != null && chara.Address == clientState.LocalPlayer.Address)
+                    if (configInterface.cfg.SeparatedYourPlayer.Enabled && clientState.LocalPlayer != null &&
+                        chara.Address == clientState.LocalPlayer.Address)
                     {
                         return configInterface.cfg.SeparatedYourPlayer.EspOption;
                     }
 
                     // If is friend
-                    if (configInterface.cfg.SeparatedFriends.Enabled && chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
+                    if (configInterface.cfg.SeparatedFriends.Enabled &&
+                        chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
                     {
                         return configInterface.cfg.SeparatedFriends.EspOption;
                     }
 
                     // Is in party
-                    if (configInterface.cfg.SeparatedParty.Enabled && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
+                    if (configInterface.cfg.SeparatedParty.Enabled &&
+                        chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
                     {
                         return configInterface.cfg.SeparatedParty.EspOption;
                     }
 
                     // If in alliance
-                    if (configInterface.cfg.SeparatedAlliance.Enabled && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
+                    if (configInterface.cfg.SeparatedAlliance.Enabled &&
+                        chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
                     {
                         return configInterface.cfg.SeparatedAlliance.EspOption;
                     }
@@ -227,7 +208,7 @@ public class RadarHelpers
 
                 if (configInterface.cfg.SeparatedRankOne.Enabled || configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
                 {
-                    if (RankDictionary.TryGetValue(bnpc.DataId, out var value))
+                    if (rankModule.TryGetRank(bnpc.DataId, out var value))
                     {
                         switch (value)
                         {
@@ -236,12 +217,15 @@ public class RadarHelpers
                                 {
                                     return configInterface.cfg.SeparatedRankOne.EspOption;
                                 }
+
                                 break;
-                            case 2: case 6:
+                            case 2:
+                            case 6:
                                 if (configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
                                 {
                                     return configInterface.cfg.SeparatedRankTwoAndSix.EspOption;
                                 }
+
                                 break;
                         }
                     }
@@ -254,12 +238,13 @@ public class RadarHelpers
 
                 if (configInterface.cfg.LevelRendering.LevelRenderingEnabled)
                 {
-                    if (clientState.LocalPlayer!.Level - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow > bnpc.Level)
+                    if (clientState.LocalPlayer!.Level - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow >
+                        bnpc.Level)
                     {
                         return configInterface.cfg.LevelRendering.LevelRenderEspOption;
                     }
                 }
-                
+
                 return configInterface.cfg.NpcOption;
             case ObjectKind.EventNpc:
                 return configInterface.cfg.EventNpcOption;
@@ -289,5 +274,20 @@ public class RadarHelpers
             default:
                 return configInterface.cfg.NpcOption;
         }
+    }
+
+    public void Dispose()
+    {
+        //Do nothing
+    }
+
+    public void StartTick()
+    {
+        //Do Nothing
+    }
+
+    public void EndTick()
+    {
+        //do nothing
     }
 }

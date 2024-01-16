@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Game.ClientState.JobGauge.Types;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using RadarPlugin.Constants;
+using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.UI;
 
@@ -16,31 +20,39 @@ public class LocalMobsUi : IDisposable
     private List<GameObject> areaObjects;
     private bool currentMobsVisible = false;
     private readonly DalamudPluginInterface dalamudPluginInterface;
-    private readonly Configuration configInterface;
+    private readonly Configuration.Configuration configInterface;
     private readonly IObjectTable objectTable;
     private readonly MobEditUi mobEditUi;
-    private readonly RadarHelpers helpers;
-
+    private readonly IPluginLog pluginLog;
+    private readonly RadarModules radarModules;
+    
     public LocalMobsUi(
         DalamudPluginInterface dalamudPluginInterface,
-        Configuration configInterface,
+        Configuration.Configuration configInterface,
         IObjectTable objectTable,
         MobEditUi mobEditUi,
-        RadarHelpers helpers)
+        IPluginLog pluginLog,
+        RadarModules radarModules)
     {
         areaObjects = new List<GameObject>();
-        this.helpers = helpers;
         this.mobEditUi = mobEditUi;
         this.configInterface = configInterface;
         this.objectTable = objectTable;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.dalamudPluginInterface.UiBuilder.Draw += DrawCurrentMobsWindow;
+        this.pluginLog = pluginLog;
+        this.radarModules = radarModules;
     }
 
     public void DrawLocalMobsUi()
     {
+        currentMobsVisible = true;
+    }
+
+    private void RefreshMobList()
+    {
         areaObjects.Clear();
-        IEnumerable<GameObject> tempObjects = objectTable;
+        
         if (configInterface.cfg.LocalMobsUiSettings.ShowPlayers)
         {
             areaObjects.AddRange(objectTable.Where(x => x.DataId == 0));
@@ -55,24 +67,17 @@ public class LocalMobsUi : IDisposable
         {
             areaObjects.AddRange(objectTable.Where(x => x.DataId != 0));
         }
-
-        currentMobsVisible = true;
     }
-
+    
     private void DrawCurrentMobsWindow()
     {
         if (!currentMobsVisible) return;
-
+        RefreshMobList();
         var size = new Vector2(560, 500);
         ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Current Mobs Menu", ref currentMobsVisible))
         {
-            if (ImGui.Button("Reload Mobs"))
-            {
-                DrawLocalMobsUi();
-            }
-
             ImGui.SameLine();
             var showPlayers = configInterface.cfg.LocalMobsUiSettings.ShowPlayers;
             if (ImGui.Checkbox("Players##localmobsui", ref showPlayers))
@@ -88,6 +93,8 @@ public class LocalMobsUi : IDisposable
                 configInterface.cfg.LocalMobsUiSettings.Duplicates = showDuplicates;
                 configInterface.Save();
             }
+            ImGui.SameLine();
+            UiHelpers.LabeledHelpMarker("","Duplicates are mobs with the same dataId");
 
             ImGui.SameLine();
             var showNpcs = configInterface.cfg.LocalMobsUiSettings.ShowNpcs;
@@ -98,121 +105,141 @@ public class LocalMobsUi : IDisposable
             }
 
             ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            //TODO: Sortable
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
             ImGui.TableSetupColumn("DataID");
-            ImGui.TableSetupColumn("CurrHP");
+            ImGui.TableSetupColumn("Mob Info", ImGuiTableColumnFlags.NoSort);
             ImGui.TableSetupColumn("Blocked");
+            ImGui.TableSetupColumn("Use Custom Settings");
             ImGui.TableSetupColumn("Quick Block");
-            ImGui.TableSetupColumn("Color");
-            ImGui.TableSetupColumn("Settings");
+            ImGui.TableSetupColumn("Custom Color");
             ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
             {
+                var espOption = radarModules.radarConfigurationModule.GetParams(x);
+                var customEspOption = radarModules.radarConfigurationModule.GetParamsWithOverride(x);
+                var isUsingCustomEspOption = espOption != customEspOption;
+                //Kind
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.ObjectKind}");
+                //Name
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.Name}");
+                //DataId
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.DataId}");
-                ImGui.TableNextColumn();
-                if (x is BattleNpc mob)
-                {
-                    ImGui.Text($"{mob.CurrentHp}");
-                }
-
-                ImGui.TableNextColumn();
-                if (UtilInfo.DataIdIgnoreList.Contains(x.DataId))
-                {
-                    ImGui.Text($"Default");
-                }
-                else if (configInterface.cfg.DataIdIgnoreList.Contains(x.DataId))
-                {
-                    ImGui.Text("User");
-                }
-                else
-                {
-                    ImGui.Text("No");
-                }
-
-                ImGui.TableNextColumn();
-                if (x.DataId != 0)
-                {
-                    var configBlocked = configInterface.cfg.DataIdIgnoreList.Contains(x.DataId);
-                    if (ImGui.Checkbox($"##{x.Address}", ref configBlocked))
-                    {
-                        if (configBlocked)
-                        {
-                            if (!configInterface.cfg.DataIdIgnoreList.Contains(x.DataId))
-                            {
-                                configInterface.cfg.DataIdIgnoreList.Add(x.DataId);
-                            }
-                        }
-                        else
-                        {
-                            configInterface.cfg.DataIdIgnoreList.Remove(x.DataId);
-                        }
-
-                        configInterface.Save();
-                    }
-                }
-                else
-                {
-                    ImGui.Text("O");
-                }
-
-                ImGui.TableNextColumn();
-                if (x.DataId != 0)
-                {
-                    var isCustom = configInterface.cfg.ColorOverride.ContainsKey(x.DataId);
-                    if (ImGui.Checkbox($"##Enabled-{x.Address}", ref isCustom))
-                    {
-                        if (configInterface.cfg.ColorOverride.ContainsKey(x.DataId))
-                        {
-                            configInterface.cfg.ColorOverride.Remove(x.DataId);
-                            configInterface.Save();
-                        }
-                        else
-                        {
-                            var color = helpers.GetParams(x).ColorU;
-                            
-                            configInterface.cfg.ColorOverride.Add(x.DataId, color);
-                            configInterface.Save();
-                        }
-                    }
-
-                    if (configInterface.cfg.ColorOverride.ContainsKey(x.DataId))
-                    {
-                        ImGui.SameLine();
-                        var colorChange = ImGui.ColorConvertU32ToFloat4(configInterface.cfg.ColorOverride[x.DataId]);
-                        if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange,
-                                ImGuiColorEditFlags.NoInputs))
-                        {
-                            configInterface.cfg.ColorOverride[x.DataId] = ImGui.ColorConvertFloat4ToU32(colorChange);
-                            configInterface.Save();
-                        }
-                    }
-                }
-                else
-                {
-                    ImGui.Text("Uneditable (Currently)");
-                }
-
+                //Settings
                 ImGui.TableNextColumn();
                 if (ImGui.Button($"Edit##{x.Address}"))
                 {
                     mobEditUi.Show(x);
                 }
+                // Blocked
+                ImGui.TableNextColumn();
+                if (MobConstants.DataIdIgnoreList.Contains(x.DataId))
+                {
+                    ImGui.Text($"Default Blocked");
+                }
+                else if (isUsingCustomEspOption)
+                {
+                    if (customEspOption.Enabled)
+                    {
+                        ImGui.Text($"User Shown");
+                    }
+                    else
+                    {
+                        ImGui.Text("User Blocked");
+                    }
+                }
+                else
+                {
+                    ImGui.Text("Not Blocked");
+                }
+                // Use Custom Settings
+                ImGui.TableNextColumn();
+                if (x.DataId != 0)
+                {
+                    if (ImGui.Checkbox($"##custom-settings-{x.Address}", ref isUsingCustomEspOption))
+                    {
+                        configInterface.CustomizeMob(x, isUsingCustomEspOption, espOption);
+                    }
+                }
+                else
+                {
+                    ImGui.Text("N/A");
+                }
+                
+                //Quick Block
+                ImGui.TableNextColumn();
+                if (x.DataId != 0)
+                {
+                    if (isUsingCustomEspOption)
+                    {
+                        if (configInterface.cfg.OptionOverride.TryGetValue(x.DataId, out var option))
+                        {
+                            var configBlocked = option.Enabled;
+                            if (ImGui.Checkbox($"##{x.Address}", ref configBlocked))
+                            {
+                                configInterface.cfg.OptionOverride[x.DataId].Enabled = configBlocked;
+                            }
+                        }
+                        else
+                        {
+                            UiHelpers.LabeledHelpMarker("!!!", "Something Weird Happened :(");
+                        }
+                    }
+                    else
+                    {
+                        UiHelpers.LabeledHelpMarker("X", "Must Enable Custom Settings First");
+                    }
+                }
+                else
+                {
+                    UiHelpers.LabeledHelpMarker("?", "Players are unable to be blocked");
+                }
+                
+                // Quick Color
+                ImGui.TableNextColumn();
+                if (x.DataId != 0)
+                {
+                    if (isUsingCustomEspOption)
+                    {
+                        if (configInterface.cfg.OptionOverride.TryGetValue(x.DataId, out var option))
+                        {
+                            var colorChange = ImGui.ColorConvertU32ToFloat4(option.ColorU);
+                            if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange,
+                                    ImGuiColorEditFlags.NoInputs))
+                            {
+                                configInterface.cfg.OptionOverride[x.DataId].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+                                configInterface.Save();
+                            }
+                        }
+                        else
+                        {
+                            UiHelpers.LabeledHelpMarker("!!!", "Something Weird Happened :(");
+                        }
+                    }
+                    else
+                    {
+                        UiHelpers.LabeledHelpMarker("X", "Must Enable Custom Settings First");
+                    }
+                }
+                else
+                {
+                    UiHelpers.LabeledHelpMarker("?", "Players are unable to be changed atm");
+                }
 
                 ImGui.TableNextRow();
             }
 
+            //TODO: Add quick edit column
             ImGui.EndTable();
         }
 
         if (!currentMobsVisible)
         {
-            PluginLog.Debug("Clearing Area Objects");
+            pluginLog.Debug("Clearing Area Objects");
             areaObjects.Clear();
         }
 

@@ -1,31 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using RadarPlugin.Enums;
 
-namespace RadarPlugin;
+namespace RadarPlugin.Constants;
 
-public static class UtilInfo
+public static class MobConstants
 {
-    public const uint Green = 0xFF00FF00;
-    public const uint Red = 0xFF0000FF;
-    public const uint Blue = 0xFFFF0000;
-    public const uint White = 0xFFFFFFFF;
-    public const uint Gold = 0xFF37AFD4;
-    public const uint Silver = 0xFFc0c0c0;
-    public const uint Yellow = 0xFF00FFFF;
-    public const uint Orange = 0xFF00A5FF;
-    public const uint LightBlue = 0xFFE6D8AD;
-    public const uint Bronze = 0xFF327FCD;
-    public const uint Turquoise = 0xffc8d530;
-    public const float MinDotSize = 0.6f;
-    public const float MaxDotSize = 6f;
-    public const uint OpacityMax = 0xff000000;
-    public const float DefaultDotSize = 2.2f;
-    public const float DefaultEspPadding = 7f;
-    public const float DefaultMaxEspDistance = 300f;
-    public const float DefaultMaxAggroRadiusDistance = 50f;
-
-
     /**
      */
     public static Dictionary<uint, float> AggroDistance = new Dictionary<uint, float>()
@@ -342,9 +323,4 @@ public static class UtilInfo
         { 2009726, DeepDungeonMobTypes.Passage }, // Unstable portal
         { 2009727, DeepDungeonMobTypes.Passage }, // Stable portal
     };
-
-    public static float Distance2D(this Vector3 v, Vector3 v2)
-    {
-        return new Vector2(v.X - v2.X, v.Z - v2.Z).Length();
-    }
 }

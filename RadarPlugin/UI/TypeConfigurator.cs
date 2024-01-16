@@ -2,28 +2,26 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using ImGuiNET;
 using RadarPlugin.Enums;
+using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.UI;
 
 public class TypeConfigurator
 {
-    private Configuration configInterface;
+    private Configuration.Configuration configInterface;
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private bool configuratorWindowVisible = false;
-    private readonly RadarHelpers radarHelper;
-    private const int ChildHeight = 280;
 
     // Current Modification
-    private Configuration.ESPOption espOption;
+    private Configuration.Configuration.ESPOption espOption;
     private string espDescription;
     private MobType mobType;
     private DisplayOrigination displayOrigination;
 
-    public TypeConfigurator(DalamudPluginInterface dalamudPluginInterface, Configuration configInterface, RadarHelpers radarHelpers)
+    public TypeConfigurator(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface)
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
-        this.radarHelper = radarHelpers;
         this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.espOption = configInterface.cfg.NpcOption;
         this.espDescription = "NPCs...";
@@ -34,7 +32,7 @@ public class TypeConfigurator
         this.dalamudPluginInterface.UiBuilder.Draw -= Draw;
     }
 
-    public void OpenUiWithType(ref Configuration.ESPOption espOption, string typeId, MobType mobType, DisplayOrigination displayOrigination)
+    public void OpenUiWithType(ref Configuration.Configuration.ESPOption espOption, string typeId, MobType mobType, DisplayOrigination displayOrigination)
     {
         if (typeId == this.espDescription && configuratorWindowVisible == true)
         {
