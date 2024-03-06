@@ -23,7 +23,7 @@ public class PluginCommands : IDisposable
         this.configInterface = configuration;
         this.commandManager.AddHandler("/radar", new CommandInfo(SettingsCommand)
         {
-            HelpMessage = "Opens configuration. Subcommands: /radar [ showall | showdebug ]",
+            HelpMessage = "Opens configuration. Subcommands: /radar [ showall | showdebug | off | on | enable | disable | toggle ]",
             ShowInHelp = true
         });
         this.commandManager.AddHandler("/radarcfg", new CommandInfo(RadarCfgCommand)
@@ -92,6 +92,17 @@ public class PluginCommands : IDisposable
                 
                 break;
             }
+            case "off":
+            case "disable":
+                configInterface.cfg.Enabled = false;
+                break;
+            case "on":
+            case "enable":
+                configInterface.cfg.Enabled = true;
+                break;
+            case "toggle":
+                configInterface.cfg.Enabled = !configInterface.cfg.Enabled;
+                break;
         }
     }
 
@@ -99,6 +110,5 @@ public class PluginCommands : IDisposable
     {
         commandManager.RemoveHandler("/radar");
         commandManager.RemoveHandler("/radarcfg");
-
     }
 }

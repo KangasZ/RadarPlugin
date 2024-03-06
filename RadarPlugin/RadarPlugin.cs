@@ -57,6 +57,7 @@ public class RadarPlugin : IDalamudPlugin
 
     public void Dispose()
     {
+        Configuration.Save();
         // UI
         mainUi.Dispose();
         localMobsUi.Dispose();
