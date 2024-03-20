@@ -4,5 +4,5 @@
   "Description": "3D Radar to see enemies, objects, and interactables through walls.\nThis is an ESP, please don't use it to call aliens down.\nPlease report any issues to the author.",
   "RepoUrl": "https://github.com/KangasZ/RadarPlugin",
   "Punchline": "See everything through walls",
-  "Changelog": "Significant changes to backend - experimental last move tracking for mobs\nAddition of more fine-grained mob settings - now it is full mob customization\nNew UI to view all mob-based customizations.\nBetter aggro type handling on aggro circle.\n"
+  "Changelog": "New chat commands /radar [ showall | showdebug | off | on | enable | disable | toggle ]\nUpdate to dotnet 8"
 }
