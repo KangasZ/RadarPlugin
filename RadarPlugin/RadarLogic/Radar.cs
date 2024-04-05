@@ -111,7 +111,8 @@ public class Radar : IDisposable
                         return this.gameFont.ImFont;
                     }
                 }
-
+                
+                
                 gameFont = pluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis,
                     configInterface.cfg.FontSettings.FontSize));
                 return gameFont.ImFont;

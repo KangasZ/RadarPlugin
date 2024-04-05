@@ -17,6 +17,15 @@ namespace RadarPlugin.Configuration;
 [Serializable]
 public class Configuration
 {
+    public class Radar2DConfiguration
+    {
+        public bool Enabled = false;
+        public bool ShowBackground = true;
+        public bool Clickthrough = false;
+        public bool ShowCross = true;
+        public bool ShowRadarBorder = true;
+    }
+    
     public class LevelRendering
     {
         public bool LevelRenderingEnabled = false;
@@ -246,6 +255,7 @@ public class Configuration
             { EspOption = new ESPOption(mobOptDefault) { ColorU = ConfigConstants.Yellow } };
 
         public bool EXPERIMENTALEnableMobTimerTracking = false;
+        public Radar2DConfiguration Radar2DConfiguration { get; set; }= new();
     }
 
     public Config cfg;

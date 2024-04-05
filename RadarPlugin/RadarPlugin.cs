@@ -20,7 +20,8 @@ public class RadarPlugin : IDalamudPlugin
     private readonly RadarModules radarModules;
     private readonly IFramework framework;
     private readonly DalamudPluginInterface pluginInterface;
-    
+    private readonly Radar2D radar2D;
+
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
         ICommandManager commandManager,
@@ -45,6 +46,7 @@ public class RadarPlugin : IDalamudPlugin
         mobEditUi = new MobEditUi(this.pluginInterface, Configuration, typeConfiguratorUi, radarModules);
         localMobsUi = new LocalMobsUi(this.pluginInterface, Configuration, objectTable, mobEditUi, pluginLog, radarModules);
         customizedEntitiesUi = new CustomizedEntitiesUI(this.pluginInterface, Configuration, pluginLog, typeConfiguratorUi);
+        radar2D = new Radar2D(this.pluginInterface, Configuration);
         mainUi = new MainUi(this.pluginInterface, Configuration, localMobsUi, clientState, typeConfiguratorUi, customizedEntitiesUi, pluginLog, radarModules);
 
         // Command manager
@@ -62,6 +64,7 @@ public class RadarPlugin : IDalamudPlugin
         mainUi.Dispose();
         localMobsUi.Dispose();
         mobEditUi.Dispose();
+        radar2D.Dispose();
         
         // Customer services
         pluginCommands.Dispose();

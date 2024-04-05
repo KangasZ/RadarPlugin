@@ -535,10 +535,23 @@ public class MainUi : IDisposable
             }
         }
 
-        ImGui.Text("EXPERIMENTAL");
-        shouldSave |= UiHelpers.DrawCheckbox("Mob Timers", ref configInterface.cfg.EXPERIMENTALEnableMobTimerTracking,
-            "Enable Mob Timer Tracking in deep dungeons and eureka");
+        if (ImGui.CollapsingHeader("EXPERIMENTAL Mob Timers"))
+        {
+            shouldSave |= UiHelpers.DrawCheckbox("Mob Timers", ref configInterface.cfg.EXPERIMENTALEnableMobTimerTracking,
+                "Enable Mob Timer Tracking in deep dungeons and eureka");
+        }
 
+        if (ImGui.CollapsingHeader("2D Radar"))
+        {
+            shouldSave |= UiHelpers.DrawCheckbox("2D Radar Enabled", ref configInterface.cfg.Radar2DConfiguration.Enabled);
+            shouldSave |= UiHelpers.DrawCheckbox("Clickthrough", ref configInterface.cfg.Radar2DConfiguration.Clickthrough);
+            shouldSave |= UiHelpers.DrawCheckbox("Show Cross", ref configInterface.cfg.Radar2DConfiguration.ShowCross);
+            shouldSave |= UiHelpers.DrawCheckbox("Show Radar Border",
+                ref configInterface.cfg.Radar2DConfiguration.ShowRadarBorder);
+            shouldSave |= UiHelpers.DrawCheckbox("Show Radar Background",
+                ref configInterface.cfg.Radar2DConfiguration.ShowBackground);
+        }
+        
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
     }

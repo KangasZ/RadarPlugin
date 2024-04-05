@@ -200,13 +200,7 @@ public static class UiHelpers
 
     public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText = null)
     {
-        var retStatement = false;
-        var tempVar = boxValue;
-        if (ImGui.Checkbox(label, ref tempVar))
-        {
-            boxValue = tempVar;
-            retStatement = true;
-        }
+        var retStatement = ImGui.Checkbox(label, ref boxValue);
 
         if (tooltipText != null)
         {
