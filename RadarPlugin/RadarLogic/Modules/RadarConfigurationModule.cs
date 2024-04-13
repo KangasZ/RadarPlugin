@@ -97,7 +97,8 @@ public class RadarConfigurationModule : IModuleInterface
             : $"{tagText}";
     }
 
-    public Configuration.Configuration.ESPOption GetParamsWithOverride(GameObject areaObject)
+
+    public Configuration.Configuration.ESPOption TryGetOverridenParams(GameObject areaObject, out bool overridden)
     {
         // If overridden
         if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
@@ -109,12 +110,14 @@ public class RadarConfigurationModule : IModuleInterface
                 optionOverride.LastSeenName = areaObject.Name?.TextValue ?? "Unknown";
             }
 
+            overridden = true;
             return optionOverride;
         }
-
+        
+        overridden = false;
         return GetParams(areaObject);
     }
-
+    
     public Configuration.Configuration.ESPOption GetParams(GameObject areaObject)
     {
         // If Deep Dungeon
@@ -275,7 +278,7 @@ public class RadarConfigurationModule : IModuleInterface
                 return configInterface.cfg.NpcOption;
         }
     }
-
+    
     public void Dispose()
     {
         //Do nothing

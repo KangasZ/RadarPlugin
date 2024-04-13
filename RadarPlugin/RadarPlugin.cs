@@ -10,7 +10,7 @@ public class RadarPlugin : IDalamudPlugin
     public string Name => "Radar Plugin";
     private readonly Configuration.Configuration Configuration;
     private readonly RadarPlugin Plugin;
-    private readonly Radar radar;
+    private readonly RadarDriver radarDriver;
     private readonly PluginCommands pluginCommands;
     private readonly MainUi mainUi;
     private readonly MobEditUi mobEditUi;
@@ -20,7 +20,6 @@ public class RadarPlugin : IDalamudPlugin
     private readonly RadarModules radarModules;
     private readonly IFramework framework;
     private readonly DalamudPluginInterface pluginInterface;
-    private readonly Radar2D radar2D;
 
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
@@ -32,7 +31,8 @@ public class RadarPlugin : IDalamudPlugin
         IPluginLog pluginLog,
         IChatGui chatGui,
         IDataManager dataManager,
-        IFramework framework)
+        IFramework framework,
+        IGameInteropProvider gameInteropProvider)
     {
         Plugin = this;
         this.framework = framework;
@@ -46,12 +46,11 @@ public class RadarPlugin : IDalamudPlugin
         mobEditUi = new MobEditUi(this.pluginInterface, Configuration, typeConfiguratorUi, radarModules);
         localMobsUi = new LocalMobsUi(this.pluginInterface, Configuration, objectTable, mobEditUi, pluginLog, radarModules);
         customizedEntitiesUi = new CustomizedEntitiesUI(this.pluginInterface, Configuration, pluginLog, typeConfiguratorUi);
-        radar2D = new Radar2D(this.pluginInterface, Configuration);
         mainUi = new MainUi(this.pluginInterface, Configuration, localMobsUi, clientState, typeConfiguratorUi, customizedEntitiesUi, pluginLog, radarModules);
 
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi, Configuration, chatGui);
-        radar = new Radar(this.pluginInterface, Configuration, objectTable, condition, clientState, gameGui, pluginLog, radarModules);
+        radarDriver = new RadarDriver(this.pluginInterface, Configuration, objectTable, condition, clientState, gameGui, pluginLog, radarModules, gameInteropProvider);
 
         this.framework.Update += radarModules.StartTick;
         this.pluginInterface.UiBuilder.Draw += radarModules.EndTick;
@@ -64,11 +63,10 @@ public class RadarPlugin : IDalamudPlugin
         mainUi.Dispose();
         localMobsUi.Dispose();
         mobEditUi.Dispose();
-        radar2D.Dispose();
         
         // Customer services
         pluginCommands.Dispose();
-        radar.Dispose();
+        radarDriver.Dispose();
         this.framework.Update -= radarModules.StartTick;
         this.pluginInterface.UiBuilder.Draw -= radarModules.EndTick;
     }

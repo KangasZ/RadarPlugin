@@ -1,27 +1,37 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Hooking;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
 using RadarPlugin.Constants;
+using CameraManager = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager;
 
 namespace RadarPlugin.UI;
 
-public class Radar2D : IDisposable
+public unsafe class Radar2D
 {
     private readonly Configuration.Configuration configuration;
     private bool configWindowVisible = false;
     private readonly DalamudPluginInterface dalamudPluginInterface;
+    private readonly IClientState clientState;
+    
+    private readonly IPluginLog pluginLog;
 
-    public Radar2D(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configuration)
+    public Radar2D(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configuration, IClientState clientState, IPluginLog pluginLog)
     {
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.configuration = configuration;
-        this.dalamudPluginInterface.UiBuilder.Draw += Draw2DRadar;
+        this.clientState = clientState;
+        this.pluginLog = pluginLog;
     }
 
-    public void Draw2DRadar()
+    public void Radar2DOnTick(IEnumerable<GameObject> gameObjects)
     {
         var config = configuration.cfg.Radar2DConfiguration;
         if (!config.Enabled) return;
@@ -50,12 +60,12 @@ public class Radar2D : IDisposable
 
         ImGui.Begin("RadarPlugin2DRadar", flags);
 
-        DrawRadar();
+        DrawRadar(gameObjects);
 
         ImGui.End();
     }
 
-    private void DrawRadar()
+    private void DrawRadar(IEnumerable<GameObject> gameObjects)
     {
         var imDrawListPtr = ImGui.GetWindowDrawList();
         var region = ImGui.GetContentRegionAvail();
@@ -75,10 +85,33 @@ public class Radar2D : IDisposable
         var center = regionSize with {X = regionSize.X / 2, Y = regionSize.Y / 2} + regionOffset;
         imDrawListPtr.AddCircle(center, 2, ConfigConstants.Silver, 60, 5);
         imDrawListPtr.AddLine(new Vector2(center.X, regionOffset.Y), new Vector2(center.X, regionOffset.Y+regionSize.Y), 0xFFFFFFFF, 1);
-    }
-    
-    public void Dispose()
-    {
-        this.dalamudPluginInterface.UiBuilder.Draw -= Draw2DRadar;
+        imDrawListPtr.AddLine(new Vector2(regionOffset.X, center.Y), new Vector2(regionOffset.X+regionSize.X, center.Y), 0xFFFFFFFF, 1);
+
+        if (clientState.LocalPlayer == null) return;
+        var playerPosition = clientState.LocalPlayer.Position;
+        var playerRotation = clientState.LocalPlayer.Rotation;
+        
+        var cameraManager = CameraManager.Instance();
+        var currCamera = cameraManager->CurrentCamera;
+        //pluginLog.Debug($"{currCamera->LookAtVector.X}, {currCamera->LookAtVector.Y}, {currCamera->LookAtVector.Z}");
+        
+        Vector3 camFront = new Vector3(currCamera->ViewMatrix.M13, currCamera->ViewMatrix.M23, currCamera->ViewMatrix.M33);
+        float pitch = (float)Math.Asin(camFront.Y);
+
+        var cameraRotation = (float)Math.Atan2(-camFront.Z / Math.Cos(pitch), -camFront.X / Math.Cos(pitch)) + Single.Pi/2;
+        foreach (var mob in gameObjects)
+        {
+            var difference = mob.Position - playerPosition;
+            var diff2 = new Vector2(difference.X, difference.Z);
+
+            // Rotate the difference vector by the negative of the camera's rotation
+            var cos = Math.Cos(-cameraRotation);
+            var sin = Math.Sin(-cameraRotation);
+            var rotatedDiff = new Vector2((float)(diff2.X * cos - diff2.Y * sin), (float)(diff2.X * sin + diff2.Y * cos));
+
+            var position = center + rotatedDiff;
+            imDrawListPtr.AddCircle(position, 2, ConfigConstants.Red, 60, 0.5f);
+        }
+        
     }
 }
