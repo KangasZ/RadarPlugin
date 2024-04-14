@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
+using Dalamud.Interface;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -70,6 +71,15 @@ public unsafe class Radar2D
         var imDrawListPtr = ImGui.GetWindowDrawList();
         var region = ImGui.GetContentRegionAvail();
         var start = ImGui.GetWindowPos();
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        if (ImGui.Button($"{FontAwesomeIcon.Cog.ToIconString()}##-asdb"))
+        {
+            
+        }
+        ImGui.PopFont();
+
+        ImGui.SliderFloat("Scale", ref configuration.cfg.Radar2DConfiguration.Scale, 0.3f, 30f);
         var xBegin = start.X + 10;
         var yBegin = start.Y + 10;
         var xEnd = xBegin + region.X - 5;
@@ -78,10 +88,12 @@ public unsafe class Radar2D
         var regionSize = new Vector2(region.X -5 , region.Y);
         var regionOffset = new Vector2(xBegin, yBegin);
         
+        /* Debug stuff
         imDrawListPtr.AddCircle(regionOffset, 2, ConfigConstants.Red, 60, 5);
         imDrawListPtr.AddCircle(regionOffset + regionSize, 2, ConfigConstants.Turquoise, 60, 5);
         imDrawListPtr.AddCircle(regionOffset + regionSize with { X = 0 }, 2, ConfigConstants.Blue, 60, 5);
         imDrawListPtr.AddCircle(regionOffset + regionSize with {Y = 0}, 2, ConfigConstants.Gold, 60, 5);
+        */
         var center = regionSize with {X = regionSize.X / 2, Y = regionSize.Y / 2} + regionOffset;
         imDrawListPtr.AddCircle(center, 2, ConfigConstants.Silver, 60, 5);
         imDrawListPtr.AddLine(new Vector2(center.X, regionOffset.Y), new Vector2(center.X, regionOffset.Y+regionSize.Y), 0xFFFFFFFF, 1);
@@ -104,13 +116,23 @@ public unsafe class Radar2D
             var difference = mob.Position - playerPosition;
             var diff2 = new Vector2(difference.X, difference.Z);
 
+            // Scale the difference by the setter
+            diff2 = diff2 * configuration.cfg.Radar2DConfiguration.Scale;
+            
             // Rotate the difference vector by the negative of the camera's rotation
             var cos = Math.Cos(-cameraRotation);
             var sin = Math.Sin(-cameraRotation);
             var rotatedDiff = new Vector2((float)(diff2.X * cos - diff2.Y * sin), (float)(diff2.X * sin + diff2.Y * cos));
-
+            
             var position = center + rotatedDiff;
             imDrawListPtr.AddCircle(position, 2, ConfigConstants.Red, 60, 0.5f);
+            
+            var tag = mob.Name.TextValue;
+            var tagTextSize = ImGui.CalcTextSize(tag);
+            imDrawListPtr.AddText(
+                new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
+                Color.White,
+                tag);
         }
         
     }

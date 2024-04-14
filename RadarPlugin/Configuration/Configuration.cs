@@ -24,6 +24,7 @@ public class Configuration
         public bool Clickthrough = false;
         public bool ShowCross = true;
         public bool ShowRadarBorder = true;
+        public float Scale = 5f;
     }
     
     public class LevelRendering
