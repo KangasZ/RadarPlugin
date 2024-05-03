@@ -46,7 +46,6 @@ public unsafe class Radar2D
               ImGuiWindowFlags.NoMouseInputs |
               ImGuiWindowFlags.NoScrollWithMouse |
               ImGuiWindowFlags.NoTitleBar |
-              ImGuiWindowFlags.NoBringToFrontOnFocus |
               ImGuiWindowFlags.NoResize |
               ImGuiWindowFlags.NoNav |
               ImGuiWindowFlags.NoDecoration |
@@ -69,7 +68,7 @@ public unsafe class Radar2D
         DrawRadar(gameObjects);
 
         ImGui.End();
-        ImGui.PopStyleColor();
+        ImGui.PopStyleColor(1);
     }
 
     private void DrawRadar(
@@ -116,9 +115,9 @@ public unsafe class Radar2D
         if (configuration.cfg.Radar2DConfiguration.ShowCross)
         {
             imDrawListPtr.AddLine(new Vector2(center.X, regionOffset.Y),
-                new Vector2(center.X, regionOffset.Y + regionSize.Y), 0xFFFFFFFF, 1);
+                new Vector2(center.X, regionOffset.Y + regionSize.Y), configuration.cfg.Radar2DConfiguration.CrossColor, 1);
             imDrawListPtr.AddLine(new Vector2(regionOffset.X, center.Y),
-                new Vector2(regionOffset.X + regionSize.X, center.Y), 0xFFFFFFFF, 1);
+                new Vector2(regionOffset.X + regionSize.X, center.Y), configuration.cfg.Radar2DConfiguration.CrossColor, 1);
         }
 
         if (clientState.LocalPlayer == null) return;

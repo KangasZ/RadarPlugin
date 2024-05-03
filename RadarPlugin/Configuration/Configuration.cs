@@ -24,6 +24,7 @@ public class Configuration
         public uint BackgroundColor = Color.BackgroundDefault;
         public bool Clickthrough = false;
         public bool ShowCross = true;
+        public uint CrossColor = Color.White;
         public bool ShowRadarBorder = true;
         public bool ShowSettings = true;
         public bool ShowScale = true;

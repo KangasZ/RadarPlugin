@@ -540,8 +540,20 @@ public static class UiHelpers
         shouldSave |= UiHelpers.DrawCheckbox("Enabled", ref cfgRadar2DConfiguration.Enabled);
         shouldSave |= UiHelpers.DrawCheckbox("Clickthrough", ref cfgRadar2DConfiguration.Clickthrough);
         shouldSave |= UiHelpers.DrawCheckbox("Show Cross", ref cfgRadar2DConfiguration.ShowCross);
+        shouldSave |= UiHelpers.Vector4ColorSelector("Cross Color", ref cfgRadar2DConfiguration.CrossColor);
+
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-undo-cross"))
+        {
+            cfgRadar2DConfiguration.CrossColor = Color.White;
+            shouldSave = true;
+        }
+
+        ImGui.PopFont();
         shouldSave |= UiHelpers.DrawCheckbox("Show Radar Border",
             ref cfgRadar2DConfiguration.ShowRadarBorder);
+        UiHelpers.LabeledHelpMarker("", "Doesn't work atm - Request it and I'll prioritize!");
         shouldSave |= UiHelpers.DrawCheckbox("Show Radar Background",
             ref cfgRadar2DConfiguration.ShowBackground);
         shouldSave |= UiHelpers.Vector4ColorSelector("Background Color", ref cfgRadar2DConfiguration.BackgroundColor);
