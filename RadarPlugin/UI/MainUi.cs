@@ -415,7 +415,7 @@ public class MainUi : IDisposable
     {
         bool shouldSave = false;
         shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType,
-            ref espOption.DisplayType);
+            ref espOption.DisplayTypeFlags);
         ImGui.SameLine();
         shouldSave |= UiHelpers.Vector4ColorSelector($"##visiblitygeneralsettings-color-{tag}", ref espOption.ColorU);
 
@@ -543,13 +543,7 @@ public class MainUi : IDisposable
 
         if (ImGui.CollapsingHeader("2D Radar"))
         {
-            shouldSave |= UiHelpers.DrawCheckbox("2D Radar Enabled", ref configInterface.cfg.Radar2DConfiguration.Enabled);
-            shouldSave |= UiHelpers.DrawCheckbox("Clickthrough", ref configInterface.cfg.Radar2DConfiguration.Clickthrough);
-            shouldSave |= UiHelpers.DrawCheckbox("Show Cross", ref configInterface.cfg.Radar2DConfiguration.ShowCross);
-            shouldSave |= UiHelpers.DrawCheckbox("Show Radar Border",
-                ref configInterface.cfg.Radar2DConfiguration.ShowRadarBorder);
-            shouldSave |= UiHelpers.DrawCheckbox("Show Radar Background",
-                ref configInterface.cfg.Radar2DConfiguration.ShowBackground);
+            UiHelpers.Draw2DRadarSettings(ref configInterface.cfg.Radar2DConfiguration);
         }
         
         ImGui.EndChild();

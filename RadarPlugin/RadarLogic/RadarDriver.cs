@@ -98,8 +98,13 @@ public class RadarDriver : IDisposable
         if (CheckDraw()) return;
         // Figure out object table
         var objectTableRef = FilterObjectTable(objectTable);
-        radar3D.Radar3DOnTick(objectTableRef);
-        radar2D.Radar2DOnTick(objectTableRef);
+        var objectsWithMobOptions = objectTableRef.Select(areaObject =>
+        {
+            var espOption = radarModules.radarConfigurationModule.TryGetOverridenParams(areaObject, out var _);
+            return (areaObject, espOption);
+        }).ToArray();
+        radar3D.Radar3DOnTick(objectsWithMobOptions);
+        radar2D.Radar2DOnTick(objectsWithMobOptions);
     }
 
 

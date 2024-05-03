@@ -29,9 +29,16 @@ public static class UiHelpers
 
         shouldSave |= ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref option.Enabled);
 
-        shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType, ref option.DisplayType);
+        shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType, ref option.DisplayTypeFlags);
 
         shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
+
+        var distance = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Distance);
+        if (ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref distance))
+        {
+            option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.Distance, distance);
+            shouldSave = true;
+        }
         
         if (mobType == MobType.Player)
         {
@@ -48,7 +55,45 @@ public static class UiHelpers
         ImGui.NextColumn();
         shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
 
-        shouldSave |= ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref option.DrawDistance);
+        if (ImGui.Button($"More Display Options##{id}-more-display-options"))
+        {
+            ImGui.OpenPopup("MoreDisplayOptionsPopup");
+        }
+
+        if (ImGui.BeginPopup("MoreDisplayOptionsPopup"))
+        {
+            var drawDot = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Dot);
+            if (UiHelpers.DrawCheckbox($"Draw Dot##{id}", ref drawDot, "Draws a dot where the real hitbox is"))
+            {
+                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.Dot, drawDot);
+                shouldSave = true;
+            }
+            var drawName = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Name);
+            if (UiHelpers.DrawCheckbox($"Draw Name##{id}", ref drawName, "Draws the name of the object"))
+            {
+                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.Name, drawName);
+                shouldSave = true;
+            }
+            var drawHealthCircle = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.HealthCircle);
+            if (UiHelpers.DrawCheckbox($"Draw Health Circle##{id}", ref drawHealthCircle, "Draws a circle around the object representing health"))
+            {
+                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.HealthCircle, drawHealthCircle);
+                shouldSave = true;
+            }
+            var drawHealthValue = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.HealthValue);
+            if (UiHelpers.DrawCheckbox($"Draw Health Value##{id}", ref drawHealthValue, "Draws the health value of the object"))
+            {
+                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.HealthValue, drawHealthValue);
+                shouldSave = true;
+            }
+            var drawDistance = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Distance);
+            if (UiHelpers.DrawCheckbox($"Draw Distance##{id}", ref drawDistance, "Draws the distance to the object"))
+            {
+                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.Distance, drawDistance);
+                shouldSave = true;
+            }
+            ImGui.EndPopup();
+        }
         
         if (option.DotSizeOverride)
         {
@@ -120,9 +165,9 @@ public static class UiHelpers
         return shouldSave;
     }
     
-    public static bool DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, ref DisplayTypes currVal)
+    public static bool DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, ref DisplayTypeFlags currVal)
     {
-        var val = (int)currVal;
+        var val = (int)currVal.ToDisplayTypes();
         if (mobType == MobType.Player)
         {
             mobType = MobType.Character;
@@ -138,14 +183,15 @@ public static class UiHelpers
                         "Dot",
                         "Name",
                         "Dot + Name",
-                    }, 3, 3);
+                        "Custom"
+                    }, 4, 4);
                 ImGui.PopItemWidth();
 
                 if (lb)
                 {
                     if (val >= 0 && val <= 2)
                     {
-                        currVal = (DisplayTypes)val;
+                        currVal = ((DisplayTypes)val).ToFlags();
                     }
                 }
 
@@ -164,14 +210,15 @@ public static class UiHelpers
                         "Name + Health Bar",
                         "Name + Health Bar + Health Value",
                         "Health Value",
-                        "Name + Health Value"
-                    }, 9, 9);
+                        "Name + Health Value",
+                        "Custom"
+                    }, 10, 10);
                 ImGui.PopItemWidth();
                 if (lb2)
                 {
                     if (val >= 0 && val <= 8)
                     {
-                        currVal = (DisplayTypes)val;
+                        currVal = ((DisplayTypes)val).ToFlags();
                     }
                 }
 
@@ -485,5 +532,31 @@ public static class UiHelpers
             pos + new Vector2(0.0f, 0.6f * size).Rotate(rotation),
             pos + new Vector2(size, -0.4f * size).Rotate(rotation)
         }[0], 3, color, (ImDrawFlags)240, thickness);
+    }
+
+    public static bool Draw2DRadarSettings(ref Configuration.Configuration.Radar2DConfiguration cfgRadar2DConfiguration)
+    {
+        var shouldSave = false;
+        shouldSave |= UiHelpers.DrawCheckbox("Enabled", ref cfgRadar2DConfiguration.Enabled);
+        shouldSave |= UiHelpers.DrawCheckbox("Clickthrough", ref cfgRadar2DConfiguration.Clickthrough);
+        shouldSave |= UiHelpers.DrawCheckbox("Show Cross", ref cfgRadar2DConfiguration.ShowCross);
+        shouldSave |= UiHelpers.DrawCheckbox("Show Radar Border",
+            ref cfgRadar2DConfiguration.ShowRadarBorder);
+        shouldSave |= UiHelpers.DrawCheckbox("Show Radar Background",
+            ref cfgRadar2DConfiguration.ShowBackground);
+        shouldSave |= UiHelpers.Vector4ColorSelector("Background Color", ref cfgRadar2DConfiguration.BackgroundColor);
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-undo"))
+        {
+            cfgRadar2DConfiguration.BackgroundColor = Color.BackgroundDefault;
+            shouldSave = true;
+        }
+
+        ImGui.PopFont();
+        shouldSave |= UiHelpers.DrawCheckbox("Show Settings", ref cfgRadar2DConfiguration.ShowSettings);
+        shouldSave |= UiHelpers.DrawCheckbox("Show Scale", ref cfgRadar2DConfiguration.ShowScale);
+        return shouldSave;
+
     }
 }

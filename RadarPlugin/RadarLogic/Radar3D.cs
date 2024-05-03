@@ -40,7 +40,7 @@ public unsafe class Radar3D
         this.clientState = clientState;
     }
     
-    public void Radar3DOnTick(IEnumerable<GameObject> objectTableRef)
+    public void Radar3DOnTick(IEnumerable<(GameObject areaObject, Configuration.Configuration.ESPOption espOption)> objectTableRef)
     {
         // Setup Drawlist
         var bgDl = configInterface.cfg.UseBackgroundDrawList;
@@ -73,10 +73,8 @@ public unsafe class Radar3D
             drawListPtr = ImGui.GetWindowDrawList();
         }
 
-        foreach (var areaObject in objectTableRef)
+        foreach (var (areaObject, espOption) in objectTableRef)
         {
-            var espOption = radarModules.radarConfigurationModule.TryGetOverridenParams(areaObject, out var _);
-
             if (!espOption.Enabled && !configInterface.cfg.DebugMode) continue;
             DrawEsp(drawListPtr, areaObject, espOption.ColorU, espOption);
         }
@@ -95,53 +93,29 @@ public unsafe class Radar3D
         if (visibleOnScreen)
         {
             var dotSize = espOption.DotSizeOverride ? espOption.DotSize : configInterface.cfg.DotSize;
-            switch (espOption.DisplayType)
+            
+            // Assuming espOption.DisplayTypeFlags is the variable of type DisplayTypeFlags
+            var displayFlags = espOption.DisplayTypeFlags;
+
+            if (displayFlags.HasFlag(DisplayTypeFlags.Dot))
             {
-                case DisplayTypes.DotOnly:
-                    DrawRadarHelper.DrawDot(drawListPtr, onScreenPosition, dotSize, color);
-                    break;
-                case DisplayTypes.NameOnly:
-                    var nameOnlyText = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
-                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, nameOnlyText, color,
-                        espOption);
-                    break;
-                case DisplayTypes.DotAndName:
-                    DrawRadarHelper.DrawDot(drawListPtr, onScreenPosition, dotSize, color);
-                    var dotAndNameText = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
-                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, dotAndNameText, color,
-                        espOption);
-                    break;
-                case DisplayTypes.HealthBarOnly:
-                    DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    break;
-                case DisplayTypes.HealthBarAndValue:
-                    DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
-                    break;
-                case DisplayTypes.HealthBarAndName:
-                    DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    var healthBarAndName = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
-                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, healthBarAndName, color,
-                        espOption);
-                    break;
-                case DisplayTypes.HealthBarAndValueAndName:
-                    DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
-                    var healthBarAndValueAndName = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
-                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, healthBarAndValueAndName,
-                        color, espOption);
-                    DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
-                    break;
-                case DisplayTypes.HealthValueOnly:
-                    DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
-                    break;
-                case DisplayTypes.HealthValueAndName:
-                    DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
-                    var healthValueAndName = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
-                    DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, healthValueAndName, color,
-                        espOption);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                DrawRadarHelper.DrawDot(drawListPtr, onScreenPosition, dotSize, color);
+            }
+
+            if (displayFlags.HasFlag(DisplayTypeFlags.Name))
+            {
+                var nameText = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
+                DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, nameText, color, espOption);
+            }
+
+            if (displayFlags.HasFlag(DisplayTypeFlags.HealthCircle))
+            {
+                DrawRadarHelper.DrawHealthCircle(drawListPtr, onScreenPosition, gameObject, color);
+            }
+
+            if (displayFlags.HasFlag(DisplayTypeFlags.HealthValue))
+            {
+                DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
             }
         }
         else if (configInterface.cfg.ShowOffScreen)

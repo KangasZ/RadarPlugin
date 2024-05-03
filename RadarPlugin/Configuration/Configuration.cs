@@ -21,9 +21,12 @@ public class Configuration
     {
         public bool Enabled = false;
         public bool ShowBackground = true;
+        public uint BackgroundColor = Color.BackgroundDefault;
         public bool Clickthrough = false;
         public bool ShowCross = true;
         public bool ShowRadarBorder = true;
+        public bool ShowSettings = true;
+        public bool ShowScale = true;
         public float Scale = 5f;
     }
     
@@ -52,13 +55,13 @@ public class Configuration
     {
         public bool HitboxEnabled = false;
         public bool OverrideMobColor = false;
-        public uint HitboxColor = ConfigConstants.Turquoise;
+        public uint HitboxColor = Color.Turquoise;
         public float Thickness = 2.2f;
 
         public bool DrawInsideCircle = false;
         public uint InsideCircleOpacity = 0xffffffff;
         public bool UseDifferentInsideCircleColor = false;
-        public uint InsideCircleColor = ConfigConstants.Turquoise & 0x50ffffff;
+        public uint InsideCircleColor = Color.Turquoise & 0x50ffffff;
     }
 
     public class OffScreenObjectsOptions
@@ -70,16 +73,16 @@ public class Configuration
 
     public class DeepDungeonOptions
     {
-        public ESPOption SpecialUndeadOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.Yellow };
-        public ESPOption AuspiceOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.Green };
-        public ESPOption EasyMobOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.LightBlue };
-        public ESPOption TrapOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Orange };
-        public ESPOption ReturnOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Blue };
-        public ESPOption PassageOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Blue };
-        public ESPOption GoldChestOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Gold };
-        public ESPOption SilverChestOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Silver };
-        public ESPOption BronzeChestOption { get; set; } = new(objectOptDefault) { ColorU = ConfigConstants.Bronze };
-        public ESPOption MimicOption { get; set; } = new(mobOptDefault) { ColorU = ConfigConstants.Red };
+        public ESPOption SpecialUndeadOption { get; set; } = new(mobOptDefault) { ColorU = Color.Yellow };
+        public ESPOption AuspiceOption { get; set; } = new(mobOptDefault) { ColorU = Color.Green };
+        public ESPOption EasyMobOption { get; set; } = new(mobOptDefault) { ColorU = Color.LightBlue };
+        public ESPOption TrapOption { get; set; } = new(objectOptDefault) { ColorU = Color.Orange };
+        public ESPOption ReturnOption { get; set; } = new(objectOptDefault) { ColorU = Color.Blue };
+        public ESPOption PassageOption { get; set; } = new(objectOptDefault) { ColorU = Color.Blue };
+        public ESPOption GoldChestOption { get; set; } = new(objectOptDefault) { ColorU = Color.Gold };
+        public ESPOption SilverChestOption { get; set; } = new(objectOptDefault) { ColorU = Color.Silver };
+        public ESPOption BronzeChestOption { get; set; } = new(objectOptDefault) { ColorU = Color.Bronze };
+        public ESPOption MimicOption { get; set; } = new(mobOptDefault) { ColorU = Color.Red };
 
         public ESPOption AccursedHoardOption { get; set; } =
             new(objectOptDefault) { ColorU = ConfigConstants.Turquoise };
@@ -121,8 +124,8 @@ public class Configuration
         {
             Enabled = espOption.Enabled;
             DisplayType = espOption.DisplayType;
+            this.DisplayTypeFlags = espOption.DisplayTypeFlags;
             ColorU = espOption.ColorU;
-            ShowFC = espOption.ShowFC;
             DrawDistance = espOption.DrawDistance;
             AppendLevelToName = espOption.AppendLevelToName;
         }
@@ -136,14 +139,15 @@ public class Configuration
         public bool ShowName = true;*/
         public bool ShowMp = false;
 
+        [Obsolete]
         public DisplayTypes DisplayType = DisplayTypes.NameOnly;
         public uint ColorU = 0xffffffff;
-        public bool ShowFC = false; // Unused
         public bool DrawDistance = false;
         public bool DotSizeOverride = false;
         public float DotSize = ConfigConstants.DefaultDotSize;
         public bool ReplaceWithJobName = false;
         public bool AppendLevelToName = false;
+        public DisplayTypeFlags DisplayTypeFlags = DisplayTypeFlags.Default;
     }
 
     public class ESPOptionMobBased : ESPOption
@@ -156,8 +160,8 @@ public class Configuration
         {
             Enabled = espOption.Enabled;
             DisplayType = espOption.DisplayType;
+            DisplayTypeFlags = espOption.DisplayTypeFlags;
             ColorU = espOption.ColorU;
-            ShowFC = espOption.ShowFC;
             DrawDistance = espOption.DrawDistance;
             AppendLevelToName = espOption.AppendLevelToName;
         }
@@ -167,8 +171,8 @@ public class Configuration
             Name = name;
             Enabled = espOption.Enabled;
             DisplayType = espOption.DisplayType;
+            DisplayTypeFlags = espOption.DisplayTypeFlags;
             ColorU = espOption.ColorU;
-            ShowFC = espOption.ShowFC;
             DrawDistance = espOption.DrawDistance;
             AppendLevelToName = espOption.AppendLevelToName;
             MobTypeValue = mobType;
@@ -182,7 +186,7 @@ public class Configuration
 
     public class Config : IPluginConfiguration
     {
-        public int Version { get; set; } = 3;
+        public int Version { get; set; } = 4;
         public string ConfigName = "default";
         public bool Enabled = true;
         public bool UseBackgroundDrawList = false;
@@ -199,10 +203,6 @@ public class Configuration
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public ESPOption NpcOption { get; set; } = new(mobOptDefault) { Enabled = true, AppendLevelToName = false };
         public ESPOption PlayerOption { get; set; } = new(playerOptDefault);
-        public ESPOption YourPlayerOption { get; set; } = new(playerOptDefault) { ColorU = ConfigConstants.Turquoise };
-        public ESPOption FriendOption { get; set; } = new(playerOptDefault) { ColorU = ConfigConstants.Orange };
-        public ESPOption AllianceOption { get; set; } = new(playerOptDefault) { ColorU = ConfigConstants.Gold };
-        public ESPOption PartyOption { get; set; } = new(playerOptDefault) { ColorU = ConfigConstants.Turquoise };
         public ESPOption TreasureOption { get; set; } = new(objectOptDefault) { Enabled = true };
         public ESPOption CompanionOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public ESPOption AreaOption { get; set; } = new(objectOptDefault) { Enabled = false };
@@ -216,19 +216,12 @@ public class Configuration
         public ESPOption CutsceneOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public ESPOption CardStandOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public ESPOption OrnamentOption { get; set; } = new(objectOptDefault) { Enabled = false };
-        public HashSet<uint> DataIdIgnoreList { get; set; } = new HashSet<uint>();
-        public Dictionary<uint, uint> ColorOverride { get; set; } = new Dictionary<uint, uint>();
-
         public Dictionary<uint, ESPOptionMobBased> OptionOverride { get; set; } =
             new Dictionary<uint, ESPOptionMobBased>();
 
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
         public float DotSize = ConfigConstants.DefaultDotSize;
-        public bool SeparateAlliance = false;
-        public bool SeparateYourPlayer = false;
-        public bool SeparateParty = false;
-        public bool SeparateFriends = false;
         public bool UseMaxDistance = false;
         public float MaxDistance = ConfigConstants.DefaultMaxEspDistance;
         public FontSettings FontSettings { get; set; } = new();
@@ -256,7 +249,7 @@ public class Configuration
             { EspOption = new ESPOption(mobOptDefault) { ColorU = ConfigConstants.Yellow } };
 
         public bool EXPERIMENTALEnableMobTimerTracking = false;
-        public Radar2DConfiguration Radar2DConfiguration { get; set; }= new();
+        public Radar2DConfiguration Radar2DConfiguration = new();
     }
 
     public Config cfg;
@@ -268,7 +261,7 @@ public class Configuration
         Enabled = true,
         ColorU = 0xffff00ff,
         DisplayType = DisplayTypes.DotAndName,
-        ShowFC = false,
+        DisplayTypeFlags = DisplayTypes.DotAndName.ToFlags(),
         DrawDistance = false
     };
 
@@ -277,7 +270,7 @@ public class Configuration
         Enabled = true,
         ColorU = 0xffFFFF00,
         DisplayType = DisplayTypes.NameOnly,
-        ShowFC = false,
+        DisplayTypeFlags = DisplayTypes.NameOnly.ToFlags(),
         DrawDistance = false
     };
 
@@ -286,7 +279,7 @@ public class Configuration
         Enabled = true,
         ColorU = 0xffffffff,
         DisplayType = DisplayTypes.HealthValueAndName,
-        ShowFC = false,
+        DisplayTypeFlags = DisplayTypes.HealthValueAndName.ToFlags(),
         DrawDistance = false,
     };
 
@@ -333,37 +326,52 @@ public class Configuration
 
     private void MigrateCfg(ref Config oldConfig)
     {
-        // Migrate version 1 to 2
-
-        if (oldConfig.Version == 1)
+        // Migrate version 2 to 4
+        
+        if (oldConfig.Version <= 3)
         {
-            oldConfig.Version = 2;
-            oldConfig.SeparatedAlliance.EspOption = oldConfig.AllianceOption;
-            oldConfig.SeparatedAlliance.Enabled = oldConfig.SeparateAlliance;
-
-            oldConfig.SeparatedFriends.EspOption = oldConfig.FriendOption;
-            oldConfig.SeparatedFriends.Enabled = oldConfig.SeparateFriends;
-
-            oldConfig.SeparatedParty.EspOption = oldConfig.PartyOption;
-            oldConfig.SeparatedParty.Enabled = oldConfig.SeparateParty;
-
-            oldConfig.SeparatedYourPlayer.EspOption = oldConfig.YourPlayerOption;
-            oldConfig.SeparatedYourPlayer.Enabled = oldConfig.SeparateYourPlayer;
-        }
-
-        if (oldConfig.Version == 2)
-        {
-            foreach (var previouslyBlocked in oldConfig.DataIdIgnoreList)
+            foreach (var espOptionMobBased in oldConfig.OptionOverride)
             {
-                oldConfig.OptionOverride.Add(previouslyBlocked, new ESPOptionMobBased(objectOptDefault)
-                {
-                    Name = "Migrated",
-                    Enabled = false
-                });
+                espOptionMobBased.Value.DisplayTypeFlags = espOptionMobBased.Value.DisplayType.ToFlags(espOptionMobBased.Value.DrawDistance);
             }
 
-            oldConfig.DataIdIgnoreList.Clear();
-            oldConfig.Version = 3;
+            oldConfig.SeparatedAlliance.EspOption.DisplayTypeFlags = oldConfig.SeparatedAlliance.EspOption.DisplayType.ToFlags(oldConfig.SeparatedAlliance.EspOption.DrawDistance);
+            oldConfig.SeparatedYourPlayer.EspOption.DisplayTypeFlags = oldConfig.SeparatedYourPlayer.EspOption.DisplayType.ToFlags(oldConfig.SeparatedYourPlayer.EspOption.DrawDistance);
+            oldConfig.SeparatedParty.EspOption.DisplayTypeFlags = oldConfig.SeparatedParty.EspOption.DisplayType.ToFlags(oldConfig.SeparatedParty.EspOption.DrawDistance);
+            oldConfig.SeparatedFriends.EspOption.DisplayTypeFlags = oldConfig.SeparatedFriends.EspOption.DisplayType.ToFlags(oldConfig.SeparatedFriends.EspOption.DrawDistance);
+            oldConfig.SeparatedRankOne.EspOption.DisplayTypeFlags = oldConfig.SeparatedRankOne.EspOption.DisplayType.ToFlags(oldConfig.SeparatedRankOne.EspOption.DrawDistance);
+            oldConfig.SeparatedRankTwoAndSix.EspOption.DisplayTypeFlags = oldConfig.SeparatedRankTwoAndSix.EspOption.DisplayType.ToFlags(oldConfig.SeparatedRankTwoAndSix.EspOption.DrawDistance);
+            
+            oldConfig.NpcOption.DisplayTypeFlags = oldConfig.NpcOption.DisplayType.ToFlags(oldConfig.NpcOption.DrawDistance);
+            oldConfig.PlayerOption.DisplayTypeFlags = oldConfig.PlayerOption.DisplayType.ToFlags(oldConfig.PlayerOption.DrawDistance);
+            oldConfig.TreasureOption.DisplayTypeFlags = oldConfig.TreasureOption.DisplayType.ToFlags(oldConfig.TreasureOption.DrawDistance);
+            oldConfig.CompanionOption.DisplayTypeFlags = oldConfig.CompanionOption.DisplayType.ToFlags(oldConfig.CompanionOption.DrawDistance);
+            oldConfig.AreaOption.DisplayTypeFlags = oldConfig.AreaOption.DisplayType.ToFlags(oldConfig.AreaOption.DrawDistance);
+            oldConfig.AetheryteOption.DisplayTypeFlags = oldConfig.AetheryteOption.DisplayType.ToFlags(oldConfig.AetheryteOption.DrawDistance);
+            oldConfig.EventNpcOption.DisplayTypeFlags = oldConfig.EventNpcOption.DisplayType.ToFlags(oldConfig.EventNpcOption.DrawDistance);
+            oldConfig.EventObjOption.DisplayTypeFlags = oldConfig.EventObjOption.DisplayType.ToFlags(oldConfig.EventObjOption.DrawDistance);
+            oldConfig.GatheringPointOption.DisplayTypeFlags = oldConfig.GatheringPointOption.DisplayType.ToFlags(oldConfig.GatheringPointOption.DrawDistance);
+            oldConfig.MountOption.DisplayTypeFlags = oldConfig.MountOption.DisplayType.ToFlags(oldConfig.MountOption.DrawDistance);
+            oldConfig.RetainerOption.DisplayTypeFlags = oldConfig.RetainerOption.DisplayType.ToFlags(oldConfig.RetainerOption.DrawDistance);
+            oldConfig.HousingOption.DisplayTypeFlags = oldConfig.HousingOption.DisplayType.ToFlags(oldConfig.HousingOption.DrawDistance);
+            oldConfig.CutsceneOption.DisplayTypeFlags = oldConfig.CutsceneOption.DisplayType.ToFlags(oldConfig.CutsceneOption.DrawDistance);
+            oldConfig.CardStandOption.DisplayTypeFlags = oldConfig.CardStandOption.DisplayType.ToFlags(oldConfig.CardStandOption.DrawDistance);
+            oldConfig.OrnamentOption.DisplayTypeFlags = oldConfig.OrnamentOption.DisplayType.ToFlags(oldConfig.OrnamentOption.DrawDistance);
+            
+            oldConfig.DeepDungeonOptions.SpecialUndeadOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.SpecialUndeadOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.SpecialUndeadOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.AuspiceOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.AuspiceOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.AuspiceOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.EasyMobOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.EasyMobOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.EasyMobOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.TrapOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.TrapOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.TrapOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.ReturnOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.ReturnOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.ReturnOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.PassageOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.PassageOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.PassageOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.GoldChestOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.GoldChestOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.GoldChestOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.SilverChestOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.SilverChestOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.SilverChestOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.BronzeChestOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.BronzeChestOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.BronzeChestOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.MimicOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.MimicOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.MimicOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.AccursedHoardOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.AccursedHoardOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.AccursedHoardOption.DrawDistance);
+            oldConfig.DeepDungeonOptions.DefaultEnemyOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.DefaultEnemyOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.DefaultEnemyOption.DrawDistance);
+            
+            oldConfig.Version = 4;
         }
     }
 

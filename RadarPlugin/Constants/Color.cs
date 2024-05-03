@@ -16,5 +16,5 @@ public class Color
     public const uint Bronze = 0xFF327FCD;
     public const uint Turquoise = 0xffc8d530;
     public const uint Black = 0xff000000;
-
+    public const uint BackgroundDefault = 0xED0F0F0F;
 }

@@ -78,7 +78,7 @@ public class RadarConfigurationModule : IModuleInterface
         }
 
         // Draw distance
-        if (espOption.DrawDistance)
+        if (espOption.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Distance))
         {
             if (clientState.LocalPlayer != null)
                 tagText += distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, gameObject).ToString(" 0.0m");
