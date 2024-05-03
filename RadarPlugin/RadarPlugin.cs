@@ -10,7 +10,7 @@ public class RadarPlugin : IDalamudPlugin
     public string Name => "Radar Plugin";
     private readonly Configuration.Configuration Configuration;
     private readonly RadarPlugin Plugin;
-    private readonly Radar radar;
+    private readonly RadarDriver radarDriver;
     private readonly PluginCommands pluginCommands;
     private readonly MainUi mainUi;
     private readonly MobEditUi mobEditUi;
@@ -20,7 +20,7 @@ public class RadarPlugin : IDalamudPlugin
     private readonly RadarModules radarModules;
     private readonly IFramework framework;
     private readonly DalamudPluginInterface pluginInterface;
-    
+
     public RadarPlugin(
         DalamudPluginInterface pluginInterface,
         ICommandManager commandManager,
@@ -31,7 +31,8 @@ public class RadarPlugin : IDalamudPlugin
         IPluginLog pluginLog,
         IChatGui chatGui,
         IDataManager dataManager,
-        IFramework framework)
+        IFramework framework,
+        IGameInteropProvider gameInteropProvider)
     {
         Plugin = this;
         this.framework = framework;
@@ -49,7 +50,7 @@ public class RadarPlugin : IDalamudPlugin
 
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi, Configuration, chatGui);
-        radar = new Radar(this.pluginInterface, Configuration, objectTable, condition, clientState, gameGui, pluginLog, radarModules);
+        radarDriver = new RadarDriver(this.pluginInterface, Configuration, objectTable, condition, clientState, gameGui, pluginLog, radarModules, gameInteropProvider);
 
         this.framework.Update += radarModules.StartTick;
         this.pluginInterface.UiBuilder.Draw += radarModules.EndTick;
@@ -65,7 +66,7 @@ public class RadarPlugin : IDalamudPlugin
         
         // Customer services
         pluginCommands.Dispose();
-        radar.Dispose();
+        radarDriver.Dispose();
         this.framework.Update -= radarModules.StartTick;
         this.pluginInterface.UiBuilder.Draw -= radarModules.EndTick;
     }

@@ -415,7 +415,7 @@ public class MainUi : IDisposable
     {
         bool shouldSave = false;
         shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox("", $"visibilitygeneralsettings-enum-{tag}", mobType,
-            ref espOption.DisplayType);
+            ref espOption.DisplayTypeFlags);
         ImGui.SameLine();
         shouldSave |= UiHelpers.Vector4ColorSelector($"##visiblitygeneralsettings-color-{tag}", ref espOption.ColorU);
 
@@ -535,10 +535,17 @@ public class MainUi : IDisposable
             }
         }
 
-        ImGui.Text("EXPERIMENTAL");
-        shouldSave |= UiHelpers.DrawCheckbox("Mob Timers", ref configInterface.cfg.EXPERIMENTALEnableMobTimerTracking,
-            "Enable Mob Timer Tracking in deep dungeons and eureka");
+        if (ImGui.CollapsingHeader("EXPERIMENTAL Mob Timers"))
+        {
+            shouldSave |= UiHelpers.DrawCheckbox("Mob Timers", ref configInterface.cfg.EXPERIMENTALEnableMobTimerTracking,
+                "Enable Mob Timer Tracking in deep dungeons and eureka");
+        }
 
+        if (ImGui.CollapsingHeader("2D Radar"))
+        {
+            UiHelpers.Draw2DRadarSettings(ref configInterface.cfg.Radar2DConfiguration);
+        }
+        
         ImGui.EndChild();
         if (shouldSave) configInterface.Save();
     }

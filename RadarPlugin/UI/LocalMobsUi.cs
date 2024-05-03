@@ -118,8 +118,7 @@ public class LocalMobsUi : IDisposable
             foreach (var x in areaObjects)
             {
                 var espOption = radarModules.radarConfigurationModule.GetParams(x);
-                var customEspOption = radarModules.radarConfigurationModule.GetParamsWithOverride(x);
-                var isUsingCustomEspOption = espOption != customEspOption;
+                var customEspOption = radarModules.radarConfigurationModule.TryGetOverridenParams(x, out var isUsingCustomEspOption);
                 //Kind
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.ObjectKind}");

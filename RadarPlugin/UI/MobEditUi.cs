@@ -43,8 +43,7 @@ public class MobEditUi : IDisposable
             ImGui.Columns(2);
             var utilIgnored = MobConstants.DataIdIgnoreList.Contains(localObject.DataId);
             var defaulParams = radarModules.radarConfigurationModule.GetParams(localObject);
-            var mobOvveride = radarModules.radarConfigurationModule.GetParamsWithOverride(localObject);
-            var isUsingCustomEspOption = defaulParams != mobOvveride;
+            var mobOvveride = radarModules.radarConfigurationModule.TryGetOverridenParams(localObject, out var isUsingCustomEspOption);
 
             ImGui.SetColumnWidth(0, ImGui.GetWindowWidth() / 2);
             // Setup First column
