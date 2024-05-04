@@ -43,6 +43,7 @@ public unsafe class Radar3D
     public void Radar3DOnTick(IEnumerable<(GameObject areaObject, Configuration.Configuration.ESPOption espOption)> objectTableRef)
     {
         // Setup Drawlist
+        if (!configInterface.cfg.Radar3DEnabled) return;
         var bgDl = configInterface.cfg.UseBackgroundDrawList;
         var requiresSave = false;
         ImDrawListPtr drawListPtr;

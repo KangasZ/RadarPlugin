@@ -54,7 +54,7 @@ public class RadarDriver : IDisposable
         this.radarModules = radarModules;
         this.pluginLog = pluginLog;
         this.radar3D = new Radar3D(configuration, clientState, gameGui, pluginLog, radarModules);
-        this.radar2D = new Radar2D(this.pluginInterface, configuration, clientState, this.pluginLog);
+        this.radar2D = new Radar2D(this.pluginInterface, configuration, clientState, this.pluginLog, radarModules);
         // Loads plugin
         this.pluginLog.Debug("Radar Loaded");
         this.clientState = clientState;

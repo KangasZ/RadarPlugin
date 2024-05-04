@@ -20,7 +20,9 @@ public static class UiHelpers
         ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color),
             text);
     }
-    public static bool DrawSettingsDetailed(Configuration.Configuration.ESPOption option, string id, MobType mobType, DisplayOrigination displayOrigination)
+
+    public static bool DrawSettingsDetailed(Configuration.Configuration.ESPOption option, string id, MobType mobType,
+        DisplayOrigination displayOrigination)
     {
         var shouldSave = false;
         UiHelpers.DrawSeperator($"{id} Options", ConfigConstants.Red);
@@ -29,21 +31,52 @@ public static class UiHelpers
 
         shouldSave |= ImGui.Checkbox($"Enabled##{id}-enabled-bool", ref option.Enabled);
 
-        shouldSave |= UiHelpers.DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType, ref option.DisplayTypeFlags);
-
-        shouldSave |= ImGui.Checkbox($"Override Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
-
-        var distance = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Distance);
-        if (ImGui.Checkbox($"Append Distance to Name##{id}-distance-bool", ref distance))
-        {
-            option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.Distance, distance);
-            shouldSave = true;
-        }
         
+        ImGui.NextColumn();
+        shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
+        ImGui.Columns(1);
+        ImGui.Columns(2, "", false);
+        shouldSave |=
+            UiHelpers.DrawDisplayTypesEnumListBox($"Display Type##{id}", $"{id}", mobType,
+                ref option.DisplayTypeFlags);
+        ImGui.NextColumn();
+        if (ImGui.Button($"More Display Options##{id}-more-display-options"))
+        {
+            ImGui.OpenPopup("MoreDisplayOptionsPopup");
+        }
+        DrawMobDisplaySettingsPopup("MoreDisplayOptionsPopup", ref option.DisplayTypeFlags);
+        ImGui.Columns(1);
+        shouldSave |= ImGui.Checkbox($"Display Types 2D Override##{id}-2d-bool", ref option.Separate2DOptions);
+        if (option.Separate2DOptions)
+        {
+            ImGui.Columns(2, "", false);
+            shouldSave |=
+                UiHelpers.DrawDisplayTypesEnumListBox($"Display Type 2D##{id}-2d", $"{id}-2d", mobType,
+                    ref option.DisplayTypeFlags2D);
+            ImGui.NextColumn();
+            if (ImGui.Button($"More Display Options 2D##{id}-more-display-options"))
+            {
+                ImGui.OpenPopup("MoreDisplayOptionsPopup2D");
+            }
+        }
+        DrawMobDisplaySettingsPopup("MoreDisplayOptionsPopup2D", ref option.DisplayTypeFlags2D);
+        ImGui.Columns(1, "", false);
+        
+        ImGui.Columns(2, "", false);
+        shouldSave |= ImGui.Checkbox($"Override 3D Dot Size##{id}-distance-bool", ref option.DotSizeOverride);
+        if (option.DotSizeOverride)
+        {
+            ImGui.NextColumn();
+            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window",
+                ConfigConstants.MinDotSize, ConfigConstants.MaxDotSize,
+                ConfigConstants.DefaultDotSize);
+        }
+        ImGui.Columns(1);
         if (mobType == MobType.Player)
         {
-            shouldSave |= ImGui.Checkbox($"Replace Name With Job##{id}-name-job-replacement", ref option.ReplaceWithJobName);
-            
+            shouldSave |= ImGui.Checkbox($"Replace Name With Job##{id}-name-job-replacement",
+                ref option.ReplaceWithJobName);
+
             shouldSave |= ImGui.Checkbox($"Show MP##{id}-mp-value-shown", ref option.ShowMp);
         }
 
@@ -51,71 +84,69 @@ public static class UiHelpers
         {
             shouldSave |= ImGui.Checkbox("Append Level To Name", ref option.AppendLevelToName);
         }
-        // Column 2
-        ImGui.NextColumn();
-        shouldSave |= UiHelpers.Vector4ColorSelector($"Color##{id}-color", ref option.ColorU);
-
-        if (ImGui.Button($"More Display Options##{id}-more-display-options"))
-        {
-            ImGui.OpenPopup("MoreDisplayOptionsPopup");
-        }
-
-        if (ImGui.BeginPopup("MoreDisplayOptionsPopup"))
-        {
-            var drawDot = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Dot);
-            if (UiHelpers.DrawCheckbox($"Draw Dot##{id}", ref drawDot, "Draws a dot where the real hitbox is"))
-            {
-                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.Dot, drawDot);
-                shouldSave = true;
-            }
-            var drawName = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Name);
-            if (UiHelpers.DrawCheckbox($"Draw Name##{id}", ref drawName, "Draws the name of the object"))
-            {
-                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.Name, drawName);
-                shouldSave = true;
-            }
-            var drawHealthCircle = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.HealthCircle);
-            if (UiHelpers.DrawCheckbox($"Draw Health Circle##{id}", ref drawHealthCircle, "Draws a circle around the object representing health"))
-            {
-                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.HealthCircle, drawHealthCircle);
-                shouldSave = true;
-            }
-            var drawHealthValue = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.HealthValue);
-            if (UiHelpers.DrawCheckbox($"Draw Health Value##{id}", ref drawHealthValue, "Draws the health value of the object"))
-            {
-                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.HealthValue, drawHealthValue);
-                shouldSave = true;
-            }
-            var drawDistance = option.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Distance);
-            if (UiHelpers.DrawCheckbox($"Draw Distance##{id}", ref drawDistance, "Draws the distance to the object"))
-            {
-                option.DisplayTypeFlags.SetFlag(DisplayTypeFlags.Distance, drawDistance);
-                shouldSave = true;
-            }
-            ImGui.EndPopup();
-        }
         
-        if (option.DotSizeOverride)
-        {
-            shouldSave |= UiHelpers.DrawFloatWithResetSlider(ref option.DotSize, "", $"{id}-font-scale-default-window", ConfigConstants.MinDotSize, ConfigConstants.MaxDotSize,
-                ConfigConstants.DefaultDotSize);
-        }
-        else
-        {
-            ImGui.Text("");
-        }
         
         //Reset Column
         ImGui.Columns(1);
         return shouldSave;
     }
+
+    public static bool DrawMobDisplaySettingsPopup(string popupId, ref DisplayTypeFlags option)
+    {
+        var shouldSave = false;
+        if (ImGui.BeginPopup(popupId))
+        {
+            var drawDot = option.HasFlag(DisplayTypeFlags.Dot);
+            if (UiHelpers.DrawCheckbox($"Draw Dot##{popupId}", ref drawDot, "Draws a dot where the real hitbox is"))
+            {
+                option.SetFlag(DisplayTypeFlags.Dot, drawDot);
+                shouldSave = true;
+            }
+
+            var drawName = option.HasFlag(DisplayTypeFlags.Name);
+            if (UiHelpers.DrawCheckbox($"Draw Name##{popupId}", ref drawName, "Draws the name of the object"))
+            {
+                option.SetFlag(DisplayTypeFlags.Name, drawName);
+                shouldSave = true;
+            }
+
+            var drawHealthCircle = option.HasFlag(DisplayTypeFlags.HealthCircle);
+            if (UiHelpers.DrawCheckbox($"Draw Health Circle##{popupId}", ref drawHealthCircle,
+                    "Draws a circle around the object representing health"))
+            {
+                option.SetFlag(DisplayTypeFlags.HealthCircle, drawHealthCircle);
+                shouldSave = true;
+            }
+
+            var drawHealthValue = option.HasFlag(DisplayTypeFlags.HealthValue);
+            if (UiHelpers.DrawCheckbox($"Draw Health Value##{popupId}", ref drawHealthValue,
+                    "Draws the health value of the object"))
+            {
+                option.SetFlag(DisplayTypeFlags.HealthValue, drawHealthValue);
+                shouldSave = true;
+            }
+
+            var drawDistance = option.HasFlag(DisplayTypeFlags.Distance);
+            if (UiHelpers.DrawCheckbox($"Draw Distance##{popupId}", ref drawDistance, "Draws the distance to the object"))
+            {
+                option.SetFlag(DisplayTypeFlags.Distance, drawDistance);
+                shouldSave = true;
+            }
+
+            ImGui.EndPopup();
+        }
+
+        return shouldSave;
+    }
     
     public static bool DrawDotSizeSlider(ref float dotSize, string id)
     {
-        return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, ConfigConstants.MinDotSize, ConfigConstants.MaxDotSize, ConfigConstants.DefaultDotSize);
+        return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, ConfigConstants.MinDotSize,
+            ConfigConstants.MaxDotSize, ConfigConstants.DefaultDotSize);
     }
 
-    public static bool DrawFloatWithResetSlider(ref float floatToModify, string textDiscription, string id, float min, float max, float defaultFloatValue, string format = "%.2f")
+    public static bool DrawFloatWithResetSlider(ref float floatToModify, string textDiscription, string id, float min,
+        float max, float defaultFloatValue, string format = "%.2f")
     {
         bool shouldSave = false;
         if (!textDiscription.IsNullOrWhitespace())
@@ -123,10 +154,11 @@ public static class UiHelpers
             ImGui.Text(textDiscription);
             ImGui.SameLine();
         }
+
         ImGui.PushItemWidth(150);
 
         shouldSave |= ImGui.SliderFloat($"##float-slider-{id}-{textDiscription}", ref floatToModify, min, max, format);
-        
+
         ImGui.SameLine();
         ImGui.PushFont(UiBuilder.IconFont);
         if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{textDiscription}"))
@@ -134,13 +166,15 @@ public static class UiHelpers
             floatToModify = defaultFloatValue;
             shouldSave = true;
         }
+
         ImGui.PopFont();
         UiHelpers.HoverTooltip($"Default: {defaultFloatValue.ToString(CultureInfo.InvariantCulture)}");
 
         return shouldSave;
     }
-    
-    public static bool DrawIntWithResetSlider(ref int floatToModify, string textDiscription, string id, int min, int max, int defaultFloatValue)
+
+    public static bool DrawIntWithResetSlider(ref int floatToModify, string textDiscription, string id, int min,
+        int max, int defaultFloatValue)
     {
         bool shouldSave = false;
         if (!textDiscription.IsNullOrWhitespace())
@@ -148,10 +182,11 @@ public static class UiHelpers
             ImGui.Text(textDiscription);
             ImGui.SameLine();
         }
+
         ImGui.PushItemWidth(150);
 
         shouldSave |= ImGui.SliderInt($"##float-slider-{id}-{textDiscription}", ref floatToModify, min, max);
-        
+
         ImGui.SameLine();
         ImGui.PushFont(UiBuilder.IconFont);
         if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-{id}-{textDiscription}"))
@@ -159,19 +194,22 @@ public static class UiHelpers
             floatToModify = defaultFloatValue;
             shouldSave = true;
         }
+
         ImGui.PopFont();
         UiHelpers.HoverTooltip($"Default: {defaultFloatValue.ToString(CultureInfo.InvariantCulture)}");
 
         return shouldSave;
     }
-    
-    public static bool DrawDisplayTypesEnumListBox(string name, string id, MobType mobType, ref DisplayTypeFlags currVal)
+
+    public static bool DrawDisplayTypesEnumListBox(string name, string id, MobType mobType,
+        ref DisplayTypeFlags currVal)
     {
         var val = (int)currVal.ToDisplayTypes();
         if (mobType == MobType.Player)
         {
             mobType = MobType.Character;
         }
+
         switch (mobType)
         {
             case MobType.Object:
@@ -227,7 +265,7 @@ public static class UiHelpers
                 return false;
         }
     }
-    
+
     public static void DrawSeperator(string text, uint color)
     {
         ImGui.Separator();
@@ -236,8 +274,9 @@ public static class UiHelpers
         ImGui.PopStyleColor();
         ImGui.Separator();
     }
-    
-    public static bool Vector4ColorSelector(string label, ref uint configColor, ImGuiColorEditFlags flags = ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.NoInputs)
+
+    public static bool Vector4ColorSelector(string label, ref uint configColor,
+        ImGuiColorEditFlags flags = ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.NoInputs)
     {
         var tempColor = ImGui.ColorConvertU32ToFloat4(configColor);
         if (!ImGui.ColorEdit4(label, ref tempColor, ImGuiColorEditFlags.NoInputs)) return false;
@@ -256,6 +295,7 @@ public static class UiHelpers
 
         return retStatement;
     }
+
     public static void DrawTabs(string tabId, params (string label, uint color, Action function)[] tabs)
     {
         ImGui.BeginTabBar($"##{tabId}");
@@ -284,7 +324,7 @@ public static class UiHelpers
         ImGui.TextUnformatted(label);
         HoverTooltip(tooltip);
     }
-    
+
     public static void HoverTooltip(string tooltip)
     {
         if (ImGui.IsItemHovered())
@@ -292,7 +332,7 @@ public static class UiHelpers
             ImGui.SetTooltip(tooltip);
         }
     }
-    
+
     public static void TextURL(string name, string url, uint color)
     {
         ImGui.PushStyleColor(ImGuiCol.Text, color);
@@ -313,7 +353,8 @@ public static class UiHelpers
             DrawUnderline(ImGui.GetColorU32(ImGuiCol.ButtonHovered));
             ImGui.BeginTooltip();
             ImGui.PushFont(UiBuilder.IconFont);
-            ImGui.Text(FontAwesomeIcon.Link.ToIconString()); ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
+            ImGui.Text(FontAwesomeIcon.Link.ToIconString());
+            ImGui.SameLine(0.0f, ImGui.GetStyle().ItemInnerSpacing.X);
             ImGui.PopFont();
             ImGui.Text(url);
             ImGui.EndTooltip();
@@ -331,7 +372,7 @@ public static class UiHelpers
         min.Y = max.Y;
         ImGui.GetWindowDrawList().AddLine(min, max, color, 1.0f);
     }
-    
+
     public static bool GetBorderClampedVector2(
         Vector2 screenpos,
         Vector2 clampSize,
@@ -402,7 +443,7 @@ public static class UiHelpers
         var num4 = p4.Y - p3.Y;
         var num5 = (float)((double)num2 * (double)num3 - (double)num1 * (double)num4);
         var f = (float)(((double)p1.X - (double)p3.X) * (double)num4 + ((double)p3.Y - (double)p1.Y) * (double)num3) /
-                  num5;
+                num5;
         if (float.IsInfinity(f))
         {
             lines_intersect = false;
@@ -569,6 +610,5 @@ public static class UiHelpers
         shouldSave |= UiHelpers.DrawCheckbox("Show Settings", ref cfgRadar2DConfiguration.ShowSettings);
         shouldSave |= UiHelpers.DrawCheckbox("Show Scale", ref cfgRadar2DConfiguration.ShowScale);
         return shouldSave;
-
     }
 }

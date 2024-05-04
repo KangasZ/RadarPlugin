@@ -24,14 +24,16 @@ public unsafe class Radar2D
     private readonly DalamudPluginInterface dalamudPluginInterface;
     private readonly IClientState clientState;
     private readonly IPluginLog pluginLog;
+    private readonly RadarModules radarModules;
 
     public Radar2D(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configuration,
-        IClientState clientState, IPluginLog pluginLog)
+        IClientState clientState, IPluginLog pluginLog, RadarModules radarModules)
     {
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.configuration = configuration;
         this.clientState = clientState;
         this.pluginLog = pluginLog;
+        this.radarModules = radarModules;
     }
 
     public void Radar2DOnTick(
@@ -65,6 +67,7 @@ public unsafe class Radar2D
 
         ImGui.PushStyleColor(ImGuiCol.WindowBg, config.BackgroundColor);
         ImGui.Begin("RadarPlugin2DRadar", flags);
+        
         DrawRadar(gameObjects);
 
         ImGui.End();
@@ -122,6 +125,13 @@ public unsafe class Radar2D
 
         if (clientState.LocalPlayer == null) return;
         var playerPosition = clientState.LocalPlayer.Position;
+        if (configuration.cfg.Radar2DConfiguration.ShowYourCurrentPosition)
+        {
+            var positionText = $"({playerPosition.X:0}, {playerPosition.Z:0})";
+            var textSize = ImGui.CalcTextSize(positionText);
+            ImGui.SameLine(ImGui.GetWindowWidth()-textSize.X-10);
+            ImGui.Text(positionText);
+        } 
         var playerRotation = clientState.LocalPlayer.Rotation;
 
         var cameraManager = CameraManager.Instance();
@@ -136,14 +146,14 @@ public unsafe class Radar2D
                              Single.Pi / 2;
         foreach (var (areaObject, espOption) in gameObjects)
         {
-            if (!espOption.Enabled) continue;
+            if (!espOption.Enabled && !configuration.cfg.DebugMode) continue;
             var color = espOption.ColorU;
 
             var difference = areaObject.Position - playerPosition;
             var diff2 = new Vector2(difference.X, difference.Z);
 
             // Scale the difference by the setter
-            diff2 = diff2 * configuration.cfg.Radar2DConfiguration.Scale;
+            diff2 *= configuration.cfg.Radar2DConfiguration.Scale;
 
             // Rotate the difference vector by the negative of the camera's rotation
             var cos = Math.Cos(-cameraRotation);
@@ -152,12 +162,32 @@ public unsafe class Radar2D
                 (float)(diff2.X * sin + diff2.Y * cos));
 
             var position = center + rotatedDiff;
-            var dotSize = espOption.DotSizeOverride ? espOption.DotSize : configuration.cfg.DotSize;
-            DrawRadarHelper.DrawDot(imDrawListPtr, position, dotSize, color);
+            var displayTypeFlags = espOption.Separate2DOptions ? espOption.DisplayTypeFlags2D : espOption.DisplayTypeFlags;
+            if (displayTypeFlags.HasFlag(DisplayTypeFlags.Dot))
+            {
+                var dotSize = espOption.DotSizeOverride2D ? espOption.DotSize2D : configuration.cfg.DotSize2D;
+                DrawRadarHelper.DrawDot(imDrawListPtr, position, dotSize, color);
+            }
             
-            if (espOption.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Name))
+            if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
             {
                 DrawTag(imDrawListPtr, areaObject, position, color);
+            }
+
+            if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
+            {
+                var nameText = radarModules.radarConfigurationModule.GetText(areaObject, espOption);
+                DrawRadarHelper.DrawTextCenteredUnder(imDrawListPtr, position, nameText, color, espOption);
+            }
+
+            if (displayTypeFlags.HasFlag(DisplayTypeFlags.HealthCircle))
+            {
+                DrawRadarHelper.DrawHealthCircle(imDrawListPtr, position, areaObject, color);
+            }
+
+            if (displayTypeFlags.HasFlag(DisplayTypeFlags.HealthValue))
+            {
+                DrawRadarHelper.DrawHealthValue(imDrawListPtr, position, areaObject, color);
             }
         }
     }

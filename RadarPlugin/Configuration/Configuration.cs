@@ -29,6 +29,7 @@ public class Configuration
         public bool ShowSettings = true;
         public bool ShowScale = true;
         public float Scale = 5f;
+        public bool ShowYourCurrentPosition = true;
     }
     
     public class LevelRendering
@@ -149,6 +150,11 @@ public class Configuration
         public bool ReplaceWithJobName = false;
         public bool AppendLevelToName = false;
         public DisplayTypeFlags DisplayTypeFlags = DisplayTypeFlags.Default;
+        
+        public bool Separate2DOptions = false;
+        public DisplayTypeFlags DisplayTypeFlags2D = DisplayTypeFlags.Default;
+        public bool DotSizeOverride2D = false;
+        public float DotSize2D = ConfigConstants.DefaultDotSize;
     }
 
     public class ESPOptionMobBased : ESPOption
@@ -162,6 +168,7 @@ public class Configuration
             Enabled = espOption.Enabled;
             DisplayType = espOption.DisplayType;
             DisplayTypeFlags = espOption.DisplayTypeFlags;
+            DisplayTypeFlags2D = espOption.DisplayTypeFlags2D;
             ColorU = espOption.ColorU;
             DrawDistance = espOption.DrawDistance;
             AppendLevelToName = espOption.AppendLevelToName;
@@ -173,6 +180,7 @@ public class Configuration
             Enabled = espOption.Enabled;
             DisplayType = espOption.DisplayType;
             DisplayTypeFlags = espOption.DisplayTypeFlags;
+            DisplayTypeFlags2D = espOption.DisplayTypeFlags2D;
             ColorU = espOption.ColorU;
             DrawDistance = espOption.DrawDistance;
             AppendLevelToName = espOption.AppendLevelToName;
@@ -190,6 +198,7 @@ public class Configuration
         public int Version { get; set; } = 4;
         public string ConfigName = "default";
         public bool Enabled = true;
+        public bool Radar3DEnabled = true;
         public bool UseBackgroundDrawList = false;
         public bool ShowBaDdObjects = true;
         public bool DebugMode = false;
@@ -223,6 +232,7 @@ public class Configuration
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
         public float DotSize = ConfigConstants.DefaultDotSize;
+        public float DotSize2D = ConfigConstants.DefaultDotSize;
         public bool UseMaxDistance = false;
         public float MaxDistance = ConfigConstants.DefaultMaxEspDistance;
         public FontSettings FontSettings { get; set; } = new();
@@ -263,6 +273,7 @@ public class Configuration
         ColorU = 0xffff00ff,
         DisplayType = DisplayTypes.DotAndName,
         DisplayTypeFlags = DisplayTypes.DotAndName.ToFlags(),
+        DisplayTypeFlags2D = DisplayTypes.DotAndName.ToFlags(),
         DrawDistance = false
     };
 
@@ -272,6 +283,7 @@ public class Configuration
         ColorU = 0xffFFFF00,
         DisplayType = DisplayTypes.NameOnly,
         DisplayTypeFlags = DisplayTypes.NameOnly.ToFlags(),
+        DisplayTypeFlags2D = DisplayTypes.NameOnly.ToFlags(),
         DrawDistance = false
     };
 
@@ -281,6 +293,7 @@ public class Configuration
         ColorU = 0xffffffff,
         DisplayType = DisplayTypes.HealthValueAndName,
         DisplayTypeFlags = DisplayTypes.HealthValueAndName.ToFlags(),
+        DisplayTypeFlags2D = DisplayTypes.HealthValueAndName.ToFlags(),
         DrawDistance = false,
     };
 
