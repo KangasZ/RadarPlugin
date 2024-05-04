@@ -609,6 +609,7 @@ public static class UiHelpers
         ImGui.PopFont();
         shouldSave |= UiHelpers.DrawCheckbox("Show Settings", ref cfgRadar2DConfiguration.ShowSettings);
         shouldSave |= UiHelpers.DrawCheckbox("Show Scale", ref cfgRadar2DConfiguration.ShowScale);
+        shouldSave |= UiHelpers.DrawCheckbox("Show Your Position", ref cfgRadar2DConfiguration.ShowYourCurrentPosition);
         return shouldSave;
     }
 }

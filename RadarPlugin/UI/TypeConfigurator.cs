@@ -61,7 +61,7 @@ public class TypeConfigurator
     private void DrawConfiguratorWindow()
     {
         var size = new Vector2(400, 260);
-        ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
+        ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Type Configurator", ref configuratorWindowVisible))
         {
