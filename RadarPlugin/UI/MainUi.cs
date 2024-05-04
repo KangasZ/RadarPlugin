@@ -189,6 +189,12 @@ public class MainUi : IDisposable
         UiHelpers.DrawSeperator("Radar Plugin 2.0 Update. Please report bugs! Ideally nothing breaks....", ConfigConstants.Red);
         shouldSave |= UiHelpers.DrawCheckbox("Plugin Enabled", ref configInterface.cfg.Enabled);
 
+        shouldSave |= UiHelpers.DrawCheckbox("3D Radar Enabled", ref configInterface.cfg.Radar3DEnabled,
+            "This will enable the 3D radar.");
+        
+        shouldSave |= UiHelpers.DrawCheckbox("2D Radar Enabled", ref configInterface.cfg.Radar2DConfiguration.Enabled,
+            "This will enable the 2D radar.");
+        
         shouldSave |= UiHelpers.DrawCheckbox("Overworld Enabled", ref configInterface.cfg.ShowOverworldObjects,
             "This will be enabled when you want to view overworld objects." +
             "Otherwise it will not show objects in the overworld");

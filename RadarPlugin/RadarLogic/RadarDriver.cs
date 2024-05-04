@@ -156,7 +156,7 @@ public class RadarDriver : IDisposable
         else
         {
             objectTableRef = objectTable.Where(ShouldRenderObject);
-            objectTableRef = objectTable.Where(PassDistanceCheck);
+            objectTableRef = objectTableRef.Where(PassDistanceCheck);
         }
 
         return objectTableRef;
