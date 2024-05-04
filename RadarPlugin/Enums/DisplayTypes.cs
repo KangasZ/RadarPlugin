@@ -25,6 +25,7 @@ public enum DisplayTypeFlags
     HealthCircle = 1 << 2,
     HealthValue = 1 << 3,
     Distance = 1 << 4,
+    Position = 1 << 5,
 }
 
 public static class DisplayTypeExtensions

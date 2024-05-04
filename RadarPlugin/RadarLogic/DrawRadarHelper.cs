@@ -16,7 +16,7 @@ public static class DrawRadarHelper
     }
 
     public static void DrawTextCenteredUnder(ImDrawListPtr imDrawListPtr, Vector2 onScreenPosition, string textToDraw,
-        uint color, Configuration.Configuration.ESPOption espOption)
+        uint color)
     {
         var tagTextSize = ImGui.CalcTextSize(textToDraw);
         imDrawListPtr.AddText(

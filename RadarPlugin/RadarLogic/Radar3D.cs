@@ -103,10 +103,10 @@ public unsafe class Radar3D
                 DrawRadarHelper.DrawDot(drawListPtr, onScreenPosition, dotSize, color);
             }
 
-            if (displayFlags.HasFlag(DisplayTypeFlags.Name))
+            if (displayFlags.HasFlag(DisplayTypeFlags.Name) || displayFlags.HasFlag(DisplayTypeFlags.Distance) || displayFlags.HasFlag(DisplayTypeFlags.Position)) 
             {
                 var nameText = radarModules.radarConfigurationModule.GetText(gameObject, espOption);
-                DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, nameText, color, espOption);
+                DrawRadarHelper.DrawTextCenteredUnder(drawListPtr, onScreenPosition, nameText, color);
             }
 
             if (displayFlags.HasFlag(DisplayTypeFlags.HealthCircle))

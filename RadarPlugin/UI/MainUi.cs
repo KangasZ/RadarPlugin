@@ -69,7 +69,8 @@ public class MainUi : IDisposable
         {
             UiHelpers.DrawTabs("radar-settings-tabs",
                 ("General", ConfigConstants.White, DrawGeneralSettings),
-                ("Overview", ConfigConstants.Red, DrawVisibilitySettings),
+                ("Mob Settings", ConfigConstants.Red, DrawVisibilitySettings),
+                ("2D Radar", Color.White, Draw2DRadarSettings),
                 ("Additional Features", ConfigConstants.White, ShowMiscSettings),
                 ("Utility", ConfigConstants.White, DrawUtilityTab),
                 ("Config", ConfigConstants.White, DrawConfigTab)
@@ -77,6 +78,11 @@ public class MainUi : IDisposable
         }
 
         ImGui.End();
+    }
+
+    private void Draw2DRadarSettings()
+    {
+        UiHelpers.Draw2DRadarSettings(ref configInterface.cfg.Radar2DConfiguration);
     }
 
     private void DrawConfigTab()
@@ -540,11 +546,6 @@ public class MainUi : IDisposable
         {
             shouldSave |= UiHelpers.DrawCheckbox("Mob Timers", ref configInterface.cfg.EXPERIMENTALEnableMobTimerTracking,
                 "Enable Mob Timer Tracking in deep dungeons and eureka");
-        }
-
-        if (ImGui.CollapsingHeader("2D Radar"))
-        {
-            UiHelpers.Draw2DRadarSettings(ref configInterface.cfg.Radar2DConfiguration);
         }
         
         ImGui.EndChild();

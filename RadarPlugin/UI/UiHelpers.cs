@@ -132,6 +132,13 @@ public static class UiHelpers
                 option.SetFlag(DisplayTypeFlags.Distance, drawDistance);
                 shouldSave = true;
             }
+            
+            var drawPosition = option.HasFlag(DisplayTypeFlags.Position);
+            if (UiHelpers.DrawCheckbox($"Draw Position##{popupId}", ref drawPosition, "Draws the position of the object"))
+            {
+                option.SetFlag(DisplayTypeFlags.Position, drawPosition);
+                shouldSave = true;
+            }
 
             ImGui.EndPopup();
         }

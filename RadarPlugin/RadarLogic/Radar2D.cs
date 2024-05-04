@@ -91,7 +91,18 @@ public unsafe class Radar2D
 
             ImGui.PopFont();
         }
-
+        
+        if (clientState.LocalPlayer == null) return;
+        var playerRotation = clientState.LocalPlayer.Rotation;
+        var playerPosition = clientState.LocalPlayer.Position;
+        if (configuration.cfg.Radar2DConfiguration.ShowYourCurrentPosition)
+        {
+            var positionText = $"({playerPosition.X:0.0}, {playerPosition.Z:0.0})";
+            var textSize = ImGui.CalcTextSize(positionText);
+            ImGui.SameLine(ImGui.GetWindowWidth()-textSize.X-10);
+            ImGui.Text(positionText);
+        } 
+        
         Draw2DRadarPopupSettings();
 
         if (configuration.cfg.Radar2DConfiguration.ShowScale)
@@ -122,17 +133,6 @@ public unsafe class Radar2D
             imDrawListPtr.AddLine(new Vector2(regionOffset.X, center.Y),
                 new Vector2(regionOffset.X + regionSize.X, center.Y), configuration.cfg.Radar2DConfiguration.CrossColor, 1);
         }
-
-        if (clientState.LocalPlayer == null) return;
-        var playerPosition = clientState.LocalPlayer.Position;
-        if (configuration.cfg.Radar2DConfiguration.ShowYourCurrentPosition)
-        {
-            var positionText = $"({playerPosition.X:0}, {playerPosition.Z:0})";
-            var textSize = ImGui.CalcTextSize(positionText);
-            ImGui.SameLine(ImGui.GetWindowWidth()-textSize.X-10);
-            ImGui.Text(positionText);
-        } 
-        var playerRotation = clientState.LocalPlayer.Rotation;
 
         var cameraManager = CameraManager.Instance();
         var currCamera = cameraManager->CurrentCamera;
@@ -168,16 +168,11 @@ public unsafe class Radar2D
                 var dotSize = espOption.DotSizeOverride2D ? espOption.DotSize2D : configuration.cfg.DotSize2D;
                 DrawRadarHelper.DrawDot(imDrawListPtr, position, dotSize, color);
             }
-            
-            if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
-            {
-                DrawTag(imDrawListPtr, areaObject, position, color);
-            }
 
-            if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
+            if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name) || displayTypeFlags.HasFlag(DisplayTypeFlags.Distance) || displayTypeFlags.HasFlag(DisplayTypeFlags.Position)) 
             {
-                var nameText = radarModules.radarConfigurationModule.GetText(areaObject, espOption);
-                DrawRadarHelper.DrawTextCenteredUnder(imDrawListPtr, position, nameText, color, espOption);
+                var nameText = radarModules.radarConfigurationModule.GetText(areaObject, espOption, false);
+                DrawRadarHelper.DrawTextCenteredUnder(imDrawListPtr, position, nameText, color);
             }
 
             if (displayTypeFlags.HasFlag(DisplayTypeFlags.HealthCircle))

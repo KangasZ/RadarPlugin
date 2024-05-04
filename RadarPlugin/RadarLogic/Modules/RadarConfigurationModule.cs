@@ -34,21 +34,26 @@ public class RadarConfigurationModule : IModuleInterface
     /**
  * TODO: Refactor this to be done once per second instead of on each render.
  */
-    public string GetText(GameObject gameObject, Configuration.Configuration.ESPOption espOption)
+    public string GetText(GameObject gameObject, Configuration.Configuration.ESPOption espOption, bool radar3d = true)
     {
         var tagText = "";
-        if (gameObject.DataId != 0 && MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
-            MobConstants.RenameList.ContainsKey(gameObject.DataId))
+        var displayTypeFlags = radar3d ? espOption.DisplayTypeFlags : espOption.Separate2DOptions ? espOption.DisplayTypeFlags2D : espOption.DisplayTypeFlags;
+
+        if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
         {
-            tagText = MobConstants.RenameList[gameObject.DataId];
-        }
-        else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))
-        {
-            tagText = "''";
-        }
-        else
-        {
-            tagText = gameObject.Name.TextValue;
+            if (gameObject.DataId != 0 && MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
+                MobConstants.RenameList.ContainsKey(gameObject.DataId))
+            {
+                tagText = MobConstants.RenameList[gameObject.DataId];
+            }
+            else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))
+            {
+                tagText = "''";
+            }
+            else
+            {
+                tagText = gameObject.Name.TextValue;
+            }
         }
 
         // Replace player names with job abbreviations
@@ -78,10 +83,16 @@ public class RadarConfigurationModule : IModuleInterface
         }
 
         // Draw distance
-        if (espOption.DisplayTypeFlags.HasFlag(DisplayTypeFlags.Distance))
+        if (displayTypeFlags.HasFlag(DisplayTypeFlags.Distance))
         {
             if (clientState.LocalPlayer != null)
                 tagText += distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, gameObject).ToString(" 0.0m");
+        }
+        
+        // Draw Position
+        if (displayTypeFlags.HasFlag(DisplayTypeFlags.Position))
+        {
+            tagText += $"({gameObject.Position.X:0.0}, {gameObject.Position.Z:0.0})";
         }
 
         if (configInterface.cfg.EXPERIMENTALEnableMobTimerTracking
