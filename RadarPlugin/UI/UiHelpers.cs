@@ -146,9 +146,9 @@ public static class UiHelpers
         return shouldSave;
     }
     
-    public static bool DrawDotSizeSlider(ref float dotSize, string id)
+    public static bool DrawDotSizeSlider(ref float dotSize, string id, string textDiscription = "")
     {
-        return DrawFloatWithResetSlider(ref dotSize, "Dot Size", id, ConfigConstants.MinDotSize,
+        return DrawFloatWithResetSlider(ref dotSize, textDiscription, id, ConfigConstants.MinDotSize,
             ConfigConstants.MaxDotSize, ConfigConstants.DefaultDotSize);
     }
 

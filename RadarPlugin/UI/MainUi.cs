@@ -208,8 +208,8 @@ public class MainUi : IDisposable
             "It will be under any other Dalamud plugin. This is the original behavior.\n" +
             "There should be practically no difference between this and normal operations");
 
-        shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size");
-        shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize2D, "default-dot-size-3d");
+        shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize, "default-dot-size", "3D Dot Size");
+        shouldSave |= UiHelpers.DrawDotSizeSlider(ref configInterface.cfg.DotSize2D, "default-dot-size-3d", "2D Dot Size");
         
         shouldSave |= UiHelpers.DrawCheckbox("Debug Text", ref configInterface.cfg.DebugText,
             "Replaces name with a debug string of:\n'Name, DataId, MobType'\n/radar showdebug");
