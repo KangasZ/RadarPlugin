@@ -628,7 +628,7 @@ public static class UiHelpers
         if (ImGui.CollapsingHeader("Camera Cone"))
         {
             ImGui.Indent(8);
-            shouldSave |= DrawConeSettings("Camera Cone", "camera-cone", ref cfgRadar2DConfiguration.CameraConeSettings);
+            shouldSave |= DrawConeSettings("Camera Cone",  "camera-cone", ref cfgRadar2DConfiguration.CameraConeSettings);
             ImGui.Unindent(8);
         }
 
