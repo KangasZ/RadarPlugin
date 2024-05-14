@@ -17,4 +17,8 @@ public class Color
     public const uint Turquoise = 0xffc8d530;
     public const uint Black = 0xff000000;
     public const uint BackgroundDefault = 0xED0F0F0F;
+    public const uint Opacity50 = 0x7FFFFFFF;
+    public const uint Gray = 0xFF7F7F7F;
+    public const uint Gray50 = Gray & Opacity50;
+    public const uint LightBlue50 = LightBlue & Opacity50;
 }

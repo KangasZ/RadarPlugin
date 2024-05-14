@@ -17,6 +17,13 @@ namespace RadarPlugin.Configuration;
 [Serializable]
 public class Configuration
 {
+    public class ConeSettings
+    {
+        public bool Enabled = false;
+        public uint ConeColor = Color.Gray50;
+        public bool Fill = true;
+    }
+    
     public class Radar2DConfiguration
     {
         public bool Enabled = false;
@@ -30,6 +37,9 @@ public class Configuration
         public bool ShowScale = true;
         public float Scale = 5f;
         public bool ShowYourCurrentPosition = true;
+        public bool RotationLockedNorth = false;
+        public ConeSettings PlayerConeSettings = new ConeSettings() { ConeColor = Color.Gray50 };
+        public ConeSettings CameraConeSettings = new ConeSettings() { ConeColor = Color.LightBlue50 };
     }
     
     public class LevelRendering

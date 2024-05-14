@@ -617,6 +617,33 @@ public static class UiHelpers
         shouldSave |= UiHelpers.DrawCheckbox("Show Settings", ref cfgRadar2DConfiguration.ShowSettings);
         shouldSave |= UiHelpers.DrawCheckbox("Show Scale", ref cfgRadar2DConfiguration.ShowScale);
         shouldSave |= UiHelpers.DrawCheckbox("Show Your Position", ref cfgRadar2DConfiguration.ShowYourCurrentPosition);
+        shouldSave |= UiHelpers.DrawCheckbox("Rotation Locked North", ref cfgRadar2DConfiguration.RotationLockedNorth);
+        if (ImGui.CollapsingHeader("Player Cone"))
+        {
+            ImGui.Indent(8);
+            shouldSave |= DrawConeSettings("Player Cone", "player-cone", ref cfgRadar2DConfiguration.PlayerConeSettings);
+            ImGui.Unindent(8);
+        }
+
+        if (ImGui.CollapsingHeader("Camera Cone"))
+        {
+            ImGui.Indent(8);
+            shouldSave |= DrawConeSettings("Camera Cone", "camera-cone", ref cfgRadar2DConfiguration.CameraConeSettings);
+            ImGui.Unindent(8);
+        }
+
+        return shouldSave;
+    }
+
+    public static bool DrawConeSettings(string coneSettingsName, string coneSettingsTag, ref Configuration.Configuration.ConeSettings cfgConeConfiguration)
+    {
+        var shouldSave = false;
+
+        shouldSave |= UiHelpers.Vector4ColorSelector($"##{coneSettingsTag}", ref cfgConeConfiguration.ConeColor,
+            ImGuiColorEditFlags.None);
+        ImGui.SameLine();
+        UiHelpers.DrawCheckbox($"{coneSettingsName}##{coneSettingsTag}", ref cfgConeConfiguration.Enabled);
+        UiHelpers.DrawCheckbox($"{coneSettingsName} Fill##{coneSettingsTag}", ref cfgConeConfiguration.Fill);
         return shouldSave;
     }
 }

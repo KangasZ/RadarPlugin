@@ -14,4 +14,13 @@ public static class ExtensionMethods
     {
         return Math.Abs(a - b) <= tolerance;
     }
+
+    [Obsolete("Use Vector2.Rotate instead")]
+    public static Vector2 RotatedVector(this Vector2 v1, float rotation)
+    {
+        var cos = Math.Cos(-rotation);
+        var sin = Math.Sin(-rotation);
+         return new Vector2((float)(v1.X * cos - v1.Y * sin),
+            (float)(v1.X * sin + v1.Y * cos));
+    }
 }

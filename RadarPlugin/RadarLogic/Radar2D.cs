@@ -142,8 +142,8 @@ public unsafe class Radar2D
             currCamera->ViewMatrix.M33);
         float pitch = (float)Math.Asin(camFront.Y);
 
-        var cameraRotation = (float)Math.Atan2(-camFront.Z / Math.Cos(pitch), -camFront.X / Math.Cos(pitch)) +
-                             Single.Pi / 2;
+        var cameraRotation = (float)Math.Atan2(-camFront.Z / Math.Cos(pitch), -camFront.X / Math.Cos(pitch));
+        var cameraRotationOffset = configuration.cfg.Radar2DConfiguration.RotationLockedNorth ? 0 : cameraRotation + Single.Pi / 2;
         foreach (var (areaObject, espOption) in gameObjects)
         {
             if (!espOption.Enabled && !configuration.cfg.DebugMode) continue;
@@ -156,11 +156,19 @@ public unsafe class Radar2D
             diff2 *= configuration.cfg.Radar2DConfiguration.Scale;
 
             // Rotate the difference vector by the negative of the camera's rotation
-            var cos = Math.Cos(-cameraRotation);
-            var sin = Math.Sin(-cameraRotation);
-            var rotatedDiff = new Vector2((float)(diff2.X * cos - diff2.Y * sin),
-                (float)(diff2.X * sin + diff2.Y * cos));
-
+            Vector2 rotatedDiff;
+            if (configuration.cfg.Radar2DConfiguration.RotationLockedNorth) {
+                rotatedDiff = diff2;
+            } else
+            {
+                rotatedDiff = diff2.Rotate(cameraRotationOffset);
+                //var cos = Math.Cos(-cameraRotation);
+                //var sin = Math.Sin(-cameraRotation);
+                //rotatedDiff = new Vector2((float)(diff2.X * cos - diff2.Y * sin),
+                //    (float)(diff2.X * sin + diff2.Y * cos));
+            }
+            
+            // Dot position
             var position = center + rotatedDiff;
             var displayTypeFlags = espOption.Separate2DOptions ? espOption.DisplayTypeFlags2D : espOption.DisplayTypeFlags;
             if (displayTypeFlags.HasFlag(DisplayTypeFlags.Dot))
@@ -183,6 +191,52 @@ public unsafe class Radar2D
             if (displayTypeFlags.HasFlag(DisplayTypeFlags.HealthValue))
             {
                 DrawRadarHelper.DrawHealthValue(imDrawListPtr, position, areaObject, color);
+            }
+        }
+        
+        // Camera Cone
+        var angleToDraw = float.Sqrt(2) / 2;
+        if (configuration.cfg.Radar2DConfiguration.CameraConeSettings.Enabled)
+        {
+            imDrawListPtr.PathLineTo(center);
+            //var diffRight = new Vector2(50, -50);
+            //diffRight = diffRight.Rotate(cameraRotation);
+            //imDrawListPtr.PathLineTo(center + diffLeft);
+            var cameraDirection = -(cameraRotationOffset - cameraRotation);
+            imDrawListPtr.PathArcTo(center, 50, cameraDirection - angleToDraw, cameraDirection + angleToDraw, 200);
+            imDrawListPtr.PathLineTo(center);
+            if (configuration.cfg.Radar2DConfiguration.CameraConeSettings.Fill)
+            {
+                imDrawListPtr.PathFillConvex(configuration.cfg.Radar2DConfiguration.CameraConeSettings.ConeColor);
+            }
+            else
+            {
+                imDrawListPtr.PathStroke(configuration.cfg.Radar2DConfiguration.CameraConeSettings.ConeColor, ImDrawFlags.None, 2f);
+            }
+        }
+
+        // Player cone
+        if (configuration.cfg.Radar2DConfiguration.PlayerConeSettings.Enabled)
+        {
+            var playerDirection = -(playerRotation - Single.Pi / 2 + cameraRotationOffset);
+            /*if (!configuration.cfg.Radar2DConfiguration.RotationLockedNorth)
+            {
+                tempRot += cameraRotation;
+            }*/
+            // if draw cone
+            imDrawListPtr.PathLineTo(center);
+            //var diffRight = new Vector2(50, -50);
+            //diffRight = diffRight.Rotate(cameraRotation);
+            //imDrawListPtr.PathLineTo(center + diffLeft);
+            imDrawListPtr.PathArcTo(center, 50, playerDirection - angleToDraw, playerDirection + angleToDraw, 200);
+            imDrawListPtr.PathLineTo(center);
+            if (configuration.cfg.Radar2DConfiguration.PlayerConeSettings.Fill)
+            {
+                imDrawListPtr.PathFillConvex(configuration.cfg.Radar2DConfiguration.PlayerConeSettings.ConeColor);
+            }
+            else
+            {
+                imDrawListPtr.PathStroke(configuration.cfg.Radar2DConfiguration.PlayerConeSettings.ConeColor, ImDrawFlags.None, 2f);
             }
         }
     }
