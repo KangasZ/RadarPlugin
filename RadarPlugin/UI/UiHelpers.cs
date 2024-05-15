@@ -644,6 +644,16 @@ public static class UiHelpers
         ImGui.SameLine();
         UiHelpers.DrawCheckbox($"{coneSettingsName}##{coneSettingsTag}", ref cfgConeConfiguration.Enabled);
         UiHelpers.DrawCheckbox($"{coneSettingsName} Fill##{coneSettingsTag}", ref cfgConeConfiguration.Fill);
+        UiHelpers.DrawFloatWithResetSlider(ref cfgConeConfiguration.Radius, "Radius", $"{coneSettingsTag}-radius",
+            0.0f, 500f, ConfigConstants.DefaultConeRadius);
+        var angle = cfgConeConfiguration.RadianAngle * 180 / MathF.PI * 2;
+        if (UiHelpers.DrawFloatWithResetSlider(ref angle, "Angle", $"{coneSettingsTag}-angle", 0.0f, 180,
+            ConfigConstants.DefaultConeAngleRadians, "%.2f"))
+        {
+            cfgConeConfiguration.RadianAngle = angle * MathF.PI / 2 / 180;
+            shouldSave = true;
+        }
+
         return shouldSave;
     }
 }

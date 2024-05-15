@@ -22,6 +22,8 @@ public class Configuration
         public bool Enabled = false;
         public uint ConeColor = Color.Gray50;
         public bool Fill = true;
+        public float Radius = ConfigConstants.DefaultConeRadius;
+        public float RadianAngle = ConfigConstants.DefaultConeAngleRadians; // About sqrt(2)/2 or 45 degrees (from each side)
     }
     
     public class Radar2DConfiguration

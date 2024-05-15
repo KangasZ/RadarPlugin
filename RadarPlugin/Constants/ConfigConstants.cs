@@ -25,4 +25,6 @@ public static class ConfigConstants
     public const float DefaultEspPadding = 7f;
     public const float DefaultMaxEspDistance = 300f;
     public const float DefaultMaxAggroRadiusDistance = 50f;
+    public const float DefaultConeRadius = 60f;
+    public const float DefaultConeAngleRadians = 0.701f;
 }

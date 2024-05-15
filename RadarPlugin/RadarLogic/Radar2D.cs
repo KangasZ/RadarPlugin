@@ -195,30 +195,33 @@ public unsafe class Radar2D
         }
         
         // Camera Cone
-        var angleToDraw = float.Sqrt(2) / 2;
-        if (configuration.cfg.Radar2DConfiguration.CameraConeSettings.Enabled)
+        var cameraConeSettings = configuration.cfg.Radar2DConfiguration.CameraConeSettings;
+        if (cameraConeSettings.Enabled)
         {
             imDrawListPtr.PathLineTo(center);
             //var diffRight = new Vector2(50, -50);
             //diffRight = diffRight.Rotate(cameraRotation);
             //imDrawListPtr.PathLineTo(center + diffLeft);
+            var angleOffset = cameraConeSettings.RadianAngle;
             var cameraDirection = -(cameraRotationOffset - cameraRotation);
-            imDrawListPtr.PathArcTo(center, 50, cameraDirection - angleToDraw, cameraDirection + angleToDraw, 200);
+            imDrawListPtr.PathArcTo(center, cameraConeSettings.Radius, cameraDirection - angleOffset, cameraDirection + angleOffset, 200);
             imDrawListPtr.PathLineTo(center);
-            if (configuration.cfg.Radar2DConfiguration.CameraConeSettings.Fill)
+            if (cameraConeSettings.Fill)
             {
-                imDrawListPtr.PathFillConvex(configuration.cfg.Radar2DConfiguration.CameraConeSettings.ConeColor);
+                imDrawListPtr.PathFillConvex(cameraConeSettings.ConeColor);
             }
             else
             {
-                imDrawListPtr.PathStroke(configuration.cfg.Radar2DConfiguration.CameraConeSettings.ConeColor, ImDrawFlags.None, 2f);
+                imDrawListPtr.PathStroke(cameraConeSettings.ConeColor, ImDrawFlags.None, 2f);
             }
         }
 
         // Player cone
-        if (configuration.cfg.Radar2DConfiguration.PlayerConeSettings.Enabled)
+        var playerConeSettings = configuration.cfg.Radar2DConfiguration.PlayerConeSettings;
+        if (playerConeSettings.Enabled)
         {
             var playerDirection = -(playerRotation - Single.Pi / 2 + cameraRotationOffset);
+            var angleOffset = playerConeSettings.RadianAngle;
             /*if (!configuration.cfg.Radar2DConfiguration.RotationLockedNorth)
             {
                 tempRot += cameraRotation;
@@ -228,15 +231,15 @@ public unsafe class Radar2D
             //var diffRight = new Vector2(50, -50);
             //diffRight = diffRight.Rotate(cameraRotation);
             //imDrawListPtr.PathLineTo(center + diffLeft);
-            imDrawListPtr.PathArcTo(center, 50, playerDirection - angleToDraw, playerDirection + angleToDraw, 200);
+            imDrawListPtr.PathArcTo(center, playerConeSettings.Radius, playerDirection - angleOffset, playerDirection + angleOffset, 200);
             imDrawListPtr.PathLineTo(center);
             if (configuration.cfg.Radar2DConfiguration.PlayerConeSettings.Fill)
             {
-                imDrawListPtr.PathFillConvex(configuration.cfg.Radar2DConfiguration.PlayerConeSettings.ConeColor);
+                imDrawListPtr.PathFillConvex(playerConeSettings.ConeColor);
             }
             else
             {
-                imDrawListPtr.PathStroke(configuration.cfg.Radar2DConfiguration.PlayerConeSettings.ConeColor, ImDrawFlags.None, 2f);
+                imDrawListPtr.PathStroke(playerConeSettings.ConeColor, ImDrawFlags.None, 2f);
             }
         }
     }
