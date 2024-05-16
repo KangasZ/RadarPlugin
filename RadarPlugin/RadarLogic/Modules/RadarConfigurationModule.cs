@@ -139,8 +139,6 @@ public class RadarConfigurationModule : IModuleInterface
             {
                 switch (value)
                 {
-                    case DeepDungeonMobTypes.Default:
-                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
                     case DeepDungeonMobTypes.SpecialUndead:
                         return configInterface.cfg.DeepDungeonOptions.SpecialUndeadOption;
                     case DeepDungeonMobTypes.Auspice:
@@ -163,6 +161,8 @@ public class RadarConfigurationModule : IModuleInterface
                         return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption;
                     case DeepDungeonMobTypes.Mimic:
                         return configInterface.cfg.DeepDungeonOptions.MimicOption;
+                    case DeepDungeonMobTypes.Default:
+                        return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
                     default:
                         return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
                 }

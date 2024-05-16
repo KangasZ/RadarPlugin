@@ -11,7 +11,8 @@ public static class MobConstants
      */
     public static Dictionary<uint, float> AggroDistance = new Dictionary<uint, float>()
     {
-        { 5832, 16f } //mimic 2
+        { 5832, 16f }, //mimic 2
+        { 5834, 16f }
     };
 
     public static HashSet<ushort> DeepDungeonMapIds = new()
@@ -107,6 +108,7 @@ public static class MobConstants
         { 2006020, "Mimic Coffer" },
         { 2566, "Mimic" },
         { 5832, "Mimic" },
+        { 5834, "Mimic" },
         { 7392, "Bronze Mimic" },
         { 7393, "Silver Mimic" },
         { 7394, "Gold Mimic" },
@@ -142,6 +144,7 @@ public static class MobConstants
         { 7393, DeepDungeonMobTypes.Mimic },
         { 7394, DeepDungeonMobTypes.Mimic },
         { 5832, DeepDungeonMobTypes.Mimic },
+        { 5834, DeepDungeonMobTypes.Mimic },
         { 15997, DeepDungeonMobTypes.Mimic },
         { 15998, DeepDungeonMobTypes.Mimic },
         { 15999, DeepDungeonMobTypes.Mimic },
