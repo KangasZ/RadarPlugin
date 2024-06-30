@@ -9,7 +9,7 @@ namespace RadarPlugin.UI;
 public class TypeConfigurator
 {
     private Configuration.Configuration configInterface;
-    private readonly DalamudPluginInterface dalamudPluginInterface;
+    private readonly IDalamudPluginInterface dalamudPluginInterface;
     private bool configuratorWindowVisible = false;
 
     // Current Modification
@@ -18,7 +18,7 @@ public class TypeConfigurator
     private MobType mobType;
     private DisplayOrigination displayOrigination;
 
-    public TypeConfigurator(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface)
+    public TypeConfigurator(IDalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface)
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;

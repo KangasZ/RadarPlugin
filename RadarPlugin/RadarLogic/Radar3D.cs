@@ -40,7 +40,7 @@ public unsafe class Radar3D
         this.clientState = clientState;
     }
     
-    public void Radar3DOnTick(IEnumerable<(GameObject areaObject, Configuration.Configuration.ESPOption espOption)> objectTableRef)
+    public void Radar3DOnTick(IEnumerable<(IGameObject areaObject, Configuration.Configuration.ESPOption espOption)> objectTableRef)
     {
         // Setup Drawlist
         if (!configInterface.cfg.Radar3DEnabled) return;
@@ -86,7 +86,7 @@ public unsafe class Radar3D
         }
     }
     
-    private void DrawEsp(ImDrawListPtr drawListPtr, GameObject gameObject, uint? overrideColor,
+    private void DrawEsp(ImDrawListPtr drawListPtr, IGameObject gameObject, uint? overrideColor,
         Configuration.Configuration.ESPOption espOption)
     {
         var color = overrideColor ?? espOption.ColorU;
@@ -100,6 +100,7 @@ public unsafe class Radar3D
 
             if (displayFlags.HasFlag(DisplayTypeFlags.Dot))
             {
+                pluginLog.Debug($"Attempting to draw dot at {onScreenPosition.ToString()}");
                 DrawRadarHelper.DrawDot(drawListPtr, onScreenPosition, dotSize, color);
             }
 
@@ -133,7 +134,7 @@ public unsafe class Radar3D
 
         switch (gameObject)
         {
-            case BattleNpc npc2:
+            case IBattleNpc npc2:
             {
                 if (configInterface.cfg.HitboxOptions.HitboxEnabled)
                 {
@@ -197,14 +198,14 @@ public unsafe class Radar3D
 
                 break;
             }
-            case PlayerCharacter pc when espOption.ShowMp:
+            case IPlayerCharacter pc when espOption.ShowMp:
                 DrawMp(drawListPtr, onScreenPosition, pc, color);
                 break;
         }
     }
 
     //todo better
-    private void DrawMp(ImDrawListPtr imDrawListPtr, Vector2 position, PlayerCharacter gameObject,
+    private void DrawMp(ImDrawListPtr imDrawListPtr, Vector2 position, IPlayerCharacter gameObject,
         uint playerOptColor)
     {
         var mpText = gameObject.CurrentMp.ToString();
@@ -224,7 +225,7 @@ public unsafe class Radar3D
     }
 
     private void DrawAggroRadius(ImDrawListPtr imDrawListPtr, Vector3 position, float radius, float rotation,
-        uint objectOptionColor, BattleNpc battleNpc)
+        uint objectOptionColor, IBattleNpc battleNpc)
     {
         var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
         rotation += MathF.PI / 4;

@@ -25,11 +25,11 @@ public static class DrawRadarHelper
             textToDraw);
     }
 
-    public static void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
+    public static void DrawHealthCircle(ImDrawListPtr imDrawListPtr, Vector2 position, IGameObject gameObject,
         uint playerOptColor)
     {
         const float radius = 13f;
-        if (gameObject is not BattleChara npc) return;
+        if (gameObject is not IBattleChara npc) return;
 
         var v1 = (float)npc.CurrentHp / (float)npc.MaxHp;
         var aMax = MathF.PI * 2.0f;
@@ -96,10 +96,10 @@ public static class DrawRadarHelper
         imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
     }
 
-    public static void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, GameObject gameObject,
+    public static void DrawHealthValue(ImDrawListPtr imDrawListPtr, Vector2 position, IGameObject gameObject,
         uint playerOptColor)
     {
-        if (gameObject is not BattleChara npc) return;
+        if (gameObject is not IBattleChara npc) return;
         var health = ((uint)(((double)npc.CurrentHp / npc.MaxHp) * 100));
         var healthText = health.ToString();
         var healthTextSize = ImGui.CalcTextSize(healthText);
@@ -109,9 +109,9 @@ public static class DrawRadarHelper
             healthText);
     }
 
-    public static void DrawHealthBar(ImDrawListPtr imDrawListPtr, Vector2 onScreenPositon, GameObject gameObject)
+    public static void DrawHealthBar(ImDrawListPtr imDrawListPtr, Vector2 onScreenPositon, IGameObject gameObject)
     {
-        if (gameObject is not BattleChara npc) return;
+        if (gameObject is not IBattleChara npc) return;
         var color = ConfigConstants.Black;
         var hp = npc.CurrentHp;
         var maxHp = npc.MaxHp;

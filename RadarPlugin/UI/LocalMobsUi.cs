@@ -17,9 +17,9 @@ namespace RadarPlugin.UI;
 
 public class LocalMobsUi : IDisposable
 {
-    private List<GameObject> areaObjects;
+    private List<IGameObject> areaObjects;
     private bool currentMobsVisible = false;
-    private readonly DalamudPluginInterface dalamudPluginInterface;
+    private readonly IDalamudPluginInterface dalamudPluginInterface;
     private readonly Configuration.Configuration configInterface;
     private readonly IObjectTable objectTable;
     private readonly MobEditUi mobEditUi;
@@ -27,14 +27,14 @@ public class LocalMobsUi : IDisposable
     private readonly RadarModules radarModules;
     
     public LocalMobsUi(
-        DalamudPluginInterface dalamudPluginInterface,
+        IDalamudPluginInterface dalamudPluginInterface,
         Configuration.Configuration configInterface,
         IObjectTable objectTable,
         MobEditUi mobEditUi,
         IPluginLog pluginLog,
         RadarModules radarModules)
     {
-        areaObjects = new List<GameObject>();
+        areaObjects = new List<IGameObject>();
         this.mobEditUi = mobEditUi;
         this.configInterface = configInterface;
         this.objectTable = objectTable;

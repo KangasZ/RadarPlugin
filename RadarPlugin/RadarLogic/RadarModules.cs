@@ -13,7 +13,7 @@ public class RadarModules : IModuleInterface
     public RankModule rankModule;
     public ZoneTypeModule zoneTypeModule;
 
-    public RadarModules(ICondition conditionInterface, IClientState clientState, Configuration.Configuration configInterface, IDataManager dataManager, DalamudPluginInterface pluginInterface)
+    public RadarModules(ICondition conditionInterface, IClientState clientState, Configuration.Configuration configInterface, IDataManager dataManager, IDalamudPluginInterface pluginInterface)
     {
         aggroTypeModule = new AggroTypeModule(pluginInterface);
         distanceModule = new DistanceModule();

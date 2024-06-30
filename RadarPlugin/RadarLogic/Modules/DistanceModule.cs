@@ -12,15 +12,15 @@ public class DistanceModule : IModuleInterface
         this.distanceDictionary = new Dictionary<uint, float>();
     }
     
-    public float GetDistanceFromPlayer(GameObject player, GameObject object2)
+    public float GetDistanceFromPlayer(IGameObject player, IGameObject object2)
     {
-        if (distanceDictionary.TryGetValue(object2.ObjectId, out var value))
+        if (distanceDictionary.TryGetValue(object2.EntityId, out var value))
         {
             return value;
         }
 
         var distance = object2.Position.Distance2D(player.Position);
-        distanceDictionary[object2.ObjectId] = distance;
+        distanceDictionary[object2.EntityId] = distance;
         return distance;
     }
 

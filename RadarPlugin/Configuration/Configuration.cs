@@ -277,7 +277,7 @@ public class Configuration
 
     public Config cfg;
 
-    [NonSerialized] private DalamudPluginInterface pluginInterface;
+    [NonSerialized] private IDalamudPluginInterface pluginInterface;
 
     [NonSerialized] private static readonly ESPOption playerOptDefault = new ESPOption
     {
@@ -314,7 +314,7 @@ public class Configuration
     [NonSerialized] public int selectedConfig = 0;
     [NonSerialized] private readonly IPluginLog pluginLog;
 
-    public Configuration(DalamudPluginInterface pluginInterface, IPluginLog pluginLog)
+    public Configuration(IDalamudPluginInterface pluginInterface, IPluginLog pluginLog)
     {
         this.pluginInterface = pluginInterface;
         cfg = this.pluginInterface.GetPluginConfig() as Config ?? new Config();
@@ -330,7 +330,7 @@ public class Configuration
         UpdateConfigs();
     }
 
-    public void CustomizeMob(GameObject gameObject, bool customizeEnabled, ESPOption currentSettings)
+    public void CustomizeMob(IGameObject gameObject, bool customizeEnabled, ESPOption currentSettings)
     {
         var dataId = gameObject.DataId;
         if (customizeEnabled)

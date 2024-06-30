@@ -13,7 +13,7 @@ public class AggroTypeModule : IModuleInterface
 {
     private readonly Dictionary<uint, AggroType> AggroTypeDictionary = new();
 
-    public AggroTypeModule(DalamudPluginInterface pluginInterface)
+    public AggroTypeModule(IDalamudPluginInterface pluginInterface)
     {
         var json = File.ReadAllText(Path.Combine(pluginInterface.AssemblyLocation.Directory?.FullName, "data/allMobs.json"));
         var mobs = JsonSerializer.Deserialize<List<AggroInfo>>(json);

@@ -9,9 +9,9 @@ public class MobLastMovement : IModuleInterface
 {
     private Dictionary<uint, (Vector4 Position, DateTime Time)> lastMovementDictionary = new();
     
-    public TimeSpan GetTimeElapsedFromMovement(GameObject gameObject)
+    public TimeSpan GetTimeElapsedFromMovement(IGameObject gameObject)
     {
-        if (lastMovementDictionary.TryGetValue(gameObject.ObjectId, out var value))
+        if (lastMovementDictionary.TryGetValue(gameObject.EntityId, out var value))
         {
             // Fuzzy equals on stuff
             if (!value.Position.X.FuzzyEquals(gameObject.Position.X) ||
@@ -21,7 +21,7 @@ public class MobLastMovement : IModuleInterface
             {
                 var positionVector = new Vector4(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z,
                     gameObject.Rotation);
-                lastMovementDictionary[gameObject.ObjectId] = (positionVector, DateTime.Now);
+                lastMovementDictionary[gameObject.EntityId] = (positionVector, DateTime.Now);
                 return TimeSpan.Zero;
             }
             else
@@ -33,7 +33,7 @@ public class MobLastMovement : IModuleInterface
         {
             var positionVector = new Vector4(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z,
                 gameObject.Rotation);
-            lastMovementDictionary.Add(gameObject.ObjectId, (positionVector, DateTime.Now));
+            lastMovementDictionary.Add(gameObject.EntityId, (positionVector, DateTime.Now));
             return TimeSpan.Zero;
         }
     }

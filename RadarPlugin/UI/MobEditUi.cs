@@ -12,14 +12,14 @@ namespace RadarPlugin.UI;
 public class MobEditUi : IDisposable
 {
     private Configuration.Configuration configInterface;
-    private readonly DalamudPluginInterface dalamudPluginInterface;
-    private GameObject localObject;
+    private readonly IDalamudPluginInterface dalamudPluginInterface;
+    private IGameObject localObject;
 
     private bool mobEditVisible = false;
     private readonly TypeConfigurator typeConfiguration;
     private readonly RadarModules radarModules;
 
-    public MobEditUi(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface, TypeConfigurator typeConfigurator, RadarModules radarModules)
+    public MobEditUi(IDalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface, TypeConfigurator typeConfigurator, RadarModules radarModules)
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
@@ -152,7 +152,7 @@ public class MobEditUi : IDisposable
         this.dalamudPluginInterface.UiBuilder.Draw -= DrawMobEditWindow;
     }
 
-    public void Show(GameObject gameObject)
+    public void Show(IGameObject gameObject)
     {
         this.localObject = gameObject;
         mobEditVisible = true;

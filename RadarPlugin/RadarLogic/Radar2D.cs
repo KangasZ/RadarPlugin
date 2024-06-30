@@ -21,12 +21,12 @@ public unsafe class Radar2D
 {
     private readonly Configuration.Configuration configuration;
     private bool configWindowVisible = false;
-    private readonly DalamudPluginInterface dalamudPluginInterface;
+    private readonly IDalamudPluginInterface dalamudPluginInterface;
     private readonly IClientState clientState;
     private readonly IPluginLog pluginLog;
     private readonly RadarModules radarModules;
 
-    public Radar2D(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configuration,
+    public Radar2D(IDalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configuration,
         IClientState clientState, IPluginLog pluginLog, RadarModules radarModules)
     {
         this.dalamudPluginInterface = dalamudPluginInterface;
@@ -37,7 +37,7 @@ public unsafe class Radar2D
     }
 
     public void Radar2DOnTick(
-        IEnumerable<(GameObject areaObject, Configuration.Configuration.ESPOption espOption)> gameObjects)
+        IEnumerable<(IGameObject areaObject, Configuration.Configuration.ESPOption espOption)> gameObjects)
     {
         var config = configuration.cfg.Radar2DConfiguration;
         if (!config.Enabled) return;
@@ -75,7 +75,7 @@ public unsafe class Radar2D
     }
 
     private void DrawRadar(
-        IEnumerable<(GameObject areaObject, Configuration.Configuration.ESPOption espOption)> gameObjects)
+        IEnumerable<(IGameObject areaObject, Configuration.Configuration.ESPOption espOption)> gameObjects)
     {
         var imDrawListPtr = ImGui.GetWindowDrawList();
         var region = ImGui.GetContentRegionAvail();
@@ -256,7 +256,7 @@ public unsafe class Radar2D
         }
     }
 
-    private void DrawTag(ImDrawListPtr imDrawListPtr, GameObject areaObject, Vector2 position, uint color)
+    private void DrawTag(ImDrawListPtr imDrawListPtr, IGameObject areaObject, Vector2 position, uint color)
     {
         var tag = areaObject.Name.TextValue;
         var tagTextSize = ImGui.CalcTextSize(tag);

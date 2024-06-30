@@ -12,7 +12,7 @@ namespace RadarPlugin.RadarLogic.Modules;
 public class RadarConfigurationModule : IModuleInterface
 {
     private readonly Configuration.Configuration configInterface;
-    private readonly PlayerCharacter localPlayer;
+    private readonly IPlayerCharacter localPlayer;
     private readonly ZoneTypeModule zoneTypeModule;
     private readonly IClientState clientState;
     private readonly RankModule rankModule;
@@ -34,7 +34,7 @@ public class RadarConfigurationModule : IModuleInterface
     /**
  * TODO: Refactor this to be done once per second instead of on each render.
  */
-    public string GetText(GameObject gameObject, Configuration.Configuration.ESPOption espOption, bool radar3d = true)
+    public string GetText(IGameObject gameObject, Configuration.Configuration.ESPOption espOption, bool radar3d = true)
     {
         var tagText = "";
         var displayTypeFlags = radar3d ? espOption.DisplayTypeFlags : espOption.Separate2DOptions ? espOption.DisplayTypeFlags2D : espOption.DisplayTypeFlags;
@@ -57,13 +57,13 @@ public class RadarConfigurationModule : IModuleInterface
         }
 
         // Replace player names with job abbreviations
-        if (espOption.ReplaceWithJobName && gameObject is PlayerCharacter { ClassJob.GameData: { } } pc)
+        if (espOption.ReplaceWithJobName && gameObject is IPlayerCharacter { ClassJob.GameData: { } } pc)
         {
             tagText = pc.ClassJob.GameData.Abbreviation.RawString;
         }
 
         // Append LEVEL and RANK to name
-        if (gameObject is BattleNpc battleNpc)
+        if (gameObject is IBattleNpc battleNpc)
         {
             if (espOption.AppendLevelToName)
             {
@@ -97,7 +97,7 @@ public class RadarConfigurationModule : IModuleInterface
 
         if (configInterface.cfg.EXPERIMENTALEnableMobTimerTracking
             && gameObject.ObjectKind == ObjectKind.BattleNpc
-            && (((BattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) == 0)
+            && (((IBattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) == 0)
         {
             tagText += (mobLastMovement.GetTimeElapsedFromMovement(gameObject).TotalSeconds)
                 .ToString(" 0.0s");
@@ -109,7 +109,7 @@ public class RadarConfigurationModule : IModuleInterface
     }
 
 
-    public Configuration.Configuration.ESPOption TryGetOverridenParams(GameObject areaObject, out bool overridden)
+    public Configuration.Configuration.ESPOption TryGetOverridenParams(IGameObject areaObject, out bool overridden)
     {
         // If overridden
         if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
@@ -129,7 +129,7 @@ public class RadarConfigurationModule : IModuleInterface
         return GetParams(areaObject);
     }
     
-    public Configuration.Configuration.ESPOption GetParams(GameObject areaObject)
+    public Configuration.Configuration.ESPOption GetParams(IGameObject areaObject)
     {
         // If Deep Dungeon
         var zoneType = zoneTypeModule.GetLocationType();
@@ -168,7 +168,7 @@ public class RadarConfigurationModule : IModuleInterface
                 }
             }
 
-            if (areaObject.ObjectKind == ObjectKind.BattleNpc && areaObject is BattleNpc
+            if (areaObject.ObjectKind == ObjectKind.BattleNpc && areaObject is IBattleNpc
                 {
                     BattleNpcKind: BattleNpcSubKind.Enemy
                 } mob)
@@ -180,7 +180,7 @@ public class RadarConfigurationModule : IModuleInterface
         switch (areaObject.ObjectKind)
         {
             case ObjectKind.Player:
-                if (areaObject is PlayerCharacter chara)
+                if (areaObject is IPlayerCharacter chara)
                 {
                     // Is the object is YOU
                     if (configInterface.cfg.SeparatedYourPlayer.Enabled && clientState.LocalPlayer != null &&
@@ -215,7 +215,7 @@ public class RadarConfigurationModule : IModuleInterface
             case ObjectKind.Companion:
                 return configInterface.cfg.CompanionOption;
             case ObjectKind.BattleNpc:
-                if (areaObject is not BattleChara bnpc)
+                if (areaObject is not IBattleChara bnpc)
                 {
                     return configInterface.cfg.NpcOption;
                 }
@@ -245,7 +245,7 @@ public class RadarConfigurationModule : IModuleInterface
                     }
                 }
 
-                if (bnpc is BattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo })
+                if (bnpc is IBattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo })
                 {
                     return configInterface.cfg.CompanionOption;
                 }

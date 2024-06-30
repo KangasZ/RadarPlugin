@@ -8,6 +8,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.GameFonts;
+using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -16,13 +17,13 @@ using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 using RadarPlugin.RadarLogic.Modules;
 using RadarPlugin.UI;
-using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
+using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace RadarPlugin.RadarLogic;
 
 public class RadarDriver : IDisposable
 {
-    private readonly DalamudPluginInterface pluginInterface;
+    private readonly IDalamudPluginInterface pluginInterface;
     private Configuration.Configuration configInterface;
     private readonly ICondition conditionInterface;
     private readonly IObjectTable objectTable;
@@ -31,7 +32,7 @@ public class RadarDriver : IDisposable
     private readonly IPluginLog pluginLog;
     private readonly Radar3D radar3D;
     private readonly Radar2D radar2D;
-    private GameFontHandle? gameFont;
+    private IFontHandle? gameFont;
     private ImFontPtr? dalamudFont;
     private bool fontBuilt = false;
 
@@ -40,7 +41,7 @@ public class RadarDriver : IDisposable
     
     
     
-    public RadarDriver(DalamudPluginInterface pluginInterface, Configuration.Configuration configuration,
+    public RadarDriver(IDalamudPluginInterface pluginInterface, Configuration.Configuration configuration,
         IObjectTable objectTable,
         ICondition condition, IClientState clientState, IGameGui gameGui,
         IPluginLog pluginLog, RadarModules radarModules, IGameInteropProvider gameInteropProvider)
@@ -60,7 +61,7 @@ public class RadarDriver : IDisposable
         this.clientState = clientState;
 
         this.pluginInterface.UiBuilder.Draw += OnUiTick;
-        this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
+        //this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
     }
 
     private void BuildFont()
@@ -92,8 +93,8 @@ public class RadarDriver : IDisposable
     {
         if (!configInterface.cfg.Enabled) return;
 
-        ImFontPtr fontPtr = LoadFont();
-        using var font = ImRaii.PushFont(fontPtr);
+        //ImFontPtr fontPtr = LoadFont();
+        //using var font = ImRaii.PushFont(fontPtr);
         if (objectTable.Length == 0) return;
         if (CheckDraw()) return;
         // Figure out object table
@@ -108,6 +109,7 @@ public class RadarDriver : IDisposable
     }
 
 
+    /*
     private ImFontPtr LoadFont()
     {
         ImFontPtr fontPtr;
@@ -145,7 +147,8 @@ public class RadarDriver : IDisposable
 
         return fontPtr;
     }
-
+    */
+    
     private IEnumerable<GameObject> FilterObjectTable(IObjectTable objectTable)
     {
         IEnumerable<GameObject> objectTableRef;
@@ -218,7 +221,7 @@ public class RadarDriver : IDisposable
             // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
             if (MobConstants.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)) return true;
             if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not BattleNpc
+            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not IBattleNpc
                 {
                     BattleNpcKind: BattleNpcSubKind.Enemy
                 } mob) return true;
@@ -226,7 +229,7 @@ public class RadarDriver : IDisposable
             return !mob.IsDead;
         }
 
-        if (obj is BattleChara mobNpc)
+        if (obj is IBattleChara mobNpc)
         {
             //if (!clientstructobj->GetIsTargetable()) continue;
             //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
@@ -243,7 +246,7 @@ public class RadarDriver : IDisposable
     public void Dispose()
     {
         pluginInterface.UiBuilder.Draw -= OnUiTick;
-        this.pluginInterface.UiBuilder.BuildFonts -= BuildFont;
+        //this.pluginInterface.UiBuilder.BuildFonts -= BuildFont;
         pluginLog.Information("Radar Unloaded");
     }
 

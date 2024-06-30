@@ -14,13 +14,13 @@ public class CustomizedEntitiesUI : IDisposable
 {
     private string currentTypedDataId = "";
     private bool drawCurrentMobsWindow = false;
-    private readonly DalamudPluginInterface dalamudPluginInterface;
+    private readonly IDalamudPluginInterface dalamudPluginInterface;
     private readonly Configuration.Configuration configInterface;
     private readonly IPluginLog pluginLog;
     private readonly TypeConfigurator typeConfigurator;
 
     public CustomizedEntitiesUI(
-        DalamudPluginInterface dalamudPluginInterface,
+        IDalamudPluginInterface dalamudPluginInterface,
         Configuration.Configuration configInterface,
         IPluginLog pluginLog,
         TypeConfigurator typeConfigurator)

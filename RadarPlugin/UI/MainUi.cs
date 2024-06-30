@@ -13,7 +13,7 @@ namespace RadarPlugin.UI;
 public class MainUi : IDisposable
 {
     private Configuration.Configuration configInterface;
-    private readonly DalamudPluginInterface dalamudPluginInterface;
+    private readonly IDalamudPluginInterface dalamudPluginInterface;
     private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible;
     private readonly IClientState clientState;
@@ -22,7 +22,7 @@ public class MainUi : IDisposable
     private readonly IPluginLog pluginLog;
     private readonly RadarModules radarModules;
 
-    public MainUi(DalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface,
+    public MainUi(IDalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface,
         LocalMobsUi localMobsUi,
         IClientState clientState, TypeConfigurator typeConfigurator,
         CustomizedEntitiesUI customizedEntitiesUi, IPluginLog pluginLog, RadarModules radarModules)

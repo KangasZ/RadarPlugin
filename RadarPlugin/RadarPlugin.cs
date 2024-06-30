@@ -19,10 +19,10 @@ public class RadarPlugin : IDalamudPlugin
     private readonly CustomizedEntitiesUI customizedEntitiesUi;
     private readonly RadarModules radarModules;
     private readonly IFramework framework;
-    private readonly DalamudPluginInterface pluginInterface;
+    private readonly IDalamudPluginInterface pluginInterface;
 
     public RadarPlugin(
-        DalamudPluginInterface pluginInterface,
+        IDalamudPluginInterface pluginInterface,
         ICommandManager commandManager,
         IObjectTable objectTable,
         ICondition condition,
