@@ -4,5 +4,5 @@
   "Description": "Radar to see enemies, objects, and interactables through walls.\nThis is an ESP, please don't use it to call aliens down.\nPlease report any issues to the author.",
   "RepoUrl": "https://github.com/KangasZ/RadarPlugin",
   "Punchline": "See everything through walls",
-  "Changelog": "2D Radar Additions!\nCones and locking rotation\nRadius and angle for cones"
+  "Changelog": "Update for Dawntrail\nFonts are broken and will be fixed eventually"
 }
