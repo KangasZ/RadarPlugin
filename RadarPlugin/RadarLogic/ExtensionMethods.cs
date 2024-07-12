@@ -1,5 +1,8 @@
 using System;
 using System.Numerics;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
+using RadarPlugin.Enums;
 
 namespace RadarPlugin.RadarLogic;
 
@@ -22,5 +25,34 @@ public static class ExtensionMethods
         var sin = Math.Sin(-rotation);
          return new Vector2((float)(v1.X * cos - v1.Y * sin),
             (float)(v1.X * sin + v1.Y * cos));
+    }
+    
+    public static unsafe ulong? GetAccountId(this IGameObject gameObject)
+    {
+        ulong? accountId = null;
+
+        if (gameObject.ObjectKind != ObjectKind.Player) return accountId;
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)(void*)gameObject.Address;
+
+        var tempAccountId = clientstructobj->AccountId;
+        if (tempAccountId != 0)
+        {
+            accountId = tempAccountId;
+        }
+
+        return accountId;
+    }
+
+    public static MobType GetMobType(this IGameObject gameObject)
+    {
+        switch (gameObject.ObjectKind)
+        {
+            case ObjectKind.Player:
+                return MobType.Player;
+            case ObjectKind.BattleNpc:
+                return MobType.Character;
+        }
+
+        return MobType.Object;
     }
 }

@@ -11,6 +11,7 @@ using ImGuiNET;
 using Newtonsoft.Json;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
+using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.Configuration;
 
@@ -186,7 +187,7 @@ public class Configuration
             AppendLevelToName = espOption.AppendLevelToName;
         }
 
-        public ESPOptionMobBased(ESPOption espOption, string name, MobType mobType = MobType.Object)
+        public ESPOptionMobBased(ESPOption espOption, string name, ulong id, MobType mobType = MobType.Object)
         {
             Name = name;
             Enabled = espOption.Enabled;
@@ -197,8 +198,10 @@ public class Configuration
             DrawDistance = espOption.DrawDistance;
             AppendLevelToName = espOption.AppendLevelToName;
             MobTypeValue = mobType;
+            this.Id = id;
         }
-
+        
+        public ulong Id = 0;
         public DateTime UtcLastSeenTime = DateTime.UtcNow;
         public string LastSeenName = string.Empty;
         public MobType MobTypeValue = MobType.Object;
@@ -207,7 +210,7 @@ public class Configuration
 
     public class Config : IPluginConfiguration
     {
-        public int Version { get; set; } = 4;
+        public int Version { get; set; } = 5;
         public string ConfigName = "default";
         public bool Enabled = true;
         public bool Radar3DEnabled = true;
@@ -240,7 +243,8 @@ public class Configuration
         public ESPOption OrnamentOption { get; set; } = new(objectOptDefault) { Enabled = false };
         public Dictionary<uint, ESPOptionMobBased> OptionOverride { get; set; } =
             new Dictionary<uint, ESPOptionMobBased>();
-
+        public Dictionary<ulong, ESPOptionMobBased> PlayerOptionOverride { get; set; } =
+            new Dictionary<ulong, ESPOptionMobBased>();
         public HitboxOptions HitboxOptions { get; set; } = new();
         public LocalMobsUISettings LocalMobsUiSettings { get; set; } = new();
         public float DotSize = ConfigConstants.DefaultDotSize;
@@ -330,23 +334,52 @@ public class Configuration
         UpdateConfigs();
     }
 
-    public void CustomizeMob(IGameObject gameObject, bool customizeEnabled, ESPOption currentSettings)
+    public void Customize(IGameObject gameObject, bool customizeEnabled, ESPOption currentSettings)
     {
         var dataId = gameObject.DataId;
-        if (customizeEnabled)
+        if (gameObject.ObjectKind == ObjectKind.Player)
         {
-            var mobtype = gameObject.ObjectKind == ObjectKind.BattleNpc ? MobType.Character : MobType.Object;
-            var newSettings = new ESPOptionMobBased(currentSettings, gameObject.Name.TextValue ?? "Unknown", mobtype);
-            if (cfg.OptionOverride.ContainsKey(dataId))
+            var accountIdT = gameObject.GetAccountId();
+
+            if (!accountIdT.HasValue)
             {
-                cfg.OptionOverride.Remove(dataId);
+                return;
             }
 
-            cfg.OptionOverride.Add(dataId, newSettings);
+            var accountId = accountIdT.Value;
+            if (customizeEnabled)
+            {
+                var newSettings = new ESPOptionMobBased(currentSettings, gameObject.Name.TextValue ?? "Oops it broke :(", accountId, MobType.Player);
+                if (cfg.PlayerOptionOverride.ContainsKey(accountId))
+                {
+                    cfg.PlayerOptionOverride.Remove(accountId);
+                }
+
+                cfg.PlayerOptionOverride.Add(accountId, newSettings);
+            }
+            else
+            {
+                cfg.PlayerOptionOverride.Remove(accountId);
+            }
         }
         else
         {
-            cfg.OptionOverride.Remove(dataId);
+            if (customizeEnabled)
+            {
+                var mobtype = gameObject.GetMobType();
+                var newSettings =
+                    new ESPOptionMobBased(currentSettings, gameObject.Name.TextValue ?? "Unknown", dataId, mobtype);
+                if (cfg.OptionOverride.ContainsKey(dataId))
+                {
+                    cfg.OptionOverride.Remove(dataId);
+                }
+
+                cfg.OptionOverride.Add(dataId, newSettings);
+            }
+            else
+            {
+                cfg.OptionOverride.Remove(dataId);
+            }
         }
     }
 
@@ -398,6 +431,23 @@ public class Configuration
             oldConfig.DeepDungeonOptions.DefaultEnemyOption.DisplayTypeFlags = oldConfig.DeepDungeonOptions.DefaultEnemyOption.DisplayType.ToFlags(oldConfig.DeepDungeonOptions.DefaultEnemyOption.DrawDistance);
             
             oldConfig.Version = 4;
+        }
+
+        if (oldConfig.Version <= 5)
+        {
+            oldConfig.OptionOverride = oldConfig.OptionOverride.ToDictionary(x => x.Key, y =>
+            {
+                var config = y.Value;
+                config.Id = y.Key;
+                return config;
+            });
+            oldConfig.PlayerOptionOverride = oldConfig.PlayerOptionOverride.ToDictionary(x => x.Key, y =>
+            {
+                var config = y.Value;
+                config.Id = y.Key;
+                return config;
+            });
+            oldConfig.Version = 5;
         }
     }
 

@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Dalamud.Game.ClientState.JobGauge.Types;
-using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Interface.Utility.Raii;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using RadarPlugin.Constants;
+using RadarPlugin.Enums;
 using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.UI;
@@ -25,14 +23,16 @@ public class LocalMobsUi : IDisposable
     private readonly MobEditUi mobEditUi;
     private readonly IPluginLog pluginLog;
     private readonly RadarModules radarModules;
-    
+    private readonly TypeConfigurator typeConfigurator;
+
     public LocalMobsUi(
         IDalamudPluginInterface dalamudPluginInterface,
         Configuration.Configuration configInterface,
         IObjectTable objectTable,
         MobEditUi mobEditUi,
         IPluginLog pluginLog,
-        RadarModules radarModules)
+        RadarModules radarModules,
+        TypeConfigurator typeConfigurator)
     {
         areaObjects = new List<IGameObject>();
         this.mobEditUi = mobEditUi;
@@ -42,6 +42,7 @@ public class LocalMobsUi : IDisposable
         this.dalamudPluginInterface.UiBuilder.Draw += DrawCurrentMobsWindow;
         this.pluginLog = pluginLog;
         this.radarModules = radarModules;
+        this.typeConfigurator = typeConfigurator;
     }
 
     public void DrawLocalMobsUi()
@@ -104,16 +105,17 @@ public class LocalMobsUi : IDisposable
                 configInterface.Save();
             }
 
-            ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg);
+            ImGui.BeginTable("objecttable", 9, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
             //TODO: Sortable
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
-            ImGui.TableSetupColumn("DataID");
-            ImGui.TableSetupColumn("Mob Info", ImGuiTableColumnFlags.NoSort);
+            ImGui.TableSetupColumn("Data/AccId");
+            ImGui.TableSetupColumn("Configuration", ImGuiTableColumnFlags.NoSort);
             ImGui.TableSetupColumn("Blocked");
-            ImGui.TableSetupColumn("Use Custom Settings");
-            ImGui.TableSetupColumn("Quick Block");
+            ImGui.TableSetupColumn("Custom");
+            ImGui.TableSetupColumn("Enabled");
             ImGui.TableSetupColumn("Custom Color");
+            ImGui.TableSetupColumn("Details");
             ImGui.TableHeadersRow();
             foreach (var x in areaObjects)
             {
@@ -127,12 +129,22 @@ public class LocalMobsUi : IDisposable
                 ImGui.Text($"{x.Name}");
                 //DataId
                 ImGui.TableNextColumn();
-                ImGui.Text($"{x.DataId}");
+                if (x.ObjectKind == ObjectKind.Player)
+                {
+                    ImGui.Text($"{x.GetAccountId()}");
+                }
+                else
+                {
+                    ImGui.Text($"{x.DataId}");
+                }
                 //Settings
                 ImGui.TableNextColumn();
-                if (ImGui.Button($"Edit##{x.Address}"))
+                if (ImGui.Button($"Default##{x.Address}"))
                 {
-                    mobEditUi.Show(x);
+                    var mobType = x.GetMobType();
+                    typeConfigurator.OpenUiWithType(ref espOption,
+                        x.Name.TextValue, mobType,
+                        DisplayOrigination.OpenWorld);
                 }
                 // Blocked
                 ImGui.TableNextColumn();
@@ -157,76 +169,60 @@ public class LocalMobsUi : IDisposable
                 }
                 // Use Custom Settings
                 ImGui.TableNextColumn();
-                if (x.DataId != 0)
+                if (ImGui.Checkbox($"##custom-settings-{x.Address}", ref isUsingCustomEspOption))
                 {
-                    if (ImGui.Checkbox($"##custom-settings-{x.Address}", ref isUsingCustomEspOption))
-                    {
-                        configInterface.CustomizeMob(x, isUsingCustomEspOption, espOption);
-                    }
+                    configInterface.Customize(x, isUsingCustomEspOption, espOption);
                 }
-                else
+
+                if (isUsingCustomEspOption)
                 {
-                    ImGui.Text("N/A");
+                    ImGui.SameLine();
+                    if (ImGui.Button("Edit"))
+                    {
+                        var mobType = x.GetMobType();
+                        typeConfigurator.OpenUiWithType(ref customEspOption,
+                            x.Name.TextValue, mobType,
+                            DisplayOrigination.OpenWorld);
+                    }
                 }
                 
                 //Quick Block
                 ImGui.TableNextColumn();
-                if (x.DataId != 0)
+                if (isUsingCustomEspOption)
                 {
-                    if (isUsingCustomEspOption)
+                    var configBlocked = customEspOption.Enabled;
+                    if (ImGui.Checkbox($"##{x.Address}", ref configBlocked))
                     {
-                        if (configInterface.cfg.OptionOverride.TryGetValue(x.DataId, out var option))
-                        {
-                            var configBlocked = option.Enabled;
-                            if (ImGui.Checkbox($"##{x.Address}", ref configBlocked))
-                            {
-                                configInterface.cfg.OptionOverride[x.DataId].Enabled = configBlocked;
-                            }
-                        }
-                        else
-                        {
-                            UiHelpers.LabeledHelpMarker("!!!", "Something Weird Happened :(");
-                        }
-                    }
-                    else
-                    {
-                        UiHelpers.LabeledHelpMarker("X", "Must Enable Custom Settings First");
+                        customEspOption.Enabled = configBlocked;
                     }
                 }
                 else
                 {
-                    UiHelpers.LabeledHelpMarker("?", "Players are unable to be blocked");
+                    UiHelpers.LabeledHelpMarker("X", "Must Enable Custom Settings First");
                 }
                 
                 // Quick Color
                 ImGui.TableNextColumn();
-                if (x.DataId != 0)
+
+                if (isUsingCustomEspOption)
                 {
-                    if (isUsingCustomEspOption)
+                    var colorChange = ImGui.ColorConvertU32ToFloat4(customEspOption.ColorU);
+                    if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange,
+                            ImGuiColorEditFlags.NoInputs))
                     {
-                        if (configInterface.cfg.OptionOverride.TryGetValue(x.DataId, out var option))
-                        {
-                            var colorChange = ImGui.ColorConvertU32ToFloat4(option.ColorU);
-                            if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange,
-                                    ImGuiColorEditFlags.NoInputs))
-                            {
-                                configInterface.cfg.OptionOverride[x.DataId].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
-                                configInterface.Save();
-                            }
-                        }
-                        else
-                        {
-                            UiHelpers.LabeledHelpMarker("!!!", "Something Weird Happened :(");
-                        }
-                    }
-                    else
-                    {
-                        UiHelpers.LabeledHelpMarker("X", "Must Enable Custom Settings First");
+                        customEspOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+                        configInterface.Save();
                     }
                 }
                 else
                 {
-                    UiHelpers.LabeledHelpMarker("?", "Players are unable to be changed atm");
+                    UiHelpers.LabeledHelpMarker("X", "Must Enable Custom Settings First");
+                }
+
+                ImGui.TableNextColumn();
+                if (ImGui.Button($"Show##{x.Address}"))
+                {
+                    mobEditUi.Show(x);
                 }
 
                 ImGui.TableNextRow();

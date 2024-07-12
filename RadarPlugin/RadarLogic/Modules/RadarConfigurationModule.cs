@@ -18,10 +18,11 @@ public class RadarConfigurationModule : IModuleInterface
     private readonly RankModule rankModule;
     private readonly DistanceModule distanceModule;
     private readonly MobLastMovement mobLastMovement;
+    private readonly IPluginLog pluginLog;
 
     public RadarConfigurationModule(IClientState clientState, Configuration.Configuration configInterface,
         ZoneTypeModule zoneTypeModule, RankModule rankModule, DistanceModule distanceModule,
-        MobLastMovement mobLastMovement)
+        MobLastMovement mobLastMovement, IPluginLog pluginLog)
     {
         this.configInterface = configInterface;
         this.zoneTypeModule = zoneTypeModule;
@@ -29,6 +30,7 @@ public class RadarConfigurationModule : IModuleInterface
         this.rankModule = rankModule;
         this.distanceModule = distanceModule;
         this.mobLastMovement = mobLastMovement;
+        this.pluginLog = pluginLog;
     }
 
     /**
@@ -111,8 +113,27 @@ public class RadarConfigurationModule : IModuleInterface
 
     public Configuration.Configuration.ESPOption TryGetOverridenParams(IGameObject areaObject, out bool overridden)
     {
-        // If overridden
-        if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out var optionOverride))
+        overridden = false;
+        Configuration.Configuration.ESPOptionMobBased? optionOverride = null;
+        if (areaObject.ObjectKind == ObjectKind.Player)
+        {
+            var accountId = areaObject.GetAccountId();
+            if (accountId.HasValue)
+            {
+                if (configInterface.cfg.PlayerOptionOverride.TryGetValue(accountId.Value, out optionOverride))
+                {
+                    overridden = true;
+                }
+            }
+        }
+        else
+        {
+            if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out optionOverride))
+            {
+                overridden = true;
+            }
+        }
+        if (overridden)
         {
             // If the mob hasnt been updated in 100 seconds, update the name and time last seen
             if ((DateTime.UtcNow - optionOverride.UtcLastSeenTime).TotalSeconds > 100)

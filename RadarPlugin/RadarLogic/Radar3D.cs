@@ -100,7 +100,6 @@ public unsafe class Radar3D
 
             if (displayFlags.HasFlag(DisplayTypeFlags.Dot))
             {
-                pluginLog.Debug($"Attempting to draw dot at {onScreenPosition.ToString()}");
                 DrawRadarHelper.DrawDot(drawListPtr, onScreenPosition, dotSize, color);
             }
 

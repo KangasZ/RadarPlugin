@@ -46,6 +46,33 @@ public class CustomizedEntitiesUI : IDisposable
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Customized Entities Menu", ref drawCurrentMobsWindow))
         {
+            UiHelpers.DrawTabs("customized-entities-tabs",
+                ("Mobs", ConfigConstants.White, DrawMobsMenu),
+                ("Players", ConfigConstants.White, DrawPlayersMenu)
+            );
+        }
+
+
+        ImGui.End();
+    }
+
+
+    private void DrawMobsMenu()
+    {
+        var mobsOptionTypeArray = configInterface.cfg.OptionOverride.Select(x => x.Value).ToArray();
+        DrawMenu(mobsOptionTypeArray, MobType.Character);
+    }
+
+    private void DrawPlayersMenu()
+    {
+        var playersOptionTypeArray = configInterface.cfg.PlayerOptionOverride.Select(x => x.Value).ToArray();
+        DrawMenu(playersOptionTypeArray, MobType.Player);
+    }
+
+    private void DrawMenu(Configuration.Configuration.ESPOptionMobBased[] optionOverrideArray, MobType mobType)
+    {
+        if (mobType == MobType.Character)
+        {
             ImGui.Text("Add Customized Entity dataId:");
             ImGui.SameLine();
             ImGui.InputText("", ref currentTypedDataId, 10,
@@ -65,7 +92,8 @@ public class CustomizedEntitiesUI : IDisposable
                             Enabled = true,
                             ColorU = ConfigConstants.White,
                             Name = "Customized Entity",
-                            MobTypeValue = MobType.Object
+                            MobTypeValue = MobType.Object,
+                            Id = dataId
                         });
                 }
             }
@@ -89,106 +117,135 @@ public class CustomizedEntitiesUI : IDisposable
             //Popup End
             UiHelpers.HoverTooltip(
                 "YES ITS ONLY AN OBJECT ATM,\nTHIS MIGHT BE DANGEROUS IF YOU ADD A MOB THAT ISNT A MOB.\nWill require some engineering");
-            ImGui.BeginTable("customizedEntitiesTable", 8,
-                ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable);
-            ImGui.TableSetupColumn("DataId");
-            ImGui.TableSetupColumn("Name When Added");
-            ImGui.TableSetupColumn("Name Last Seen");
-            ImGui.TableSetupColumn("Time Last Seen");
-            ImGui.TableSetupColumn("Enabled");
-            ImGui.TableSetupColumn("Color", ImGuiTableColumnFlags.NoSort);
-            ImGui.TableSetupColumn("Edit", ImGuiTableColumnFlags.NoSort);
-            ImGui.TableSetupColumn("Delete", ImGuiTableColumnFlags.NoSort);
-
-            var optionOverrideTemporary = GetSortedOptionOverride();
-
-            ImGui.TableHeadersRow();
-            var shouldSave = false;
-            foreach (var x in optionOverrideTemporary)
-            {
-                //DataId
-                ImGui.TableNextColumn();
-                ImGui.Text($"{x.Key}");
-                //Names
-                ImGui.TableNextColumn();
-                ImGui.Text($"{x.Value.Name}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{x.Value.LastSeenName}");
-                ImGui.TableNextColumn();
-                ImGui.Text($"{x.Value.UtcLastSeenTime.ToLocalTime()}");
-                //Enabled
-                ImGui.TableNextColumn();
-                if (ImGui.Checkbox($"##{x.Key}", ref x.Value.Enabled))
-                {
-                    shouldSave = true;
-                }
-
-                //Color
-                //shouldSave |= UiHelpers.Vector4ColorSelector($"##{x.Key}-color", ref x.Value.ColorU, ImGuiColorEditFlags.NoInputs);
-                ImGui.TableNextColumn();
-                var colorChange = ImGui.ColorConvertU32ToFloat4(x.Value.ColorU);
-                if (ImGui.ColorEdit4($"##{x.Key}-color", ref colorChange,
-                        ImGuiColorEditFlags.NoInputs))
-                {
-                    configInterface.cfg.OptionOverride[x.Key].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
-                    shouldSave = true;
-                }
-
-                //Edit
-                ImGui.TableNextColumn();
-                if (ImGui.Button($"Edit##{x.Key}"))
-                {
-                    var optionOverride =
-                        (Configuration.Configuration.ESPOption)configInterface.cfg.OptionOverride[x.Key];
-                    typeConfigurator.OpenUiWithType(ref optionOverride, x.Value.Name,
-                        ((Configuration.Configuration.ESPOptionMobBased)optionOverride).MobTypeValue,
-                        DisplayOrigination.DeepDungeon);
-                }
-                // Delete
-                ImGui.TableNextColumn();
-                if (ImGui.Button($"Delete##{x.Key}"))
-                {
-                    ImGui.OpenPopup($"DeleteConfigPopup##{x.Key}");
-                }
-                ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
-                ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
-                if (ImGui.BeginPopup($"DeleteConfigPopup##{x.Key}"))
-                {
-                    ImGui.Text($"Are you sure you want to delete the config for the mob: {x.Value.LastSeenName}?");
-                    if (ImGui.Button("Yes"))
-                    {
-                        configInterface.cfg.OptionOverride.Remove(x.Key);
-                        shouldSave = true;
-                        ImGui.CloseCurrentPopup();
-                    }
-
-                    ImGui.SameLine();
-                    if (ImGui.Button("No"))
-                    {
-                        ImGui.CloseCurrentPopup();
-                    }
-
-                    ImGui.EndPopup();
-                }
-                ImGui.PopStyleVar();
-                ImGui.PopStyleColor();
-            }
-            
-            if (shouldSave)
-            {
-                configInterface.Save();
-            }
-
-            ImGui.EndTable();
         }
 
+        ImGui.BeginTable($"customizedEntitiesTable-{mobType}", 8,
+            ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable);
+        ImGui.TableSetupColumn("DataId");
+        ImGui.TableSetupColumn("Name When Added");
+        ImGui.TableSetupColumn("Name Last Seen");
+        ImGui.TableSetupColumn("Time Last Seen");
+        ImGui.TableSetupColumn("Enabled");
+        ImGui.TableSetupColumn("Color", ImGuiTableColumnFlags.NoSort);
+        ImGui.TableSetupColumn("Edit", ImGuiTableColumnFlags.NoSort);
+        ImGui.TableSetupColumn("Delete", ImGuiTableColumnFlags.NoSort);
 
-        ImGui.End();
+        var optionOverrideTemporary =
+            GetSortedOptionOverride(optionOverrideArray);
+
+        ImGui.TableHeadersRow();
+        var shouldSave = false;
+        foreach (var x in optionOverrideTemporary)
+        {
+            //DataId
+            ImGui.TableNextColumn();
+            ImGui.Text($"{x.Id}");
+            //Names
+            ImGui.TableNextColumn();
+            ImGui.Text($"{x.Name}");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{x.LastSeenName}");
+            ImGui.TableNextColumn();
+            ImGui.Text($"{x.UtcLastSeenTime.ToLocalTime()}");
+            //Enabled
+            ImGui.TableNextColumn();
+            if (ImGui.Checkbox($"##{x.Id}", ref x.Enabled))
+            {
+                shouldSave = true;
+            }
+
+            //Color
+            //shouldSave |= UiHelpers.Vector4ColorSelector($"##{x.Key}-color", ref x.Value.ColorU, ImGuiColorEditFlags.NoInputs);
+            ImGui.TableNextColumn();
+            var colorChange = ImGui.ColorConvertU32ToFloat4(x.ColorU);
+            if (ImGui.ColorEdit4($"##{x.Id}-color", ref colorChange,
+                    ImGuiColorEditFlags.NoInputs))
+            {
+                if (mobType == MobType.Player)
+                {
+                    configInterface.cfg.PlayerOptionOverride[x.Id].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+                }
+                else
+                {
+                    var convertedUint = Convert.ToUInt32(x.Id);
+                    configInterface.cfg.OptionOverride[convertedUint].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+                }
+
+                shouldSave = true;
+            }
+
+            //Edit
+            ImGui.TableNextColumn();
+            if (ImGui.Button($"Edit##{x.Id}"))
+            {
+
+                Configuration.Configuration.ESPOption optionOverride;
+                if (mobType == MobType.Player)
+                {
+                    optionOverride = configInterface.cfg.PlayerOptionOverride[x.Id];
+                }
+                else
+                {
+                    var convertedUint = Convert.ToUInt32(x.Id);
+                    optionOverride = configInterface.cfg.OptionOverride[convertedUint];
+                }
+                typeConfigurator.OpenUiWithType(ref optionOverride, x.Name,
+                    ((Configuration.Configuration.ESPOptionMobBased)optionOverride).MobTypeValue,
+                    DisplayOrigination.DeepDungeon);
+            }
+
+            // Delete
+            ImGui.TableNextColumn();
+            if (ImGui.Button($"Delete##{x.Id}"))
+            {
+                ImGui.OpenPopup($"DeleteConfigPopup##{x.Id}");
+            }
+
+            ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, 1f);
+            ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
+            if (ImGui.BeginPopup($"DeleteConfigPopup##{x.Id}"))
+            {
+                ImGui.Text($"Are you sure you want to delete the config for the mob: {x.LastSeenName}?");
+                if (ImGui.Button("Yes"))
+                {
+                    if (mobType == MobType.Player)
+                    {
+                        configInterface.cfg.PlayerOptionOverride.Remove(x.Id);
+                    }
+                    else
+                    {
+                        var convertedUint = Convert.ToUInt32(x.Id);
+                        configInterface.cfg.OptionOverride.Remove(convertedUint);
+                    }
+                    shouldSave = true;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("No"))
+                {
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.EndPopup();
+            }
+
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
+        }
+
+        if (shouldSave)
+        {
+            configInterface.Save();
+        }
+
+        ImGui.EndTable();
     }
 
-    private Dictionary<uint, Configuration.Configuration.ESPOptionMobBased> GetSortedOptionOverride()
+    private Configuration.Configuration.ESPOptionMobBased[] GetSortedOptionOverride(
+        Configuration.Configuration.ESPOptionMobBased[] arrayToSort)
     {
-        var optionOverrideTemporary = configInterface.cfg.OptionOverride;
+        IEnumerable<Configuration.Configuration.ESPOptionMobBased> optionOverrideTemporary = arrayToSort;
         var sortSpecs = ImGui.TableGetSortSpecs();
         if (sortSpecs.SpecsDirty)
         {
@@ -197,13 +254,11 @@ public class CustomizedEntitiesUI : IDisposable
                 case 0:
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderBy(x => x.Key)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderBy(x => x.Id);
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderByDescending(x => x.Key)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderByDescending(x => x.Id);
                     }
 
                     break;
@@ -211,13 +266,11 @@ public class CustomizedEntitiesUI : IDisposable
                     // Name When Added
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderBy(x => x.Value.Name)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderBy(x => x.Name);
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderByDescending(x => x.Value.Name)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderByDescending(x => x.Name);
                     }
 
                     break;
@@ -225,13 +278,11 @@ public class CustomizedEntitiesUI : IDisposable
                     // Name Last Seen
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderBy(x => x.Value.LastSeenName)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderBy(x => x.LastSeenName);
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderByDescending(x => x.Value.LastSeenName)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderByDescending(x => x.LastSeenName);
                     }
 
                     break;
@@ -239,14 +290,12 @@ public class CustomizedEntitiesUI : IDisposable
                     // Time Last Seen
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderBy(x => x.Value.UtcLastSeenTime)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderBy(x => x.UtcLastSeenTime);
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary
-                            .OrderByDescending(x => x.Value.UtcLastSeenTime)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort
+                            .OrderByDescending(x => x.UtcLastSeenTime);
                     }
 
                     break;
@@ -254,20 +303,18 @@ public class CustomizedEntitiesUI : IDisposable
                     // Enabled
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderBy(x => x.Value.Enabled)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderBy(x => x.Enabled);
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        optionOverrideTemporary = optionOverrideTemporary.OrderByDescending(x => x.Value.Enabled)
-                            .ToDictionary(x => x.Key, x => x.Value);
+                        optionOverrideTemporary = arrayToSort.OrderByDescending(x => x.Enabled);
                     }
 
                     break;
             }
         }
 
-        return optionOverrideTemporary;
+        return optionOverrideTemporary.ToArray();
     }
 
     public void Dispose()

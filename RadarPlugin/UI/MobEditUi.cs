@@ -113,7 +113,7 @@ public class MobEditUi : IDisposable
                 //TODO: Grab the custom overridden thingy
                 if (ImGui.Checkbox($"Custom Settings Enable##custom-settings-{localObject.Address}", ref isUsingCustomEspOption))
                 {
-                    configInterface.CustomizeMob(localObject, isUsingCustomEspOption, defaulParams);
+                    configInterface.Customize(localObject, isUsingCustomEspOption, defaulParams);
                 }
 
                 if (isUsingCustomEspOption)
