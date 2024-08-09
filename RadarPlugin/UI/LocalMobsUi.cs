@@ -93,11 +93,11 @@ public class LocalMobsUi : IDisposable
                     // Name
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
-                        areaObjectsSorted = areaObjects.OrderBy(x => x.Name);
+                        areaObjectsSorted = areaObjects.OrderBy(x => x.Name?.TextValue ?? "");
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        areaObjectsSorted = areaObjects.OrderByDescending(x => x.Name);
+                        areaObjectsSorted = areaObjects.OrderByDescending(x => x.Name?.TextValue ?? "");
                     }
 
                     break;
@@ -123,14 +123,20 @@ public class LocalMobsUi : IDisposable
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
+                        {
                             radarModules.radarConfigurationModule.TryGetOverridenParams(x,
-                                out var isUsingCustomEspOption));
+                                out var isUsingCustomEspOption);
+                            return isUsingCustomEspOption;
+                        });
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
+                        {
                             radarModules.radarConfigurationModule.TryGetOverridenParams(x,
-                                out var isUsingCustomEspOption));
+                                out var isUsingCustomEspOption);
+                            return isUsingCustomEspOption;
+                        });
                     }
 
                     break;
