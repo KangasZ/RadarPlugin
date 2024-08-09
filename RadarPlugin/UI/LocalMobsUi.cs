@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Text.RegularExpressions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
@@ -15,6 +16,8 @@ namespace RadarPlugin.UI;
 
 public class LocalMobsUi : IDisposable
 {
+    private string nameFilterValue = string.Empty;
+    private Regex? nameFilterRegex;
     private bool currentMobsVisible = false;
     private readonly IDalamudPluginInterface dalamudPluginInterface;
     private readonly Configuration.Configuration configInterface;
@@ -66,20 +69,10 @@ public class LocalMobsUi : IDisposable
         {
             areaObjects.AddRange(objectTable.Where(x => x.DataId != 0));
         }
-        
+
         // Sort the array
         IEnumerable<IGameObject> areaObjectsSorted = areaObjects;
         var sortSpecs = ImGui.TableGetSortSpecs();
-        /*
-         *             ImGui.TableSetupColumn("Kind");
-            ImGui.TableSetupColumn("Name");
-            ImGui.TableSetupColumn("Data/AccId");
-            ImGui.TableSetupColumn("Configuration", ImGuiTableColumnFlags.NoSort);
-            ImGui.TableSetupColumn("Custom");
-            ImGui.TableSetupColumn("Enabled");
-            ImGui.TableSetupColumn("Custom Color");
-            ImGui.TableSetupColumn("Details");
-         */
         if (sortSpecs.SpecsDirty)
         {
             switch (sortSpecs.Specs.ColumnIndex)
@@ -112,11 +105,13 @@ public class LocalMobsUi : IDisposable
                     // DataId (Account ID when its a player)
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
-                        areaObjectsSorted = areaObjects.OrderBy(x => x.ObjectKind == ObjectKind.Player ? x.GetAccountId() : x.DataId);
+                        areaObjectsSorted = areaObjects.OrderBy(x =>
+                            x.ObjectKind == ObjectKind.Player ? x.GetAccountId() : x.DataId);
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        areaObjectsSorted = areaObjects.OrderByDescending(x => x.ObjectKind == ObjectKind.Player ? x.GetAccountId() : x.DataId);
+                        areaObjectsSorted = areaObjects.OrderByDescending(x =>
+                            x.ObjectKind == ObjectKind.Player ? x.GetAccountId() : x.DataId);
                     }
 
                     break;
@@ -127,11 +122,15 @@ public class LocalMobsUi : IDisposable
                     // Custom
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
-                        areaObjectsSorted = areaObjects.OrderBy(x => radarModules.radarConfigurationModule.TryGetOverridenParams(x, out var isUsingCustomEspOption));
+                        areaObjectsSorted = areaObjects.OrderBy(x =>
+                            radarModules.radarConfigurationModule.TryGetOverridenParams(x,
+                                out var isUsingCustomEspOption));
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        areaObjectsSorted = areaObjects.OrderByDescending(x => radarModules.radarConfigurationModule.TryGetOverridenParams(x, out var isUsingCustomEspOption));
+                        areaObjectsSorted = areaObjects.OrderByDescending(x =>
+                            radarModules.radarConfigurationModule.TryGetOverridenParams(x,
+                                out var isUsingCustomEspOption));
                     }
 
                     break;
@@ -164,9 +163,20 @@ public class LocalMobsUi : IDisposable
             }
         }
 
+        // Filter the array
+        if (nameFilterValue.Length != 0)
+        {
+            areaObjectsSorted = areaObjectsSorted.Where(x =>
+            {
+                var name = x.Name.TextValue;
+                return nameFilterRegex?.IsMatch(name) ?? name.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
+            });
+        }
+
+        
         return areaObjectsSorted.ToList();
     }
-    
+
     private void DrawCurrentMobsWindow()
     {
         if (!currentMobsVisible) return;
@@ -190,8 +200,9 @@ public class LocalMobsUi : IDisposable
                 configInterface.cfg.LocalMobsUiSettings.Duplicates = showDuplicates;
                 configInterface.Save();
             }
+
             ImGui.SameLine();
-            UiHelpers.LabeledHelpMarker("","Duplicates are mobs with the same dataId");
+            UiHelpers.LabeledHelpMarker("", "Duplicates are mobs with the same dataId");
 
             ImGui.SameLine();
             var showNpcs = configInterface.cfg.LocalMobsUiSettings.ShowNpcs;
@@ -201,7 +212,27 @@ public class LocalMobsUi : IDisposable
                 configInterface.Save();
             }
 
-            ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable);
+            // Draw the filter
+
+            var tmp = nameFilterValue;
+            if (ImGui.InputTextWithHint("Name Filter", "Input a name filter. You can use regex", ref tmp, 256))
+            {
+                nameFilterValue = tmp;
+                try
+                {
+                    nameFilterRegex = new Regex(nameFilterValue,
+                        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                }
+                catch
+                {
+                    nameFilterRegex = null;
+                }
+            }
+
+            // draw the table
+
+            ImGui.BeginTable("objecttable", 8,
+                ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable);
             //TODO: Sortable
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
@@ -216,7 +247,8 @@ public class LocalMobsUi : IDisposable
             foreach (var x in areaObjects)
             {
                 var espOption = radarModules.radarConfigurationModule.GetParams(x);
-                var customEspOption = radarModules.radarConfigurationModule.TryGetOverridenParams(x, out var isUsingCustomEspOption);
+                var customEspOption =
+                    radarModules.radarConfigurationModule.TryGetOverridenParams(x, out var isUsingCustomEspOption);
                 //Kind
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.ObjectKind}");
@@ -233,6 +265,7 @@ public class LocalMobsUi : IDisposable
                 {
                     ImGui.Text($"{x.DataId}");
                 }
+
                 //Settings
                 ImGui.TableNextColumn();
                 if (ImGui.Button($"Default##{x.Address}"))
@@ -242,6 +275,7 @@ public class LocalMobsUi : IDisposable
                         x.Name.TextValue, mobType,
                         DisplayOrigination.OpenWorld);
                 }
+
                 // Use Custom Settings
                 ImGui.TableNextColumn();
                 if (ImGui.Checkbox($"##custom-settings-{x.Address}", ref isUsingCustomEspOption))
@@ -260,7 +294,7 @@ public class LocalMobsUi : IDisposable
                             DisplayOrigination.OpenWorld);
                     }
                 }
-                
+
                 //Quick Block
                 ImGui.TableNextColumn();
                 if (isUsingCustomEspOption)
@@ -275,7 +309,7 @@ public class LocalMobsUi : IDisposable
                 {
                     UiHelpers.LabeledHelpMarker("X", "Must Enable Custom Settings First");
                 }
-                
+
                 // Quick Color
                 ImGui.TableNextColumn();
 
