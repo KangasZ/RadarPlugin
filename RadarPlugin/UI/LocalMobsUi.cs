@@ -15,7 +15,6 @@ namespace RadarPlugin.UI;
 
 public class LocalMobsUi : IDisposable
 {
-    private List<IGameObject> areaObjects;
     private bool currentMobsVisible = false;
     private readonly IDalamudPluginInterface dalamudPluginInterface;
     private readonly Configuration.Configuration configInterface;
@@ -34,7 +33,6 @@ public class LocalMobsUi : IDisposable
         RadarModules radarModules,
         TypeConfigurator typeConfigurator)
     {
-        areaObjects = new List<IGameObject>();
         this.mobEditUi = mobEditUi;
         this.configInterface = configInterface;
         this.objectTable = objectTable;
@@ -50,17 +48,17 @@ public class LocalMobsUi : IDisposable
         currentMobsVisible = true;
     }
 
-    private void RefreshMobList()
+    private List<IGameObject> GetCurrentMobListSorted()
     {
-        areaObjects.Clear();
-        
+        // Populate the array
+        var areaObjects = new List<IGameObject>();
         if (configInterface.cfg.LocalMobsUiSettings.ShowPlayers)
         {
             areaObjects.AddRange(objectTable.Where(x => x.DataId == 0));
         }
 
         // Don't show duplicates but show npcs
-        if (!configInterface.cfg.LocalMobsUiSettings.Duplicates && configInterface.cfg.LocalMobsUiSettings.ShowNpcs)
+        if (configInterface.cfg.LocalMobsUiSettings is { Duplicates: false, ShowNpcs: true })
         {
             areaObjects.AddRange(objectTable.Where(x => x.DataId != 0).GroupBy(x => x.DataId).Select(x => x.First()));
         }
@@ -68,12 +66,110 @@ public class LocalMobsUi : IDisposable
         {
             areaObjects.AddRange(objectTable.Where(x => x.DataId != 0));
         }
+        
+        // Sort the array
+        IEnumerable<IGameObject> areaObjectsSorted = areaObjects;
+        var sortSpecs = ImGui.TableGetSortSpecs();
+        /*
+         *             ImGui.TableSetupColumn("Kind");
+            ImGui.TableSetupColumn("Name");
+            ImGui.TableSetupColumn("Data/AccId");
+            ImGui.TableSetupColumn("Configuration", ImGuiTableColumnFlags.NoSort);
+            ImGui.TableSetupColumn("Custom");
+            ImGui.TableSetupColumn("Enabled");
+            ImGui.TableSetupColumn("Custom Color");
+            ImGui.TableSetupColumn("Details");
+         */
+        if (sortSpecs.SpecsDirty)
+        {
+            switch (sortSpecs.Specs.ColumnIndex)
+            {
+                case 0:
+                    // Object Kind
+                    if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderBy(x => x.ObjectKind.ToString());
+                    }
+                    else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderByDescending(x => x.ObjectKind.ToString());
+                    }
+
+                    break;
+                case 1:
+                    // Name
+                    if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderBy(x => x.Name);
+                    }
+                    else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderByDescending(x => x.Name);
+                    }
+
+                    break;
+                case 2:
+                    // DataId (Account ID when its a player)
+                    if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderBy(x => x.ObjectKind == ObjectKind.Player ? x.GetAccountId() : x.DataId);
+                    }
+                    else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderByDescending(x => x.ObjectKind == ObjectKind.Player ? x.GetAccountId() : x.DataId);
+                    }
+
+                    break;
+                case 3:
+                    // Unsortable
+                    break;
+                case 4:
+                    // Custom
+                    if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderBy(x => radarModules.radarConfigurationModule.TryGetOverridenParams(x, out var isUsingCustomEspOption));
+                    }
+                    else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderByDescending(x => radarModules.radarConfigurationModule.TryGetOverridenParams(x, out var isUsingCustomEspOption));
+                    }
+
+                    break;
+                case 5:
+                    // Custom Enabled
+                    if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderBy(x =>
+                        {
+                            var objectParams = radarModules.radarConfigurationModule.TryGetOverridenParams(x,
+                                out var isUsingCustomEspOption);
+                            if (isUsingCustomEspOption)
+                                return objectParams.Enabled;
+                            return false;
+                        });
+                    }
+                    else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
+                    {
+                        areaObjectsSorted = areaObjects.OrderByDescending(x =>
+                        {
+                            var objectParams = radarModules.radarConfigurationModule.TryGetOverridenParams(x,
+                                out var isUsingCustomEspOption);
+                            if (isUsingCustomEspOption)
+                                return objectParams.Enabled;
+                            return false;
+                        });
+                    }
+
+                    break;
+            }
+        }
+
+        return areaObjectsSorted.ToList();
     }
     
     private void DrawCurrentMobsWindow()
     {
         if (!currentMobsVisible) return;
-        RefreshMobList();
         var size = new Vector2(560, 500);
         ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
@@ -105,18 +201,18 @@ public class LocalMobsUi : IDisposable
                 configInterface.Save();
             }
 
-            ImGui.BeginTable("objecttable", 9, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
+            ImGui.BeginTable("objecttable", 8, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable);
             //TODO: Sortable
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
             ImGui.TableSetupColumn("Data/AccId");
             ImGui.TableSetupColumn("Configuration", ImGuiTableColumnFlags.NoSort);
-            ImGui.TableSetupColumn("Blocked");
             ImGui.TableSetupColumn("Custom");
             ImGui.TableSetupColumn("Enabled");
-            ImGui.TableSetupColumn("Custom Color");
-            ImGui.TableSetupColumn("Details");
+            ImGui.TableSetupColumn("Custom Color", ImGuiTableColumnFlags.NoSort);
+            ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.NoSort);
             ImGui.TableHeadersRow();
+            var areaObjects = GetCurrentMobListSorted();
             foreach (var x in areaObjects)
             {
                 var espOption = radarModules.radarConfigurationModule.GetParams(x);
@@ -145,27 +241,6 @@ public class LocalMobsUi : IDisposable
                     typeConfigurator.OpenUiWithType(ref espOption,
                         x.Name.TextValue, mobType,
                         DisplayOrigination.OpenWorld);
-                }
-                // Blocked
-                ImGui.TableNextColumn();
-                if (MobConstants.DataIdIgnoreList.Contains(x.DataId))
-                {
-                    ImGui.Text($"Default Blocked");
-                }
-                else if (isUsingCustomEspOption)
-                {
-                    if (customEspOption.Enabled)
-                    {
-                        ImGui.Text($"User Shown");
-                    }
-                    else
-                    {
-                        ImGui.Text("User Blocked");
-                    }
-                }
-                else
-                {
-                    ImGui.Text("Not Blocked");
                 }
                 // Use Custom Settings
                 ImGui.TableNextColumn();
@@ -230,12 +305,6 @@ public class LocalMobsUi : IDisposable
 
             //TODO: Add quick edit column
             ImGui.EndTable();
-        }
-
-        if (!currentMobsVisible)
-        {
-            pluginLog.Debug("Clearing Area Objects");
-            areaObjects.Clear();
         }
 
         ImGui.End();
