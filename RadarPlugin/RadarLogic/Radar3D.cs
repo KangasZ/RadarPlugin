@@ -118,6 +118,11 @@ public unsafe class Radar3D
             {
                 DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
             }
+            
+            if (displayFlags.HasFlag(DisplayTypeFlags.HealthBar))
+            {
+                //DrawRadarHelper.DrawHealthBar(drawListPtr, onScreenPosition, gameObject);
+            }
         }
         else if (configInterface.cfg.ShowOffScreen)
         {

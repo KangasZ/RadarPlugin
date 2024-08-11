@@ -26,6 +26,7 @@ public enum DisplayTypeFlags
     HealthValue = 1 << 3,
     Distance = 1 << 4,
     Position = 1 << 5,
+    HealthBar = 1 << 6,
 }
 
 public static class DisplayTypeExtensions

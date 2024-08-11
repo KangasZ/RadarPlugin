@@ -21,6 +21,31 @@ public static class UiHelpers
             text);
     }
 
+    public static void BufferingBar(ImDrawListPtr imDrawListPtr, Vector2 cursorScreenPos, string label, uint bgColor, uint fgColor, uint borderColor, uint textColor, float xSize, float ySize, float borderThickness, float filledPercent) {
+        var tagTextSize = ImGui.CalcTextSize(label);
+
+        var size = new Vector2(xSize - borderThickness, ySize);
+        var filledSize = new Vector2(size.X * filledPercent, size.Y);
+        cursorScreenPos += new Vector2(borderThickness, 0);
+        imDrawListPtr.AddRectFilled(cursorScreenPos,
+            cursorScreenPos + size,
+            bgColor, 0);
+
+        imDrawListPtr.AddRectFilled(cursorScreenPos,
+            cursorScreenPos + filledSize,
+            fgColor, 0);
+
+        if (borderThickness > 0)
+        {
+            imDrawListPtr.AddRect(cursorScreenPos,
+                cursorScreenPos + size,
+                borderColor, 0, ImDrawFlags.Closed, borderThickness);
+        }
+
+        imDrawListPtr.AddText(cursorScreenPos + new Vector2(size.X - (tagTextSize.X + borderThickness), size.Y / 2 - tagTextSize.Y / 2), textColor, label);
+        ImGui.SetCursorScreenPos(cursorScreenPos + new Vector2(0-borderThickness, filledSize.Y + 5));
+    }
+    
     public static bool DrawSettingsDetailed(Configuration.Configuration.ESPOption option, string id, MobType mobType,
         DisplayOrigination displayOrigination)
     {
@@ -140,6 +165,12 @@ public static class UiHelpers
                 shouldSave = true;
             }
 
+            //var drawHealthBar = option.HasFlag(DisplayTypeFlags.HealthBar);
+            //if (UiHelpers.DrawCheckbox($"Draw Health Bar##{popupId}", ref drawHealthBar, "Draws the health bar of an object"))
+            //{
+            //    option.SetFlag(DisplayTypeFlags.HealthBar, drawHealthBar);
+            //    shouldSave = true;
+            //}
             ImGui.EndPopup();
         }
 

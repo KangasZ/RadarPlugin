@@ -4,6 +4,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using RadarPlugin.Constants;
+using RadarPlugin.UI;
 
 namespace RadarPlugin.RadarLogic;
 
@@ -111,19 +112,6 @@ public static class DrawRadarHelper
 
     public static void DrawHealthBar(ImDrawListPtr imDrawListPtr, Vector2 onScreenPositon, IGameObject gameObject)
     {
-        if (gameObject is not IBattleChara npc) return;
-        var color = ConfigConstants.Black;
-        var hp = npc.CurrentHp;
-        var maxHp = npc.MaxHp;
-        var height = 100f;
-        var width = 10f;
-        imDrawListPtr.PushClipRect(onScreenPositon + new Vector2(0.0f, (maxHp - hp) / 100.0f * height),
-            onScreenPositon + new Vector2(width + 1.0f, height + 1.0f));
-        imDrawListPtr.AddRectFilled(onScreenPositon + new Vector2(1.0f, 1.0f), onScreenPositon + new Vector2(
-            width + 1.0f, height + 1.0f
-        ), ConfigConstants.Green);
-        imDrawListPtr.AddRectFilled(onScreenPositon, onScreenPositon + new Vector2(
-            width, height
-        ), ConfigConstants.Blue);
+        UiHelpers.BufferingBar(imDrawListPtr, onScreenPositon, "hi", ConfigConstants.Black, ConfigConstants.Red, ConfigConstants.White, ConfigConstants.White, 50f, 100f, 1f, 0.5f);
     }
 }

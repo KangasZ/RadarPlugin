@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Text.RegularExpressions;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
@@ -12,6 +13,8 @@ namespace RadarPlugin.UI;
 
 public class CustomizedEntitiesUI : IDisposable
 {
+    private string nameFilterValue = string.Empty;
+    private Regex? filterRegex;
     private string currentTypedDataId = "";
     private bool drawCurrentMobsWindow = false;
     private readonly IDalamudPluginInterface dalamudPluginInterface;
@@ -59,18 +62,33 @@ public class CustomizedEntitiesUI : IDisposable
 
     private void DrawMobsMenu()
     {
-        var mobsOptionTypeArray = configInterface.cfg.OptionOverride.Select(x => x.Value).ToArray();
+        var mobsOptionTypeArray = configInterface.cfg.OptionOverride.Select(x => x.Value);
         DrawMenu(mobsOptionTypeArray, MobType.Character);
     }
 
     private void DrawPlayersMenu()
     {
-        var playersOptionTypeArray = configInterface.cfg.PlayerOptionOverride.Select(x => x.Value).ToArray();
+        var playersOptionTypeArray = configInterface.cfg.PlayerOptionOverride.Select(x => x.Value);
         DrawMenu(playersOptionTypeArray, MobType.Player);
     }
 
-    private void DrawMenu(Configuration.Configuration.ESPOptionMobBased[] optionOverrideArray, MobType mobType)
+    private void DrawMenu(IEnumerable<Configuration.Configuration.ESPOptionMobBased> optionOverrideIEnumerable, MobType mobType)
     {
+        // Filter the array
+        if (nameFilterValue.Length != 0)
+        {
+            optionOverrideIEnumerable = optionOverrideIEnumerable.Where(x =>
+            {
+                var name = x.Name;
+                var nameMatch = filterRegex?.IsMatch(name) ??
+                                name.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
+                var id = x.Id;
+                var idString = id.ToString();
+                var idMatch = filterRegex?.IsMatch(idString) ?? idString.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
+                return nameMatch || idMatch;
+            });
+        }
+        var optionOverrideArray = optionOverrideIEnumerable.ToArray();
         if (mobType == MobType.Character)
         {
             ImGui.Text("Add Customized Entity dataId:");
@@ -118,7 +136,23 @@ public class CustomizedEntitiesUI : IDisposable
             UiHelpers.HoverTooltip(
                 "YES ITS ONLY AN OBJECT ATM,\nTHIS MIGHT BE DANGEROUS IF YOU ADD A MOB THAT ISNT A MOB.\nWill require some engineering");
         }
+        // Draw the filter
 
+        var tmp = nameFilterValue;
+        if (ImGui.InputTextWithHint("Name Filter", "Input a name / id filter. You can use regex", ref tmp, 256))
+        {
+            nameFilterValue = tmp;
+            try
+            {
+                filterRegex = new Regex(nameFilterValue,
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            }
+            catch
+            {
+                filterRegex = null;
+            }
+        }
+        
         ImGui.BeginTable($"customizedEntitiesTable-{mobType}", 8,
             ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable);
         ImGui.TableSetupColumn("DataId");
