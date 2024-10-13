@@ -39,6 +39,6 @@ jobs:
         run: msbuild RadarPlugin.sln /p:Configuration=Release
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
           path: ./RadarPlugin/bin/x64/Release/*
