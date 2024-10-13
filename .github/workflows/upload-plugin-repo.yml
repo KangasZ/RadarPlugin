@@ -43,7 +43,7 @@ jobs:
         run: msbuild ${{ env.SOLUTION_NAME }}.sln /p:Configuration=Release
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ env.RELEASE_DIR }}/*
 
