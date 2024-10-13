@@ -292,7 +292,7 @@ public class LocalMobsUi : IDisposable
                 if (isUsingCustomEspOption)
                 {
                     ImGui.SameLine();
-                    if (ImGui.Button("Edit"))
+                    if (ImGui.Button($"Edit##{x.Address}"))
                     {
                         var mobType = x.GetMobType();
                         typeConfigurator.OpenUiWithType(ref customEspOption,
