@@ -3,26 +3,28 @@ on:
   push:
     branches: 'main'
 
+env:
+  SOLUTION_NAME: RadarPlugin
+  INTERNAL_NAME: RadarPlugin
+  RELEASE_DIR: ./RadarPlugin/bin/x64/Release/RadarPlugin
+  PERSONAL_PLUGIN_REPO: KangasZ/DalamudPluginRepository
+  BRANCH: main
+
 jobs:
   build:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-ci]')"
-    runs-on: [ windows-2022 ]
+    runs-on: [windows-2022]
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1
-        with:
-          vs-prerelease: true
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.5
 
       - name: Restore NuGet Packages
-        run: dotnet restore
+        run: nuget restore ${{ env.SOLUTION_NAME }}.sln
 
       - name: Download Dalamud
         if: "!contains(github.event.head_commit.message, '[stg]') && !contains(github.event.head_commit.message, '[api11]')"
@@ -34,16 +36,16 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -OutFile latest.zip
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
-      - name: Download Dalamud temp
+      - name: Download Dalamud staging
         if: "contains(github.event.head_commit.message, '[api11]')"
         run: |
           Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/api11/latest.zip -OutFile latest.zip
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
       - name: Build
-        run: msbuild RadarPlugin.sln /p:Configuration=Release
+        run: msbuild ${{ env.SOLUTION_NAME }}.sln /p:Configuration=Release
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./RadarPlugin/bin/x64/Release/*
+          path: ${{ env.RELEASE_DIR }}/*
