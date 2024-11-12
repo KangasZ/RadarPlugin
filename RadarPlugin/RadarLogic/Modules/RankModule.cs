@@ -11,7 +11,6 @@ public class RankModule : IModuleInterface
     private readonly IDataManager dataManager;
     private readonly Dictionary<uint, byte> RankDictionary = new();
     private readonly IPluginLog pluginLog;
-    private readonly bool isRankEnabled;
     
     public RankModule(IDataManager dataManager, IPluginLog pluginLog)
     {
