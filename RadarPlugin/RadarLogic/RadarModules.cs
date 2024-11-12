@@ -18,7 +18,7 @@ public class RadarModules : IModuleInterface
         aggroTypeModule = new AggroTypeModule(pluginInterface);
         distanceModule = new DistanceModule();
         moduleMobLastMovement = new MobLastMovement();
-        rankModule = new RankModule(dataManager);
+        rankModule = new RankModule(dataManager, pluginLog);
         zoneTypeModule = new ZoneTypeModule(conditionInterface, clientState);
         radarConfigurationModule = new RadarConfigurationModule(clientState, configInterface, zoneTypeModule, rankModule, distanceModule, moduleMobLastMovement, pluginLog);
     }

@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace RadarPlugin.RadarLogic.Modules;
 
@@ -9,16 +10,26 @@ public class RankModule : IModuleInterface
 {
     private readonly IDataManager dataManager;
     private readonly Dictionary<uint, byte> RankDictionary = new();
-
-    public RankModule(IDataManager dataManager)
+    private readonly IPluginLog pluginLog;
+    private readonly bool isRankEnabled;
+    
+    public RankModule(IDataManager dataManager, IPluginLog pluginLog)
     {
+        this.pluginLog = pluginLog;
         this.dataManager = dataManager;
 
-        var excelBnpcs = this.dataManager.GetExcelSheet<BNpcBase>();
-        if (excelBnpcs != null)
+        try
         {
-            RankDictionary = excelBnpcs.ToDictionary(x => x.RowId, x => x.Rank);
+            var excelBnpcs = this.dataManager.Excel.GetSheet<BNpcBase>();
+            if (excelBnpcs != null)
+            {
+                RankDictionary = excelBnpcs.ToDictionary(x => x.RowId, x => x.Rank);
+            }
+        } catch (Exception e)
+        {
+            pluginLog.Error(e, "Failed to load RankModule");
         }
+
     }
 
     public bool TryGetRank(uint rowId, out byte rank)

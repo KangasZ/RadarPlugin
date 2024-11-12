@@ -59,9 +59,9 @@ public class RadarConfigurationModule : IModuleInterface
         }
 
         // Replace player names with job abbreviations
-        if (espOption.ReplaceWithJobName && gameObject is IPlayerCharacter { ClassJob.GameData: { } } pc)
+        if (espOption.ReplaceWithJobName && gameObject is IPlayerCharacter { ClassJob.Value: { } } pc)
         {
-            tagText = pc.ClassJob.GameData.Abbreviation.RawString;
+            tagText = pc.ClassJob.Value.Abbreviation.ToString();
         }
 
         // Append LEVEL and RANK to name
