@@ -38,7 +38,7 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -OutFile latest.zip
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
-      - name: Download Dalamud staging
+      - name: Download Dalamud 11
         if: "contains(github.event.head_commit.message, '[api11]')"
         run: |
           Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/api11/latest.zip -OutFile latest.zip
