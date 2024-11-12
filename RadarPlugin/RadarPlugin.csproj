@@ -4,7 +4,7 @@
 		<Name>Radar Plugin</Name>
 		<Punchline>3D-Radar ESP</Punchline>
 		<Authors>KangasZ</Authors>
-		<Version>2.1.4.0</Version>
+		<Version>2.1.4.1</Version>
 		<RootNamespace>RadarPlugin</RootNamespace>
 		<Copyright>MIT @ KangasZ</Copyright>
 	</PropertyGroup>
@@ -32,7 +32,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DalamudPackager" Version="2.1.13" />
+		<PackageReference Include="DalamudPackager" Version="11.0.0" />
 		<Reference Include="FFXIVClientStructs">
 			<HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
 			<Private>false</Private>
