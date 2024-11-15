@@ -66,6 +66,10 @@ public class RadarDriver : IDisposable
 
     private void BuildFont()
     {
+       // Axis = Plugin.Interface.UiBuilder.FontAtlas.NewGameFontHandle(new GameFontStyle(GameFontFamily.Axis, SizeInPx(Plugin.Config.FontSizeV2)));
+       //config.SizePt = Plugin.Config.SymbolsFontSizeV2;
+       ///config.GlyphRanges = SymRange;
+       //tk.AddFontFromMemory(GameSymFont, config, "ChatTwo2 Sym Font");
         fontBuilt = false;
         var fontFile = Path.Combine(pluginInterface.DalamudAssetDirectory.FullName, "UIRes",
             "NotoSansCJKjp-Medium.otf");
