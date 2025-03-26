@@ -242,7 +242,7 @@ public class LocalMobsUi : IDisposable
             //TODO: Sortable
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
-            ImGui.TableSetupColumn("Data/AccId");
+            ImGui.TableSetupColumn("DataId");
             ImGui.TableSetupColumn("Configuration", ImGuiTableColumnFlags.NoSort);
             ImGui.TableSetupColumn("Custom");
             ImGui.TableSetupColumn("Enabled");
