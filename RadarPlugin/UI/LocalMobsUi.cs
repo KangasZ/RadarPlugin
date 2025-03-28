@@ -26,6 +26,7 @@ public class LocalMobsUi : IDisposable
     private readonly IPluginLog pluginLog;
     private readonly RadarModules radarModules;
     private readonly TypeConfigurator typeConfigurator;
+    private readonly IClientState clientState;
 
     public LocalMobsUi(
         IDalamudPluginInterface dalamudPluginInterface,
@@ -34,7 +35,8 @@ public class LocalMobsUi : IDisposable
         MobEditUi mobEditUi,
         IPluginLog pluginLog,
         RadarModules radarModules,
-        TypeConfigurator typeConfigurator)
+        TypeConfigurator typeConfigurator,
+        IClientState clientState)
     {
         this.mobEditUi = mobEditUi;
         this.configInterface = configInterface;
@@ -44,6 +46,7 @@ public class LocalMobsUi : IDisposable
         this.pluginLog = pluginLog;
         this.radarModules = radarModules;
         this.typeConfigurator = typeConfigurator;
+        this.clientState = clientState;
     }
 
     public void DrawLocalMobsUi()
@@ -53,6 +56,10 @@ public class LocalMobsUi : IDisposable
 
     private List<IGameObject> GetCurrentMobListSorted()
     {
+        // Get some tertiary data
+        var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
+        var baseId = configInterface.cfg.YourAccountId;
+        
         // Populate the array
         var areaObjects = new List<IGameObject>();
         if (configInterface.cfg.LocalMobsUiSettings.ShowPlayers)
@@ -106,12 +113,12 @@ public class LocalMobsUi : IDisposable
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
-                            x.ObjectKind == ObjectKind.Player ? x.GetAccountId() : x.DataId);
+                            x.ObjectKind == ObjectKind.Player ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId) : x.DataId);
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
-                            x.ObjectKind == ObjectKind.Player ? x.GetAccountId() : x.DataId);
+                            x.ObjectKind == ObjectKind.Player ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId) : x.DataId);
                     }
 
                     break;
@@ -124,7 +131,7 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
                         {
-                            radarModules.radarConfigurationModule.TryGetOverridenParams(x,
+                            radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId,
                                 out var isUsingCustomEspOption);
                             return isUsingCustomEspOption;
                         });
@@ -133,7 +140,7 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
                         {
-                            radarModules.radarConfigurationModule.TryGetOverridenParams(x,
+                            radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId,
                                 out var isUsingCustomEspOption);
                             return isUsingCustomEspOption;
                         });
@@ -146,7 +153,7 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
                         {
-                            var objectParams = radarModules.radarConfigurationModule.TryGetOverridenParams(x,
+                            var objectParams = radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId,
                                 out var isUsingCustomEspOption);
                             if (isUsingCustomEspOption)
                                 return objectParams.Enabled;
@@ -157,7 +164,7 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
                         {
-                            var objectParams = radarModules.radarConfigurationModule.TryGetOverridenParams(x,
+                            var objectParams = radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId,
                                 out var isUsingCustomEspOption);
                             if (isUsingCustomEspOption)
                                 return objectParams.Enabled;
@@ -250,11 +257,13 @@ public class LocalMobsUi : IDisposable
             ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.NoSort);
             ImGui.TableHeadersRow();
             var areaObjects = GetCurrentMobListSorted();
+            var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
+            var baseId = configInterface.cfg.YourAccountId;
             foreach (var x in areaObjects)
             {
                 var espOption = radarModules.radarConfigurationModule.GetParams(x);
                 var customEspOption =
-                    radarModules.radarConfigurationModule.TryGetOverridenParams(x, out var isUsingCustomEspOption);
+                    radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId, out var isUsingCustomEspOption);
                 //Kind
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.ObjectKind}");
@@ -265,7 +274,7 @@ public class LocalMobsUi : IDisposable
                 ImGui.TableNextColumn();
                 if (x.ObjectKind == ObjectKind.Player)
                 {
-                    ImGui.Text($"{x.GetAccountId()}");
+                    ImGui.Text($"{x.GetDeobfuscatedAccountId(selfObfuscated, baseId)}");
                 }
                 else
                 {
@@ -286,7 +295,7 @@ public class LocalMobsUi : IDisposable
                 ImGui.TableNextColumn();
                 if (ImGui.Checkbox($"##custom-settings-{x.Address}", ref isUsingCustomEspOption))
                 {
-                    configInterface.Customize(x, isUsingCustomEspOption, espOption);
+                    configInterface.Customize(x, isUsingCustomEspOption, espOption, selfObfuscated, baseId);
                 }
 
                 if (isUsingCustomEspOption)

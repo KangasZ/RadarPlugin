@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Numerics;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
@@ -18,17 +20,19 @@ public class MobEditUi : IDisposable
     private bool mobEditVisible = false;
     private readonly TypeConfigurator typeConfiguration;
     private readonly RadarModules radarModules;
+    private readonly IClientState clientState;
 
-    public MobEditUi(IDalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface, TypeConfigurator typeConfigurator, RadarModules radarModules)
+    public MobEditUi(IDalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface, TypeConfigurator typeConfigurator, RadarModules radarModules, IClientState clientState)
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.dalamudPluginInterface.UiBuilder.Draw += DrawMobEditWindow;
         this.typeConfiguration = typeConfigurator;
         this.radarModules = radarModules;
+        this.clientState = clientState;
     }
 
-    private void DrawMobEditWindow()
+    private unsafe void DrawMobEditWindow()
     {
         if (!mobEditVisible)
         {
@@ -38,12 +42,14 @@ public class MobEditUi : IDisposable
         var size = new Vector2(600, 300);
         ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
+        var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
+        var baseId = configInterface.cfg.YourAccountId;
         if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible))
         {
             ImGui.Columns(2);
             var utilIgnored = MobConstants.DataIdIgnoreList.Contains(localObject.DataId);
             var defaulParams = radarModules.radarConfigurationModule.GetParams(localObject);
-            var mobOvveride = radarModules.radarConfigurationModule.TryGetOverridenParams(localObject, out var isUsingCustomEspOption);
+            var mobOvveride = radarModules.radarConfigurationModule.TryGetOverridenParams(localObject, selfObfuscated, baseId, out var isUsingCustomEspOption);
 
             ImGui.SetColumnWidth(0, ImGui.GetWindowWidth() / 2);
             // Setup First column
@@ -113,7 +119,7 @@ public class MobEditUi : IDisposable
                 //TODO: Grab the custom overridden thingy
                 if (ImGui.Checkbox($"Custom Settings Enable##custom-settings-{localObject.Address}", ref isUsingCustomEspOption))
                 {
-                    configInterface.Customize(localObject, isUsingCustomEspOption, defaulParams);
+                    configInterface.Customize(localObject, isUsingCustomEspOption, defaulParams, selfObfuscated, baseId);
                 }
 
                 if (isUsingCustomEspOption)
@@ -138,6 +144,14 @@ public class MobEditUi : IDisposable
                             DisplayOrigination.DeepDungeon);
                     }
                 }
+            }
+
+            if (localObject.ObjectKind == ObjectKind.Player)
+            {
+                ImGui.Text($"Content Id: {localObject.GetContentId()}");
+                ImGui.Text($"Obfuscated Account Id: {localObject.GetAccountId()}");
+                ImGui.Text($"Theroretical Deobfuscated ID: {localObject.GetDeobfuscatedAccountId(selfObfuscated, baseId)}");
+
             }
 #if DEBUG
             Dalamud.Utility.Util.ShowObject(localObject);

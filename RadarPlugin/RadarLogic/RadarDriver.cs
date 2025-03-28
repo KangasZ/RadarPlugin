@@ -103,9 +103,11 @@ public class RadarDriver : IDisposable
         if (CheckDraw()) return;
         // Figure out object table
         var objectTableRef = FilterObjectTable(objectTable);
+        var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
+        var baseId = configInterface.cfg.YourAccountId;
         var objectsWithMobOptions = objectTableRef.Select(areaObject =>
         {
-            var espOption = radarModules.radarConfigurationModule.TryGetOverridenParams(areaObject, out var _);
+            var espOption = radarModules.radarConfigurationModule.TryGetOverridenParams(areaObject, selfObfuscated, baseId, out var _);
             return (areaObject, espOption);
         }).ToArray();
         radar3D.Radar3DOnTick(objectsWithMobOptions);

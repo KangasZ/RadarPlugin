@@ -111,19 +111,16 @@ public class RadarConfigurationModule : IModuleInterface
     }
 
 
-    public Configuration.Configuration.ESPOption TryGetOverridenParams(IGameObject areaObject, out bool overridden)
+    public Configuration.Configuration.ESPOption TryGetOverridenParams(IGameObject areaObject, ulong obfuscatedSelfId, uint baseAccountId, out bool overridden)
     {
         overridden = false;
         Configuration.Configuration.ESPOptionMobBased? optionOverride = null;
         if (areaObject.ObjectKind == ObjectKind.Player)
         {
-            var accountId = areaObject.GetAccountId();
-            if (accountId.HasValue)
+            var accountId = areaObject.GetDeobfuscatedAccountId(obfuscatedSelfId, baseAccountId);
+            if (configInterface.cfg.PlayerOptionOverride.TryGetValue(accountId, out optionOverride))
             {
-                if (configInterface.cfg.PlayerOptionOverride.TryGetValue(accountId.Value, out optionOverride))
-                {
-                    overridden = true;
-                }
+                overridden = true;
             }
         }
         else

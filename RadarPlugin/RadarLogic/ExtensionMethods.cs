@@ -27,22 +27,69 @@ public static class ExtensionMethods
             (float)(v1.X * sin + v1.Y * cos));
     }
     
-    public static unsafe ulong? GetAccountId(this IGameObject gameObject)
+    public static unsafe ulong GetAccountId(this IGameObject gameObject)
     {
-        ulong? accountId = null;
+        ulong accountId = 0;
 
         if (gameObject.ObjectKind != ObjectKind.Player) return accountId;
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)(void*)gameObject.Address;
-
         var tempAccountId = clientstructobj->AccountId;
         if (tempAccountId != 0)
         {
             accountId = tempAccountId;
         }
-
         return accountId;
     }
+    
+    public static unsafe ulong GetContentId(this IGameObject gameObject)
+    {
+        ulong accountId = 0;
 
+        if (gameObject.ObjectKind != ObjectKind.Player) return accountId;
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)(void*)gameObject.Address;
+        var tempAccountId = clientstructobj->ContentId;
+        if (tempAccountId != 0)
+        {
+            accountId = tempAccountId;
+        }
+        return accountId;
+    }
+    
+    public static unsafe ulong GetDeobfuscatedAccountId(this IGameObject gameObject, ulong obfuscatedSelfId, uint yourBaseId)
+    {
+        ulong accountId = 0;
+
+        if (gameObject.ObjectKind != ObjectKind.Player) return accountId;
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)(void*)gameObject.Address;
+
+        if (yourBaseId == 0)
+        {
+            var tempAccountId = clientstructobj->ContentId;
+            if (tempAccountId != 0)
+            {
+                accountId = tempAccountId;
+            }
+
+            return accountId;
+        }
+        else
+        {
+            var tempAccountId = gameObject.GetAccountId();
+            if (tempAccountId != 0)
+            {
+                accountId = tempAccountId;
+            }
+            accountId = DeobfuscateAccountId(obfuscatedSelfId, accountId, yourBaseId);
+            return accountId;
+        }
+    }
+
+    public static uint DeobfuscateAccountId(ulong selfId, ulong otherId, uint yourBaseId)
+    {
+        var shiftedVal = (selfId ^ otherId) >> 31;
+        return (uint)((shiftedVal ^ yourBaseId) & 0xFFFFFFFF);
+    }
+    
     public static MobType GetMobType(this IGameObject gameObject)
     {
         switch (gameObject.ObjectKind)

@@ -186,7 +186,6 @@ public class MainUi : IDisposable
     {
         var shouldSave = false;
         UiHelpers.TextColored("This is made by KangasZ for use in FFXIV.", ConfigConstants.Yellow);
-        UiHelpers.DrawSeperator("Radar Plugin 2.0 Update. Please report bugs! Ideally nothing breaks....", ConfigConstants.Red);
         shouldSave |= UiHelpers.DrawCheckbox("Plugin Enabled", ref configInterface.cfg.Enabled);
 
         shouldSave |= UiHelpers.DrawCheckbox("3D Radar Enabled", ref configInterface.cfg.Radar3DEnabled,
@@ -203,6 +202,13 @@ public class MainUi : IDisposable
             "This focuses on giving support to eureka and deep dungeons.\n" +
             "Will display things such as portals, chests, and traps.");
 
+        shouldSave |= UiHelpers.DrawNumberInputBox("Your Account Id", ref configInterface.cfg.YourAccountId,
+            "This will use your account id to deobfuscate others account ids.\n" +
+            "I will update this to support alternate accounts sometime probably.\n" +
+            "You MUST know your account id\n" +
+            "If you know another persons account id you can derrive your own (make an issue if this is something you want)\n" +
+            "If you saved your old account id via a custom save, you can use that");
+        
         shouldSave |= UiHelpers.DrawCheckbox("Use Background Draw List", ref configInterface.cfg.UseBackgroundDrawList,
             "This feature will use a background draw list from ImGui to render the 3d radar.\n" +
             "It will be under any other Dalamud plugin. This is the original behavior.\n" +

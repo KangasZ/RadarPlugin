@@ -43,8 +43,8 @@ public class RadarPlugin : IDalamudPlugin
 
         // UI
         typeConfiguratorUi = new TypeConfigurator(this.pluginInterface, Configuration);
-        mobEditUi = new MobEditUi(this.pluginInterface, Configuration, typeConfiguratorUi, radarModules);
-        localMobsUi = new LocalMobsUi(this.pluginInterface, Configuration, objectTable, mobEditUi, pluginLog, radarModules, typeConfiguratorUi);
+        mobEditUi = new MobEditUi(this.pluginInterface, Configuration, typeConfiguratorUi, radarModules, clientState);
+        localMobsUi = new LocalMobsUi(this.pluginInterface, Configuration, objectTable, mobEditUi, pluginLog, radarModules, typeConfiguratorUi, clientState);
         customizedEntitiesUi = new CustomizedEntitiesUI(this.pluginInterface, Configuration, pluginLog, typeConfiguratorUi);
         mainUi = new MainUi(this.pluginInterface, Configuration, localMobsUi, clientState, typeConfiguratorUi, customizedEntitiesUi, pluginLog, radarModules);
 

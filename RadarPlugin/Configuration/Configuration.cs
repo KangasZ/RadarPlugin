@@ -187,7 +187,7 @@ public class Configuration
             AppendLevelToName = espOption.AppendLevelToName;
         }
 
-        public ESPOptionMobBased(ESPOption espOption, string name, ulong id, MobType mobType = MobType.Object)
+        public ESPOptionMobBased(ESPOption espOption, string name, ulong id, MobType mobType = MobType.Object, ulong tertiaryId = 0)
         {
             Name = name;
             Enabled = espOption.Enabled;
@@ -199,8 +199,10 @@ public class Configuration
             AppendLevelToName = espOption.AppendLevelToName;
             MobTypeValue = mobType;
             this.Id = id;
+            this.TertiaryId = tertiaryId;
         }
-        
+
+        public ulong TertiaryId = 0;
         public ulong Id = 0;
         public DateTime UtcLastSeenTime = DateTime.UtcNow;
         public string LastSeenName = string.Empty;
@@ -212,6 +214,7 @@ public class Configuration
     {
         public int Version { get; set; } = 5;
         public string ConfigName = "default";
+        public uint YourAccountId = 0;
         public bool Enabled = true;
         public bool Radar3DEnabled = true;
         public bool UseBackgroundDrawList = false;
@@ -334,22 +337,22 @@ public class Configuration
         UpdateConfigs();
     }
 
-    public void Customize(IGameObject gameObject, bool customizeEnabled, ESPOption currentSettings)
+    public void Customize(IGameObject gameObject, bool customizeEnabled, ESPOption currentSettings, ulong obfuscatedSelfId, uint yourBaseId)
     {
         var dataId = gameObject.DataId;
         if (gameObject.ObjectKind == ObjectKind.Player)
         {
-            var accountIdT = gameObject.GetAccountId();
-
-            if (!accountIdT.HasValue)
+            var accountIdT = gameObject.GetDeobfuscatedAccountId(obfuscatedSelfId, yourBaseId);
+            var contentId = gameObject.GetContentId();
+            if (accountIdT == 0)
             {
                 return;
             }
 
-            var accountId = accountIdT.Value;
+            var accountId = accountIdT;
             if (customizeEnabled)
             {
-                var newSettings = new ESPOptionMobBased(currentSettings, gameObject.Name.TextValue ?? "Oops it broke :(", accountId, MobType.Player);
+                var newSettings = new ESPOptionMobBased(currentSettings, gameObject.Name.TextValue ?? "Oops it broke :(", accountId, MobType.Player, tertiaryId: contentId);
                 if (cfg.PlayerOptionOverride.ContainsKey(accountId))
                 {
                     cfg.PlayerOptionOverride.Remove(accountId);

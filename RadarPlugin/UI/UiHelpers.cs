@@ -334,6 +334,24 @@ public static class UiHelpers
         return retStatement;
     }
 
+    public static bool DrawNumberInputBox(string label, ref uint number, string? tooltipText = null)
+    {
+        var boxValue = number.ToString();
+        var retStatement = ImGui.InputText(label, ref boxValue, 32, ImGuiInputTextFlags.CharsDecimal);
+        if (retStatement)
+        {
+            var success = uint.TryParse(boxValue, out number);
+            // Haha don't handle it gl
+        }
+        
+        if (tooltipText != null)
+        {
+            LabeledHelpMarker("", tooltipText);
+        }
+
+        return retStatement;
+    }
+
     public static void DrawTabs(string tabId, params (string label, uint color, Action function)[] tabs)
     {
         ImGui.BeginTabBar($"##{tabId}");
