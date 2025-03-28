@@ -4,5 +4,5 @@
   "Description": "Radar to see enemies, objects, and interactables through walls.\nThis is an ESP, please don't use it to call aliens down.\nPlease report any issues to the author.",
   "RepoUrl": "https://github.com/KangasZ/RadarPlugin",
   "Punchline": "See everything through walls",
-  "Changelog": "Updated for 7.2 and API12.\nAll existing player customizations will be useless due to SE changes. New player customizations will work as intended."
+  "Changelog": "Updated for 7.2 and API12.\nYou will need to have or derrive your account id to use the account-based custom options"
 }
