@@ -54,58 +54,6 @@ public static class MobConstants
      */
     public static Dictionary<uint, string> RenameList = new()
     {
-        // Coffers
-        { 2007358, "Gold Coffer" },
-        { 2007357, "Silver Coffer" },
-        { 2007542, "Accursed Hoard" },
-
-        // Potd Bronze Coffers
-        { 782, "Bronze Coffer" },
-        { 783, "Bronze Coffer" },
-        { 784, "Bronze Coffer" },
-        { 785, "Bronze Coffer" },
-        { 786, "Bronze Coffer" },
-        { 787, "Bronze Coffer" },
-        { 788, "Bronze Coffer" },
-        { 789, "Bronze Coffer" },
-        { 790, "Bronze Coffer" },
-        { 802, "Bronze Coffer" },
-        { 803, "Bronze Coffer" },
-        { 804, "Bronze Coffer" },
-        { 805, "Bronze Coffer" },
-
-        // Hoh bronze coffers
-        { 1036, "Bronze Coffer" },
-        { 1037, "Bronze Coffer" },
-        { 1038, "Bronze Coffer" },
-        { 1039, "Bronze Coffer" },
-        { 1040, "Bronze Coffer" },
-        { 1041, "Bronze Coffer" },
-        { 1042, "Bronze Coffer" },
-        { 1043, "Bronze Coffer" },
-        { 1044, "Bronze Coffer" },
-        { 1045, "Bronze Coffer" },
-        { 1046, "Bronze Coffer" },
-        { 1047, "Bronze Coffer" },
-        { 1048, "Bronze Coffer" },
-        { 1049, "Bronze Coffer" },
-
-        // Eureka Orthos Bronze Coffers
-        { 1541, "Bronze Coffer" },
-        { 1542, "Bronze Coffer" },
-        { 1543, "Bronze Coffer" },
-        { 1544, "Bronze Coffer" },
-        { 1545, "Bronze Coffer" },
-        { 1546, "Bronze Coffer" },
-        { 1547, "Bronze Coffer" },
-        { 1548, "Bronze Coffer" },
-        { 1549, "Bronze Coffer" },
-        { 1550, "Bronze Coffer" },
-        { 1551, "Bronze Coffer" },
-        { 1552, "Bronze Coffer" },
-        { 1553, "Bronze Coffer" },
-        { 1554, "Bronze Coffer" },
-
         // Mimics
         { 2006020, "Mimic Coffer" },
         { 2566, "Mimic" },
@@ -360,6 +308,7 @@ public static class MobConstants
         {1829, DeepDungeonMobTypes.BronzeChest},
         {1831, DeepDungeonMobTypes.BronzeChest},
         {1809, DeepDungeonMobTypes.BronzeChest},
+        {2014742, DeepDungeonMobTypes.SilverChest} // Bunny
         
     };
 }

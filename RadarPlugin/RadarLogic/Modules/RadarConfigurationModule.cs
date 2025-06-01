@@ -43,10 +43,29 @@ public class RadarConfigurationModule : IModuleInterface
 
         if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
         {
-            if (gameObject.DataId != 0 && MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) &&
-                MobConstants.RenameList.ContainsKey(gameObject.DataId))
+            if (gameObject.DataId != 0 && MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType))
             {
-                tagText = MobConstants.RenameList[gameObject.DataId];
+                if (MobConstants.RenameList.ContainsKey(gameObject.DataId))
+                {
+                    tagText = MobConstants.RenameList[gameObject.DataId];
+                } else if (MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.DataId, out var value))
+                {
+                    switch (value)
+                    {
+                        case DeepDungeonMobTypes.GoldChest:
+                            tagText = "Gold Chest";
+                            break;
+                        case DeepDungeonMobTypes.SilverChest:
+                            tagText = "Silver Chest";
+                            break;
+                        case DeepDungeonMobTypes.BronzeChest:
+                            tagText = "Bronze Chest";
+                            break;
+                        case DeepDungeonMobTypes.AccursedHoard:
+                            tagText = "Accursed Hoard";
+                            break;
+                    }
+                }
             }
             else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))
             {
