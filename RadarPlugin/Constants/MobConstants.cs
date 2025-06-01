@@ -21,6 +21,7 @@ public static class MobConstants
         770, 771, 772, 782, 773, 783, 774, 784, 775, 785, // HOH
         732, 763, 795, 827, // Eureka (Old) (in order)
         1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, // Eureka Orthos in order
+        1252 // OC: South Horn
     };
 
     /**
@@ -43,6 +44,7 @@ public static class MobConstants
         9841, // owain
         9824, // owain
         9768, // Av?*/ 
+        2007457, //OC: idk some random thing
     };
 
     /**
@@ -132,7 +134,12 @@ public static class MobConstants
         { 2009728, "Trap" }, // Eureka Portal,
         { 2009729, "Portal" }, // Eureka Portal,
         { 2009726, "Unstable Portal" },
-        { 2009727, "Stable Portal" }
+        { 2009727, "Stable Portal" },
+        
+        // OC objects
+        {2010139, "Happy Carrot"},
+        {18279, "Trap v1"},
+        {2014585, "Unk 1"}
     };
 
     public static Dictionary<uint, DeepDungeonMobTypes> DeepDungeonMobTypesMap = new()
@@ -325,5 +332,34 @@ public static class MobConstants
         { 2009729, DeepDungeonMobTypes.Passage }, // Eureka Portal,
         { 2009726, DeepDungeonMobTypes.Passage }, // Unstable portal
         { 2009727, DeepDungeonMobTypes.Passage }, // Stable portal
+        
+        // OC Objects,
+        //Surveys
+        {2014695, DeepDungeonMobTypes.Return},
+        
+        //Others
+        {2010139, DeepDungeonMobTypes.Passage},
+        {18279, DeepDungeonMobTypes.Traps},
+        {2014585, DeepDungeonMobTypes.Passage},
+        {18442, DeepDungeonMobTypes.Mimic},
+        {1842, DeepDungeonMobTypes.BronzeChest },
+        {1794, DeepDungeonMobTypes.SilverChest},
+        {1791, DeepDungeonMobTypes.SilverChest},
+        {1796, DeepDungeonMobTypes.SilverChest},
+        {1851, DeepDungeonMobTypes.BronzeChest},
+        {1848, DeepDungeonMobTypes.BronzeChest},
+        {1834, DeepDungeonMobTypes.BronzeChest},
+        {1804, DeepDungeonMobTypes.BronzeChest},
+        {1806, DeepDungeonMobTypes.BronzeChest},
+        {1789, DeepDungeonMobTypes.SilverChest},
+        {1837, DeepDungeonMobTypes.BronzeChest},
+        {1838, DeepDungeonMobTypes.BronzeChest},
+        {1853, DeepDungeonMobTypes.BronzeChest},
+        {1792, DeepDungeonMobTypes.SilverChest},
+        {1830, DeepDungeonMobTypes.BronzeChest},
+        {1829, DeepDungeonMobTypes.BronzeChest},
+        {1831, DeepDungeonMobTypes.BronzeChest},
+        {1809, DeepDungeonMobTypes.BronzeChest},
+        
     };
 }

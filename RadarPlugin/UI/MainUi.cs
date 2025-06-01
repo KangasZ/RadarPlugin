@@ -198,7 +198,7 @@ public class MainUi : IDisposable
             "This will be enabled when you want to view overworld objects." +
             "Otherwise it will not show objects in the overworld");
 
-        shouldSave |= UiHelpers.DrawCheckbox("Eureka/Deep Dungeons Support", ref configInterface.cfg.ShowBaDdObjects,
+        shouldSave |= UiHelpers.DrawCheckbox("Eureka/Occult Crescent/Deep Dungeons Support", ref configInterface.cfg.ShowBaDdObjects,
             "This focuses on giving support to eureka and deep dungeons.\n" +
             "Will display things such as portals, chests, and traps.");
 
