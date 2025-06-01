@@ -355,7 +355,7 @@ public class MainUi : IDisposable
             ("Players", ConfigConstants.Silver, DrawPlayerGeneralSettings),
             ("Mobs", ConfigConstants.Green, DrawMobsVisibilitySettings),
             ("Entities", ConfigConstants.LightBlue, DrawEntitiesVisibilitySettings),
-            ("Deep Dungeons", ConfigConstants.Yellow, DrawDeepDungeonOverviewSettings)
+            ("OC/DD/Eureka", ConfigConstants.Yellow, DrawDeepDungeonOverviewSettings)
         );
     }
 
@@ -424,7 +424,7 @@ public class MainUi : IDisposable
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.ReturnOption, "Return",
             displayOrigination: DisplayOrigination.DeepDungeon);
         DrawSettingsOverview(configInterface.cfg.DeepDungeonOptions.PassageOption, "Passage",
-            displayOrigination: DisplayOrigination.DeepDungeon);
+            displayOrigination: DisplayOrigination.DeepDungeon, description: "This also contains the carrot and some mixed spots in OC");
     }
 
     private void DrawSettingsOverview(Configuration.Configuration.ESPOption espOption, string tag,
