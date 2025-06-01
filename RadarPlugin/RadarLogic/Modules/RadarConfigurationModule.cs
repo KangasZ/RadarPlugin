@@ -50,21 +50,18 @@ public class RadarConfigurationModule : IModuleInterface
                     tagText = MobConstants.RenameList[gameObject.DataId];
                 } else if (MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.DataId, out var value))
                 {
-                    switch (value)
+                    tagText = value switch
                     {
-                        case DeepDungeonMobTypes.GoldChest:
-                            tagText = "Gold Chest";
-                            break;
-                        case DeepDungeonMobTypes.SilverChest:
-                            tagText = "Silver Chest";
-                            break;
-                        case DeepDungeonMobTypes.BronzeChest:
-                            tagText = "Bronze Chest";
-                            break;
-                        case DeepDungeonMobTypes.AccursedHoard:
-                            tagText = "Accursed Hoard";
-                            break;
-                    }
+                        DeepDungeonMobTypes.GoldChest => "Gold Chest",
+                        DeepDungeonMobTypes.SilverChest => "Silver Chest",
+                        DeepDungeonMobTypes.BronzeChest => "Bronze Chest",
+                        DeepDungeonMobTypes.AccursedHoard => "Accursed Hoard",
+                        _ => tagText
+                    };
+                }
+                else
+                {
+                    tagText = gameObject.Name.TextValue;
                 }
             }
             else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))

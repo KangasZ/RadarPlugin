@@ -308,6 +308,7 @@ public static class MobConstants
         {1829, DeepDungeonMobTypes.BronzeChest},
         {1831, DeepDungeonMobTypes.BronzeChest},
         {1809, DeepDungeonMobTypes.BronzeChest},
+        {1832, DeepDungeonMobTypes.BronzeChest},
         {2014742, DeepDungeonMobTypes.SilverChest} // Bunny
         
     };
