@@ -45,6 +45,8 @@ public static class MobConstants
         9824, // owain
         9768, // Av?*/ 
         2007457, //OC: idk some random thing
+        18458, //Silencer
+        18279, //Dead trap
     };
 
     /**
@@ -86,8 +88,9 @@ public static class MobConstants
         
         // OC objects
         {2010139, "Happy Carrot"},
-        {18279, "Trap v1"},
-        {2014585, "Unk 1"}
+        {18279, "Dead Trap"},
+        {2014585, "Mega Trap"},
+        {2014584, "Trap"}
     };
 
     public static Dictionary<uint, DeepDungeonMobTypes> DeepDungeonMobTypesMap = new()
@@ -325,6 +328,24 @@ public static class MobConstants
         {1802, DeepDungeonMobTypes.BronzeChest},
         {1810, DeepDungeonMobTypes.BronzeChest},
         {1841, DeepDungeonMobTypes.BronzeChest},
-        {2014742, DeepDungeonMobTypes.SilverChest} // Bunny
+        {1823, DeepDungeonMobTypes.BronzeChest},
+        {1818, DeepDungeonMobTypes.BronzeChest},
+        {1816, DeepDungeonMobTypes.BronzeChest},
+        {1826, DeepDungeonMobTypes.BronzeChest},
+        {1817, DeepDungeonMobTypes.BronzeChest},
+        {1800, DeepDungeonMobTypes.BronzeChest},
+        {1836, DeepDungeonMobTypes.BronzeChest},
+        {1811, DeepDungeonMobTypes.BronzeChest},
+        
+        {2014742, DeepDungeonMobTypes.SilverChest}, // Bunny
+        
+        {2014571, DeepDungeonMobTypes.Passage}, //Locked door
+        {2014569, DeepDungeonMobTypes.Passage}, // Locked door
+        {2014564, DeepDungeonMobTypes.Passage}, //Trap control
+        {2014567, DeepDungeonMobTypes.Passage}, //Barrier control
+        {2014568, DeepDungeonMobTypes.Passage}, //Barrier control
+        {2014584, DeepDungeonMobTypes.Traps},
+        {18328, DeepDungeonMobTypes.SpecialUndead}, // SIlencer
+        
     };
 }

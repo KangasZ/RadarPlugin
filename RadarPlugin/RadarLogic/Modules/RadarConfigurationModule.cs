@@ -43,26 +43,19 @@ public class RadarConfigurationModule : IModuleInterface
 
         if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
         {
-            if (gameObject.DataId != 0 && MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType))
+            if (MobConstants.RenameList.TryGetValue(gameObject.DataId, out var rename))
             {
-                if (MobConstants.RenameList.ContainsKey(gameObject.DataId))
+                tagText = rename;
+            } else if (MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) && MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.DataId, out var value))
+            {
+                tagText = value switch
                 {
-                    tagText = MobConstants.RenameList[gameObject.DataId];
-                } else if (MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.DataId, out var value))
-                {
-                    tagText = value switch
-                    {
-                        DeepDungeonMobTypes.GoldChest => "Gold Chest",
-                        DeepDungeonMobTypes.SilverChest => "Silver Chest",
-                        DeepDungeonMobTypes.BronzeChest => "Bronze Chest",
-                        DeepDungeonMobTypes.AccursedHoard => "Accursed Hoard",
-                        _ => tagText
-                    };
-                }
-                else
-                {
-                    tagText = gameObject.Name.TextValue;
-                }
+                    DeepDungeonMobTypes.GoldChest => "Gold Chest",
+                    DeepDungeonMobTypes.SilverChest => "Silver Chest",
+                    DeepDungeonMobTypes.BronzeChest => "Bronze Chest",
+                    DeepDungeonMobTypes.AccursedHoard => "Accursed Hoard",
+                    _ => gameObject.Name.TextValue
+                };
             }
             else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))
             {
