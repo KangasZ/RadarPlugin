@@ -336,6 +336,9 @@ public static class MobConstants
         {1800, DeepDungeonMobTypes.BronzeChest},
         {1836, DeepDungeonMobTypes.BronzeChest},
         {1811, DeepDungeonMobTypes.BronzeChest},
+        {1799, DeepDungeonMobTypes.BronzeChest},
+        {1819, DeepDungeonMobTypes.BronzeChest},
+        {1808, DeepDungeonMobTypes.BronzeChest},
         
         {2014742, DeepDungeonMobTypes.SilverChest}, // Bunny
         
@@ -346,6 +349,7 @@ public static class MobConstants
         {2014568, DeepDungeonMobTypes.Passage}, //Barrier control
         {2014584, DeepDungeonMobTypes.Traps},
         {18328, DeepDungeonMobTypes.SpecialUndead}, // SIlencer
+        {18324, DeepDungeonMobTypes.SpecialUndead}, // SIlencer
         
     };
 }
