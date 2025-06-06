@@ -43,7 +43,7 @@ public static class MobConstants
         9822, // munderg
         9841, // owain
         9824, // owain
-        9768, // Av?*/ 
+        9768, // Av?*/
         2007457, //OC: idk some random thing
         18458, //Silencer
         18279, //Dead trap
@@ -85,12 +85,12 @@ public static class MobConstants
         { 2009729, "Portal" }, // Eureka Portal,
         { 2009726, "Unstable Portal" },
         { 2009727, "Stable Portal" },
-        
+
         // OC objects
-        {2010139, "Happy Carrot"},
-        {18279, "Dead Trap"},
-        {2014585, "Mega Trap"},
-        {2014584, "Trap"}
+        { 2010139, "Happy Carrot" },
+        { 18279, "Dead Trap" },
+        { 2014585, "Mega Trap" },
+        { 2014584, "Trap" }
     };
 
     public static Dictionary<uint, DeepDungeonMobTypes> DeepDungeonMobTypesMap = new()
@@ -283,73 +283,95 @@ public static class MobConstants
         { 2009729, DeepDungeonMobTypes.Passage }, // Eureka Portal,
         { 2009726, DeepDungeonMobTypes.Passage }, // Unstable portal
         { 2009727, DeepDungeonMobTypes.Passage }, // Stable portal
-        
+
         // OC Objects,
         //Surveys
-        {2014695, DeepDungeonMobTypes.Return},
-        
-        //Others
-        {2010139, DeepDungeonMobTypes.Passage},
-        {18279, DeepDungeonMobTypes.Traps},
-        {2014585, DeepDungeonMobTypes.Passage},
-        {18442, DeepDungeonMobTypes.Mimic},
-        
-        {1794, DeepDungeonMobTypes.SilverChest},
-        {1791, DeepDungeonMobTypes.SilverChest},
-        {1796, DeepDungeonMobTypes.SilverChest},
-        {1789, DeepDungeonMobTypes.SilverChest},
-        {1792, DeepDungeonMobTypes.SilverChest},
-        {1790, DeepDungeonMobTypes.SilverChest},
+        { 2014695, DeepDungeonMobTypes.Return },
 
-        {1842, DeepDungeonMobTypes.BronzeChest },
-        {1851, DeepDungeonMobTypes.BronzeChest},
-        {1848, DeepDungeonMobTypes.BronzeChest},
-        {1834, DeepDungeonMobTypes.BronzeChest},
-        {1804, DeepDungeonMobTypes.BronzeChest},
-        {1806, DeepDungeonMobTypes.BronzeChest},
-        {1837, DeepDungeonMobTypes.BronzeChest},
-        {1838, DeepDungeonMobTypes.BronzeChest},
-        {1853, DeepDungeonMobTypes.BronzeChest},
-        {1830, DeepDungeonMobTypes.BronzeChest},
-        {1829, DeepDungeonMobTypes.BronzeChest},
-        {1831, DeepDungeonMobTypes.BronzeChest},
-        {1809, DeepDungeonMobTypes.BronzeChest},
-        {1832, DeepDungeonMobTypes.BronzeChest},
-        {1840, DeepDungeonMobTypes.BronzeChest},
-        {1820, DeepDungeonMobTypes.BronzeChest},
-        {1825, DeepDungeonMobTypes.BronzeChest},
-        {1801, DeepDungeonMobTypes.BronzeChest},
-        {1815, DeepDungeonMobTypes.BronzeChest},
-        {1855, DeepDungeonMobTypes.BronzeChest},
-        {1847, DeepDungeonMobTypes.BronzeChest},
-        {1852, DeepDungeonMobTypes.BronzeChest},
-        {1849, DeepDungeonMobTypes.BronzeChest},
-        {1797, DeepDungeonMobTypes.BronzeChest},
-        {1802, DeepDungeonMobTypes.BronzeChest},
-        {1810, DeepDungeonMobTypes.BronzeChest},
-        {1841, DeepDungeonMobTypes.BronzeChest},
-        {1823, DeepDungeonMobTypes.BronzeChest},
-        {1818, DeepDungeonMobTypes.BronzeChest},
-        {1816, DeepDungeonMobTypes.BronzeChest},
-        {1826, DeepDungeonMobTypes.BronzeChest},
-        {1817, DeepDungeonMobTypes.BronzeChest},
-        {1800, DeepDungeonMobTypes.BronzeChest},
-        {1836, DeepDungeonMobTypes.BronzeChest},
-        {1811, DeepDungeonMobTypes.BronzeChest},
-        {1799, DeepDungeonMobTypes.BronzeChest},
-        {1819, DeepDungeonMobTypes.BronzeChest},
-        {1808, DeepDungeonMobTypes.BronzeChest},
-        
-        {2014742, DeepDungeonMobTypes.SilverChest}, // Bunny
-        
-        {2014571, DeepDungeonMobTypes.Passage}, //Locked door
-        {2014569, DeepDungeonMobTypes.Passage}, // Locked door
-        {2014564, DeepDungeonMobTypes.Passage}, //Trap control
-        {2014567, DeepDungeonMobTypes.Passage}, //Barrier control
-        {2014568, DeepDungeonMobTypes.Passage}, //Barrier control
-        {2014584, DeepDungeonMobTypes.Traps},
-        {18328, DeepDungeonMobTypes.SpecialUndead}, // SIlencer
-        {18324, DeepDungeonMobTypes.SpecialUndead}, // SIlencer
-        
+        //Others
+        { 2010139, DeepDungeonMobTypes.Passage },
+        { 18279, DeepDungeonMobTypes.Traps },
+        { 2014585, DeepDungeonMobTypes.Passage },
+        { 18442, DeepDungeonMobTypes.Mimic },
+
+        { 1794, DeepDungeonMobTypes.SilverChest },
+        { 1791, DeepDungeonMobTypes.SilverChest },
+        { 1796, DeepDungeonMobTypes.SilverChest },
+        { 1789, DeepDungeonMobTypes.SilverChest },
+        { 1792, DeepDungeonMobTypes.SilverChest },
+        { 1790, DeepDungeonMobTypes.SilverChest },
+        { 1795, DeepDungeonMobTypes.SilverChest },
+        { 1793, DeepDungeonMobTypes.SilverChest },
+
+        { 1842, DeepDungeonMobTypes.BronzeChest },
+        { 1851, DeepDungeonMobTypes.BronzeChest },
+        { 1848, DeepDungeonMobTypes.BronzeChest },
+        { 1834, DeepDungeonMobTypes.BronzeChest },
+        { 1804, DeepDungeonMobTypes.BronzeChest },
+        { 1806, DeepDungeonMobTypes.BronzeChest },
+        { 1837, DeepDungeonMobTypes.BronzeChest },
+        { 1838, DeepDungeonMobTypes.BronzeChest },
+        { 1853, DeepDungeonMobTypes.BronzeChest },
+        { 1830, DeepDungeonMobTypes.BronzeChest },
+        { 1829, DeepDungeonMobTypes.BronzeChest },
+        { 1831, DeepDungeonMobTypes.BronzeChest },
+        { 1809, DeepDungeonMobTypes.BronzeChest },
+        { 1832, DeepDungeonMobTypes.BronzeChest },
+        { 1840, DeepDungeonMobTypes.BronzeChest },
+        { 1820, DeepDungeonMobTypes.BronzeChest },
+        { 1825, DeepDungeonMobTypes.BronzeChest },
+        { 1801, DeepDungeonMobTypes.BronzeChest },
+        { 1815, DeepDungeonMobTypes.BronzeChest },
+        { 1855, DeepDungeonMobTypes.BronzeChest },
+        { 1847, DeepDungeonMobTypes.BronzeChest },
+        { 1852, DeepDungeonMobTypes.BronzeChest },
+        { 1849, DeepDungeonMobTypes.BronzeChest },
+        { 1797, DeepDungeonMobTypes.BronzeChest },
+        { 1802, DeepDungeonMobTypes.BronzeChest },
+        { 1810, DeepDungeonMobTypes.BronzeChest },
+        { 1841, DeepDungeonMobTypes.BronzeChest },
+        { 1823, DeepDungeonMobTypes.BronzeChest },
+        { 1818, DeepDungeonMobTypes.BronzeChest },
+        { 1816, DeepDungeonMobTypes.BronzeChest },
+        { 1826, DeepDungeonMobTypes.BronzeChest },
+        { 1817, DeepDungeonMobTypes.BronzeChest },
+        { 1800, DeepDungeonMobTypes.BronzeChest },
+        { 1836, DeepDungeonMobTypes.BronzeChest },
+        { 1811, DeepDungeonMobTypes.BronzeChest },
+        { 1799, DeepDungeonMobTypes.BronzeChest },
+        { 1819, DeepDungeonMobTypes.BronzeChest },
+        { 1808, DeepDungeonMobTypes.BronzeChest },
+        { 1798, DeepDungeonMobTypes.BronzeChest },
+        { 1803, DeepDungeonMobTypes.BronzeChest },
+        { 1828, DeepDungeonMobTypes.BronzeChest },
+        { 1843, DeepDungeonMobTypes.BronzeChest },
+        { 1845, DeepDungeonMobTypes.BronzeChest },
+        { 1812, DeepDungeonMobTypes.BronzeChest },
+        { 1839, DeepDungeonMobTypes.BronzeChest },
+        { 1813, DeepDungeonMobTypes.BronzeChest },
+        { 1846, DeepDungeonMobTypes.BronzeChest },
+        { 1824, DeepDungeonMobTypes.BronzeChest },
+        { 1856, DeepDungeonMobTypes.BronzeChest },
+        { 1821, DeepDungeonMobTypes.BronzeChest },
+        { 1822, DeepDungeonMobTypes.BronzeChest },
+        { 1833, DeepDungeonMobTypes.BronzeChest },
+        { 1805, DeepDungeonMobTypes.BronzeChest },
+        { 1827, DeepDungeonMobTypes.BronzeChest },
+        { 1814, DeepDungeonMobTypes.BronzeChest },
+        { 1807, DeepDungeonMobTypes.BronzeChest },
+        { 1850, DeepDungeonMobTypes.BronzeChest },
+
+
+        { 2014742, DeepDungeonMobTypes.SilverChest }, // Bunny
+        { 2014743, DeepDungeonMobTypes.BronzeChest }, // Bunny
+
+        { 2014571, DeepDungeonMobTypes.Passage }, //Locked door
+        { 2014569, DeepDungeonMobTypes.Passage }, // Locked door
+        { 2014564, DeepDungeonMobTypes.Passage }, //Trap control
+        { 2014567, DeepDungeonMobTypes.Passage }, //Barrier control
+        { 2014568, DeepDungeonMobTypes.Passage }, //Barrier control
+        { 2014584, DeepDungeonMobTypes.Traps },
+        { 18328, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
+        { 18324, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
     };
 }
