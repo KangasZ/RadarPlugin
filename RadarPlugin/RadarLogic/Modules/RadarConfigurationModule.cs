@@ -56,7 +56,10 @@ public class RadarConfigurationModule : IModuleInterface
 
         if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
         {
-            if (MobConstants.RenameList.TryGetValue(gameObject.DataId, out var rename))
+            if (
+                MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
+                && MobConstants.RenameList.TryGetValue(gameObject.DataId, out var rename)
+            )
             {
                 tagText = rename;
             }
