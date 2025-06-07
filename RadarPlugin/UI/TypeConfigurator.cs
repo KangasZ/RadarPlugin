@@ -18,7 +18,10 @@ public class TypeConfigurator
     private MobType mobType;
     private DisplayOrigination displayOrigination;
 
-    public TypeConfigurator(IDalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configInterface)
+    public TypeConfigurator(
+        IDalamudPluginInterface dalamudPluginInterface,
+        Configuration.Configuration configInterface
+    )
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
@@ -32,7 +35,12 @@ public class TypeConfigurator
         this.dalamudPluginInterface.UiBuilder.Draw -= Draw;
     }
 
-    public void OpenUiWithType(ref Configuration.Configuration.ESPOption espOption, string typeId, MobType mobType, DisplayOrigination displayOrigination)
+    public void OpenUiWithType(
+        ref Configuration.Configuration.ESPOption espOption,
+        string typeId,
+        MobType mobType,
+        DisplayOrigination displayOrigination
+    )
     {
         if (typeId == this.espDescription && configuratorWindowVisible == true)
         {
@@ -66,8 +74,14 @@ public class TypeConfigurator
         if (ImGui.Begin("Radar Plugin Type Configurator", ref configuratorWindowVisible))
         {
             ImGui.Text($"Currently Updating: {espDescription}");
-            var shouldSave = UiHelpers.DrawSettingsDetailed(espOption, espDescription, mobType, displayOrigination);
-            if (shouldSave) configInterface.Save();
+            var shouldSave = UiHelpers.DrawSettingsDetailed(
+                espOption,
+                espDescription,
+                mobType,
+                displayOrigination
+            );
+            if (shouldSave)
+                configInterface.Save();
         }
 
         ImGui.End();

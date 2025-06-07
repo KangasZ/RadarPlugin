@@ -11,7 +11,7 @@ public class RankModule : IModuleInterface
     private readonly IDataManager dataManager;
     private readonly Dictionary<uint, byte> RankDictionary = new();
     private readonly IPluginLog pluginLog;
-    
+
     public RankModule(IDataManager dataManager, IPluginLog pluginLog)
     {
         this.pluginLog = pluginLog;
@@ -24,11 +24,11 @@ public class RankModule : IModuleInterface
             {
                 RankDictionary = excelBnpcs.ToDictionary(x => x.RowId, x => x.Rank);
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             pluginLog.Error(e, "Failed to load RankModule");
         }
-
     }
 
     public bool TryGetRank(uint rowId, out byte rank)
@@ -37,7 +37,7 @@ public class RankModule : IModuleInterface
         rank = value;
         return tryGetValue;
     }
-    
+
     public void Dispose()
     {
         RankDictionary.Clear();

@@ -15,7 +15,9 @@ public class AggroTypeModule : IModuleInterface
 
     public AggroTypeModule(IDalamudPluginInterface pluginInterface)
     {
-        var json = File.ReadAllText(Path.Combine(pluginInterface.AssemblyLocation.Directory?.FullName, "data/allMobs.json"));
+        var json = File.ReadAllText(
+            Path.Combine(pluginInterface.AssemblyLocation.Directory?.FullName, "data/allMobs.json")
+        );
         var mobs = JsonSerializer.Deserialize<List<AggroInfo>>(json);
         if (mobs.Count > 0)
         {
@@ -42,7 +44,7 @@ public class AggroTypeModule : IModuleInterface
     {
         // Also do nothing
     }
-    
+
     public void Dispose()
     {
         AggroTypeDictionary.Clear();

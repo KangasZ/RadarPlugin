@@ -32,25 +32,72 @@ public class RadarPlugin : IDalamudPlugin
         IChatGui chatGui,
         IDataManager dataManager,
         IFramework framework,
-        IGameInteropProvider gameInteropProvider)
+        IGameInteropProvider gameInteropProvider
+    )
     {
         Plugin = this;
         this.framework = framework;
         this.pluginInterface = pluginInterface;
         // Services and DI
         Configuration = new Configuration.Configuration(this.pluginInterface, pluginLog);
-        radarModules = new RadarModules(condition, clientState, Configuration, dataManager, pluginInterface, pluginLog);
+        radarModules = new RadarModules(
+            condition,
+            clientState,
+            Configuration,
+            dataManager,
+            pluginInterface,
+            pluginLog
+        );
 
         // UI
         typeConfiguratorUi = new TypeConfigurator(this.pluginInterface, Configuration);
-        mobEditUi = new MobEditUi(this.pluginInterface, Configuration, typeConfiguratorUi, radarModules, clientState);
-        localMobsUi = new LocalMobsUi(this.pluginInterface, Configuration, objectTable, mobEditUi, pluginLog, radarModules, typeConfiguratorUi, clientState);
-        customizedEntitiesUi = new CustomizedEntitiesUI(this.pluginInterface, Configuration, pluginLog, typeConfiguratorUi);
-        mainUi = new MainUi(this.pluginInterface, Configuration, localMobsUi, clientState, typeConfiguratorUi, customizedEntitiesUi, pluginLog, radarModules);
+        mobEditUi = new MobEditUi(
+            this.pluginInterface,
+            Configuration,
+            typeConfiguratorUi,
+            radarModules,
+            clientState
+        );
+        localMobsUi = new LocalMobsUi(
+            this.pluginInterface,
+            Configuration,
+            objectTable,
+            mobEditUi,
+            pluginLog,
+            radarModules,
+            typeConfiguratorUi,
+            clientState
+        );
+        customizedEntitiesUi = new CustomizedEntitiesUI(
+            this.pluginInterface,
+            Configuration,
+            pluginLog,
+            typeConfiguratorUi
+        );
+        mainUi = new MainUi(
+            this.pluginInterface,
+            Configuration,
+            localMobsUi,
+            clientState,
+            typeConfiguratorUi,
+            customizedEntitiesUi,
+            pluginLog,
+            radarModules
+        );
 
         // Command manager
         pluginCommands = new PluginCommands(commandManager, mainUi, Configuration, chatGui);
-        radarDriver = new RadarDriver(this.pluginInterface, Configuration, objectTable, condition, clientState, gameGui, pluginLog, radarModules, gameInteropProvider);
+        radarDriver = new RadarDriver(
+            this.pluginInterface,
+            Configuration,
+            objectTable,
+            condition,
+            clientState,
+            gameGui,
+            pluginLog,
+            radarModules,
+            gameInteropProvider
+        );
 
         this.framework.Update += radarModules.StartTick;
         this.pluginInterface.UiBuilder.Draw += radarModules.EndTick;
@@ -63,7 +110,7 @@ public class RadarPlugin : IDalamudPlugin
         mainUi.Dispose();
         localMobsUi.Dispose();
         mobEditUi.Dispose();
-        
+
         // Customer services
         pluginCommands.Dispose();
         radarDriver.Dispose();

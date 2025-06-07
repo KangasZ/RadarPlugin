@@ -23,16 +23,17 @@ public static class ExtensionMethods
     {
         var cos = Math.Cos(-rotation);
         var sin = Math.Sin(-rotation);
-         return new Vector2((float)(v1.X * cos - v1.Y * sin),
-            (float)(v1.X * sin + v1.Y * cos));
+        return new Vector2((float)(v1.X * cos - v1.Y * sin), (float)(v1.X * sin + v1.Y * cos));
     }
-    
+
     public static unsafe ulong GetAccountId(this IGameObject gameObject)
     {
         ulong accountId = 0;
 
-        if (gameObject.ObjectKind != ObjectKind.Player) return accountId;
-        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)(void*)gameObject.Address;
+        if (gameObject.ObjectKind != ObjectKind.Player)
+            return accountId;
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)
+            (void*)gameObject.Address;
         var tempAccountId = clientstructobj->AccountId;
         if (tempAccountId != 0)
         {
@@ -40,13 +41,15 @@ public static class ExtensionMethods
         }
         return accountId;
     }
-    
+
     public static unsafe ulong GetContentId(this IGameObject gameObject)
     {
         ulong accountId = 0;
 
-        if (gameObject.ObjectKind != ObjectKind.Player) return accountId;
-        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)(void*)gameObject.Address;
+        if (gameObject.ObjectKind != ObjectKind.Player)
+            return accountId;
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)
+            (void*)gameObject.Address;
         var tempAccountId = clientstructobj->ContentId;
         if (tempAccountId != 0)
         {
@@ -54,13 +57,19 @@ public static class ExtensionMethods
         }
         return accountId;
     }
-    
-    public static unsafe ulong GetDeobfuscatedAccountId(this IGameObject gameObject, ulong obfuscatedSelfId, uint yourBaseId)
+
+    public static unsafe ulong GetDeobfuscatedAccountId(
+        this IGameObject gameObject,
+        ulong obfuscatedSelfId,
+        uint yourBaseId
+    )
     {
         ulong accountId = 0;
 
-        if (gameObject.ObjectKind != ObjectKind.Player) return accountId;
-        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)(void*)gameObject.Address;
+        if (gameObject.ObjectKind != ObjectKind.Player)
+            return accountId;
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)
+            (void*)gameObject.Address;
 
         if (yourBaseId == 0)
         {
@@ -89,7 +98,7 @@ public static class ExtensionMethods
         var shiftedVal = (selfId ^ otherId) >> 31;
         return (uint)((shiftedVal ^ yourBaseId) & 0xFFFFFFFF);
     }
-    
+
     public static MobType GetMobType(this IGameObject gameObject)
     {
         switch (gameObject.ObjectKind)

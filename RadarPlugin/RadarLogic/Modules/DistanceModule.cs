@@ -11,7 +11,7 @@ public class DistanceModule : IModuleInterface
     {
         this.distanceDictionary = new Dictionary<uint, float>();
     }
-    
+
     public float GetDistanceFromPlayer(IGameObject player, IGameObject object2)
     {
         if (distanceDictionary.TryGetValue(object2.EntityId, out var value))
@@ -33,7 +33,7 @@ public class DistanceModule : IModuleInterface
     {
         ResetDistance();
     }
-    
+
     public void Dispose()
     {
         distanceDictionary.Clear();

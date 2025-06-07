@@ -38,13 +38,17 @@ public class RadarDriver : IDisposable
 
     private RadarModules radarModules;
 
-    
-    
-    
-    public RadarDriver(IDalamudPluginInterface pluginInterface, Configuration.Configuration configuration,
+    public RadarDriver(
+        IDalamudPluginInterface pluginInterface,
+        Configuration.Configuration configuration,
         IObjectTable objectTable,
-        ICondition condition, IClientState clientState, IGameGui gameGui,
-        IPluginLog pluginLog, RadarModules radarModules, IGameInteropProvider gameInteropProvider)
+        ICondition condition,
+        IClientState clientState,
+        IGameGui gameGui,
+        IPluginLog pluginLog,
+        RadarModules radarModules,
+        IGameInteropProvider gameInteropProvider
+    )
     {
         // Creates Dependencies
         this.objectTable = objectTable;
@@ -55,7 +59,13 @@ public class RadarDriver : IDisposable
         this.radarModules = radarModules;
         this.pluginLog = pluginLog;
         this.radar3D = new Radar3D(configuration, clientState, gameGui, pluginLog, radarModules);
-        this.radar2D = new Radar2D(this.pluginInterface, configuration, clientState, this.pluginLog, radarModules);
+        this.radar2D = new Radar2D(
+            this.pluginInterface,
+            configuration,
+            clientState,
+            this.pluginLog,
+            radarModules
+        );
         // Loads plugin
         this.pluginLog.Debug("Radar Loaded");
         this.clientState = clientState;
@@ -66,19 +76,23 @@ public class RadarDriver : IDisposable
 
     private void BuildFont()
     {
-       // Axis = Plugin.Interface.UiBuilder.FontAtlas.NewGameFontHandle(new GameFontStyle(GameFontFamily.Axis, SizeInPx(Plugin.Config.FontSizeV2)));
-       //config.SizePt = Plugin.Config.SymbolsFontSizeV2;
-       ///config.GlyphRanges = SymRange;
-       //tk.AddFontFromMemory(GameSymFont, config, "ChatTwo2 Sym Font");
+        // Axis = Plugin.Interface.UiBuilder.FontAtlas.NewGameFontHandle(new GameFontStyle(GameFontFamily.Axis, SizeInPx(Plugin.Config.FontSizeV2)));
+        //config.SizePt = Plugin.Config.SymbolsFontSizeV2;
+        ///config.GlyphRanges = SymRange;
+        //tk.AddFontFromMemory(GameSymFont, config, "ChatTwo2 Sym Font");
         fontBuilt = false;
-        var fontFile = Path.Combine(pluginInterface.DalamudAssetDirectory.FullName, "UIRes",
-            "NotoSansCJKjp-Medium.otf");
+        var fontFile = Path.Combine(
+            pluginInterface.DalamudAssetDirectory.FullName,
+            "UIRes",
+            "NotoSansCJKjp-Medium.otf"
+        );
         if (File.Exists(fontFile))
         {
             try
             {
-                dalamudFont = ImGui.GetIO().Fonts
-                    .AddFontFromFileTTF(fontFile, configInterface.cfg.FontSettings.FontSize);
+                dalamudFont = ImGui
+                    .GetIO()
+                    .Fonts.AddFontFromFileTTF(fontFile, configInterface.cfg.FontSettings.FontSize);
                 fontBuilt = true;
                 this.pluginLog.Debug("Custom dalamud font loaded sucesffully");
             }
@@ -95,25 +109,34 @@ public class RadarDriver : IDisposable
 
     private void OnUiTick()
     {
-        if (!configInterface.cfg.Enabled) return;
+        if (!configInterface.cfg.Enabled)
+            return;
 
         //ImFontPtr fontPtr = LoadFont();
         //using var font = ImRaii.PushFont(fontPtr);
-        if (objectTable.Length == 0) return;
-        if (CheckDraw()) return;
+        if (objectTable.Length == 0)
+            return;
+        if (CheckDraw())
+            return;
         // Figure out object table
         var objectTableRef = FilterObjectTable(objectTable);
         var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
         var baseId = configInterface.cfg.YourAccountId;
-        var objectsWithMobOptions = objectTableRef.Select(areaObject =>
-        {
-            var espOption = radarModules.radarConfigurationModule.TryGetOverridenParams(areaObject, selfObfuscated, baseId, out var _);
-            return (areaObject, espOption);
-        }).ToArray();
+        var objectsWithMobOptions = objectTableRef
+            .Select(areaObject =>
+            {
+                var espOption = radarModules.radarConfigurationModule.TryGetOverridenParams(
+                    areaObject,
+                    selfObfuscated,
+                    baseId,
+                    out var _
+                );
+                return (areaObject, espOption);
+            })
+            .ToArray();
         radar3D.Radar3DOnTick(objectsWithMobOptions);
         radar2D.Radar2DOnTick(objectsWithMobOptions);
     }
-
 
     /*
     private ImFontPtr LoadFont()
@@ -154,7 +177,7 @@ public class RadarDriver : IDisposable
         return fontPtr;
     }
     */
-    
+
     private IEnumerable<GameObject> FilterObjectTable(IObjectTable objectTable)
     {
         IEnumerable<GameObject> objectTableRef;
@@ -176,18 +199,19 @@ public class RadarDriver : IDisposable
      */
     private bool CheckDraw()
     {
-        return conditionInterface[ConditionFlag.LoggingOut] || conditionInterface[ConditionFlag.BetweenAreas] ||
-               conditionInterface[ConditionFlag.BetweenAreas51] ||
-               clientState.LocalContentId == 0 || clientState.LocalPlayer == null;
+        return conditionInterface[ConditionFlag.LoggingOut]
+            || conditionInterface[ConditionFlag.BetweenAreas]
+            || conditionInterface[ConditionFlag.BetweenAreas51]
+            || clientState.LocalContentId == 0
+            || clientState.LocalPlayer == null;
     }
-
 
     private bool PassDistanceCheck(GameObject obj)
     {
         if (configInterface.cfg.UseMaxDistance && clientState.LocalPlayer != null)
         {
-            return radarModules.distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, obj) <
-                   configInterface.cfg.MaxDistance;
+            return radarModules.distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, obj)
+                < configInterface.cfg.MaxDistance;
         }
 
         return true;
@@ -196,20 +220,24 @@ public class RadarDriver : IDisposable
     private unsafe bool ShouldRenderObject(GameObject obj)
     {
         // Objest valid check
-        if (!obj.IsValid()) return false;
+        if (!obj.IsValid())
+            return false;
         //if (obj.DataId == GameObject.InvalidGameObjectId) return false;
 
         // Object within ignore lists
-        if (MobConstants.DataIdIgnoreList.Contains(obj.DataId)) return false;
+        if (MobConstants.DataIdIgnoreList.Contains(obj.DataId))
+            return false;
 
         // Object visible & config check
-        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)obj.Address;
-        if (configInterface.cfg.ShowOnlyVisible &&
-            (clientstructobj->RenderFlags != 0)) // || !clientstructobj->GetIsTargetable()))
+        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)
+            (void*)obj.Address;
+        if (configInterface.cfg.ShowOnlyVisible && (clientstructobj->RenderFlags != 0)) // || !clientstructobj->GetIsTargetable()))
         {
-            // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still. 
-            if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters) return false;
-            if (obj.ObjectKind != ObjectKind.Player) return false;
+            // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still.
+            if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters)
+                return false;
+            if (obj.ObjectKind != ObjectKind.Player)
+                return false;
         }
 
         var locationType = radarModules.zoneTypeModule.GetLocationType();
@@ -221,17 +249,23 @@ public class RadarDriver : IDisposable
         }
 
         // Eureka DD STQ
-        if (configInterface.cfg.ShowBaDdObjects &&
-            radarModules.zoneTypeModule.GetLocationType() == LocationKind.DeepDungeon)
+        if (
+            configInterface.cfg.ShowBaDdObjects
+            && radarModules.zoneTypeModule.GetLocationType() == LocationKind.DeepDungeon
+        )
         {
             // UtilInfo.RenameList.ContainsKey(obj.DataId) || UtilInfo.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)))
-            if (MobConstants.DeepDungeonMobTypesMap.ContainsKey(obj.DataId)) return true;
-            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (obj.ObjectKind != ObjectKind.BattleNpc || obj is not IBattleNpc
-                {
-                    BattleNpcKind: BattleNpcSubKind.Enemy
-                } mob) return true;
-            if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled) return false;
+            if (MobConstants.DeepDungeonMobTypesMap.ContainsKey(obj.DataId))
+                return true;
+            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless)
+                return false;
+            if (
+                obj.ObjectKind != ObjectKind.BattleNpc
+                || obj is not IBattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob
+            )
+                return true;
+            if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled)
+                return false;
             return !mob.IsDead;
         }
 
@@ -239,13 +273,14 @@ public class RadarDriver : IDisposable
         {
             //if (!clientstructobj->GetIsTargetable()) continue;
             //if (String.IsNullOrWhiteSpace(mob.Name.TextValue)) continue;
-            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless) return false;
-            if (mobNpc.IsDead) return false;
+            if (string.IsNullOrWhiteSpace(obj.Name.TextValue) && !configInterface.cfg.ShowNameless)
+                return false;
+            if (mobNpc.IsDead)
+                return false;
         }
 
         return true;
     }
-
 
     #region CLEANUP REGION
 

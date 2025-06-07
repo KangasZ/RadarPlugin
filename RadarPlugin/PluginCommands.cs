@@ -15,28 +15,41 @@ public class PluginCommands : IDisposable
     private readonly Configuration.Configuration configInterface;
     private readonly IChatGui chatGui;
 
-    public PluginCommands(ICommandManager commandManager, MainUi mainUi, Configuration.Configuration configuration, IChatGui chatGui)
+    public PluginCommands(
+        ICommandManager commandManager,
+        MainUi mainUi,
+        Configuration.Configuration configuration,
+        IChatGui chatGui
+    )
     {
         this.mainUi = mainUi;
         this.chatGui = chatGui;
         this.commandManager = commandManager;
         this.configInterface = configuration;
-        this.commandManager.AddHandler("/radar", new CommandInfo(SettingsCommand)
-        {
-            HelpMessage = "Opens configuration. Subcommands: /radar [ showall | showdebug | off | on | enable | disable | toggle ]",
-            ShowInHelp = true
-        });
-        this.commandManager.AddHandler("/radarcfg", new CommandInfo(RadarCfgCommand)
-        {
-            HelpMessage = "Loads config manually. Subcommands: /radarcfg [ load ] { fileName }",
-            ShowInHelp = true
-        });
+        this.commandManager.AddHandler(
+            "/radar",
+            new CommandInfo(SettingsCommand)
+            {
+                HelpMessage =
+                    "Opens configuration. Subcommands: /radar [ showall | showdebug | off | on | enable | disable | toggle ]",
+                ShowInHelp = true,
+            }
+        );
+        this.commandManager.AddHandler(
+            "/radarcfg",
+            new CommandInfo(RadarCfgCommand)
+            {
+                HelpMessage = "Loads config manually. Subcommands: /radarcfg [ load ] { fileName }",
+                ShowInHelp = true,
+            }
+        );
     }
 
     private void RadarCfgCommand(string command, string arguments)
     {
         var regex = Regex.Match(arguments, "^(\\w+) ?(.*)");
-        var subcommand = regex.Success && regex.Groups.Count > 1 ? regex.Groups[1].Value : string.Empty;
+        var subcommand =
+            regex.Success && regex.Groups.Count > 1 ? regex.Groups[1].Value : string.Empty;
         switch (subcommand.ToLower())
         {
             case "load":
@@ -47,49 +60,49 @@ public class PluginCommands : IDisposable
         }
     }
 
-
     private void SettingsCommand(string command, string args)
     {
         if (string.IsNullOrEmpty(args))
-        { 
+        {
             mainUi.OpenUi();
             return;
         }
 
         var regex = Regex.Match(args, "^(\\w+) ?(.*)");
-        var subcommand = regex.Success && regex.Groups.Count > 1 ? regex.Groups[1].Value : string.Empty;
+        var subcommand =
+            regex.Success && regex.Groups.Count > 1 ? regex.Groups[1].Value : string.Empty;
         switch (subcommand.ToLower())
         {
             case "showall":
             {
                 configInterface.cfg.DebugMode = !configInterface.cfg.DebugMode;
-                
+
                 var activatedString = configInterface.cfg.DebugMode ? "Enabled" : "Disabled";
                 var seString = new SeStringBuilder();
                 seString.Append($"Radar Plugin: Show All Entities Feature {activatedString}");
                 var chatEntry = new XivChatEntry()
                 {
                     Type = XivChatType.Echo,
-                    Message = seString.Build()
+                    Message = seString.Build(),
                 };
                 chatGui.Print(chatEntry);
-                
+
                 break;
             }
             case "showdebug":
             {
                 configInterface.cfg.DebugText = !configInterface.cfg.DebugText;
-                
+
                 var activatedString = configInterface.cfg.DebugText ? "Enabled" : "Disabled";
                 var seString = new SeStringBuilder();
                 seString.Append($"Radar Plugin: Debug Text Feature {activatedString}");
                 var chatEntry = new XivChatEntry()
                 {
                     Type = XivChatType.Echo,
-                    Message = seString.Build()
+                    Message = seString.Build(),
                 };
                 chatGui.Print(chatEntry);
-                
+
                 break;
             }
             case "off":

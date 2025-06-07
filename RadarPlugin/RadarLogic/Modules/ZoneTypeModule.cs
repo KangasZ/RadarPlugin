@@ -21,7 +21,7 @@ public class ZoneTypeModule : IModuleInterface
     {
         return this.currentLocation;
     }
-    
+
     public void Dispose()
     {
         //nothing
@@ -29,8 +29,10 @@ public class ZoneTypeModule : IModuleInterface
 
     public void StartTick()
     {
-        if (MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) ||
-            this.conditionInterface[ConditionFlag.InDeepDungeon])
+        if (
+            MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
+            || this.conditionInterface[ConditionFlag.InDeepDungeon]
+        )
         {
             currentLocation = LocationKind.DeepDungeon;
         }

@@ -13,14 +13,29 @@ public class RadarModules : IModuleInterface
     public RankModule rankModule;
     public ZoneTypeModule zoneTypeModule;
 
-    public RadarModules(ICondition conditionInterface, IClientState clientState, Configuration.Configuration configInterface, IDataManager dataManager, IDalamudPluginInterface pluginInterface, IPluginLog pluginLog)
+    public RadarModules(
+        ICondition conditionInterface,
+        IClientState clientState,
+        Configuration.Configuration configInterface,
+        IDataManager dataManager,
+        IDalamudPluginInterface pluginInterface,
+        IPluginLog pluginLog
+    )
     {
         aggroTypeModule = new AggroTypeModule(pluginInterface);
         distanceModule = new DistanceModule();
         moduleMobLastMovement = new MobLastMovement();
         rankModule = new RankModule(dataManager, pluginLog);
         zoneTypeModule = new ZoneTypeModule(conditionInterface, clientState);
-        radarConfigurationModule = new RadarConfigurationModule(clientState, configInterface, zoneTypeModule, rankModule, distanceModule, moduleMobLastMovement, pluginLog);
+        radarConfigurationModule = new RadarConfigurationModule(
+            clientState,
+            configInterface,
+            zoneTypeModule,
+            rankModule,
+            distanceModule,
+            moduleMobLastMovement,
+            pluginLog
+        );
     }
 
     public void Dispose()
@@ -34,7 +49,7 @@ public class RadarModules : IModuleInterface
     }
 
     public void StartTick(IFramework _) => StartTick();
-    
+
     public void StartTick()
     {
         aggroTypeModule.StartTick();

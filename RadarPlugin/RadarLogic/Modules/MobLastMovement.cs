@@ -8,19 +8,25 @@ namespace RadarPlugin.RadarLogic.Modules;
 public class MobLastMovement : IModuleInterface
 {
     private Dictionary<uint, (Vector4 Position, DateTime Time)> lastMovementDictionary = new();
-    
+
     public TimeSpan GetTimeElapsedFromMovement(IGameObject gameObject)
     {
         if (lastMovementDictionary.TryGetValue(gameObject.EntityId, out var value))
         {
             // Fuzzy equals on stuff
-            if (!value.Position.X.FuzzyEquals(gameObject.Position.X) ||
-                !value.Position.Y.FuzzyEquals(gameObject.Position.Y) ||
-                !value.Position.Z.FuzzyEquals(gameObject.Position.Z) ||
-                !value.Position.W.FuzzyEquals(gameObject.Rotation))
+            if (
+                !value.Position.X.FuzzyEquals(gameObject.Position.X)
+                || !value.Position.Y.FuzzyEquals(gameObject.Position.Y)
+                || !value.Position.Z.FuzzyEquals(gameObject.Position.Z)
+                || !value.Position.W.FuzzyEquals(gameObject.Rotation)
+            )
             {
-                var positionVector = new Vector4(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z,
-                    gameObject.Rotation);
+                var positionVector = new Vector4(
+                    gameObject.Position.X,
+                    gameObject.Position.Y,
+                    gameObject.Position.Z,
+                    gameObject.Rotation
+                );
                 lastMovementDictionary[gameObject.EntityId] = (positionVector, DateTime.Now);
                 return TimeSpan.Zero;
             }
@@ -31,13 +37,17 @@ public class MobLastMovement : IModuleInterface
         }
         else
         {
-            var positionVector = new Vector4(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z,
-                gameObject.Rotation);
+            var positionVector = new Vector4(
+                gameObject.Position.X,
+                gameObject.Position.Y,
+                gameObject.Position.Z,
+                gameObject.Rotation
+            );
             lastMovementDictionary.Add(gameObject.EntityId, (positionVector, DateTime.Now));
             return TimeSpan.Zero;
         }
     }
-    
+
     public void Dispose()
     {
         lastMovementDictionary.Clear();

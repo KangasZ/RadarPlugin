@@ -13,7 +13,7 @@ public enum DisplayTypes
     HealthBarAndValueAndName = 6,
     HealthValueOnly = 7,
     HealthValueAndName = 8,
-    Custom = 9
+    Custom = 9,
 }
 
 [Flags]
@@ -39,9 +39,12 @@ public static class DisplayTypeExtensions
             DisplayTypes.NameOnly => DisplayTypeFlags.Name,
             DisplayTypes.DotAndName => DisplayTypeFlags.Dot | DisplayTypeFlags.Name,
             DisplayTypes.HealthBarOnly => DisplayTypeFlags.HealthCircle,
-            DisplayTypes.HealthBarAndValue => DisplayTypeFlags.HealthCircle | DisplayTypeFlags.HealthValue,
+            DisplayTypes.HealthBarAndValue => DisplayTypeFlags.HealthCircle
+                | DisplayTypeFlags.HealthValue,
             DisplayTypes.HealthBarAndName => DisplayTypeFlags.HealthCircle | DisplayTypeFlags.Name,
-            DisplayTypes.HealthBarAndValueAndName => DisplayTypeFlags.HealthCircle | DisplayTypeFlags.HealthValue | DisplayTypeFlags.Name,
+            DisplayTypes.HealthBarAndValueAndName => DisplayTypeFlags.HealthCircle
+                | DisplayTypeFlags.HealthValue
+                | DisplayTypeFlags.Name,
             DisplayTypes.HealthValueOnly => DisplayTypeFlags.HealthValue,
             DisplayTypes.HealthValueAndName => DisplayTypeFlags.HealthValue | DisplayTypeFlags.Name,
             _ => DisplayTypeFlags.Default,
@@ -54,12 +57,17 @@ public static class DisplayTypeExtensions
 
         return flags;
     }
-    
+
     public static DisplayTypes ToDisplayTypes(this DisplayTypeFlags flags)
     {
         DisplayTypes result;
 
-        if (flags.HasFlag(DisplayTypeFlags.Dot) && flags.HasFlag(DisplayTypeFlags.Name) && flags.HasFlag(DisplayTypeFlags.HealthCircle) && flags.HasFlag(DisplayTypeFlags.HealthValue))
+        if (
+            flags.HasFlag(DisplayTypeFlags.Dot)
+            && flags.HasFlag(DisplayTypeFlags.Name)
+            && flags.HasFlag(DisplayTypeFlags.HealthCircle)
+            && flags.HasFlag(DisplayTypeFlags.HealthValue)
+        )
         {
             result = DisplayTypes.HealthBarAndValueAndName;
         }
@@ -67,15 +75,22 @@ public static class DisplayTypeExtensions
         {
             result = DisplayTypes.DotAndName;
         }
-        else if (flags.HasFlag(DisplayTypeFlags.HealthCircle) && flags.HasFlag(DisplayTypeFlags.Name))
+        else if (
+            flags.HasFlag(DisplayTypeFlags.HealthCircle) && flags.HasFlag(DisplayTypeFlags.Name)
+        )
         {
             result = DisplayTypes.HealthBarAndName;
         }
-        else if (flags.HasFlag(DisplayTypeFlags.HealthCircle) && flags.HasFlag(DisplayTypeFlags.HealthValue))
+        else if (
+            flags.HasFlag(DisplayTypeFlags.HealthCircle)
+            && flags.HasFlag(DisplayTypeFlags.HealthValue)
+        )
         {
             result = DisplayTypes.HealthBarAndValue;
         }
-        else if (flags.HasFlag(DisplayTypeFlags.HealthValue) && flags.HasFlag(DisplayTypeFlags.Name))
+        else if (
+            flags.HasFlag(DisplayTypeFlags.HealthValue) && flags.HasFlag(DisplayTypeFlags.Name)
+        )
         {
             result = DisplayTypes.HealthValueAndName;
         }
@@ -108,7 +123,7 @@ public static class DisplayTypeExtensions
 
         return result;
     }
-    
+
     public static void SetFlag(this ref DisplayTypeFlags flags, DisplayTypeFlags flag, bool value)
     {
         if (value)

@@ -20,9 +20,15 @@ public class RadarConfigurationModule : IModuleInterface
     private readonly MobLastMovement mobLastMovement;
     private readonly IPluginLog pluginLog;
 
-    public RadarConfigurationModule(IClientState clientState, Configuration.Configuration configInterface,
-        ZoneTypeModule zoneTypeModule, RankModule rankModule, DistanceModule distanceModule,
-        MobLastMovement mobLastMovement, IPluginLog pluginLog)
+    public RadarConfigurationModule(
+        IClientState clientState,
+        Configuration.Configuration configInterface,
+        ZoneTypeModule zoneTypeModule,
+        RankModule rankModule,
+        DistanceModule distanceModule,
+        MobLastMovement mobLastMovement,
+        IPluginLog pluginLog
+    )
     {
         this.configInterface = configInterface;
         this.zoneTypeModule = zoneTypeModule;
@@ -36,17 +42,28 @@ public class RadarConfigurationModule : IModuleInterface
     /**
  * TODO: Refactor this to be done once per second instead of on each render.
  */
-    public string GetText(IGameObject gameObject, Configuration.Configuration.ESPOption espOption, bool radar3d = true)
+    public string GetText(
+        IGameObject gameObject,
+        Configuration.Configuration.ESPOption espOption,
+        bool radar3d = true
+    )
     {
         var tagText = "";
-        var displayTypeFlags = radar3d ? espOption.DisplayTypeFlags : espOption.Separate2DOptions ? espOption.DisplayTypeFlags2D : espOption.DisplayTypeFlags;
+        var displayTypeFlags =
+            radar3d ? espOption.DisplayTypeFlags
+            : espOption.Separate2DOptions ? espOption.DisplayTypeFlags2D
+            : espOption.DisplayTypeFlags;
 
         if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
         {
             if (MobConstants.RenameList.TryGetValue(gameObject.DataId, out var rename))
             {
                 tagText = rename;
-            } else if (MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType) && MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.DataId, out var value))
+            }
+            else if (
+                MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
+                && MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.DataId, out var value)
+            )
             {
                 tagText = value switch
                 {
@@ -54,7 +71,7 @@ public class RadarConfigurationModule : IModuleInterface
                     DeepDungeonMobTypes.SilverChest => "Silver Chest",
                     DeepDungeonMobTypes.BronzeChest => "Bronze Chest",
                     DeepDungeonMobTypes.AccursedHoard => "Accursed Hoard",
-                    _ => gameObject.Name.TextValue
+                    _ => gameObject.Name.TextValue,
                 };
             }
             else if (string.IsNullOrWhiteSpace(gameObject.Name.TextValue))
@@ -68,7 +85,10 @@ public class RadarConfigurationModule : IModuleInterface
         }
 
         // Replace player names with job abbreviations
-        if (espOption.ReplaceWithJobName && gameObject is IPlayerCharacter { ClassJob.Value: { } } pc)
+        if (
+            espOption.ReplaceWithJobName
+            && gameObject is IPlayerCharacter { ClassJob.Value: { } } pc
+        )
         {
             tagText = pc.ClassJob.Value.Abbreviation.ToString();
         }
@@ -97,21 +117,26 @@ public class RadarConfigurationModule : IModuleInterface
         if (displayTypeFlags.HasFlag(DisplayTypeFlags.Distance))
         {
             if (clientState.LocalPlayer != null)
-                tagText += distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, gameObject).ToString(" 0.0m");
+                tagText += distanceModule
+                    .GetDistanceFromPlayer(clientState.LocalPlayer, gameObject)
+                    .ToString(" 0.0m");
         }
-        
+
         // Draw Position
         if (displayTypeFlags.HasFlag(DisplayTypeFlags.Position))
         {
             tagText += $"({gameObject.Position.X:0.0}, {gameObject.Position.Z:0.0})";
         }
 
-        if (configInterface.cfg.EXPERIMENTALEnableMobTimerTracking
+        if (
+            configInterface.cfg.EXPERIMENTALEnableMobTimerTracking
             && gameObject.ObjectKind == ObjectKind.BattleNpc
-            && (((IBattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) == 0)
+            && (((IBattleNpc)gameObject).StatusFlags & StatusFlags.InCombat) == 0
+        )
         {
-            tagText += (mobLastMovement.GetTimeElapsedFromMovement(gameObject).TotalSeconds)
-                .ToString(" 0.0s");
+            tagText += (
+                mobLastMovement.GetTimeElapsedFromMovement(gameObject).TotalSeconds
+            ).ToString(" 0.0s");
         }
 
         return configInterface.cfg.DebugText
@@ -119,8 +144,12 @@ public class RadarConfigurationModule : IModuleInterface
             : $"{tagText}";
     }
 
-
-    public Configuration.Configuration.ESPOption TryGetOverridenParams(IGameObject areaObject, ulong obfuscatedSelfId, uint baseAccountId, out bool overridden)
+    public Configuration.Configuration.ESPOption TryGetOverridenParams(
+        IGameObject areaObject,
+        ulong obfuscatedSelfId,
+        uint baseAccountId,
+        out bool overridden
+    )
     {
         overridden = false;
         Configuration.Configuration.ESPOptionMobBased? optionOverride = null;
@@ -134,7 +163,12 @@ public class RadarConfigurationModule : IModuleInterface
         }
         else
         {
-            if (configInterface.cfg.OptionOverride.TryGetValue(areaObject.DataId, out optionOverride))
+            if (
+                configInterface.cfg.OptionOverride.TryGetValue(
+                    areaObject.DataId,
+                    out optionOverride
+                )
+            )
             {
                 overridden = true;
             }
@@ -151,11 +185,11 @@ public class RadarConfigurationModule : IModuleInterface
             overridden = true;
             return optionOverride;
         }
-        
+
         overridden = false;
         return GetParams(areaObject);
     }
-    
+
     public Configuration.Configuration.ESPOption GetParams(IGameObject areaObject)
     {
         // If Deep Dungeon
@@ -195,10 +229,10 @@ public class RadarConfigurationModule : IModuleInterface
                 }
             }
 
-            if (areaObject.ObjectKind == ObjectKind.BattleNpc && areaObject is IBattleNpc
-                {
-                    BattleNpcKind: BattleNpcSubKind.Enemy
-                } mob)
+            if (
+                areaObject.ObjectKind == ObjectKind.BattleNpc
+                && areaObject is IBattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob
+            )
             {
                 return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
             }
@@ -210,29 +244,38 @@ public class RadarConfigurationModule : IModuleInterface
                 if (areaObject is IPlayerCharacter chara)
                 {
                     // Is the object is YOU
-                    if (configInterface.cfg.SeparatedYourPlayer.Enabled && clientState.LocalPlayer != null &&
-                        chara.Address == clientState.LocalPlayer.Address)
+                    if (
+                        configInterface.cfg.SeparatedYourPlayer.Enabled
+                        && clientState.LocalPlayer != null
+                        && chara.Address == clientState.LocalPlayer.Address
+                    )
                     {
                         return configInterface.cfg.SeparatedYourPlayer.EspOption;
                     }
 
                     // If is friend
-                    if (configInterface.cfg.SeparatedFriends.Enabled &&
-                        chara.StatusFlags.HasFlag(StatusFlags.Friend)) //0x80
+                    if (
+                        configInterface.cfg.SeparatedFriends.Enabled
+                        && chara.StatusFlags.HasFlag(StatusFlags.Friend)
+                    ) //0x80
                     {
                         return configInterface.cfg.SeparatedFriends.EspOption;
                     }
 
                     // Is in party
-                    if (configInterface.cfg.SeparatedParty.Enabled &&
-                        chara.StatusFlags.HasFlag(StatusFlags.PartyMember)) //0x20
+                    if (
+                        configInterface.cfg.SeparatedParty.Enabled
+                        && chara.StatusFlags.HasFlag(StatusFlags.PartyMember)
+                    ) //0x20
                     {
                         return configInterface.cfg.SeparatedParty.EspOption;
                     }
 
                     // If in alliance
-                    if (configInterface.cfg.SeparatedAlliance.Enabled &&
-                        chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)) // 0x40
+                    if (
+                        configInterface.cfg.SeparatedAlliance.Enabled
+                        && chara.StatusFlags.HasFlag(StatusFlags.AllianceMember)
+                    ) // 0x40
                     {
                         return configInterface.cfg.SeparatedAlliance.EspOption;
                     }
@@ -247,7 +290,10 @@ public class RadarConfigurationModule : IModuleInterface
                     return configInterface.cfg.NpcOption;
                 }
 
-                if (configInterface.cfg.SeparatedRankOne.Enabled || configInterface.cfg.SeparatedRankTwoAndSix.Enabled)
+                if (
+                    configInterface.cfg.SeparatedRankOne.Enabled
+                    || configInterface.cfg.SeparatedRankTwoAndSix.Enabled
+                )
                 {
                     if (rankModule.TryGetRank(bnpc.DataId, out var value))
                     {
@@ -272,15 +318,23 @@ public class RadarConfigurationModule : IModuleInterface
                     }
                 }
 
-                if (bnpc is IBattleNpc { BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo })
+                if (
+                    bnpc is IBattleNpc
+                    {
+                        BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo
+                    }
+                )
                 {
                     return configInterface.cfg.CompanionOption;
                 }
 
                 if (configInterface.cfg.LevelRendering.LevelRenderingEnabled)
                 {
-                    if (clientState.LocalPlayer!.Level - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow >
-                        bnpc.Level)
+                    if (
+                        clientState.LocalPlayer!.Level
+                            - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow
+                        > bnpc.Level
+                    )
                     {
                         return configInterface.cfg.LevelRendering.LevelRenderEspOption;
                     }
@@ -316,7 +370,7 @@ public class RadarConfigurationModule : IModuleInterface
                 return configInterface.cfg.NpcOption;
         }
     }
-    
+
     public void Dispose()
     {
         //Do nothing

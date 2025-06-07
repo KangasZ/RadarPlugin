@@ -26,8 +26,13 @@ public unsafe class Radar2D
     private readonly IPluginLog pluginLog;
     private readonly RadarModules radarModules;
 
-    public Radar2D(IDalamudPluginInterface dalamudPluginInterface, Configuration.Configuration configuration,
-        IClientState clientState, IPluginLog pluginLog, RadarModules radarModules)
+    public Radar2D(
+        IDalamudPluginInterface dalamudPluginInterface,
+        Configuration.Configuration configuration,
+        IClientState clientState,
+        IPluginLog pluginLog,
+        RadarModules radarModules
+    )
     {
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.configuration = configuration;
@@ -37,37 +42,38 @@ public unsafe class Radar2D
     }
 
     public void Radar2DOnTick(
-        IEnumerable<(IGameObject areaObject, Configuration.Configuration.ESPOption espOption)> gameObjects)
+        IEnumerable<(
+            IGameObject areaObject,
+            Configuration.Configuration.ESPOption espOption
+        )> gameObjects
+    )
     {
         var config = configuration.cfg.Radar2DConfiguration;
-        if (!config.Enabled) return;
+        if (!config.Enabled)
+            return;
         var flags = config.Clickthrough
-            ? ImGuiWindowFlags.NoMove |
-              ImGuiWindowFlags.NoInputs |
-              ImGuiWindowFlags.NoScrollbar |
-              ImGuiWindowFlags.NoMouseInputs |
-              ImGuiWindowFlags.NoScrollWithMouse |
-              ImGuiWindowFlags.NoTitleBar |
-              ImGuiWindowFlags.NoResize |
-              ImGuiWindowFlags.NoNav |
-              ImGuiWindowFlags.NoDecoration |
-              ImGuiWindowFlags.NoDocking |
-              ImGuiWindowFlags.NoFocusOnAppearing
+            ? ImGuiWindowFlags.NoMove
+                | ImGuiWindowFlags.NoInputs
+                | ImGuiWindowFlags.NoScrollbar
+                | ImGuiWindowFlags.NoMouseInputs
+                | ImGuiWindowFlags.NoScrollWithMouse
+                | ImGuiWindowFlags.NoTitleBar
+                | ImGuiWindowFlags.NoResize
+                | ImGuiWindowFlags.NoNav
+                | ImGuiWindowFlags.NoDecoration
+                | ImGuiWindowFlags.NoDocking
+                | ImGuiWindowFlags.NoFocusOnAppearing
             : ImGuiWindowFlags.NoTitleBar;
         if (!config.ShowBackground)
         {
             flags |= ImGuiWindowFlags.NoBackground;
         }
 
-        ImGui.SetNextWindowSize(new Vector2(
-                300,
-                300),
-            ImGuiCond.FirstUseEver);
-
+        ImGui.SetNextWindowSize(new Vector2(300, 300), ImGuiCond.FirstUseEver);
 
         ImGui.PushStyleColor(ImGuiCol.WindowBg, config.BackgroundColor);
         ImGui.Begin("RadarPlugin2DRadar", flags);
-        
+
         DrawRadar(gameObjects);
 
         ImGui.End();
@@ -75,7 +81,11 @@ public unsafe class Radar2D
     }
 
     private void DrawRadar(
-        IEnumerable<(IGameObject areaObject, Configuration.Configuration.ESPOption espOption)> gameObjects)
+        IEnumerable<(
+            IGameObject areaObject,
+            Configuration.Configuration.ESPOption espOption
+        )> gameObjects
+    )
     {
         var imDrawListPtr = ImGui.GetWindowDrawList();
         var region = ImGui.GetContentRegionAvail();
@@ -91,18 +101,19 @@ public unsafe class Radar2D
 
             ImGui.PopFont();
         }
-        
-        if (clientState.LocalPlayer == null) return;
+
+        if (clientState.LocalPlayer == null)
+            return;
         var playerRotation = clientState.LocalPlayer.Rotation;
         var playerPosition = clientState.LocalPlayer.Position;
         if (configuration.cfg.Radar2DConfiguration.ShowYourCurrentPosition)
         {
             var positionText = $"({playerPosition.X:0.0}, {playerPosition.Z:0.0})";
             var textSize = ImGui.CalcTextSize(positionText);
-            ImGui.SameLine(ImGui.GetWindowWidth()-textSize.X-10);
+            ImGui.SameLine(ImGui.GetWindowWidth() - textSize.X - 10);
             ImGui.Text(positionText);
-        } 
-        
+        }
+
         Draw2DRadarPopupSettings();
 
         if (configuration.cfg.Radar2DConfiguration.ShowScale)
@@ -128,25 +139,40 @@ public unsafe class Radar2D
         //imDrawListPtr.AddCircle(center, 2, ConfigConstants.Silver, 60, 5);
         if (configuration.cfg.Radar2DConfiguration.ShowCross)
         {
-            imDrawListPtr.AddLine(new Vector2(center.X, regionOffset.Y),
-                new Vector2(center.X, regionOffset.Y + regionSize.Y), configuration.cfg.Radar2DConfiguration.CrossColor, 1);
-            imDrawListPtr.AddLine(new Vector2(regionOffset.X, center.Y),
-                new Vector2(regionOffset.X + regionSize.X, center.Y), configuration.cfg.Radar2DConfiguration.CrossColor, 1);
+            imDrawListPtr.AddLine(
+                new Vector2(center.X, regionOffset.Y),
+                new Vector2(center.X, regionOffset.Y + regionSize.Y),
+                configuration.cfg.Radar2DConfiguration.CrossColor,
+                1
+            );
+            imDrawListPtr.AddLine(
+                new Vector2(regionOffset.X, center.Y),
+                new Vector2(regionOffset.X + regionSize.X, center.Y),
+                configuration.cfg.Radar2DConfiguration.CrossColor,
+                1
+            );
         }
 
         var cameraManager = CameraManager.Instance();
         var currCamera = cameraManager->CurrentCamera;
         //pluginLog.Debug($"{currCamera->LookAtVector.X}, {currCamera->LookAtVector.Y}, {currCamera->LookAtVector.Z}");
 
-        Vector3 camFront = new Vector3(currCamera->ViewMatrix.M13, currCamera->ViewMatrix.M23,
-            currCamera->ViewMatrix.M33);
+        Vector3 camFront = new Vector3(
+            currCamera->ViewMatrix.M13,
+            currCamera->ViewMatrix.M23,
+            currCamera->ViewMatrix.M33
+        );
         float pitch = (float)Math.Asin(camFront.Y);
 
-        var cameraRotation = (float)Math.Atan2(-camFront.Z / Math.Cos(pitch), -camFront.X / Math.Cos(pitch));
-        var cameraRotationOffset = configuration.cfg.Radar2DConfiguration.RotationLockedNorth ? 0 : cameraRotation + Single.Pi / 2;
+        var cameraRotation = (float)
+            Math.Atan2(-camFront.Z / Math.Cos(pitch), -camFront.X / Math.Cos(pitch));
+        var cameraRotationOffset = configuration.cfg.Radar2DConfiguration.RotationLockedNorth
+            ? 0
+            : cameraRotation + Single.Pi / 2;
         foreach (var (areaObject, espOption) in gameObjects)
         {
-            if (!espOption.Enabled && !configuration.cfg.DebugMode) continue;
+            if (!espOption.Enabled && !configuration.cfg.DebugMode)
+                continue;
             var color = espOption.ColorU;
 
             var difference = areaObject.Position - playerPosition;
@@ -157,9 +183,11 @@ public unsafe class Radar2D
 
             // Rotate the difference vector by the negative of the camera's rotation
             Vector2 rotatedDiff;
-            if (configuration.cfg.Radar2DConfiguration.RotationLockedNorth) {
+            if (configuration.cfg.Radar2DConfiguration.RotationLockedNorth)
+            {
                 rotatedDiff = diff2;
-            } else
+            }
+            else
             {
                 rotatedDiff = diff2.Rotate(cameraRotationOffset);
                 //var cos = Math.Cos(-cameraRotation);
@@ -167,19 +195,31 @@ public unsafe class Radar2D
                 //rotatedDiff = new Vector2((float)(diff2.X * cos - diff2.Y * sin),
                 //    (float)(diff2.X * sin + diff2.Y * cos));
             }
-            
+
             // Dot position
             var position = center + rotatedDiff;
-            var displayTypeFlags = espOption.Separate2DOptions ? espOption.DisplayTypeFlags2D : espOption.DisplayTypeFlags;
+            var displayTypeFlags = espOption.Separate2DOptions
+                ? espOption.DisplayTypeFlags2D
+                : espOption.DisplayTypeFlags;
             if (displayTypeFlags.HasFlag(DisplayTypeFlags.Dot))
             {
-                var dotSize = espOption.DotSizeOverride2D ? espOption.DotSize2D : configuration.cfg.DotSize2D;
+                var dotSize = espOption.DotSizeOverride2D
+                    ? espOption.DotSize2D
+                    : configuration.cfg.DotSize2D;
                 DrawRadarHelper.DrawDot(imDrawListPtr, position, dotSize, color);
             }
 
-            if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name) || displayTypeFlags.HasFlag(DisplayTypeFlags.Distance) || displayTypeFlags.HasFlag(DisplayTypeFlags.Position)) 
+            if (
+                displayTypeFlags.HasFlag(DisplayTypeFlags.Name)
+                || displayTypeFlags.HasFlag(DisplayTypeFlags.Distance)
+                || displayTypeFlags.HasFlag(DisplayTypeFlags.Position)
+            )
             {
-                var nameText = radarModules.radarConfigurationModule.GetText(areaObject, espOption, false);
+                var nameText = radarModules.radarConfigurationModule.GetText(
+                    areaObject,
+                    espOption,
+                    false
+                );
                 DrawRadarHelper.DrawTextCenteredUnder(imDrawListPtr, position, nameText, color);
             }
 
@@ -193,7 +233,7 @@ public unsafe class Radar2D
                 DrawRadarHelper.DrawHealthValue(imDrawListPtr, position, areaObject, color);
             }
         }
-        
+
         // Camera Cone
         var cameraConeSettings = configuration.cfg.Radar2DConfiguration.CameraConeSettings;
         if (cameraConeSettings.Enabled)
@@ -204,7 +244,13 @@ public unsafe class Radar2D
             //imDrawListPtr.PathLineTo(center + diffLeft);
             var angleOffset = cameraConeSettings.RadianAngle;
             var cameraDirection = -(cameraRotationOffset - cameraRotation);
-            imDrawListPtr.PathArcTo(center, cameraConeSettings.Radius, cameraDirection - angleOffset, cameraDirection + angleOffset, 200);
+            imDrawListPtr.PathArcTo(
+                center,
+                cameraConeSettings.Radius,
+                cameraDirection - angleOffset,
+                cameraDirection + angleOffset,
+                200
+            );
             imDrawListPtr.PathLineTo(center);
             if (cameraConeSettings.Fill)
             {
@@ -231,7 +277,13 @@ public unsafe class Radar2D
             //var diffRight = new Vector2(50, -50);
             //diffRight = diffRight.Rotate(cameraRotation);
             //imDrawListPtr.PathLineTo(center + diffLeft);
-            imDrawListPtr.PathArcTo(center, playerConeSettings.Radius, playerDirection - angleOffset, playerDirection + angleOffset, 200);
+            imDrawListPtr.PathArcTo(
+                center,
+                playerConeSettings.Radius,
+                playerDirection - angleOffset,
+                playerDirection + angleOffset,
+                200
+            );
             imDrawListPtr.PathLineTo(center);
             if (configuration.cfg.Radar2DConfiguration.PlayerConeSettings.Fill)
             {
@@ -247,7 +299,8 @@ public unsafe class Radar2D
     private void Draw2DRadarPopupSettings()
     {
         var shouldSave = false;
-        if (!ImGui.BeginPopup("Radar2DPopupSettings")) return;
+        if (!ImGui.BeginPopup("Radar2DPopupSettings"))
+            return;
         shouldSave |= UiHelpers.Draw2DRadarSettings(ref configuration.cfg.Radar2DConfiguration);
         ImGui.EndPopup();
         if (shouldSave)
@@ -256,13 +309,19 @@ public unsafe class Radar2D
         }
     }
 
-    private void DrawTag(ImDrawListPtr imDrawListPtr, IGameObject areaObject, Vector2 position, uint color)
+    private void DrawTag(
+        ImDrawListPtr imDrawListPtr,
+        IGameObject areaObject,
+        Vector2 position,
+        uint color
+    )
     {
         var tag = areaObject.Name.TextValue;
         var tagTextSize = ImGui.CalcTextSize(tag);
         imDrawListPtr.AddText(
             new Vector2(position.X - tagTextSize.X / 2f, position.Y + tagTextSize.Y / 2f),
             color,
-            tag);
+            tag
+        );
     }
 }

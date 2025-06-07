@@ -36,7 +36,8 @@ public class LocalMobsUi : IDisposable
         IPluginLog pluginLog,
         RadarModules radarModules,
         TypeConfigurator typeConfigurator,
-        IClientState clientState)
+        IClientState clientState
+    )
     {
         this.mobEditUi = mobEditUi;
         this.configInterface = configInterface;
@@ -59,7 +60,7 @@ public class LocalMobsUi : IDisposable
         // Get some tertiary data
         var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
         var baseId = configInterface.cfg.YourAccountId;
-        
+
         // Populate the array
         var areaObjects = new List<IGameObject>();
         if (configInterface.cfg.LocalMobsUiSettings.ShowPlayers)
@@ -70,7 +71,9 @@ public class LocalMobsUi : IDisposable
         // Don't show duplicates but show npcs
         if (configInterface.cfg.LocalMobsUiSettings is { Duplicates: false, ShowNpcs: true })
         {
-            areaObjects.AddRange(objectTable.Where(x => x.DataId != 0).GroupBy(x => x.DataId).Select(x => x.First()));
+            areaObjects.AddRange(
+                objectTable.Where(x => x.DataId != 0).GroupBy(x => x.DataId).Select(x => x.First())
+            );
         }
         else if (configInterface.cfg.LocalMobsUiSettings.ShowNpcs)
         {
@@ -92,7 +95,9 @@ public class LocalMobsUi : IDisposable
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        areaObjectsSorted = areaObjects.OrderByDescending(x => x.ObjectKind.ToString());
+                        areaObjectsSorted = areaObjects.OrderByDescending(x =>
+                            x.ObjectKind.ToString()
+                        );
                     }
 
                     break;
@@ -104,7 +109,9 @@ public class LocalMobsUi : IDisposable
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        areaObjectsSorted = areaObjects.OrderByDescending(x => x.Name?.TextValue ?? "");
+                        areaObjectsSorted = areaObjects.OrderByDescending(x =>
+                            x.Name?.TextValue ?? ""
+                        );
                     }
 
                     break;
@@ -113,12 +120,18 @@ public class LocalMobsUi : IDisposable
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
-                            x.ObjectKind == ObjectKind.Player ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId) : x.DataId);
+                            x.ObjectKind == ObjectKind.Player
+                                ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId)
+                                : x.DataId
+                        );
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
-                            x.ObjectKind == ObjectKind.Player ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId) : x.DataId);
+                            x.ObjectKind == ObjectKind.Player
+                                ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId)
+                                : x.DataId
+                        );
                     }
 
                     break;
@@ -131,8 +144,12 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
                         {
-                            radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId,
-                                out var isUsingCustomEspOption);
+                            radarModules.radarConfigurationModule.TryGetOverridenParams(
+                                x,
+                                selfObfuscated,
+                                baseId,
+                                out var isUsingCustomEspOption
+                            );
                             return isUsingCustomEspOption;
                         });
                     }
@@ -140,8 +157,12 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
                         {
-                            radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId,
-                                out var isUsingCustomEspOption);
+                            radarModules.radarConfigurationModule.TryGetOverridenParams(
+                                x,
+                                selfObfuscated,
+                                baseId,
+                                out var isUsingCustomEspOption
+                            );
                             return isUsingCustomEspOption;
                         });
                     }
@@ -153,8 +174,13 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
                         {
-                            var objectParams = radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId,
-                                out var isUsingCustomEspOption);
+                            var objectParams =
+                                radarModules.radarConfigurationModule.TryGetOverridenParams(
+                                    x,
+                                    selfObfuscated,
+                                    baseId,
+                                    out var isUsingCustomEspOption
+                                );
                             if (isUsingCustomEspOption)
                                 return objectParams.Enabled;
                             return false;
@@ -164,8 +190,13 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
                         {
-                            var objectParams = radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId,
-                                out var isUsingCustomEspOption);
+                            var objectParams =
+                                radarModules.radarConfigurationModule.TryGetOverridenParams(
+                                    x,
+                                    selfObfuscated,
+                                    baseId,
+                                    out var isUsingCustomEspOption
+                                );
                             if (isUsingCustomEspOption)
                                 return objectParams.Enabled;
                             return false;
@@ -182,17 +213,18 @@ public class LocalMobsUi : IDisposable
             areaObjectsSorted = areaObjectsSorted.Where(x =>
             {
                 var name = x.Name.TextValue;
-                return nameFilterRegex?.IsMatch(name) ?? name.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
+                return nameFilterRegex?.IsMatch(name)
+                    ?? name.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
             });
         }
 
-        
         return areaObjectsSorted.ToList();
     }
 
     private void DrawCurrentMobsWindow()
     {
-        if (!currentMobsVisible) return;
+        if (!currentMobsVisible)
+            return;
         var size = new Vector2(560, 500);
         ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
@@ -228,13 +260,24 @@ public class LocalMobsUi : IDisposable
             // Draw the filter
 
             var tmp = nameFilterValue;
-            if (ImGui.InputTextWithHint("Name Filter", "Input a name filter. You can use regex", ref tmp, 256))
+            if (
+                ImGui.InputTextWithHint(
+                    "Name Filter",
+                    "Input a name filter. You can use regex",
+                    ref tmp,
+                    256
+                )
+            )
             {
                 nameFilterValue = tmp;
                 try
                 {
-                    nameFilterRegex = new Regex(nameFilterValue,
-                        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                    nameFilterRegex = new Regex(
+                        nameFilterValue,
+                        RegexOptions.Compiled
+                            | RegexOptions.IgnoreCase
+                            | RegexOptions.CultureInvariant
+                    );
                 }
                 catch
                 {
@@ -244,8 +287,14 @@ public class LocalMobsUi : IDisposable
 
             // draw the table
 
-            ImGui.BeginTable("objecttable", 8,
-                ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Resizable | ImGuiTableFlags.Sortable);
+            ImGui.BeginTable(
+                "objecttable",
+                8,
+                ImGuiTableFlags.Borders
+                    | ImGuiTableFlags.RowBg
+                    | ImGuiTableFlags.Resizable
+                    | ImGuiTableFlags.Sortable
+            );
             //TODO: Sortable
             ImGui.TableSetupColumn("Kind");
             ImGui.TableSetupColumn("Name");
@@ -262,8 +311,12 @@ public class LocalMobsUi : IDisposable
             foreach (var x in areaObjects)
             {
                 var espOption = radarModules.radarConfigurationModule.GetParams(x);
-                var customEspOption =
-                    radarModules.radarConfigurationModule.TryGetOverridenParams(x, selfObfuscated, baseId, out var isUsingCustomEspOption);
+                var customEspOption = radarModules.radarConfigurationModule.TryGetOverridenParams(
+                    x,
+                    selfObfuscated,
+                    baseId,
+                    out var isUsingCustomEspOption
+                );
                 //Kind
                 ImGui.TableNextColumn();
                 ImGui.Text($"{x.ObjectKind}");
@@ -286,16 +339,25 @@ public class LocalMobsUi : IDisposable
                 if (ImGui.Button($"Default##{x.Address}"))
                 {
                     var mobType = x.GetMobType();
-                    typeConfigurator.OpenUiWithType(ref espOption,
-                        x.Name.TextValue, mobType,
-                        DisplayOrigination.OpenWorld);
+                    typeConfigurator.OpenUiWithType(
+                        ref espOption,
+                        x.Name.TextValue,
+                        mobType,
+                        DisplayOrigination.OpenWorld
+                    );
                 }
 
                 // Use Custom Settings
                 ImGui.TableNextColumn();
                 if (ImGui.Checkbox($"##custom-settings-{x.Address}", ref isUsingCustomEspOption))
                 {
-                    configInterface.Customize(x, isUsingCustomEspOption, espOption, selfObfuscated, baseId);
+                    configInterface.Customize(
+                        x,
+                        isUsingCustomEspOption,
+                        espOption,
+                        selfObfuscated,
+                        baseId
+                    );
                 }
 
                 if (isUsingCustomEspOption)
@@ -304,9 +366,12 @@ public class LocalMobsUi : IDisposable
                     if (ImGui.Button($"Edit##{x.Address}"))
                     {
                         var mobType = x.GetMobType();
-                        typeConfigurator.OpenUiWithType(ref customEspOption,
-                            x.Name.TextValue, mobType,
-                            DisplayOrigination.OpenWorld);
+                        typeConfigurator.OpenUiWithType(
+                            ref customEspOption,
+                            x.Name.TextValue,
+                            mobType,
+                            DisplayOrigination.OpenWorld
+                        );
                     }
                 }
 
@@ -331,8 +396,13 @@ public class LocalMobsUi : IDisposable
                 if (isUsingCustomEspOption)
                 {
                     var colorChange = ImGui.ColorConvertU32ToFloat4(customEspOption.ColorU);
-                    if (ImGui.ColorEdit4($"Color##{x.Address}-color", ref colorChange,
-                            ImGuiColorEditFlags.NoInputs))
+                    if (
+                        ImGui.ColorEdit4(
+                            $"Color##{x.Address}-color",
+                            ref colorChange,
+                            ImGuiColorEditFlags.NoInputs
+                        )
+                    )
                     {
                         customEspOption.ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
                         configInterface.Save();

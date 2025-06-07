@@ -26,7 +26,8 @@ public class CustomizedEntitiesUI : IDisposable
         IDalamudPluginInterface dalamudPluginInterface,
         Configuration.Configuration configInterface,
         IPluginLog pluginLog,
-        TypeConfigurator typeConfigurator)
+        TypeConfigurator typeConfigurator
+    )
     {
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
@@ -42,23 +43,23 @@ public class CustomizedEntitiesUI : IDisposable
 
     private void DrawCustomizedEntitiesMenu()
     {
-        if (!drawCurrentMobsWindow) return;
+        if (!drawCurrentMobsWindow)
+            return;
 
         var size = new Vector2(560, 500);
         ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
         if (ImGui.Begin("Radar Plugin Customized Entities Menu", ref drawCurrentMobsWindow))
         {
-            UiHelpers.DrawTabs("customized-entities-tabs",
+            UiHelpers.DrawTabs(
+                "customized-entities-tabs",
                 ("Mobs", ConfigConstants.White, DrawMobsMenu),
                 ("Players", ConfigConstants.White, DrawPlayersMenu)
             );
         }
 
-
         ImGui.End();
     }
-
 
     private void DrawMobsMenu()
     {
@@ -72,7 +73,10 @@ public class CustomizedEntitiesUI : IDisposable
         DrawMenu(playersOptionTypeArray, MobType.Player);
     }
 
-    private void DrawMenu(IEnumerable<Configuration.Configuration.ESPOptionMobBased> optionOverrideIEnumerable, MobType mobType)
+    private void DrawMenu(
+        IEnumerable<Configuration.Configuration.ESPOptionMobBased> optionOverrideIEnumerable,
+        MobType mobType
+    )
     {
         // Filter the array
         if (nameFilterValue.Length != 0)
@@ -80,11 +84,14 @@ public class CustomizedEntitiesUI : IDisposable
             optionOverrideIEnumerable = optionOverrideIEnumerable.Where(x =>
             {
                 var name = x.Name;
-                var nameMatch = filterRegex?.IsMatch(name) ??
-                                name.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
+                var nameMatch =
+                    filterRegex?.IsMatch(name)
+                    ?? name.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
                 var id = x.Id;
                 var idString = id.ToString();
-                var idMatch = filterRegex?.IsMatch(idString) ?? idString.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
+                var idMatch =
+                    filterRegex?.IsMatch(idString)
+                    ?? idString.Contains(nameFilterValue, StringComparison.OrdinalIgnoreCase);
                 return nameMatch || idMatch;
             });
         }
@@ -93,8 +100,12 @@ public class CustomizedEntitiesUI : IDisposable
         {
             ImGui.Text("Add Customized Entity dataId:");
             ImGui.SameLine();
-            ImGui.InputText("", ref currentTypedDataId, 10,
-                ImGuiInputTextFlags.CharsDecimal | ImGuiInputTextFlags.CharsNoBlank);
+            ImGui.InputText(
+                "",
+                ref currentTypedDataId,
+                10,
+                ImGuiInputTextFlags.CharsDecimal | ImGuiInputTextFlags.CharsNoBlank
+            );
             if (ImGui.Button("Add As Object"))
             {
                 var parsed = uint.TryParse(currentTypedDataId, out var dataId);
@@ -104,15 +115,19 @@ public class CustomizedEntitiesUI : IDisposable
                 }
                 else
                 {
-                    configInterface.cfg.OptionOverride.Add(dataId,
-                        new Configuration.Configuration.ESPOptionMobBased(Configuration.Configuration.objectOptDefault)
+                    configInterface.cfg.OptionOverride.Add(
+                        dataId,
+                        new Configuration.Configuration.ESPOptionMobBased(
+                            Configuration.Configuration.objectOptDefault
+                        )
                         {
                             Enabled = true,
                             ColorU = ConfigConstants.White,
                             Name = "Customized Entity",
                             MobTypeValue = MobType.Object,
-                            Id = dataId
-                        });
+                            Id = dataId,
+                        }
+                    );
                 }
             }
 
@@ -134,27 +149,40 @@ public class CustomizedEntitiesUI : IDisposable
             ImGui.PopStyleColor();
             //Popup End
             UiHelpers.HoverTooltip(
-                "YES ITS ONLY AN OBJECT ATM,\nTHIS MIGHT BE DANGEROUS IF YOU ADD A MOB THAT ISNT A MOB.\nWill require some engineering");
+                "YES ITS ONLY AN OBJECT ATM,\nTHIS MIGHT BE DANGEROUS IF YOU ADD A MOB THAT ISNT A MOB.\nWill require some engineering"
+            );
         }
         // Draw the filter
 
         var tmp = nameFilterValue;
-        if (ImGui.InputTextWithHint("Name Filter", "Input a name / id filter. You can use regex", ref tmp, 256))
+        if (
+            ImGui.InputTextWithHint(
+                "Name Filter",
+                "Input a name / id filter. You can use regex",
+                ref tmp,
+                256
+            )
+        )
         {
             nameFilterValue = tmp;
             try
             {
-                filterRegex = new Regex(nameFilterValue,
-                    RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                filterRegex = new Regex(
+                    nameFilterValue,
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+                );
             }
             catch
             {
                 filterRegex = null;
             }
         }
-        
-        ImGui.BeginTable($"customizedEntitiesTable-{mobType}", 8,
-            ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable);
+
+        ImGui.BeginTable(
+            $"customizedEntitiesTable-{mobType}",
+            8,
+            ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable
+        );
         ImGui.TableSetupColumn("DataId");
         ImGui.TableSetupColumn("Name When Added");
         ImGui.TableSetupColumn("Name Last Seen");
@@ -164,8 +192,7 @@ public class CustomizedEntitiesUI : IDisposable
         ImGui.TableSetupColumn("Edit", ImGuiTableColumnFlags.NoSort);
         ImGui.TableSetupColumn("Delete", ImGuiTableColumnFlags.NoSort);
 
-        var optionOverrideTemporary =
-            GetSortedOptionOverride(optionOverrideArray);
+        var optionOverrideTemporary = GetSortedOptionOverride(optionOverrideArray);
 
         ImGui.TableHeadersRow();
         var shouldSave = false;
@@ -192,17 +219,18 @@ public class CustomizedEntitiesUI : IDisposable
             //shouldSave |= UiHelpers.Vector4ColorSelector($"##{x.Key}-color", ref x.Value.ColorU, ImGuiColorEditFlags.NoInputs);
             ImGui.TableNextColumn();
             var colorChange = ImGui.ColorConvertU32ToFloat4(x.ColorU);
-            if (ImGui.ColorEdit4($"##{x.Id}-color", ref colorChange,
-                    ImGuiColorEditFlags.NoInputs))
+            if (ImGui.ColorEdit4($"##{x.Id}-color", ref colorChange, ImGuiColorEditFlags.NoInputs))
             {
                 if (mobType == MobType.Player)
                 {
-                    configInterface.cfg.PlayerOptionOverride[x.Id].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+                    configInterface.cfg.PlayerOptionOverride[x.Id].ColorU =
+                        ImGui.ColorConvertFloat4ToU32(colorChange);
                 }
                 else
                 {
                     var convertedUint = Convert.ToUInt32(x.Id);
-                    configInterface.cfg.OptionOverride[convertedUint].ColorU = ImGui.ColorConvertFloat4ToU32(colorChange);
+                    configInterface.cfg.OptionOverride[convertedUint].ColorU =
+                        ImGui.ColorConvertFloat4ToU32(colorChange);
                 }
 
                 shouldSave = true;
@@ -212,7 +240,6 @@ public class CustomizedEntitiesUI : IDisposable
             ImGui.TableNextColumn();
             if (ImGui.Button($"Edit##{x.Id}"))
             {
-
                 Configuration.Configuration.ESPOption optionOverride;
                 if (mobType == MobType.Player)
                 {
@@ -223,9 +250,12 @@ public class CustomizedEntitiesUI : IDisposable
                     var convertedUint = Convert.ToUInt32(x.Id);
                     optionOverride = configInterface.cfg.OptionOverride[convertedUint];
                 }
-                typeConfigurator.OpenUiWithType(ref optionOverride, x.Name,
+                typeConfigurator.OpenUiWithType(
+                    ref optionOverride,
+                    x.Name,
                     ((Configuration.Configuration.ESPOptionMobBased)optionOverride).MobTypeValue,
-                    DisplayOrigination.DeepDungeon);
+                    DisplayOrigination.DeepDungeon
+                );
             }
 
             // Delete
@@ -239,7 +269,9 @@ public class CustomizedEntitiesUI : IDisposable
             ImGui.PushStyleColor(ImGuiCol.Border, ImGui.GetColorU32(ImGuiCol.TabActive));
             if (ImGui.BeginPopup($"DeleteConfigPopup##{x.Id}"))
             {
-                ImGui.Text($"Are you sure you want to delete the config for the mob: {x.LastSeenName}?");
+                ImGui.Text(
+                    $"Are you sure you want to delete the config for the mob: {x.LastSeenName}?"
+                );
                 if (ImGui.Button("Yes"))
                 {
                     if (mobType == MobType.Player)
@@ -277,9 +309,11 @@ public class CustomizedEntitiesUI : IDisposable
     }
 
     private Configuration.Configuration.ESPOptionMobBased[] GetSortedOptionOverride(
-        Configuration.Configuration.ESPOptionMobBased[] arrayToSort)
+        Configuration.Configuration.ESPOptionMobBased[] arrayToSort
+    )
     {
-        IEnumerable<Configuration.Configuration.ESPOptionMobBased> optionOverrideTemporary = arrayToSort;
+        IEnumerable<Configuration.Configuration.ESPOptionMobBased> optionOverrideTemporary =
+            arrayToSort;
         var sortSpecs = ImGui.TableGetSortSpecs();
         if (sortSpecs.SpecsDirty)
         {
@@ -316,7 +350,9 @@ public class CustomizedEntitiesUI : IDisposable
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        optionOverrideTemporary = arrayToSort.OrderByDescending(x => x.LastSeenName);
+                        optionOverrideTemporary = arrayToSort.OrderByDescending(x =>
+                            x.LastSeenName
+                        );
                     }
 
                     break;
@@ -328,8 +364,9 @@ public class CustomizedEntitiesUI : IDisposable
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
-                        optionOverrideTemporary = arrayToSort
-                            .OrderByDescending(x => x.UtcLastSeenTime);
+                        optionOverrideTemporary = arrayToSort.OrderByDescending(x =>
+                            x.UtcLastSeenTime
+                        );
                     }
 
                     break;
