@@ -2,20 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Interface.GameFonts;
 using Dalamud.Interface.ManagedFontAtlas;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
-using RadarPlugin.RadarLogic.Modules;
 using RadarPlugin.UI;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
@@ -74,6 +69,7 @@ public class RadarDriver : IDisposable
         //this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
     }
 
+    /*
     private void BuildFont()
     {
         // Axis = Plugin.Interface.UiBuilder.FontAtlas.NewGameFontHandle(new GameFontStyle(GameFontFamily.Axis, SizeInPx(Plugin.Config.FontSizeV2)));
@@ -105,7 +101,7 @@ public class RadarDriver : IDisposable
         {
             this.pluginLog.Error("Font does not exist! Please fix dev.");
         }
-    }
+    }*/
 
     private void OnUiTick()
     {

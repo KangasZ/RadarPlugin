@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.InteropServices;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Hooking;
 using Dalamud.Interface;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Control;
-using ImGuiNET;
-using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 using RadarPlugin.RadarLogic;
 using CameraManager = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager;

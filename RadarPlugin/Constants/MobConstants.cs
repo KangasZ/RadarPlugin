@@ -306,6 +306,7 @@ public static class MobConstants
         { 18279, DeepDungeonMobTypes.Traps },
         { 2014585, DeepDungeonMobTypes.Passage },
         { 18442, DeepDungeonMobTypes.Mimic },
+        //Silvers
         { 1794, DeepDungeonMobTypes.SilverChest },
         { 1791, DeepDungeonMobTypes.SilverChest },
         { 1796, DeepDungeonMobTypes.SilverChest },
@@ -314,6 +315,7 @@ public static class MobConstants
         { 1790, DeepDungeonMobTypes.SilverChest },
         { 1795, DeepDungeonMobTypes.SilverChest },
         { 1793, DeepDungeonMobTypes.SilverChest },
+        //Bronze
         { 1842, DeepDungeonMobTypes.BronzeChest },
         { 1851, DeepDungeonMobTypes.BronzeChest },
         { 1848, DeepDungeonMobTypes.BronzeChest },

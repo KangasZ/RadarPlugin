@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
-using Dalamud.Logging;
 using Dalamud.Utility;
-using ImGuiNET;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 
@@ -15,6 +15,19 @@ namespace RadarPlugin.UI;
 
 public static class UiHelpers
 {
+    public static string[] ObjectDrawTypes = { "Dot", "Name", "Dot + Name", "Custom" };
+    public static string[] MobDrawTypes = {
+        "Dot",
+        "Name",
+        "Dot + Name",
+        "Health Circle",
+        "Health Circle and Value",
+        "Health Circle and Name",
+        "Health Cirlcle + Value + name",
+        "Health Value",
+        "Health Value and Name",
+        "Custom",
+    };
     public static void TextColored(string text, uint color)
     {
         ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color), text);
@@ -39,9 +52,9 @@ public static class UiHelpers
         var size = new Vector2(xSize - borderThickness, ySize);
         var filledSize = new Vector2(size.X * filledPercent, size.Y);
         cursorScreenPos += new Vector2(borderThickness, 0);
-        imDrawListPtr.AddRectFilled(cursorScreenPos, cursorScreenPos + size, bgColor, 0);
+        imDrawListPtr.AddRectFilled(cursorScreenPos, cursorScreenPos + size, bgColor, 0f);
 
-        imDrawListPtr.AddRectFilled(cursorScreenPos, cursorScreenPos + filledSize, fgColor, 0);
+        imDrawListPtr.AddRectFilled(cursorScreenPos, cursorScreenPos + filledSize, fgColor, 0f);
 
         if (borderThickness > 0)
         {
@@ -363,21 +376,28 @@ public static class UiHelpers
         {
             mobType = MobType.Character;
         }
+        var hasChanged = false;
 
         switch (mobType)
         {
             case MobType.Object:
                 ImGui.PushItemWidth(175);
-                var lb = ImGui.Combo(
-                    $"##{id}",
-                    ref val,
-                    new string[] { "Dot", "Name", "Dot + Name", "Custom" },
-                    4,
-                    4
-                );
+                if (ImGui.BeginCombo($"##{id}{name}", ObjectDrawTypes[val]))
+                {
+                    for (var i = 0; i < ObjectDrawTypes.Length; i++)
+                    {
+                        if (ImGui.Selectable(ObjectDrawTypes[i]))
+                        {
+                            val = i;
+                            hasChanged = true;
+                        }
+                    }
+
+                    ImGui.EndCombo();
+                }
                 ImGui.PopItemWidth();
 
-                if (lb)
+                if (hasChanged)
                 {
                     if (val >= 0 && val <= 2)
                     {
@@ -385,30 +405,24 @@ public static class UiHelpers
                     }
                 }
 
-                return lb;
+                return hasChanged;
             case MobType.Character:
                 ImGui.PushItemWidth(175);
-                var lb2 = ImGui.Combo(
-                    $"##{id}",
-                    ref val,
-                    new string[]
+                if (ImGui.BeginCombo($"##{id}{name}", MobDrawTypes[val]))
+                {
+                    for (var i = 0; i < MobDrawTypes.Length; i++)
                     {
-                        "Dot",
-                        "Name",
-                        "Dot + Name",
-                        "Health Bar",
-                        "Health Bar + Health Value",
-                        "Name + Health Bar",
-                        "Name + Health Bar + Health Value",
-                        "Health Value",
-                        "Name + Health Value",
-                        "Custom",
-                    },
-                    10,
-                    10
-                );
+                        if (ImGui.Selectable(MobDrawTypes[i]))
+                        {
+                            val = i;
+                            hasChanged = true;
+                        }
+                    }
+
+                    ImGui.EndCombo();
+                }
                 ImGui.PopItemWidth();
-                if (lb2)
+                if (hasChanged)
                 {
                     if (val >= 0 && val <= 8)
                     {
@@ -416,7 +430,7 @@ public static class UiHelpers
                     }
                 }
 
-                return lb2;
+                return hasChanged;
             default:
                 return false;
         }

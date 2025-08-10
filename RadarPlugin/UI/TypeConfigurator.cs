@@ -1,8 +1,7 @@
+using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Common.Math;
-using ImGuiNET;
 using RadarPlugin.Enums;
-using RadarPlugin.RadarLogic;
 
 namespace RadarPlugin.UI;
 
