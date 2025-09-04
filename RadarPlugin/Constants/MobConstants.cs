@@ -131,18 +131,46 @@ public static class MobConstants
     {
         // Mimics
         { 2006020, DeepDungeonMobTypes.Mimic },
-        { 2566, DeepDungeonMobTypes.Mimic },
-        { 7392, DeepDungeonMobTypes.Mimic },
-        { 7393, DeepDungeonMobTypes.Mimic },
-        { 7394, DeepDungeonMobTypes.Mimic },
+        { 5831, DeepDungeonMobTypes.Mimic }, // POTD 1-50
         { 5832, DeepDungeonMobTypes.Mimic },
         { 5834, DeepDungeonMobTypes.Mimic },
-        { 15997, DeepDungeonMobTypes.Mimic },
+        { 5833, DeepDungeonMobTypes.Mimic },
+        { 5835, DeepDungeonMobTypes.Mimic },
+        { 6359, DeepDungeonMobTypes.Mimic}, // POTD 51-200
+        { 6360, DeepDungeonMobTypes.Mimic},
+        { 6361, DeepDungeonMobTypes.Mimic},
+        { 6362, DeepDungeonMobTypes.Mimic},
+        { 6363, DeepDungeonMobTypes.Mimic},
+        { 6364, DeepDungeonMobTypes.Mimic},
+        { 6365, DeepDungeonMobTypes.Mimic},
+        { 6366, DeepDungeonMobTypes.Mimic},
+        { 6367, DeepDungeonMobTypes.Mimic},
+        { 6368, DeepDungeonMobTypes.Mimic},
+        { 6369, DeepDungeonMobTypes.Mimic},
+        { 6370, DeepDungeonMobTypes.Mimic},
+        { 6371, DeepDungeonMobTypes.Mimic},
+        { 6372, DeepDungeonMobTypes.Mimic},
+        { 6373, DeepDungeonMobTypes.Mimic},
+        
+        {9042, DeepDungeonMobTypes.Mimic}, // HOH 1-30
+        {9043, DeepDungeonMobTypes.Mimic},
+        {9044, DeepDungeonMobTypes.Mimic},
+        {9045, DeepDungeonMobTypes.Mimic}, // HOH 31-60
+        {9046, DeepDungeonMobTypes.Mimic},
+        {9047, DeepDungeonMobTypes.Mimic},
+        {9048, DeepDungeonMobTypes.Mimic}, // HOH 61-100
+        {9049, DeepDungeonMobTypes.Mimic},
+        {9050, DeepDungeonMobTypes.Mimic},
+        {9051, DeepDungeonMobTypes.Mimic},
+        
+        
+        { 15996, DeepDungeonMobTypes.Mimic }, // EO 1-30
+        { 15997, DeepDungeonMobTypes.Mimic }, 
         { 15998, DeepDungeonMobTypes.Mimic },
-        { 15999, DeepDungeonMobTypes.Mimic },
+        { 15999, DeepDungeonMobTypes.Mimic }, // EO 31-60
         { 16000, DeepDungeonMobTypes.Mimic },
         { 16001, DeepDungeonMobTypes.Mimic },
-        { 16002, DeepDungeonMobTypes.Mimic },
+        { 16002, DeepDungeonMobTypes.Mimic }, // EO 61-100
         { 16003, DeepDungeonMobTypes.Mimic },
         { 16004, DeepDungeonMobTypes.Mimic },
         { 16005, DeepDungeonMobTypes.Mimic },
@@ -213,8 +241,20 @@ public static class MobConstants
         { 2009504, DeepDungeonMobTypes.Traps },
         { 2013284, DeepDungeonMobTypes.Traps },
         //Easy Mobs
-        { 5041, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
-        { 7610, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 5837, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
+        { 5838, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
+        { 5839, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
+        { 5840, DeepDungeonMobTypes.EasyMobs }, // Pygmaioi
+        { 9052, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9053, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9054, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9055, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9056, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9057, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9058, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9059, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9060, DeepDungeonMobTypes.EasyMobs }, // Korrigan
+        { 9061, DeepDungeonMobTypes.EasyMobs }, // Korrigan
         // Orthos Korrigans
         { 16006, DeepDungeonMobTypes.EasyMobs },
         { 16007, DeepDungeonMobTypes.EasyMobs },
@@ -228,37 +268,37 @@ public static class MobConstants
         { 16015, DeepDungeonMobTypes.EasyMobs },
         // Auspices
         // First three may be wrong
-        { 7396, DeepDungeonMobTypes.Auspice }, // Komainu
-        { 7397, DeepDungeonMobTypes.Auspice }, // Inugami
-        { 7398, DeepDungeonMobTypes.Auspice }, // Senri
+        { 9021, DeepDungeonMobTypes.Auspice }, // Komainu
+        { 9022, DeepDungeonMobTypes.Auspice }, // Inugami
+        { 9023, DeepDungeonMobTypes.Auspice }, // Senri
         { 15898, DeepDungeonMobTypes.Auspice }, // WHM Demiclone
         { 15899, DeepDungeonMobTypes.Auspice }, // BLM Demiclone
         { 15900, DeepDungeonMobTypes.Auspice }, // Onion knight Demiclone
         // POTD Specail Undead
-        { 5049, DeepDungeonMobTypes.SpecialUndead },
-        { 5048, DeepDungeonMobTypes.SpecialUndead },
-        { 5047, DeepDungeonMobTypes.SpecialUndead },
-        { 5050, DeepDungeonMobTypes.SpecialUndead },
-        { 5052, DeepDungeonMobTypes.SpecialUndead },
-        { 5051, DeepDungeonMobTypes.SpecialUndead },
-        { 5053, DeepDungeonMobTypes.SpecialUndead },
-        { 5046, DeepDungeonMobTypes.SpecialUndead },
-        { 5290, DeepDungeonMobTypes.SpecialUndead },
-        { 5291, DeepDungeonMobTypes.SpecialUndead },
-        { 5293, DeepDungeonMobTypes.SpecialUndead },
-        { 5292, DeepDungeonMobTypes.SpecialUndead },
-        { 5294, DeepDungeonMobTypes.SpecialUndead },
-        { 5295, DeepDungeonMobTypes.SpecialUndead },
-        { 5296, DeepDungeonMobTypes.SpecialUndead },
-        { 5297, DeepDungeonMobTypes.SpecialUndead },
-        { 5298, DeepDungeonMobTypes.SpecialUndead },
-        { 5283, DeepDungeonMobTypes.SpecialUndead },
-        { 5284, DeepDungeonMobTypes.SpecialUndead },
-        { 5285, DeepDungeonMobTypes.SpecialUndead },
-        { 5286, DeepDungeonMobTypes.SpecialUndead },
-        { 5287, DeepDungeonMobTypes.SpecialUndead },
-        { 5288, DeepDungeonMobTypes.SpecialUndead },
-        { 5289, DeepDungeonMobTypes.SpecialUndead },
+        { 5696, DeepDungeonMobTypes.SpecialUndead },
+        { 5695, DeepDungeonMobTypes.SpecialUndead },
+        { 5009, DeepDungeonMobTypes.SpecialUndead },
+        { 5716, DeepDungeonMobTypes.SpecialUndead },
+        { 5719, DeepDungeonMobTypes.SpecialUndead },
+        { 5717, DeepDungeonMobTypes.SpecialUndead },
+        { 5720, DeepDungeonMobTypes.SpecialUndead },
+        { 5008, DeepDungeonMobTypes.SpecialUndead },
+        { 6393, DeepDungeonMobTypes.SpecialUndead },
+        { 6394, DeepDungeonMobTypes.SpecialUndead },
+        { 6390, DeepDungeonMobTypes.SpecialUndead },
+        { 6389, DeepDungeonMobTypes.SpecialUndead },
+        { 6391, DeepDungeonMobTypes.SpecialUndead },
+        { 6395, DeepDungeonMobTypes.SpecialUndead },
+        { 6397, DeepDungeonMobTypes.SpecialUndead },
+        { 6392, DeepDungeonMobTypes.SpecialUndead },
+        { 6398, DeepDungeonMobTypes.SpecialUndead },
+        { 6396, DeepDungeonMobTypes.SpecialUndead },
+        { 6404, DeepDungeonMobTypes.SpecialUndead },
+        { 6402, DeepDungeonMobTypes.SpecialUndead },
+        { 6401, DeepDungeonMobTypes.SpecialUndead },
+        { 6403, DeepDungeonMobTypes.SpecialUndead },
+        { 6399, DeepDungeonMobTypes.SpecialUndead },
+        { 6400, DeepDungeonMobTypes.SpecialUndead },
         // Dread Orthos Mobs
         // Meracydian Clone
         { 15912, DeepDungeonMobTypes.SpecialUndead },
