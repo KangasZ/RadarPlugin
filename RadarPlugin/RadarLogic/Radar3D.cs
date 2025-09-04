@@ -318,7 +318,6 @@ public unsafe class Radar3D
         IBattleNpc battleNpc
     )
     {
-        var opacity = configInterface.cfg.AggroRadiusOptions.CircleOpacity;
         rotation += MathF.PI / 4;
         var numSegments = 100;
 
@@ -330,7 +329,7 @@ public unsafe class Radar3D
         switch (aggroType)
         {
             case AggroType.Proximity:
-                var proximityColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
+                var proximityColor = configInterface.cfg.AggroRadiusOptions.FrontColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
                     imDrawListPtr,
                     position,
@@ -344,7 +343,7 @@ public unsafe class Radar3D
                 );
                 break;
             case AggroType.Sound:
-                var soundColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
+                var soundColor = configInterface.cfg.AggroRadiusOptions.RearColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
                     imDrawListPtr,
                     position,
@@ -359,7 +358,7 @@ public unsafe class Radar3D
                 break;
             case AggroType.Sight:
             default:
-                var frontColor = configInterface.cfg.AggroRadiusOptions.FrontColor & opacity;
+                var frontColor = configInterface.cfg.AggroRadiusOptions.FrontColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
                     imDrawListPtr,
                     position,
@@ -371,7 +370,7 @@ public unsafe class Radar3D
                     numSegments,
                     gameGui
                 );
-                var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor & opacity;
+                var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
                     imDrawListPtr,
                     position,
@@ -383,7 +382,7 @@ public unsafe class Radar3D
                     numSegments,
                     gameGui
                 );
-                var backColor = configInterface.cfg.AggroRadiusOptions.RearColor & opacity;
+                var backColor = configInterface.cfg.AggroRadiusOptions.RearColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
                     imDrawListPtr,
                     position,
@@ -395,7 +394,7 @@ public unsafe class Radar3D
                     numSegments,
                     gameGui
                 );
-                var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor & opacity;
+                var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
                     imDrawListPtr,
                     position,
@@ -407,9 +406,7 @@ public unsafe class Radar3D
                     numSegments,
                     gameGui
                 );
-                var coneColor =
-                    configInterface.cfg.AggroRadiusOptions.FrontConeColor
-                    & configInterface.cfg.AggroRadiusOptions.FrontConeOpacity;
+                var coneColor = configInterface.cfg.AggroRadiusOptions.FrontConeColor;
                 DrawRadarHelper.DrawConeAtCenterPointFromRotation(
                     imDrawListPtr,
                     position,

@@ -16,7 +16,8 @@ namespace RadarPlugin.UI;
 public static class UiHelpers
 {
     public static string[] ObjectDrawTypes = { "Dot", "Name", "Dot + Name", "Custom" };
-    public static string[] MobDrawTypes = {
+    public static string[] MobDrawTypes =
+    {
         "Dot",
         "Name",
         "Dot + Name",
@@ -28,6 +29,7 @@ public static class UiHelpers
         "Health Value and Name",
         "Custom",
     };
+
     public static void TextColored(string text, uint color)
     {
         ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color), text);
@@ -381,12 +383,16 @@ public static class UiHelpers
         switch (mobType)
         {
             case MobType.Object:
+                if (val >= ObjectDrawTypes.Length || val < 0)
+                {
+                    val = ObjectDrawTypes.Length - 1;
+                }
                 ImGui.PushItemWidth(175);
                 if (ImGui.BeginCombo($"##{id}{name}", ObjectDrawTypes[val]))
                 {
                     for (var i = 0; i < ObjectDrawTypes.Length; i++)
                     {
-                        if (ImGui.Selectable(ObjectDrawTypes[i]))
+                        if (ImGui.Selectable($"{ObjectDrawTypes[i]}##{id}{name}"))
                         {
                             val = i;
                             hasChanged = true;
@@ -397,22 +403,23 @@ public static class UiHelpers
                 }
                 ImGui.PopItemWidth();
 
-                if (hasChanged)
+                if (hasChanged && val < ObjectDrawTypes.Length - 1 && val >= 0)
                 {
-                    if (val >= 0 && val <= 2)
-                    {
-                        currVal = ((DisplayTypes)val).ToFlags();
-                    }
+                    currVal = ((DisplayTypes)val).ToFlags();
                 }
 
                 return hasChanged;
             case MobType.Character:
+                if (val >= MobDrawTypes.Length || val < 0)
+                {
+                    val = MobDrawTypes.Length - 1;
+                }
                 ImGui.PushItemWidth(175);
                 if (ImGui.BeginCombo($"##{id}{name}", MobDrawTypes[val]))
                 {
                     for (var i = 0; i < MobDrawTypes.Length; i++)
                     {
-                        if (ImGui.Selectable(MobDrawTypes[i]))
+                        if (ImGui.Selectable($"{MobDrawTypes[i]}##{id}{name}"))
                         {
                             val = i;
                             hasChanged = true;
@@ -422,12 +429,9 @@ public static class UiHelpers
                     ImGui.EndCombo();
                 }
                 ImGui.PopItemWidth();
-                if (hasChanged)
+                if (hasChanged && val < MobDrawTypes.Length - 1 && val >= 0)
                 {
-                    if (val >= 0 && val <= 8)
-                    {
-                        currVal = ((DisplayTypes)val).ToFlags();
-                    }
+                    currVal = ((DisplayTypes)val).ToFlags();
                 }
 
                 return hasChanged;

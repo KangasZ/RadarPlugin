@@ -835,6 +835,10 @@ public class MainUi : IDisposable
             $"Right##{tag}",
             ref configInterface.cfg.AggroRadiusOptions.RightSideColor
         );
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            $"Frontal Cone##{tag}",
+            ref configInterface.cfg.AggroRadiusOptions.FrontConeColor
+        );
         UiHelpers.DrawSeperator("Sound Aggro Settings:", ConfigConstants.White);
         shouldSave |= UiHelpers.Vector4ColorSelector(
             $"Sound##{tag}",

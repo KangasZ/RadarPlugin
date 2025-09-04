@@ -224,7 +224,7 @@ public class Configuration
 
     public class Config : IPluginConfiguration
     {
-        public int Version { get; set; } = 5;
+        public int Version { get; set; } = 6;
         public string ConfigName = "default";
         public uint YourAccountId = 0;
         public bool Enabled = true;
@@ -592,6 +592,28 @@ public class Configuration
                 }
             );
             oldConfig.Version = 5;
+        }
+
+        if (oldConfig.Version <= 6)
+        {
+            oldConfig.AggroRadiusOptions.FrontColor &= oldConfig.AggroRadiusOptions.CircleOpacity;
+            oldConfig.AggroRadiusOptions.LeftSideColor &= oldConfig
+                .AggroRadiusOptions
+                .CircleOpacity;
+            oldConfig.AggroRadiusOptions.RightSideColor &= oldConfig
+                .AggroRadiusOptions
+                .CircleOpacity;
+            oldConfig.AggroRadiusOptions.RearColor &= oldConfig.AggroRadiusOptions.CircleOpacity;
+            oldConfig.AggroRadiusOptions.SoundAggroColor &= oldConfig
+                .AggroRadiusOptions
+                .CircleOpacity;
+            oldConfig.AggroRadiusOptions.ProximityAggroColor &= oldConfig
+                .AggroRadiusOptions
+                .CircleOpacity;
+            oldConfig.AggroRadiusOptions.FrontConeColor &= oldConfig
+                .AggroRadiusOptions
+                .FrontConeOpacity;
+            oldConfig.Version = 6;
         }
     }
 

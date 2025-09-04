@@ -1,5 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using RadarPlugin.Enums;
 
@@ -16,10 +17,12 @@ public class TypeConfigurator
     private string espDescription;
     private MobType mobType;
     private DisplayOrigination displayOrigination;
+    private readonly IPluginLog pluginLog;
 
     public TypeConfigurator(
         IDalamudPluginInterface dalamudPluginInterface,
-        Configuration.Configuration configInterface
+        Configuration.Configuration configInterface,
+        IPluginLog pluginLog
     )
     {
         this.configInterface = configInterface;
@@ -27,6 +30,7 @@ public class TypeConfigurator
         this.dalamudPluginInterface.UiBuilder.Draw += Draw;
         this.espOption = configInterface.cfg.NpcOption;
         this.espDescription = "NPCs...";
+        this.pluginLog = pluginLog;
     }
 
     public void Dispose()
@@ -41,6 +45,7 @@ public class TypeConfigurator
         DisplayOrigination displayOrigination
     )
     {
+        pluginLog.Debug($"Opening up type configurator {typeId} {mobType} {displayOrigination}");
         if (typeId == this.espDescription && configuratorWindowVisible == true)
         {
             configuratorWindowVisible = false;

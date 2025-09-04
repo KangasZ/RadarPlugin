@@ -50,7 +50,7 @@ public class RadarPlugin : IDalamudPlugin
         );
 
         // UI
-        typeConfiguratorUi = new TypeConfigurator(this.pluginInterface, Configuration);
+        typeConfiguratorUi = new TypeConfigurator(this.pluginInterface, Configuration, pluginLog);
         mobEditUi = new MobEditUi(
             this.pluginInterface,
             Configuration,
