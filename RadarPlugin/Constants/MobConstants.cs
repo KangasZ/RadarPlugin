@@ -60,6 +60,13 @@ public static class MobConstants
         1107,
         1108, // Eureka Orthos in order
         1252, // OC: South Horn
+        
+        // DD
+        1281,
+        1282,
+        1283,
+        1284,
+        1285,
     };
 
     /**
@@ -115,6 +122,7 @@ public static class MobConstants
         { 2007186, "Toading Trap" },
         { 2009504, "Odder Trap" },
         { 2013284, "Owlet Trap" },
+        {2014939, "Fae Trap"},
         // BA Objects
         { 2009728, "Trap" }, // Eureka Portal,
         { 2009729, "Portal" }, // Eureka Portal,
@@ -426,5 +434,24 @@ public static class MobConstants
         { 2014584, DeepDungeonMobTypes.Traps },
         { 18328, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
         { 18324, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
+        
+        
+        
+        //Pilgrims
+        {2014756, DeepDungeonMobTypes.Passage},
+        {2014755, DeepDungeonMobTypes.Return},
+        //{2007357, DeepDungeonMobTypes.SilverChest},
+        //{2007358, DeepDungeonMobTypes.GoldChest},
+        {2014759, DeepDungeonMobTypes.Passage}, // votice candalabra
+        {1882, DeepDungeonMobTypes.BronzeChest},
+        {1883, DeepDungeonMobTypes.BronzeChest},
+        {1884, DeepDungeonMobTypes.BronzeChest},
+        {1885, DeepDungeonMobTypes.BronzeChest},
+        {1886, DeepDungeonMobTypes.BronzeChest},
+        {1887, DeepDungeonMobTypes.BronzeChest},
+        {1888, DeepDungeonMobTypes.BronzeChest},
+        {2014939, DeepDungeonMobTypes.Traps}, // fae trap
+        {18868, DeepDungeonMobTypes.Auspice} // Feo ul
+        
     };
 }
