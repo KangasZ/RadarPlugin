@@ -62,11 +62,15 @@ public static class MobConstants
         1252, // OC: South Horn
         
         // DD
+        1280, // Base floor lol
         1281,
         1282,
         1283,
         1284,
         1285,
+        1286,
+        1287,
+        1288,
     };
 
     /**
@@ -435,14 +439,13 @@ public static class MobConstants
         { 18328, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
         { 18324, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
         
-        
-        
         //Pilgrims
         {2014756, DeepDungeonMobTypes.Passage},
         {2014755, DeepDungeonMobTypes.Return},
         //{2007357, DeepDungeonMobTypes.SilverChest},
         //{2007358, DeepDungeonMobTypes.GoldChest},
-        {2014759, DeepDungeonMobTypes.Passage}, // votice candalabra
+        {2014759, DeepDungeonMobTypes.Passage}, // votive candalabra
+        {1881, DeepDungeonMobTypes.BronzeChest},
         {1882, DeepDungeonMobTypes.BronzeChest},
         {1883, DeepDungeonMobTypes.BronzeChest},
         {1884, DeepDungeonMobTypes.BronzeChest},
@@ -450,8 +453,34 @@ public static class MobConstants
         {1886, DeepDungeonMobTypes.BronzeChest},
         {1887, DeepDungeonMobTypes.BronzeChest},
         {1888, DeepDungeonMobTypes.BronzeChest},
+        {1889, DeepDungeonMobTypes.BronzeChest},
+        {1906, DeepDungeonMobTypes.BronzeChest},
+        {1890, DeepDungeonMobTypes.BronzeChest},
+        {1907, DeepDungeonMobTypes.BronzeChest},
+        {1891, DeepDungeonMobTypes.BronzeChest},
+        {1908, DeepDungeonMobTypes.BronzeChest},
         {2014939, DeepDungeonMobTypes.Traps}, // fae trap
-        {18868, DeepDungeonMobTypes.Auspice} // Feo ul
+        {18868, DeepDungeonMobTypes.Auspice}, // Feo ul
+        {18869, DeepDungeonMobTypes.Auspice}, // Feo ul 55
         
+        
+        {18899, DeepDungeonMobTypes.EasyMobs},
+        {18905, DeepDungeonMobTypes.EasyMobs},
+        
+        // Patrols
+        {18823, DeepDungeonMobTypes.Patrol},
+        {18720, DeepDungeonMobTypes.Patrol},
+        {18727, DeepDungeonMobTypes.Patrol},
+        {18830, DeepDungeonMobTypes.Patrol},
+        {18726, DeepDungeonMobTypes.Patrol},
+        {18732, DeepDungeonMobTypes.Patrol},
+        {18731, DeepDungeonMobTypes.Patrol},
+        {18838, DeepDungeonMobTypes.Patrol},
+        
+        {18889, DeepDungeonMobTypes.Mimic},
+        {18894 , DeepDungeonMobTypes.Mimic},
+        {18895 , DeepDungeonMobTypes.Mimic},
+        
+        //18910 boss 60
     };
 }

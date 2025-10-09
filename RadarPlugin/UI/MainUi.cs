@@ -446,7 +446,7 @@ public class MainUi : IDisposable
             ("Players", ConfigConstants.Silver, DrawPlayerGeneralSettings),
             ("Mobs", ConfigConstants.Green, DrawMobsVisibilitySettings),
             ("Entities", ConfigConstants.LightBlue, DrawEntitiesVisibilitySettings),
-            ("OC/DD/Eureka", ConfigConstants.Yellow, DrawDeepDungeonOverviewSettings)
+            ("Foray/DD", ConfigConstants.Yellow, DrawDeepDungeonOverviewSettings)
         );
     }
 
@@ -528,7 +528,13 @@ public class MainUi : IDisposable
             mobType: MobType.Character,
             displayOrigination: DisplayOrigination.DeepDungeon
         );
-
+        DrawSettingsOverview(
+            configInterface.cfg.DeepDungeonOptions.PatrolOption,
+            "Patrol mobs",
+            mobType: MobType.Character,
+            displayOrigination: DisplayOrigination.DeepDungeon
+        );
+        
         UiHelpers.DrawSeperator($"Loot Options", ConfigConstants.Red);
         DrawSettingsOverview(
             configInterface.cfg.DeepDungeonOptions.GoldChestOption,

@@ -113,6 +113,9 @@ public class Configuration
 
         public ESPOption DefaultEnemyOption { get; set; } =
             new(mobOptDefault) { ColorU = ConfigConstants.White };
+        
+        public ESPOption PatrolOption { get; set; } =
+            new(mobOptDefault) { ColorU = Color.Yellow };
     }
 
     public class AggroRadiusOptions

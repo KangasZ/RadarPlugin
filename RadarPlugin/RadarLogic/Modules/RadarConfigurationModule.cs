@@ -225,6 +225,8 @@ public class RadarConfigurationModule : IModuleInterface
                         return configInterface.cfg.DeepDungeonOptions.AccursedHoardOption;
                     case DeepDungeonMobTypes.Mimic:
                         return configInterface.cfg.DeepDungeonOptions.MimicOption;
+                    case DeepDungeonMobTypes.Patrol:
+                        return configInterface.cfg.DeepDungeonOptions.PatrolOption;
                     case DeepDungeonMobTypes.Default:
                         return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
                     default:
