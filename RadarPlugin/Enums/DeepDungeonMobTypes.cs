@@ -14,5 +14,6 @@ public enum DeepDungeonMobTypes
     BronzeChest,
     AccursedHoard,
     Mimic,
-    Patrol
+    Patrol,
+    Activatable,
 }

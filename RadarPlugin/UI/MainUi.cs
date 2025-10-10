@@ -572,6 +572,12 @@ public class MainUi : IDisposable
             configInterface.cfg.DeepDungeonOptions.PassageOption,
             "Passage",
             displayOrigination: DisplayOrigination.DeepDungeon,
+            description: "This also contains the carrot? and some mixed spots in OC"
+        );
+        DrawSettingsOverview(
+            configInterface.cfg.DeepDungeonOptions.ActivatableOption,
+            "Activatables",
+            displayOrigination: DisplayOrigination.DeepDungeon,
             description: "This also contains the carrot and some mixed spots in OC"
         );
     }

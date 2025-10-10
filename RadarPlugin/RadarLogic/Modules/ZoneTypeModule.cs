@@ -7,6 +7,7 @@ namespace RadarPlugin.RadarLogic.Modules;
 
 public class ZoneTypeModule : IModuleInterface
 {
+    //TODO: Set this to a change event instead of checking every tick
     private ICondition conditionInterface;
     private readonly IClientState clientState;
     private LocationKind currentLocation = LocationKind.Overworld;
@@ -30,7 +31,7 @@ public class ZoneTypeModule : IModuleInterface
     public void StartTick()
     {
         if (
-            MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
+            MapConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
             || this.conditionInterface[ConditionFlag.InDeepDungeon]
         )
         {

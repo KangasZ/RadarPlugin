@@ -116,6 +116,9 @@ public class Configuration
         
         public ESPOption PatrolOption { get; set; } =
             new(mobOptDefault) { ColorU = Color.Yellow };
+        
+        public ESPOption ActivatableOption { get; set; } =
+            new(objectOptDefault) { ColorU = Color.Blue };
     }
 
     public class AggroRadiusOptions

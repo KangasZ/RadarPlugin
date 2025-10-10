@@ -57,14 +57,14 @@ public class RadarConfigurationModule : IModuleInterface
         if (displayTypeFlags.HasFlag(DisplayTypeFlags.Name))
         {
             if (
-                MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
+                MapConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
                 && MobConstants.RenameList.TryGetValue(gameObject.DataId, out var rename)
             )
             {
                 tagText = rename;
             }
             else if (
-                MobConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
+                MapConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
                 && MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.DataId, out var value)
             )
             {
@@ -227,6 +227,8 @@ public class RadarConfigurationModule : IModuleInterface
                         return configInterface.cfg.DeepDungeonOptions.MimicOption;
                     case DeepDungeonMobTypes.Patrol:
                         return configInterface.cfg.DeepDungeonOptions.PatrolOption;
+                    case DeepDungeonMobTypes.Activatable:
+                        return configInterface.cfg.DeepDungeonOptions.ActivatableOption;
                     case DeepDungeonMobTypes.Default:
                         return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
                     default:

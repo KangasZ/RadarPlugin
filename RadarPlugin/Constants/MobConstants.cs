@@ -15,64 +15,6 @@ public static class MobConstants
         { 5834, 16f },
     };
 
-    public static HashSet<ushort> DeepDungeonMapIds = new()
-    {
-        561,
-        562,
-        563,
-        564,
-        565,
-        593,
-        594,
-        595,
-        596,
-        597,
-        598,
-        599,
-        600,
-        601,
-        602,
-        603,
-        604,
-        605, // POTD
-        770,
-        771,
-        772,
-        782,
-        773,
-        783,
-        774,
-        784,
-        775,
-        785, // HOH
-        732,
-        763,
-        795,
-        827, // Eureka (Old) (in order)
-        1099,
-        1100,
-        1101,
-        1102,
-        1103,
-        1104,
-        1105,
-        1106,
-        1107,
-        1108, // Eureka Orthos in order
-        1252, // OC: South Horn
-        
-        // DD
-        1280, // Base floor lol
-        1281,
-        1282,
-        1283,
-        1284,
-        1285,
-        1286,
-        1287,
-        1288,
-    };
-
     /**
      * This is a dictionary to fix bosses that have duplicates on the screen
      * KEY: uint representing name id
@@ -95,7 +37,7 @@ public static class MobConstants
         9768, // Av?*/
         2007457, //OC: idk some random thing
         18458, //Silencer
-        18279, //Dead trap
+        18279, //Dead trap in new DD
     };
 
     /**
@@ -444,7 +386,7 @@ public static class MobConstants
         {2014755, DeepDungeonMobTypes.Return},
         //{2007357, DeepDungeonMobTypes.SilverChest},
         //{2007358, DeepDungeonMobTypes.GoldChest},
-        {2014759, DeepDungeonMobTypes.Passage}, // votive candalabra
+        {2014759, DeepDungeonMobTypes.Activatable}, // votive candalabra
         {1881, DeepDungeonMobTypes.BronzeChest},
         {1882, DeepDungeonMobTypes.BronzeChest},
         {1883, DeepDungeonMobTypes.BronzeChest},
@@ -459,6 +401,8 @@ public static class MobConstants
         {1907, DeepDungeonMobTypes.BronzeChest},
         {1891, DeepDungeonMobTypes.BronzeChest},
         {1908, DeepDungeonMobTypes.BronzeChest},
+        {1892, DeepDungeonMobTypes.BronzeChest},
+        {1893, DeepDungeonMobTypes.BronzeChest},
         {2014939, DeepDungeonMobTypes.Traps}, // fae trap
         {18868, DeepDungeonMobTypes.Auspice}, // Feo ul
         {18869, DeepDungeonMobTypes.Auspice}, // Feo ul 55
@@ -476,10 +420,18 @@ public static class MobConstants
         {18732, DeepDungeonMobTypes.Patrol},
         {18731, DeepDungeonMobTypes.Patrol},
         {18838, DeepDungeonMobTypes.Patrol},
+        {18735, DeepDungeonMobTypes.Patrol},
+        {18736, DeepDungeonMobTypes.Patrol},
+        {18737, DeepDungeonMobTypes.Patrol},
+        {18856, DeepDungeonMobTypes.Patrol},
+        {18858, DeepDungeonMobTypes.Patrol},
+        {18743, DeepDungeonMobTypes.Patrol},
         
         {18889, DeepDungeonMobTypes.Mimic},
         {18894 , DeepDungeonMobTypes.Mimic},
         {18895 , DeepDungeonMobTypes.Mimic},
+        {18896 , DeepDungeonMobTypes.Mimic},
+        {18897 , DeepDungeonMobTypes.Mimic},
         
         //18910 boss 60
     };
