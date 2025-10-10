@@ -578,7 +578,7 @@ public class MainUi : IDisposable
             configInterface.cfg.DeepDungeonOptions.ActivatableOption,
             "Activatables",
             displayOrigination: DisplayOrigination.DeepDungeon,
-            description: "This also contains the carrot and some mixed spots in OC"
+            description: "Candalabras, and (eventually) spots in OC/Bozja/Eureka(?)"
         );
     }
 
