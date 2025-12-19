@@ -4,12 +4,12 @@
     <Name>Radar Plugin</Name>
     <Punchline>3D-Radar ESP</Punchline>
     <Authors>KangasZ</Authors>
-    <Version>2.1.8.1</Version>
+    <Version>2.1.8.2</Version>
     <RootNamespace>RadarPlugin</RootNamespace>
     <Copyright>MIT @ KangasZ</Copyright>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <Platforms>x64</Platforms>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -28,7 +28,7 @@
     <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="13.0.0" />
+    <PackageReference Include="DalamudPackager" Version="14.0.1" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
       <Private>false</Private>
