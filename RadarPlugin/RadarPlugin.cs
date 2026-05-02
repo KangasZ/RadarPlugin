@@ -32,7 +32,8 @@ public class RadarPlugin : IDalamudPlugin
         IChatGui chatGui,
         IDataManager dataManager,
         IFramework framework,
-        IGameInteropProvider gameInteropProvider
+        IGameInteropProvider gameInteropProvider,
+        IPlayerState playerState
     )
     {
         Plugin = this;
@@ -46,7 +47,8 @@ public class RadarPlugin : IDalamudPlugin
             Configuration,
             dataManager,
             pluginInterface,
-            pluginLog
+            pluginLog,
+            objectTable
         );
 
         // UI
@@ -56,7 +58,8 @@ public class RadarPlugin : IDalamudPlugin
             Configuration,
             typeConfiguratorUi,
             radarModules,
-            clientState
+            clientState,
+            objectTable
         );
         localMobsUi = new LocalMobsUi(
             this.pluginInterface,
@@ -96,7 +99,8 @@ public class RadarPlugin : IDalamudPlugin
             gameGui,
             pluginLog,
             radarModules,
-            gameInteropProvider
+            gameInteropProvider,
+            playerState
         );
 
         this.framework.Update += radarModules.StartTick;

@@ -12,13 +12,13 @@ namespace RadarPlugin.RadarLogic.Modules;
 public class RadarConfigurationModule : IModuleInterface
 {
     private readonly Configuration.Configuration configInterface;
-    private readonly IPlayerCharacter localPlayer;
     private readonly ZoneTypeModule zoneTypeModule;
     private readonly IClientState clientState;
     private readonly RankModule rankModule;
     private readonly DistanceModule distanceModule;
     private readonly MobLastMovement mobLastMovement;
     private readonly IPluginLog pluginLog;
+    private readonly IObjectTable objectTable;
 
     public RadarConfigurationModule(
         IClientState clientState,
@@ -27,7 +27,8 @@ public class RadarConfigurationModule : IModuleInterface
         RankModule rankModule,
         DistanceModule distanceModule,
         MobLastMovement mobLastMovement,
-        IPluginLog pluginLog
+        IPluginLog pluginLog,
+        IObjectTable objectTable
     )
     {
         this.configInterface = configInterface;
@@ -37,6 +38,7 @@ public class RadarConfigurationModule : IModuleInterface
         this.distanceModule = distanceModule;
         this.mobLastMovement = mobLastMovement;
         this.pluginLog = pluginLog;
+        this.objectTable = objectTable;
     }
 
     /**
@@ -58,14 +60,14 @@ public class RadarConfigurationModule : IModuleInterface
         {
             if (
                 MapConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
-                && MobConstants.RenameList.TryGetValue(gameObject.DataId, out var rename)
+                && MobConstants.RenameList.TryGetValue(gameObject.BaseId, out var rename)
             )
             {
                 tagText = rename;
             }
             else if (
                 MapConstants.DeepDungeonMapIds.Contains(this.clientState.TerritoryType)
-                && MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.DataId, out var value)
+                && MobConstants.DeepDungeonMobTypesMap.TryGetValue(gameObject.BaseId, out var value)
             )
             {
                 tagText = value switch
@@ -107,9 +109,9 @@ public class RadarConfigurationModule : IModuleInterface
             // DEBUG rank text
             if (configInterface.cfg.RankText)
             {
-                tagText += $"\nD {battleNpc.DataId}";
+                tagText += $"\nD {battleNpc.BaseId}";
                 tagText += $"\nN {battleNpc.NameId}";
-                if (rankModule.TryGetRank(battleNpc.DataId, out byte value))
+                if (rankModule.TryGetRank(battleNpc.BaseId, out byte value))
                 {
                     tagText += $"\nR {value}";
                 }
@@ -119,9 +121,9 @@ public class RadarConfigurationModule : IModuleInterface
         // Draw distance
         if (displayTypeFlags.HasFlag(DisplayTypeFlags.Distance))
         {
-            if (clientState.LocalPlayer != null)
+            if (objectTable.LocalPlayer != null)
                 tagText += distanceModule
-                    .GetDistanceFromPlayer(clientState.LocalPlayer, gameObject)
+                    .GetDistanceFromPlayer(objectTable.LocalPlayer, gameObject)
                     .ToString(" 0.0m");
         }
 
@@ -156,7 +158,7 @@ public class RadarConfigurationModule : IModuleInterface
     {
         overridden = false;
         Configuration.Configuration.ESPOptionMobBased? optionOverride = null;
-        if (areaObject.ObjectKind == ObjectKind.Player)
+        if (areaObject.ObjectKind == ObjectKind.Pc)
         {
             var accountId = areaObject.GetDeobfuscatedAccountId(obfuscatedSelfId, baseAccountId);
             if (configInterface.cfg.PlayerOptionOverride.TryGetValue(accountId, out optionOverride))
@@ -168,7 +170,7 @@ public class RadarConfigurationModule : IModuleInterface
         {
             if (
                 configInterface.cfg.OptionOverride.TryGetValue(
-                    areaObject.DataId,
+                    areaObject.BaseId,
                     out optionOverride
                 )
             )
@@ -199,7 +201,7 @@ public class RadarConfigurationModule : IModuleInterface
         var zoneType = zoneTypeModule.GetLocationType();
         if (configInterface.cfg.ShowBaDdObjects && zoneType == LocationKind.DeepDungeon)
         {
-            if (MobConstants.DeepDungeonMobTypesMap.TryGetValue(areaObject.DataId, out var value))
+            if (MobConstants.DeepDungeonMobTypesMap.TryGetValue(areaObject.BaseId, out var value))
             {
                 switch (value)
                 {
@@ -238,7 +240,7 @@ public class RadarConfigurationModule : IModuleInterface
 
             if (
                 areaObject.ObjectKind == ObjectKind.BattleNpc
-                && areaObject is IBattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob
+                && areaObject is IBattleNpc { BattleNpcKind: BattleNpcSubKind.Combatant } mob
             )
             {
                 return configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption;
@@ -247,14 +249,14 @@ public class RadarConfigurationModule : IModuleInterface
 
         switch (areaObject.ObjectKind)
         {
-            case ObjectKind.Player:
+            case ObjectKind.Pc:
                 if (areaObject is IPlayerCharacter chara)
                 {
                     // Is the object is YOU
                     if (
                         configInterface.cfg.SeparatedYourPlayer.Enabled
-                        && clientState.LocalPlayer != null
-                        && chara.Address == clientState.LocalPlayer.Address
+                        && objectTable.LocalPlayer != null
+                        && chara.Address == objectTable.LocalPlayer.Address
                     )
                     {
                         return configInterface.cfg.SeparatedYourPlayer.EspOption;
@@ -302,7 +304,7 @@ public class RadarConfigurationModule : IModuleInterface
                     || configInterface.cfg.SeparatedRankTwoAndSix.Enabled
                 )
                 {
-                    if (rankModule.TryGetRank(bnpc.DataId, out var value))
+                    if (rankModule.TryGetRank(bnpc.BaseId, out var value))
                     {
                         switch (value)
                         {
@@ -328,7 +330,7 @@ public class RadarConfigurationModule : IModuleInterface
                 if (
                     bnpc is IBattleNpc
                     {
-                        BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Chocobo
+                        BattleNpcKind: BattleNpcSubKind.Pet or BattleNpcSubKind.Buddy
                     }
                 )
                 {
@@ -338,7 +340,7 @@ public class RadarConfigurationModule : IModuleInterface
                 if (configInterface.cfg.LevelRendering.LevelRenderingEnabled)
                 {
                     if (
-                        clientState.LocalPlayer!.Level
+                        objectTable.LocalPlayer!.Level
                             - (byte)configInterface.cfg.LevelRendering.RelativeLevelsBelow
                         > bnpc.Level
                     )
@@ -358,13 +360,13 @@ public class RadarConfigurationModule : IModuleInterface
                 return configInterface.cfg.GatheringPointOption;
             case ObjectKind.EventObj:
                 return configInterface.cfg.EventObjOption;
-            case ObjectKind.MountType:
+            case ObjectKind.Mount:
                 return configInterface.cfg.MountOption;
             case ObjectKind.Retainer:
                 return configInterface.cfg.RetainerOption;
-            case ObjectKind.Area:
+            case ObjectKind.AreaObject:
                 return configInterface.cfg.AreaOption;
-            case ObjectKind.Housing:
+            case ObjectKind.HousingEventObject:
                 return configInterface.cfg.HousingOption;
             case ObjectKind.Cutscene:
                 return configInterface.cfg.CutsceneOption;

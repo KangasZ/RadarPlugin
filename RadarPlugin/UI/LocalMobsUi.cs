@@ -57,7 +57,7 @@ public class LocalMobsUi : IDisposable
     private List<IGameObject> GetCurrentMobListSorted()
     {
         // Get some tertiary data
-        var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
+        var selfObfuscated = objectTable.LocalPlayer?.GetAccountId() ?? 0;
         var baseId = configInterface.cfg.YourAccountId;
 
         // Populate the array
@@ -119,17 +119,17 @@ public class LocalMobsUi : IDisposable
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
-                            x.ObjectKind == ObjectKind.Player
+                            x.ObjectKind == ObjectKind.Pc
                                 ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId)
-                                : x.DataId
+                                : x.BaseId
                         );
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
-                            x.ObjectKind == ObjectKind.Player
+                            x.ObjectKind == ObjectKind.Pc
                                 ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId)
-                                : x.DataId
+                                : x.BaseId
                         );
                     }
 
@@ -305,7 +305,7 @@ public class LocalMobsUi : IDisposable
             ImGui.TableSetupColumn("Details", ImGuiTableColumnFlags.NoSort);
             ImGui.TableHeadersRow();
             var areaObjects = GetCurrentMobListSorted();
-            var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
+            var selfObfuscated = objectTable.LocalPlayer?.GetAccountId() ?? 0;
             var baseId = configInterface.cfg.YourAccountId;
             foreach (var x in areaObjects)
             {
@@ -324,7 +324,7 @@ public class LocalMobsUi : IDisposable
                 ImGui.Text($"{x.Name}");
                 //DataId
                 ImGui.TableNextColumn();
-                if (x.ObjectKind == ObjectKind.Player)
+                if (x.ObjectKind == ObjectKind.Pc)
                 {
                     ImGui.Text($"{x.GetDeobfuscatedAccountId(selfObfuscated, baseId)}");
                 }

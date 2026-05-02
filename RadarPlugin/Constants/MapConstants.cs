@@ -4,7 +4,7 @@ namespace RadarPlugin.Constants;
 
 public static class MapConstants
 {
-    public static HashSet<ushort> DeepDungeonMapIds = new()
+    public static HashSet<uint> DeepDungeonMapIds = new()
     {
         // POTD
         561,

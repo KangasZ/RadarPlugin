@@ -32,6 +32,7 @@ public class RadarDriver : IDisposable
     private bool fontBuilt = false;
 
     private RadarModules radarModules;
+    private readonly IPlayerState playerState;
 
     public RadarDriver(
         IDalamudPluginInterface pluginInterface,
@@ -42,7 +43,8 @@ public class RadarDriver : IDisposable
         IGameGui gameGui,
         IPluginLog pluginLog,
         RadarModules radarModules,
-        IGameInteropProvider gameInteropProvider
+        IGameInteropProvider gameInteropProvider,
+        IPlayerState playerState
     )
     {
         // Creates Dependencies
@@ -53,18 +55,19 @@ public class RadarDriver : IDisposable
         this.gameGui = gameGui;
         this.radarModules = radarModules;
         this.pluginLog = pluginLog;
-        this.radar3D = new Radar3D(configuration, clientState, gameGui, pluginLog, radarModules);
+        this.radar3D = new Radar3D(configuration, clientState, gameGui, pluginLog, radarModules, objectTable);
         this.radar2D = new Radar2D(
             this.pluginInterface,
             configuration,
             clientState,
             this.pluginLog,
-            radarModules
+            radarModules,
+            objectTable
         );
         // Loads plugin
         this.pluginLog.Debug("Radar Loaded");
         this.clientState = clientState;
-
+        this.playerState = playerState;
         this.pluginInterface.UiBuilder.Draw += OnUiTick;
         //this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
     }
@@ -116,7 +119,7 @@ public class RadarDriver : IDisposable
             return;
         // Figure out object table
         var objectTableRef = FilterObjectTable(objectTable);
-        var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
+        var selfObfuscated = objectTable.LocalPlayer?.GetAccountId() ?? 0;
         var baseId = configInterface.cfg.YourAccountId;
         var objectsWithMobOptions = objectTableRef
             .Select(areaObject =>
@@ -198,15 +201,15 @@ public class RadarDriver : IDisposable
         return conditionInterface[ConditionFlag.LoggingOut]
             || conditionInterface[ConditionFlag.BetweenAreas]
             || conditionInterface[ConditionFlag.BetweenAreas51]
-            || clientState.LocalContentId == 0
-            || clientState.LocalPlayer == null;
+            || playerState.ContentId == 0
+            || objectTable.LocalPlayer == null;
     }
 
     private bool PassDistanceCheck(GameObject obj)
     {
-        if (configInterface.cfg.UseMaxDistance && clientState.LocalPlayer != null)
+        if (configInterface.cfg.UseMaxDistance && objectTable.LocalPlayer != null)
         {
-            return radarModules.distanceModule.GetDistanceFromPlayer(clientState.LocalPlayer, obj)
+            return radarModules.distanceModule.GetDistanceFromPlayer(objectTable.LocalPlayer, obj)
                 < configInterface.cfg.MaxDistance;
         }
 
@@ -232,7 +235,7 @@ public class RadarDriver : IDisposable
             // If override is not enabled, return false, otherwise check if the object kind is a player, and if not, return false still.
             if (!configInterface.cfg.OverrideShowInvisiblePlayerCharacters)
                 return false;
-            if (obj.ObjectKind != ObjectKind.Player)
+            if (obj.ObjectKind != ObjectKind.Pc)
                 return false;
         }
 
@@ -257,7 +260,7 @@ public class RadarDriver : IDisposable
                 return false;
             if (
                 obj.ObjectKind != ObjectKind.BattleNpc
-                || obj is not IBattleNpc { BattleNpcKind: BattleNpcSubKind.Enemy } mob
+                || obj is not IBattleNpc { BattleNpcKind: BattleNpcSubKind.Combatant } mob
             )
                 return true;
             if (!configInterface.cfg.DeepDungeonOptions.DefaultEnemyOption.Enabled)
@@ -277,15 +280,11 @@ public class RadarDriver : IDisposable
 
         return true;
     }
-
-    #region CLEANUP REGION
-
+    
     public void Dispose()
     {
         pluginInterface.UiBuilder.Draw -= OnUiTick;
         //this.pluginInterface.UiBuilder.BuildFonts -= BuildFont;
         pluginLog.Information("Radar Unloaded");
     }
-
-    #endregion
 }

@@ -19,7 +19,8 @@ public class RadarModules : IModuleInterface
         Configuration.Configuration configInterface,
         IDataManager dataManager,
         IDalamudPluginInterface pluginInterface,
-        IPluginLog pluginLog
+        IPluginLog pluginLog,
+        IObjectTable objectTable
     )
     {
         aggroTypeModule = new AggroTypeModule(pluginInterface);
@@ -34,7 +35,8 @@ public class RadarModules : IModuleInterface
             rankModule,
             distanceModule,
             moduleMobLastMovement,
-            pluginLog
+            pluginLog,
+            objectTable
         );
     }
 

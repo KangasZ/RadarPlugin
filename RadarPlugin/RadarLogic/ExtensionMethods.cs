@@ -30,7 +30,7 @@ public static class ExtensionMethods
     {
         ulong accountId = 0;
 
-        if (gameObject.ObjectKind != ObjectKind.Player)
+        if (gameObject.ObjectKind != ObjectKind.Pc)
             return accountId;
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)
             (void*)gameObject.Address;
@@ -46,7 +46,7 @@ public static class ExtensionMethods
     {
         ulong accountId = 0;
 
-        if (gameObject.ObjectKind != ObjectKind.Player)
+        if (gameObject.ObjectKind != ObjectKind.Pc)
             return accountId;
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)
             (void*)gameObject.Address;
@@ -66,7 +66,7 @@ public static class ExtensionMethods
     {
         ulong accountId = 0;
 
-        if (gameObject.ObjectKind != ObjectKind.Player)
+        if (gameObject.ObjectKind != ObjectKind.Pc)
             return accountId;
         var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)
             (void*)gameObject.Address;
@@ -103,7 +103,7 @@ public static class ExtensionMethods
     {
         switch (gameObject.ObjectKind)
         {
-            case ObjectKind.Player:
+            case ObjectKind.Pc:
                 return MobType.Player;
             case ObjectKind.BattleNpc:
                 return MobType.Character;

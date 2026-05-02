@@ -21,13 +21,15 @@ public class MobEditUi : IDisposable
     private readonly TypeConfigurator typeConfiguration;
     private readonly RadarModules radarModules;
     private readonly IClientState clientState;
+    private readonly IObjectTable objectTable;
 
     public MobEditUi(
         IDalamudPluginInterface dalamudPluginInterface,
         Configuration.Configuration configInterface,
         TypeConfigurator typeConfigurator,
         RadarModules radarModules,
-        IClientState clientState
+        IClientState clientState,
+        IObjectTable objectTable
     )
     {
         this.configInterface = configInterface;
@@ -36,6 +38,7 @@ public class MobEditUi : IDisposable
         this.typeConfiguration = typeConfigurator;
         this.radarModules = radarModules;
         this.clientState = clientState;
+        this.objectTable = objectTable;
     }
 
     private unsafe void DrawMobEditWindow()
@@ -48,7 +51,7 @@ public class MobEditUi : IDisposable
         var size = new Vector2(600, 300);
         ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
-        var selfObfuscated = clientState.LocalPlayer?.GetAccountId() ?? 0;
+        var selfObfuscated = objectTable.LocalPlayer?.GetAccountId() ?? 0;
         var baseId = configInterface.cfg.YourAccountId;
         if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible))
         {
@@ -188,7 +191,7 @@ public class MobEditUi : IDisposable
                 }
             }
 
-            if (localObject.ObjectKind == ObjectKind.Player)
+            if (localObject.ObjectKind == ObjectKind.Pc)
             {
                 ImGui.Text($"Content Id: {localObject.GetContentId()}");
                 ImGui.Text($"Obfuscated Account Id: {localObject.GetAccountId()}");

@@ -20,13 +20,15 @@ public unsafe class Radar2D
     private readonly IClientState clientState;
     private readonly IPluginLog pluginLog;
     private readonly RadarModules radarModules;
+    private readonly IObjectTable objectTable;
 
     public Radar2D(
         IDalamudPluginInterface dalamudPluginInterface,
         Configuration.Configuration configuration,
         IClientState clientState,
         IPluginLog pluginLog,
-        RadarModules radarModules
+        RadarModules radarModules,
+        IObjectTable objectTable
     )
     {
         this.dalamudPluginInterface = dalamudPluginInterface;
@@ -34,6 +36,7 @@ public unsafe class Radar2D
         this.clientState = clientState;
         this.pluginLog = pluginLog;
         this.radarModules = radarModules;
+        this.objectTable = objectTable;
     }
 
     public void Radar2DOnTick(
@@ -97,10 +100,10 @@ public unsafe class Radar2D
             ImGui.PopFont();
         }
 
-        if (clientState.LocalPlayer == null)
+        if (objectTable.LocalPlayer == null)
             return;
-        var playerRotation = clientState.LocalPlayer.Rotation;
-        var playerPosition = clientState.LocalPlayer.Position;
+        var playerRotation = objectTable.LocalPlayer.Rotation;
+        var playerPosition = objectTable.LocalPlayer.Position;
         if (configuration.cfg.Radar2DConfiguration.ShowYourCurrentPosition)
         {
             var positionText = $"({playerPosition.X:0.0}, {playerPosition.Z:0.0})";

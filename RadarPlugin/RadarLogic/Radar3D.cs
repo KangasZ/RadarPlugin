@@ -19,13 +19,15 @@ public unsafe class Radar3D
     private readonly IClientState clientState;
     private readonly IGameGui gameGui;
     private readonly Configuration.Configuration configInterface;
+    private readonly IObjectTable objectTable;
 
     public Radar3D(
         Configuration.Configuration configuration,
         IClientState clientState,
         IGameGui gameGui,
         IPluginLog pluginLog,
-        RadarModules radarModules
+        RadarModules radarModules,
+        IObjectTable objectTable
     )
     {
         // Creates Dependencies
@@ -37,6 +39,7 @@ public unsafe class Radar3D
         this.pluginLog.Debug("Radar Loaded");
 
         this.clientState = clientState;
+        this.objectTable = objectTable;
     }
 
     public void Radar3DOnTick(
@@ -230,9 +233,9 @@ public unsafe class Radar3D
                     // Aggro radius max distance check
                     if (
                         configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool
-                        && clientState.LocalPlayer != null
+                        && objectTable.LocalPlayer != null
                         && radarModules.distanceModule.GetDistanceFromPlayer(
-                            clientState.LocalPlayer,
+                            objectTable.LocalPlayer,
                             npc2
                         ) > configInterface.cfg.AggroRadiusOptions.MaxDistance
                     )
@@ -245,7 +248,7 @@ public unsafe class Radar3D
                         && (npc2.StatusFlags & StatusFlags.InCombat) != 0
                     )
                         return;
-                    if (npc2.BattleNpcKind != BattleNpcSubKind.Enemy)
+                    if (npc2.BattleNpcKind != BattleNpcSubKind.Combatant)
                         return;
                     float aggroRadius = 10;
                     if (MobConstants.AggroDistance.TryGetValue(gameObject.DataId, out var range))

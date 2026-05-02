@@ -386,7 +386,7 @@ public class Configuration
     )
     {
         var dataId = gameObject.DataId;
-        if (gameObject.ObjectKind == ObjectKind.Player)
+        if (gameObject.ObjectKind == ObjectKind.Pc)
         {
             var accountIdT = gameObject.GetDeobfuscatedAccountId(obfuscatedSelfId, yourBaseId);
             var contentId = gameObject.GetContentId();
