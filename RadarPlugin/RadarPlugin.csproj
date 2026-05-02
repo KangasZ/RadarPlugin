@@ -27,8 +27,4 @@
   <PropertyGroup>
     <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="15.0.0" />
-    <PackageReference Include="Dalamud.NET.Sdk" Version="15.0.0" />
-  </ItemGroup>
 </Project>

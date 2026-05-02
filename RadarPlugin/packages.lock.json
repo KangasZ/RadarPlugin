@@ -2,12 +2,6 @@
   "version": 1,
   "dependencies": {
     "net10.0-windows7.0": {
-      "Dalamud.NET.Sdk": {
-        "type": "Direct",
-        "requested": "[15.0.0, )",
-        "resolved": "15.0.0",
-        "contentHash": "aNSEjVUGyycZnqWITyd/0jdpHM+qfH/2nYHLL2pwZP00CyHCS254jwe6nuH4hjOMxYIK+PbAapyWFS5MeOCDzQ=="
-      },
       "DalamudPackager": {
         "type": "Direct",
         "requested": "[15.0.0, )",
