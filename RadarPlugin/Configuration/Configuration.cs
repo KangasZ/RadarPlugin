@@ -125,8 +125,11 @@ public class Configuration
     {
         public bool ShowAggroCircle = false;
         public bool ShowAggroCircleInCombat = false;
+        public bool ShowAggroCircleOnPlayerHeight = false;
         public bool MaxDistanceCapBool = true;
         public float MaxDistance = ConfigConstants.DefaultMaxAggroRadiusDistance;
+        public bool EnableMaxDistanceArcFromPlayer = true;
+        public float MaxDistanceArcFromPlayer = ConfigConstants.DefaultMaxArcLengthFromPlayer;
         public uint FrontColor = ConfigConstants.Red;
         public uint RearColor = ConfigConstants.Green;
         public uint RightSideColor = ConfigConstants.Yellow;
@@ -388,33 +391,27 @@ public class Configuration
         var dataId = gameObject.DataId;
         if (gameObject.ObjectKind == ObjectKind.Pc)
         {
-            var accountIdT = gameObject.GetDeobfuscatedAccountId(obfuscatedSelfId, yourBaseId);
             var contentId = gameObject.GetContentId();
-            if (accountIdT == 0)
-            {
-                return;
-            }
 
-            var accountId = accountIdT;
             if (customizeEnabled)
             {
                 var newSettings = new ESPOptionMobBased(
                     currentSettings,
                     gameObject.Name.TextValue ?? "Oops it broke :(",
-                    accountId,
+                    contentId,
                     MobType.Player,
                     tertiaryId: contentId
                 );
-                if (cfg.PlayerOptionOverride.ContainsKey(accountId))
+                if (cfg.PlayerOptionOverride.ContainsKey(contentId))
                 {
-                    cfg.PlayerOptionOverride.Remove(accountId);
+                    cfg.PlayerOptionOverride.Remove(contentId);
                 }
 
-                cfg.PlayerOptionOverride.Add(accountId, newSettings);
+                cfg.PlayerOptionOverride.Add(contentId, newSettings);
             }
             else
             {
-                cfg.PlayerOptionOverride.Remove(accountId);
+                cfg.PlayerOptionOverride.Remove(contentId);
             }
         }
         else

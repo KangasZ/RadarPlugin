@@ -115,12 +115,12 @@ public class LocalMobsUi : IDisposable
 
                     break;
                 case 2:
-                    // DataId (Account ID when its a player)
+                    // DataId (content ID when its a player)
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
                             x.ObjectKind == ObjectKind.Pc
-                                ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId)
+                                ? x.GetContentId()
                                 : x.BaseId
                         );
                     }
@@ -128,7 +128,7 @@ public class LocalMobsUi : IDisposable
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
                             x.ObjectKind == ObjectKind.Pc
-                                ? x.GetDeobfuscatedAccountId(selfObfuscated, baseId)
+                                ? x.GetContentId()
                                 : x.BaseId
                         );
                     }
@@ -145,8 +145,6 @@ public class LocalMobsUi : IDisposable
                         {
                             radarModules.radarConfigurationModule.TryGetOverridenParams(
                                 x,
-                                selfObfuscated,
-                                baseId,
                                 out var isUsingCustomEspOption
                             );
                             return isUsingCustomEspOption;
@@ -158,8 +156,6 @@ public class LocalMobsUi : IDisposable
                         {
                             radarModules.radarConfigurationModule.TryGetOverridenParams(
                                 x,
-                                selfObfuscated,
-                                baseId,
                                 out var isUsingCustomEspOption
                             );
                             return isUsingCustomEspOption;
@@ -176,8 +172,6 @@ public class LocalMobsUi : IDisposable
                             var objectParams =
                                 radarModules.radarConfigurationModule.TryGetOverridenParams(
                                     x,
-                                    selfObfuscated,
-                                    baseId,
                                     out var isUsingCustomEspOption
                                 );
                             if (isUsingCustomEspOption)
@@ -192,8 +186,6 @@ public class LocalMobsUi : IDisposable
                             var objectParams =
                                 radarModules.radarConfigurationModule.TryGetOverridenParams(
                                     x,
-                                    selfObfuscated,
-                                    baseId,
                                     out var isUsingCustomEspOption
                                 );
                             if (isUsingCustomEspOption)
@@ -312,8 +304,6 @@ public class LocalMobsUi : IDisposable
                 var espOption = radarModules.radarConfigurationModule.GetParams(x);
                 var customEspOption = radarModules.radarConfigurationModule.TryGetOverridenParams(
                     x,
-                    selfObfuscated,
-                    baseId,
                     out var isUsingCustomEspOption
                 );
                 //Kind
@@ -326,7 +316,7 @@ public class LocalMobsUi : IDisposable
                 ImGui.TableNextColumn();
                 if (x.ObjectKind == ObjectKind.Pc)
                 {
-                    ImGui.Text($"{x.GetDeobfuscatedAccountId(selfObfuscated, baseId)}");
+                    ImGui.Text($"{x.GetContentId()}");
                 }
                 else
                 {

@@ -810,15 +810,30 @@ public class MainUi : IDisposable
         shouldSave |= UiHelpers.DrawCheckbox(
             $"Enable Max Distance For Aggro Radius##{tag}-max-dist",
             ref configInterface.cfg.AggroRadiusOptions.MaxDistanceCapBool,
-            "Sets a max distance for aggro circles"
+            "Sets a max distance mobs that will have rendered aggro circles"
         );
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(
             ref configInterface.cfg.AggroRadiusOptions.MaxDistance,
             "",
             $"##{tag}-max-dist-slider",
             1f,
-            2000f,
+            100f,
             ConfigConstants.DefaultMaxAggroRadiusDistance,
+            "%.0fm"
+        );
+        
+        shouldSave |= UiHelpers.DrawCheckbox(
+            $"Enable Maximum Distance Circle Draw From Player##{tag}-max-arc-dist",
+            ref configInterface.cfg.AggroRadiusOptions.EnableMaxDistanceArcFromPlayer,
+            "This sets a max distance for the drawn circle on the screen from the player. This is so that you can walk around and aggro circles will appear around you and sort of grow as you get closer."
+        );
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref configInterface.cfg.AggroRadiusOptions.MaxDistanceArcFromPlayer,
+            "",
+            $"##{tag}-max-arc-dist-slider",
+            1f,
+            100f,
+            ConfigConstants.DefaultMaxArcLengthFromPlayer,
             "%.0fm"
         );
 
@@ -826,6 +841,11 @@ public class MainUi : IDisposable
             $"Aggro Circle In Combat##{tag}-settings",
             ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleInCombat,
             "If enabled, always show aggro circle.\nIf disabled, only show aggro circle when enemy is not engaged in combat."
+        );
+        shouldSave |= UiHelpers.DrawCheckbox(
+            $"Draw Aggro Circles on Player height value##{tag}-y-value",
+            ref configInterface.cfg.AggroRadiusOptions.ShowAggroCircleOnPlayerHeight,
+            "If enabled, the aggro circles will be drawn on the same height value as the player."
         );
         UiHelpers.DrawSeperator("Sight Aggro Settings:", ConfigConstants.White);
         shouldSave |= UiHelpers.Vector4ColorSelector(

@@ -4,5 +4,5 @@
   "Description": "Radar to see enemies, objects, and interactables through walls.\nThis is an ESP, please don't use it to call aliens down.\nPlease report any issues to the author.",
   "RepoUrl": "https://github.com/KangasZ/RadarPlugin",
   "Punchline": "See everything through walls",
-  "Changelog": "Initial support for new deep dungeon"
+  "Changelog": "Removed any account id references\nAdd some minor settings for aggro radius\nUpdate mobs json file."
 }

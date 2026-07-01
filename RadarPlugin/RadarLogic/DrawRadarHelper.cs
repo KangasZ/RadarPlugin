@@ -107,7 +107,9 @@ public static class DrawRadarHelper
         uint color,
         float thickness,
         int numSegments,
-        IGameGui gameGui
+        IGameGui gameGui,
+        Vector3? playerPosition = null,
+        float maxDistanceFromPlayer = 0f
     )
     {
         var rotationPerSegment = totalRotationCw / numSegments;
@@ -118,8 +120,18 @@ public static class DrawRadarHelper
             var currentRotation = rotationStart - i * rotationPerSegment;
             var xValue = radius * MathF.Sin(currentRotation);
             var yValue = radius * MathF.Cos(currentRotation);
+            var strokePosition = new Vector3(originPosition.X + xValue, originPosition.Y, originPosition.Z + yValue);
+            if (playerPosition.HasValue)
+            {
+                var distanceFromPlayer = strokePosition.Distance2D(playerPosition.Value);
+                if (distanceFromPlayer > maxDistanceFromPlayer)
+                {
+                    continue;
+                }
+            }
+
             isOnScreen = gameGui.WorldToScreen(
-                new Vector3(originPosition.X + xValue, originPosition.Y, originPosition.Z + yValue),
+                strokePosition,
                 out segmentVectorOnCircle
             );
             if (!isOnScreen)

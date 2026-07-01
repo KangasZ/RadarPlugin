@@ -256,13 +256,22 @@ public unsafe class Radar3D
                         aggroRadius = range;
                     }
 
+                    Vector3? playerPosition = configInterface.cfg.AggroRadiusOptions.EnableMaxDistanceArcFromPlayer
+                        ? objectTable.LocalPlayer.Position
+                        : null;
+                    var gameObjectPosition = new Vector3(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z);
+                    if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircleOnPlayerHeight)
+                    {
+                        gameObjectPosition.Y = objectTable.LocalPlayer.Position.Y;
+                    }
                     DrawAggroRadius(
                         drawListPtr,
-                        gameObject.Position,
+                        gameObjectPosition,
                         aggroRadius + gameObject.HitboxRadius,
                         gameObject.Rotation,
-                        uint.MaxValue,
-                        npc2
+                        npc2,
+                        playerPosition,
+                        configInterface.cfg.AggroRadiusOptions.MaxDistanceArcFromPlayer
                     );
                 }
 
@@ -317,8 +326,9 @@ public unsafe class Radar3D
         Vector3 position,
         float radius,
         float rotation,
-        uint objectOptionColor,
-        IBattleNpc battleNpc
+        IBattleNpc battleNpc,
+        Vector3? playerPosition = null,
+        float maxDistanceFromPlayer = 0f
     )
     {
         rotation += MathF.PI / 4;
@@ -342,7 +352,9 @@ public unsafe class Radar3D
                     proximityColor,
                     thickness,
                     numSegments,
-                    gameGui
+                    gameGui,
+                    playerPosition,
+                    maxDistanceFromPlayer
                 );
                 break;
             case AggroType.Sound:
@@ -356,7 +368,9 @@ public unsafe class Radar3D
                     soundColor,
                     thickness,
                     numSegments,
-                    gameGui
+                    gameGui,
+                    playerPosition,
+                    maxDistanceFromPlayer
                 );
                 break;
             case AggroType.Sight:
@@ -371,7 +385,9 @@ public unsafe class Radar3D
                     frontColor,
                     thickness,
                     numSegments,
-                    gameGui
+                    gameGui,
+                    playerPosition,
+                    maxDistanceFromPlayer
                 );
                 var rightColor = configInterface.cfg.AggroRadiusOptions.RightSideColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
@@ -383,7 +399,9 @@ public unsafe class Radar3D
                     rightColor,
                     thickness,
                     numSegments,
-                    gameGui
+                    gameGui,
+                    playerPosition,
+                    maxDistanceFromPlayer
                 );
                 var backColor = configInterface.cfg.AggroRadiusOptions.RearColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
@@ -395,7 +413,9 @@ public unsafe class Radar3D
                     backColor,
                     thickness,
                     numSegments,
-                    gameGui
+                    gameGui,
+                    playerPosition,
+                    maxDistanceFromPlayer
                 );
                 var leftColor = configInterface.cfg.AggroRadiusOptions.LeftSideColor;
                 DrawRadarHelper.DrawArcAtCenterPointFromRotations(
@@ -407,7 +427,9 @@ public unsafe class Radar3D
                     leftColor,
                     thickness,
                     numSegments,
-                    gameGui
+                    gameGui,
+                    playerPosition,
+                    maxDistanceFromPlayer
                 );
                 var coneColor = configInterface.cfg.AggroRadiusOptions.FrontConeColor;
                 DrawRadarHelper.DrawConeAtCenterPointFromRotation(

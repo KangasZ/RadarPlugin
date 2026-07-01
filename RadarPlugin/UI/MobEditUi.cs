@@ -60,8 +60,6 @@ public class MobEditUi : IDisposable
             var defaulParams = radarModules.radarConfigurationModule.GetParams(localObject);
             var mobOvveride = radarModules.radarConfigurationModule.TryGetOverridenParams(
                 localObject,
-                selfObfuscated,
-                baseId,
                 out var isUsingCustomEspOption
             );
 
@@ -195,9 +193,6 @@ public class MobEditUi : IDisposable
             {
                 ImGui.Text($"Content Id: {localObject.GetContentId()}");
                 ImGui.Text($"Obfuscated Account Id: {localObject.GetAccountId()}");
-                ImGui.Text(
-                    $"Theroretical Deobfuscated ID: {localObject.GetDeobfuscatedAccountId(selfObfuscated, baseId)}"
-                );
             }
 #if DEBUG
             Dalamud.Utility.Util.ShowObject(localObject);

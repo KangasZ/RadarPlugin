@@ -58,40 +58,40 @@ public static class ExtensionMethods
         return accountId;
     }
 
-    public static unsafe ulong GetDeobfuscatedAccountId(
-        this IGameObject gameObject,
-        ulong obfuscatedSelfId,
-        uint yourBaseId
-    )
-    {
-        ulong accountId = 0;
-
-        if (gameObject.ObjectKind != ObjectKind.Pc)
-            return accountId;
-        var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)
-            (void*)gameObject.Address;
-
-        if (yourBaseId == 0)
-        {
-            var tempAccountId = clientstructobj->ContentId;
-            if (tempAccountId != 0)
-            {
-                accountId = tempAccountId;
-            }
-
-            return accountId;
-        }
-        else
-        {
-            var tempAccountId = gameObject.GetAccountId();
-            if (tempAccountId != 0)
-            {
-                accountId = tempAccountId;
-            }
-            accountId = DeobfuscateAccountId(obfuscatedSelfId, accountId, yourBaseId);
-            return accountId;
-        }
-    }
+    // public static unsafe ulong GetDeobfuscatedAccountId(
+    //     this IGameObject gameObject,
+    //     ulong obfuscatedSelfId,
+    //     uint yourBaseId
+    // )
+    // {
+    //     ulong accountId = 0;
+    //
+    //     if (gameObject.ObjectKind != ObjectKind.Pc)
+    //         return accountId;
+    //     var clientstructobj = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)
+    //         (void*)gameObject.Address;
+    //
+    //     if (yourBaseId == 0)
+    //     {
+    //         var tempAccountId = clientstructobj->ContentId;
+    //         if (tempAccountId != 0)
+    //         {
+    //             accountId = tempAccountId;
+    //         }
+    //
+    //         return accountId;
+    //     }
+    //     else
+    //     {
+    //         var tempAccountId = gameObject.GetAccountId();
+    //         if (tempAccountId != 0)
+    //         {
+    //             accountId = tempAccountId;
+    //         }
+    //         accountId = DeobfuscateAccountId(obfuscatedSelfId, accountId, yourBaseId);
+    //         return accountId;
+    //     }
+    // }
 
     public static uint DeobfuscateAccountId(ulong selfId, ulong otherId, uint yourBaseId)
     {

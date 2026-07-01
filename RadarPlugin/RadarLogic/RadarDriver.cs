@@ -119,15 +119,11 @@ public class RadarDriver : IDisposable
             return;
         // Figure out object table
         var objectTableRef = FilterObjectTable(objectTable);
-        var selfObfuscated = objectTable.LocalPlayer?.GetAccountId() ?? 0;
-        var baseId = configInterface.cfg.YourAccountId;
         var objectsWithMobOptions = objectTableRef
             .Select(areaObject =>
             {
                 var espOption = radarModules.radarConfigurationModule.TryGetOverridenParams(
                     areaObject,
-                    selfObfuscated,
-                    baseId,
                     out var _
                 );
                 return (areaObject, espOption);
