@@ -300,6 +300,7 @@ public static class MobConstants
         { 18279, DeepDungeonMobTypes.Traps },
         { 2014585, DeepDungeonMobTypes.Passage },
         { 18442, DeepDungeonMobTypes.Mimic },
+        { 18379, DeepDungeonMobTypes.Auspice }, // Persistant Pot
         //Silvers
         { 1794, DeepDungeonMobTypes.SilverChest },
         { 1791, DeepDungeonMobTypes.SilverChest },
@@ -380,6 +381,61 @@ public static class MobConstants
         { 2014584, DeepDungeonMobTypes.Traps },
         { 18328, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
         { 18324, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
+        
+        //OC Objects 2
+        //Crystal / Aetherytes
+        { 2007457, DeepDungeonMobTypes.Passage },
+        { 2015433, DeepDungeonMobTypes.Passage },
+        { 2015431, DeepDungeonMobTypes.Passage },
+        // Surveys
+        { 2015421, DeepDungeonMobTypes.Return },
+        
+        //silver
+        {2008, DeepDungeonMobTypes.SilverChest},
+        {2006, DeepDungeonMobTypes.SilverChest},
+        {2007, DeepDungeonMobTypes.SilverChest},
+        
+        // Bronze
+        
+        {2015, DeepDungeonMobTypes.BronzeChest},
+        {2016, DeepDungeonMobTypes.BronzeChest},
+        {2017, DeepDungeonMobTypes.BronzeChest},
+        {2018, DeepDungeonMobTypes.BronzeChest},
+        {2019, DeepDungeonMobTypes.BronzeChest},
+        {2020, DeepDungeonMobTypes.BronzeChest},
+        {2021, DeepDungeonMobTypes.BronzeChest},
+        {2022, DeepDungeonMobTypes.BronzeChest},
+        {2023, DeepDungeonMobTypes.BronzeChest},
+        {2024, DeepDungeonMobTypes.BronzeChest},
+        {2025, DeepDungeonMobTypes.BronzeChest},
+        {2026, DeepDungeonMobTypes.BronzeChest},
+        {2027, DeepDungeonMobTypes.BronzeChest},
+        {2028, DeepDungeonMobTypes.BronzeChest},
+        {2029, DeepDungeonMobTypes.BronzeChest},
+        {2030, DeepDungeonMobTypes.BronzeChest},
+        {2033, DeepDungeonMobTypes.BronzeChest},
+        {2034, DeepDungeonMobTypes.BronzeChest},
+        {2035, DeepDungeonMobTypes.BronzeChest},
+        {2036, DeepDungeonMobTypes.BronzeChest},
+        {2037, DeepDungeonMobTypes.BronzeChest},
+        {2038, DeepDungeonMobTypes.BronzeChest},
+        {2039, DeepDungeonMobTypes.BronzeChest},
+        {2040, DeepDungeonMobTypes.BronzeChest},
+        {2041, DeepDungeonMobTypes.BronzeChest},
+        {2042, DeepDungeonMobTypes.BronzeChest},
+        {2043, DeepDungeonMobTypes.BronzeChest},
+        {2044, DeepDungeonMobTypes.BronzeChest},
+        {2045, DeepDungeonMobTypes.BronzeChest},
+        {2046, DeepDungeonMobTypes.BronzeChest},
+        {2047, DeepDungeonMobTypes.BronzeChest},
+        {2048, DeepDungeonMobTypes.BronzeChest},
+        {2049, DeepDungeonMobTypes.BronzeChest},
+        {2050, DeepDungeonMobTypes.BronzeChest},
+        {2051, DeepDungeonMobTypes.BronzeChest},
+        {2052, DeepDungeonMobTypes.BronzeChest},
+        {2053, DeepDungeonMobTypes.BronzeChest},
+        {2056, DeepDungeonMobTypes.BronzeChest},
+        {2070, DeepDungeonMobTypes.BronzeChest},
         
         //Pilgrims
         {2014756, DeepDungeonMobTypes.Passage},

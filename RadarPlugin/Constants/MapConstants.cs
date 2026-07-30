@@ -58,6 +58,8 @@ public static class MapConstants
         
         // OC: South Horn
         1252,
+        // OC: North Horn
+        1346,
         
         // New DD
         //1280, // Base floor lol (between floors)
