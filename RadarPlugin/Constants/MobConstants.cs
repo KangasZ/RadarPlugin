@@ -383,20 +383,34 @@ public static class MobConstants
         { 18324, DeepDungeonMobTypes.SpecialUndead }, // SIlencer
         
         //OC Objects 2
+        { 18380, DeepDungeonMobTypes.Auspice}, // Carrot Bunny
         //Crystal / Aetherytes
         { 2007457, DeepDungeonMobTypes.Passage },
         { 2015433, DeepDungeonMobTypes.Passage },
         { 2015431, DeepDungeonMobTypes.Passage },
         // Surveys
         { 2015421, DeepDungeonMobTypes.Return },
-        
+        {1997, DeepDungeonMobTypes.GoldChest}, //FT personal spoils
+        {1998, DeepDungeonMobTypes.GoldChest}, //FT personal spoils
+        {1999, DeepDungeonMobTypes.GoldChest}, //FT personal spoils
+        {2000, DeepDungeonMobTypes.GoldChest}, //FT personal spoils
+        {2001, DeepDungeonMobTypes.GoldChest}, //FT personal spoils
+        {2002, DeepDungeonMobTypes.GoldChest}, //FT personal spoils
+        {2003, DeepDungeonMobTypes.GoldChest}, //FT personal spoils
+        {2004, DeepDungeonMobTypes.GoldChest}, //FT personal spoils
         //silver
-        {2008, DeepDungeonMobTypes.SilverChest},
         {2006, DeepDungeonMobTypes.SilverChest},
         {2007, DeepDungeonMobTypes.SilverChest},
+        {2008, DeepDungeonMobTypes.SilverChest},
+        {2009, DeepDungeonMobTypes.SilverChest},
+        {2010, DeepDungeonMobTypes.SilverChest},
+        {2011, DeepDungeonMobTypes.SilverChest},
+        {2012, DeepDungeonMobTypes.SilverChest},
+        {2013, DeepDungeonMobTypes.SilverChest},
         
         // Bronze
         
+        {2014, DeepDungeonMobTypes.BronzeChest},
         {2015, DeepDungeonMobTypes.BronzeChest},
         {2016, DeepDungeonMobTypes.BronzeChest},
         {2017, DeepDungeonMobTypes.BronzeChest},
@@ -413,6 +427,8 @@ public static class MobConstants
         {2028, DeepDungeonMobTypes.BronzeChest},
         {2029, DeepDungeonMobTypes.BronzeChest},
         {2030, DeepDungeonMobTypes.BronzeChest},
+        {2031, DeepDungeonMobTypes.BronzeChest},
+        {2032, DeepDungeonMobTypes.BronzeChest},
         {2033, DeepDungeonMobTypes.BronzeChest},
         {2034, DeepDungeonMobTypes.BronzeChest},
         {2035, DeepDungeonMobTypes.BronzeChest},
@@ -434,8 +450,25 @@ public static class MobConstants
         {2051, DeepDungeonMobTypes.BronzeChest},
         {2052, DeepDungeonMobTypes.BronzeChest},
         {2053, DeepDungeonMobTypes.BronzeChest},
+        {2054, DeepDungeonMobTypes.BronzeChest},
+        {2055, DeepDungeonMobTypes.BronzeChest},
         {2056, DeepDungeonMobTypes.BronzeChest},
+        {2057, DeepDungeonMobTypes.BronzeChest},
+        {2058, DeepDungeonMobTypes.BronzeChest},
+        {2059, DeepDungeonMobTypes.BronzeChest},
+        {2060, DeepDungeonMobTypes.BronzeChest},
+        {2061, DeepDungeonMobTypes.BronzeChest},
+        {2062, DeepDungeonMobTypes.BronzeChest},
+        {2063, DeepDungeonMobTypes.BronzeChest},
+        {2064, DeepDungeonMobTypes.BronzeChest},
+        {2065, DeepDungeonMobTypes.BronzeChest},
+        {2066, DeepDungeonMobTypes.BronzeChest},
+        {2067, DeepDungeonMobTypes.BronzeChest},
+        {2068, DeepDungeonMobTypes.BronzeChest},
+        {2069, DeepDungeonMobTypes.BronzeChest},
         {2070, DeepDungeonMobTypes.BronzeChest},
+        {2071, DeepDungeonMobTypes.BronzeChest},
+        {2072, DeepDungeonMobTypes.BronzeChest},
         
         //Pilgrims
         {2014756, DeepDungeonMobTypes.Passage},
