@@ -5,14 +5,17 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using RadarPlugin.Configuration.Models.ESPOption;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 using RadarPlugin.UI;
+using Action = Lumina.Excel.Sheets.Action;
 
 namespace RadarPlugin.RadarLogic;
 
-public unsafe class Radar3D
+public class Radar3D
 {
     private readonly RadarModules radarModules;
     private readonly IPluginLog pluginLog;
@@ -20,6 +23,7 @@ public unsafe class Radar3D
     private readonly IGameGui gameGui;
     private readonly Configuration.Configuration configInterface;
     private readonly IObjectTable objectTable;
+    private readonly IDataManager dataManager;
 
     public Radar3D(
         Configuration.Configuration configuration,
@@ -27,7 +31,8 @@ public unsafe class Radar3D
         IGameGui gameGui,
         IPluginLog pluginLog,
         RadarModules radarModules,
-        IObjectTable objectTable
+        IObjectTable objectTable,
+        IDataManager dataManager
     )
     {
         // Creates Dependencies
@@ -35,6 +40,7 @@ public unsafe class Radar3D
         this.gameGui = gameGui;
         this.radarModules = radarModules;
         this.pluginLog = pluginLog;
+        this.dataManager = dataManager;
         // Loads plugin
         this.pluginLog.Debug("Radar Loaded");
 
@@ -43,10 +49,7 @@ public unsafe class Radar3D
     }
 
     public void Radar3DOnTick(
-        IEnumerable<(
-            IGameObject areaObject,
-            Configuration.Configuration.ESPOption espOption
-        )> objectTableRef
+        IEnumerable<(IGameObject areaObject, ESPOption espOption)> objectTableRef
     )
     {
         // Setup Drawlist
@@ -101,7 +104,7 @@ public unsafe class Radar3D
         ImDrawListPtr drawListPtr,
         IGameObject gameObject,
         uint? overrideColor,
-        Configuration.Configuration.ESPOption espOption
+        ESPOption espOption
     )
     {
         var color = overrideColor ?? espOption.ColorU;
@@ -256,10 +259,17 @@ public unsafe class Radar3D
                         aggroRadius = range;
                     }
 
-                    Vector3? playerPosition = configInterface.cfg.AggroRadiusOptions.EnableMaxDistanceArcFromPlayer
+                    Vector3? playerPosition = configInterface
+                        .cfg
+                        .AggroRadiusOptions
+                        .EnableMaxDistanceArcFromPlayer
                         ? objectTable.LocalPlayer.Position
                         : null;
-                    var gameObjectPosition = new Vector3(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z);
+                    var gameObjectPosition = new Vector3(
+                        gameObject.Position.X,
+                        gameObject.Position.Y,
+                        gameObject.Position.Z
+                    );
                     if (configInterface.cfg.AggroRadiusOptions.ShowAggroCircleOnPlayerHeight)
                     {
                         gameObjectPosition.Y = objectTable.LocalPlayer.Position.Y;
@@ -275,11 +285,77 @@ public unsafe class Radar3D
                     );
                 }
 
+                if (configInterface.cfg.CastBarOptions.BattleNpcs)
+                {
+                    DrawCastBar(drawListPtr, npc2, onScreenPosition);
+                }
+
                 break;
             }
-            case IPlayerCharacter pc when espOption.ShowMp:
-                DrawMp(drawListPtr, onScreenPosition, pc, color);
+            case IPlayerCharacter pc:
+                if (espOption.ShowMp)
+                {
+                    DrawMp(drawListPtr, onScreenPosition, pc, color);
+                }
+
+                if (configInterface.cfg.CastBarOptions.Players)
+                {
+                    DrawCastBar(drawListPtr, pc, onScreenPosition);
+                }
+
                 break;
+        }
+    }
+
+    private void DrawCastBar(
+        ImDrawListPtr drawListPtr,
+        IBattleChara battleChara,
+        Vector2 onScreenPosition
+    )
+    {
+        if (
+            battleChara.IsCasting
+            && configInterface.cfg.CastBarOptions.Enabled
+            && battleChara.CastActionType == 1
+        )
+        {
+            var castTime = battleChara.TotalCastTime;
+            var currentCastTime = battleChara.CurrentCastTime;
+            if (castTime == 0)
+            {
+                return;
+            }
+            var excelBnpcs = this.dataManager.Excel.GetSheet<Action>();
+            var castBarAction = battleChara.CastActionId;
+            var action = excelBnpcs.GetRowOrDefault(castBarAction);
+            if (action == null)
+            {
+                return;
+            }
+
+            var castBarOptions = configInterface.cfg.CastBarOptions;
+            var castTimePercent = currentCastTime / castTime;
+            var xSize = castBarOptions.XSize;
+            var ySize = castBarOptions.YSize;
+            var label = $"{action.Value.Name.ExtractText()}";
+            if (configInterface.cfg.CastBarOptions.DrawTime)
+            {
+                var timeLeft = castTime - currentCastTime;
+                label += $" ({timeLeft.ToString("F1")}s)";
+            }
+            UiHelpers.BufferingBar(
+                drawListPtr,
+                onScreenPosition - new Vector2(xSize / 2, -(castBarOptions.YOffset) + ySize / 2),
+                label,
+                castBarOptions.BackgroundColor,
+                castBarOptions.ProgressColor,
+                castBarOptions.BorderColor,
+                castBarOptions.TextColor,
+                xSize,
+                ySize,
+                castBarOptions.BorderThickness,
+                castTimePercent
+            );
         }
     }
 

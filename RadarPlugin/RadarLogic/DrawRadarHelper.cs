@@ -120,7 +120,11 @@ public static class DrawRadarHelper
             var currentRotation = rotationStart - i * rotationPerSegment;
             var xValue = radius * MathF.Sin(currentRotation);
             var yValue = radius * MathF.Cos(currentRotation);
-            var strokePosition = new Vector3(originPosition.X + xValue, originPosition.Y, originPosition.Z + yValue);
+            var strokePosition = new Vector3(
+                originPosition.X + xValue,
+                originPosition.Y,
+                originPosition.Z + yValue
+            );
             if (playerPosition.HasValue)
             {
                 var distanceFromPlayer = strokePosition.Distance2D(playerPosition.Value);
@@ -130,10 +134,7 @@ public static class DrawRadarHelper
                 }
             }
 
-            isOnScreen = gameGui.WorldToScreen(
-                strokePosition,
-                out segmentVectorOnCircle
-            );
+            isOnScreen = gameGui.WorldToScreen(strokePosition, out segmentVectorOnCircle);
             if (!isOnScreen)
             {
                 imDrawListPtr.PathStroke(color, ImDrawFlags.RoundCornersAll, thickness);
@@ -168,24 +169,61 @@ public static class DrawRadarHelper
         );
     }
 
-    public static void DrawHealthBar(
+    public static void BufferingBar(
         ImDrawListPtr imDrawListPtr,
-        Vector2 onScreenPositon,
-        IGameObject gameObject
+        string label,
+        uint bgColor,
+        uint fgColor,
+        uint borderColor,
+        uint textColor,
+        float xSize,
+        float ySize,
+        float borderThickness,
+        float filledPercent
     )
     {
-        UiHelpers.BufferingBar(
-            imDrawListPtr,
-            onScreenPositon,
-            "hi",
-            ConfigConstants.Black,
-            ConfigConstants.Red,
-            ConfigConstants.White,
-            ConfigConstants.White,
-            50f,
-            100f,
-            1f,
-            0.5f
+        var tagTextSize = ImGui.CalcTextSize(label);
+
+        var size = new Vector2(xSize - borderThickness, ySize);
+        var filledSize = new Vector2(size.X * filledPercent, size.Y);
+        var cursorScreenPos = ImGui.GetCursorScreenPos() + new Vector2(borderThickness, 0);
+        imDrawListPtr.AddRectFilled(
+            cursorScreenPos,
+            cursorScreenPos + size,
+            bgColor,
+            (ImDrawFlags)0
+        );
+
+        imDrawListPtr.AddRectFilled(
+            cursorScreenPos,
+            cursorScreenPos + filledSize,
+            fgColor,
+            (ImDrawFlags)0
+        );
+
+        if (borderThickness > 0)
+        {
+            imDrawListPtr.AddRect(
+                cursorScreenPos,
+                cursorScreenPos + size,
+                borderColor,
+                0,
+                ImDrawFlags.Closed,
+                borderThickness
+            );
+        }
+
+        imDrawListPtr.AddText(
+            cursorScreenPos
+                + new Vector2(
+                    size.X - (tagTextSize.X + borderThickness),
+                    size.Y / 2 - tagTextSize.Y / 2
+                ),
+            textColor,
+            label
+        );
+        ImGui.SetCursorScreenPos(
+            cursorScreenPos + new Vector2(0 - borderThickness, filledSize.Y + 5)
         );
     }
 }

@@ -119,17 +119,13 @@ public class LocalMobsUi : IDisposable
                     if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Ascending)
                     {
                         areaObjectsSorted = areaObjects.OrderBy(x =>
-                            x.ObjectKind == ObjectKind.Pc
-                                ? x.GetContentId()
-                                : x.BaseId
+                            x.ObjectKind == ObjectKind.Pc ? x.GetContentId() : x.BaseId
                         );
                     }
                     else if (sortSpecs.Specs.SortDirection == ImGuiSortDirection.Descending)
                     {
                         areaObjectsSorted = areaObjects.OrderByDescending(x =>
-                            x.ObjectKind == ObjectKind.Pc
-                                ? x.GetContentId()
-                                : x.BaseId
+                            x.ObjectKind == ObjectKind.Pc ? x.GetContentId() : x.BaseId
                         );
                     }
 

@@ -20,6 +20,7 @@ public class RadarPlugin : IDalamudPlugin
     private readonly RadarModules radarModules;
     private readonly IFramework framework;
     private readonly IDalamudPluginInterface pluginInterface;
+    private readonly FontManager fontManager;
 
     public RadarPlugin(
         IDalamudPluginInterface pluginInterface,
@@ -77,6 +78,8 @@ public class RadarPlugin : IDalamudPlugin
             pluginLog,
             typeConfiguratorUi
         );
+        this.fontManager = new FontManager(pluginInterface, dataManager, Configuration, pluginLog);
+        fontManager.BuildFonts();
         mainUi = new MainUi(
             this.pluginInterface,
             Configuration,
@@ -85,7 +88,8 @@ public class RadarPlugin : IDalamudPlugin
             typeConfiguratorUi,
             customizedEntitiesUi,
             pluginLog,
-            radarModules
+            radarModules,
+            fontManager
         );
 
         // Command manager
@@ -100,7 +104,9 @@ public class RadarPlugin : IDalamudPlugin
             pluginLog,
             radarModules,
             gameInteropProvider,
-            playerState
+            playerState,
+            dataManager,
+            fontManager
         );
 
         this.framework.Update += radarModules.StartTick;

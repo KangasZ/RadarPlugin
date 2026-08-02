@@ -2,6 +2,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Common.Math;
+using RadarPlugin.Configuration.Models.ESPOption;
 using RadarPlugin.Enums;
 
 namespace RadarPlugin.UI;
@@ -13,7 +14,7 @@ public class TypeConfigurator
     private bool configuratorWindowVisible = false;
 
     // Current Modification
-    private Configuration.Configuration.ESPOption espOption;
+    private ESPOption espOption;
     private string espDescription;
     private MobType mobType;
     private DisplayOrigination displayOrigination;
@@ -39,7 +40,7 @@ public class TypeConfigurator
     }
 
     public void OpenUiWithType(
-        ref Configuration.Configuration.ESPOption espOption,
+        ref ESPOption espOption,
         string typeId,
         MobType mobType,
         DisplayOrigination displayOrigination

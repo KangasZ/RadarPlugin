@@ -6,9 +6,13 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface;
+using Dalamud.Interface.GameFonts;
 using Dalamud.Interface.ManagedFontAtlas;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 using RadarPlugin.UI;
@@ -27,12 +31,10 @@ public class RadarDriver : IDisposable
     private readonly IPluginLog pluginLog;
     private readonly Radar3D radar3D;
     private readonly Radar2D radar2D;
-    private IFontHandle? gameFont;
-    private ImFontPtr? dalamudFont;
-    private bool fontBuilt = false;
 
     private RadarModules radarModules;
     private readonly IPlayerState playerState;
+    private readonly FontManager fontManager;
 
     public RadarDriver(
         IDalamudPluginInterface pluginInterface,
@@ -44,7 +46,9 @@ public class RadarDriver : IDisposable
         IPluginLog pluginLog,
         RadarModules radarModules,
         IGameInteropProvider gameInteropProvider,
-        IPlayerState playerState
+        IPlayerState playerState,
+        IDataManager dataManager,
+        FontManager fontManager
     )
     {
         // Creates Dependencies
@@ -55,7 +59,15 @@ public class RadarDriver : IDisposable
         this.gameGui = gameGui;
         this.radarModules = radarModules;
         this.pluginLog = pluginLog;
-        this.radar3D = new Radar3D(configuration, clientState, gameGui, pluginLog, radarModules, objectTable);
+        this.radar3D = new Radar3D(
+            configuration,
+            clientState,
+            gameGui,
+            pluginLog,
+            radarModules,
+            objectTable,
+            dataManager
+        );
         this.radar2D = new Radar2D(
             this.pluginInterface,
             configuration,
@@ -68,51 +80,20 @@ public class RadarDriver : IDisposable
         this.pluginLog.Debug("Radar Loaded");
         this.clientState = clientState;
         this.playerState = playerState;
+        this.fontManager = fontManager;
         this.pluginInterface.UiBuilder.Draw += OnUiTick;
-        //this.pluginInterface.UiBuilder.BuildFonts += BuildFont;
     }
-
-    /*
-    private void BuildFont()
-    {
-        // Axis = Plugin.Interface.UiBuilder.FontAtlas.NewGameFontHandle(new GameFontStyle(GameFontFamily.Axis, SizeInPx(Plugin.Config.FontSizeV2)));
-        //config.SizePt = Plugin.Config.SymbolsFontSizeV2;
-        ///config.GlyphRanges = SymRange;
-        //tk.AddFontFromMemory(GameSymFont, config, "ChatTwo2 Sym Font");
-        fontBuilt = false;
-        var fontFile = Path.Combine(
-            pluginInterface.DalamudAssetDirectory.FullName,
-            "UIRes",
-            "NotoSansCJKjp-Medium.otf"
-        );
-        if (File.Exists(fontFile))
-        {
-            try
-            {
-                dalamudFont = ImGui
-                    .GetIO()
-                    .Fonts.AddFontFromFileTTF(fontFile, configInterface.cfg.FontSettings.FontSize);
-                fontBuilt = true;
-                this.pluginLog.Debug("Custom dalamud font loaded sucesffully");
-            }
-            catch (Exception ex)
-            {
-                this.pluginLog.Error(ex, "Font failed to load!");
-            }
-        }
-        else
-        {
-            this.pluginLog.Error("Font does not exist! Please fix dev.");
-        }
-    }*/
 
     private void OnUiTick()
     {
         if (!configInterface.cfg.Enabled)
             return;
 
-        //ImFontPtr fontPtr = LoadFont();
-        //using var font = ImRaii.PushFont(fontPtr);
+        var font = configInterface.cfg.FontSettings.UseCustomFont
+            ? configInterface.cfg.FontSettings.UseAxisFont
+                ? fontManager.Axis
+                : fontManager.RegularFont
+            : fontManager.RegularFont;
         if (objectTable.Length == 0)
             return;
         if (CheckDraw())
@@ -129,49 +110,12 @@ public class RadarDriver : IDisposable
                 return (areaObject, espOption);
             })
             .ToArray();
-        radar3D.Radar3DOnTick(objectsWithMobOptions);
+        using (font.Push())
+        {
+            radar3D.Radar3DOnTick(objectsWithMobOptions);
+        }
         radar2D.Radar2DOnTick(objectsWithMobOptions);
     }
-
-    /*
-    private ImFontPtr LoadFont()
-    {
-        ImFontPtr fontPtr;
-        if (configInterface.cfg.FontSettings.UseCustomFont)
-        {
-            if (configInterface.cfg.FontSettings.UseAxisFont)
-            {
-                if (this.gameFont != null && this.gameFont.Available)
-                {
-                    var tempPointer = gameFont.ImFont;
-                    if (tempPointer.IsLoaded() &&
-                        Math.Abs(tempPointer.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
-                    {
-                        return this.gameFont.ImFont;
-                    }
-                }
-
-
-                gameFont = pluginInterface.UiBuilder.GetGameFontHandle(new GameFontStyle(GameFontFamily.Axis,
-                    configInterface.cfg.FontSettings.FontSize));
-                return gameFont.ImFont;
-            }
-
-            if (dalamudFont.HasValue && this.fontBuilt && dalamudFont.Value.IsLoaded() &&
-                Math.Abs(dalamudFont.Value.FontSize - configInterface.cfg.FontSettings.FontSize) < 0.01)
-            {
-                return dalamudFont.Value;
-            }
-
-            pluginInterface.UiBuilder.RebuildFonts();
-            return this.fontBuilt ? dalamudFont.Value : ImGui.GetFont();
-        }
-
-        fontPtr = ImGui.GetFont();
-
-        return fontPtr;
-    }
-    */
 
     private IEnumerable<GameObject> FilterObjectTable(IObjectTable objectTable)
     {
@@ -276,7 +220,7 @@ public class RadarDriver : IDisposable
 
         return true;
     }
-    
+
     public void Dispose()
     {
         pluginInterface.UiBuilder.Draw -= OnUiTick;

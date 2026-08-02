@@ -8,6 +8,8 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Utility;
+using RadarPlugin.Configuration.Models.ESPOption;
+using RadarPlugin.Configuration.Models.FeatureSettings;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 
@@ -69,7 +71,6 @@ public static class UiHelpers
                 borderThickness
             );
         }
-
         imDrawListPtr.AddText(
             cursorScreenPos
                 + new Vector2(
@@ -79,13 +80,10 @@ public static class UiHelpers
             textColor,
             label
         );
-        ImGui.SetCursorScreenPos(
-            cursorScreenPos + new Vector2(0 - borderThickness, filledSize.Y + 5)
-        );
     }
 
     public static bool DrawSettingsDetailed(
-        Configuration.Configuration.ESPOption option,
+        ESPOption option,
         string id,
         MobType mobType,
         DisplayOrigination displayOrigination
@@ -452,14 +450,31 @@ public static class UiHelpers
     public static bool Vector4ColorSelector(
         string label,
         ref uint configColor,
-        ImGuiColorEditFlags flags = ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.NoInputs
+        ImGuiColorEditFlags flags = ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.NoInputs,
+        uint? defaultColor = null
     )
     {
+        var shouldSave = false;
         var tempColor = ImGui.ColorConvertU32ToFloat4(configColor);
         if (!ImGui.ColorEdit4(label, ref tempColor, ImGuiColorEditFlags.NoInputs))
-            return false;
+        {
+            shouldSave = false;
+        }
+
         configColor = ImGui.ColorConvertFloat4ToU32(tempColor);
-        return true;
+        shouldSave = true;
+        if (defaultColor.HasValue)
+        {
+            ImGui.SameLine();
+            ImGui.PushFont(UiBuilder.IconFont);
+            if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-undo{label}"))
+            {
+                configColor = defaultColor.Value;
+                shouldSave = true;
+            }
+            ImGui.PopFont();
+        }
+        return shouldSave;
     }
 
     public static bool DrawCheckbox(string label, ref bool boxValue, string? tooltipText = null)
@@ -869,9 +884,7 @@ public static class UiHelpers
         );
     }
 
-    public static bool Draw2DRadarSettings(
-        ref Configuration.Configuration.Radar2DConfiguration cfgRadar2DConfiguration
-    )
+    public static bool Draw2DRadarSettings(ref Radar2DConfiguration cfgRadar2DConfiguration)
     {
         var shouldSave = false;
         shouldSave |= UiHelpers.DrawCheckbox("Enabled", ref cfgRadar2DConfiguration.Enabled);
@@ -882,18 +895,10 @@ public static class UiHelpers
         shouldSave |= UiHelpers.DrawCheckbox("Show Cross", ref cfgRadar2DConfiguration.ShowCross);
         shouldSave |= UiHelpers.Vector4ColorSelector(
             "Cross Color",
-            ref cfgRadar2DConfiguration.CrossColor
+            ref cfgRadar2DConfiguration.CrossColor,
+            defaultColor: Color.White
         );
 
-        ImGui.SameLine();
-        ImGui.PushFont(UiBuilder.IconFont);
-        if (ImGui.Button($"{FontAwesomeIcon.UndoAlt.ToIconString()}##-undo-cross"))
-        {
-            cfgRadar2DConfiguration.CrossColor = Color.White;
-            shouldSave = true;
-        }
-
-        ImGui.PopFont();
         shouldSave |= UiHelpers.DrawCheckbox(
             "Show Radar Border",
             ref cfgRadar2DConfiguration.ShowRadarBorder
@@ -957,7 +962,7 @@ public static class UiHelpers
     public static bool DrawConeSettings(
         string coneSettingsName,
         string coneSettingsTag,
-        ref Configuration.Configuration.ConeSettings cfgConeConfiguration
+        ref ConeSettings cfgConeConfiguration
     )
     {
         var shouldSave = false;

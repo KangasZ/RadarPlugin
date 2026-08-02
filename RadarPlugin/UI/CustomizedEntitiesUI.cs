@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using RadarPlugin.Configuration.Models.ESPOption;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 
@@ -73,10 +74,7 @@ public class CustomizedEntitiesUI : IDisposable
         DrawMenu(playersOptionTypeArray, MobType.Player);
     }
 
-    private void DrawMenu(
-        IEnumerable<Configuration.Configuration.ESPOptionMobBased> optionOverrideIEnumerable,
-        MobType mobType
-    )
+    private void DrawMenu(IEnumerable<ESPOptionMobBased> optionOverrideIEnumerable, MobType mobType)
     {
         // Filter the array
         if (nameFilterValue.Length != 0)
@@ -117,9 +115,7 @@ public class CustomizedEntitiesUI : IDisposable
                 {
                     configInterface.cfg.OptionOverride.Add(
                         dataId,
-                        new Configuration.Configuration.ESPOptionMobBased(
-                            Configuration.Configuration.objectOptDefault
-                        )
+                        new ESPOptionMobBased(DefaultESPOptions.objectOptDefault)
                         {
                             Enabled = true,
                             ColorU = ConfigConstants.White,
@@ -240,7 +236,7 @@ public class CustomizedEntitiesUI : IDisposable
             ImGui.TableNextColumn();
             if (ImGui.Button($"Edit##{x.Id}"))
             {
-                Configuration.Configuration.ESPOption optionOverride;
+                ESPOption optionOverride;
                 if (mobType == MobType.Player)
                 {
                     optionOverride = configInterface.cfg.PlayerOptionOverride[x.Id];
@@ -253,7 +249,7 @@ public class CustomizedEntitiesUI : IDisposable
                 typeConfigurator.OpenUiWithType(
                     ref optionOverride,
                     x.Name,
-                    ((Configuration.Configuration.ESPOptionMobBased)optionOverride).MobTypeValue,
+                    ((ESPOptionMobBased)optionOverride).MobTypeValue,
                     DisplayOrigination.DeepDungeon
                 );
             }
@@ -308,12 +304,9 @@ public class CustomizedEntitiesUI : IDisposable
         ImGui.EndTable();
     }
 
-    private Configuration.Configuration.ESPOptionMobBased[] GetSortedOptionOverride(
-        Configuration.Configuration.ESPOptionMobBased[] arrayToSort
-    )
+    private ESPOptionMobBased[] GetSortedOptionOverride(ESPOptionMobBased[] arrayToSort)
     {
-        IEnumerable<Configuration.Configuration.ESPOptionMobBased> optionOverrideTemporary =
-            arrayToSort;
+        IEnumerable<ESPOptionMobBased> optionOverrideTemporary = arrayToSort;
         var sortSpecs = ImGui.TableGetSortSpecs();
         if (sortSpecs.SpecsDirty)
         {

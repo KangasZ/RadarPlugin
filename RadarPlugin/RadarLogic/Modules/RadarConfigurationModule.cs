@@ -4,6 +4,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
 using Dalamud.Plugin.Services;
+using RadarPlugin.Configuration.Models.ESPOption;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 
@@ -44,11 +45,7 @@ public class RadarConfigurationModule : IModuleInterface
     /**
  * TODO: Refactor this to be done once per second instead of on each render.
  */
-    public string GetText(
-        IGameObject gameObject,
-        Configuration.Configuration.ESPOption espOption,
-        bool radar3d = true
-    )
+    public string GetText(IGameObject gameObject, ESPOption espOption, bool radar3d = true)
     {
         var tagText = "";
         var displayTypeFlags =
@@ -149,16 +146,18 @@ public class RadarConfigurationModule : IModuleInterface
             : $"{tagText}";
     }
 
-    public Configuration.Configuration.ESPOption TryGetOverridenParams(
-        IGameObject areaObject,
-        out bool overridden
-    )
+    public ESPOption TryGetOverridenParams(IGameObject areaObject, out bool overridden)
     {
         overridden = false;
-        Configuration.Configuration.ESPOptionMobBased? optionOverride = null;
+        ESPOptionMobBased? optionOverride = null;
         if (areaObject.ObjectKind == ObjectKind.Pc)
         {
-            if (configInterface.cfg.PlayerOptionOverride.TryGetValue(areaObject.GetContentId(), out optionOverride))
+            if (
+                configInterface.cfg.PlayerOptionOverride.TryGetValue(
+                    areaObject.GetContentId(),
+                    out optionOverride
+                )
+            )
             {
                 overridden = true;
             }
@@ -192,7 +191,7 @@ public class RadarConfigurationModule : IModuleInterface
         return GetParams(areaObject);
     }
 
-    public Configuration.Configuration.ESPOption GetParams(IGameObject areaObject)
+    public ESPOption GetParams(IGameObject areaObject)
     {
         // If Deep Dungeon
         var zoneType = zoneTypeModule.GetLocationType();

@@ -25,7 +25,6 @@ public static class MapConstants
         603,
         604,
         605,
-        
         // HOH
         770,
         771,
@@ -37,13 +36,11 @@ public static class MapConstants
         784,
         775,
         785,
-        
         // Eureka (Old) (in order)
         732,
         763,
         795,
         827,
-        
         // Eureka Orthos in order
         1099,
         1100,
@@ -55,12 +52,10 @@ public static class MapConstants
         1106,
         1107,
         1108,
-        
         // OC: South Horn
         1252,
         // OC: North Horn
         1346,
-        
         // New DD
         //1280, // Base floor lol (between floors)
         1281,

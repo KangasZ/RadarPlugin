@@ -4,6 +4,8 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
+using RadarPlugin.Configuration.Models;
+using RadarPlugin.Configuration.Models.ESPOption;
 using RadarPlugin.Constants;
 using RadarPlugin.Enums;
 using RadarPlugin.RadarLogic;
@@ -21,6 +23,7 @@ public class MainUi : IDisposable
     private readonly CustomizedEntitiesUI customizedEntitiesUi;
     private readonly IPluginLog pluginLog;
     private readonly RadarModules radarModules;
+    private readonly FontManager fontManager;
 
     public MainUi(
         IDalamudPluginInterface dalamudPluginInterface,
@@ -30,7 +33,8 @@ public class MainUi : IDisposable
         TypeConfigurator typeConfigurator,
         CustomizedEntitiesUI customizedEntitiesUi,
         IPluginLog pluginLog,
-        RadarModules radarModules
+        RadarModules radarModules,
+        FontManager fontManager
     )
     {
         this.clientState = clientState;
@@ -43,6 +47,7 @@ public class MainUi : IDisposable
         this.customizedEntitiesUi = customizedEntitiesUi;
         this.pluginLog = pluginLog;
         this.radarModules = radarModules;
+        this.fontManager = fontManager;
     }
 
     public void Dispose()
@@ -352,6 +357,7 @@ public class MainUi : IDisposable
     private bool DrawFontOptions()
     {
         var shouldSave = false;
+        var shouldSaveFontSize = false;
 
         shouldSave |= ImGui.Checkbox(
             "Use Custom Font##custom-font-selector-default",
@@ -371,72 +377,79 @@ public class MainUi : IDisposable
             "Uses the axis font instead of default dalamud.\nThis is what most of the game is rendered with."
         );
 
-        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
-            ref configInterface.cfg.FontSettings.FontSize,
-            "Font Size",
-            "font-scale-default-window",
-            7f,
-            36f,
-            ImGui.GetFontSize(),
-            "%.0fpx"
-        );
+        ImGui.Text($"Current size: {configInterface.cfg.FontSettings.FontSize}px");
 
+        UiHelpers.TextColored("Takes a second to update font size", ConfigConstants.Red);
+
+        // shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+        //     ref configInterface.cfg.FontSettings.FontSize,
+        //     "Font Size",
+        //     "font-scale-default-window",
+        //     7f,
+        //     36f,
+        //     ImGui.GetFontSize(),
+        //     "%.0fpx"
+        // );
+        if (ImGui.Button("9px"))
+        {
+            configInterface.cfg.FontSettings.FontSize = 9f;
+            shouldSaveFontSize = true;
+        }
+
+        ImGui.SameLine();
         if (ImGui.Button("12px"))
         {
             configInterface.cfg.FontSettings.FontSize = 12f;
-            shouldSave = true;
+            shouldSaveFontSize = true;
         }
 
         ImGui.SameLine();
         if (ImGui.Button("16px"))
         {
             configInterface.cfg.FontSettings.FontSize = 16f;
-            shouldSave = true;
-        }
-
-        ImGui.SameLine();
-        if (ImGui.Button("17px"))
-        {
-            configInterface.cfg.FontSettings.FontSize = 17f;
-            shouldSave = true;
+            shouldSaveFontSize = true;
         }
 
         ImGui.SameLine();
         if (ImGui.Button("18px"))
         {
             configInterface.cfg.FontSettings.FontSize = 18f;
-            shouldSave = true;
+            shouldSaveFontSize = true;
         }
 
         ImGui.SameLine();
         if (ImGui.Button("20px"))
         {
             configInterface.cfg.FontSettings.FontSize = 20f;
-            shouldSave = true;
+            shouldSaveFontSize = true;
         }
 
         ImGui.SameLine();
         if (ImGui.Button("22px"))
         {
             configInterface.cfg.FontSettings.FontSize = 22f;
-            shouldSave = true;
+            shouldSaveFontSize = true;
         }
 
         ImGui.SameLine();
         if (ImGui.Button("24px"))
         {
             configInterface.cfg.FontSettings.FontSize = 24f;
-            shouldSave = true;
+            shouldSaveFontSize = true;
         }
 
         ImGui.SameLine();
         if (ImGui.Button("36px"))
         {
             configInterface.cfg.FontSettings.FontSize = 36f;
-            shouldSave = true;
+            shouldSaveFontSize = true;
         }
 
-        return shouldSave;
+        if (shouldSaveFontSize)
+        {
+            this.fontManager.RebuildFonts();
+        }
+        return shouldSave || shouldSaveFontSize;
     }
 
     private void DrawVisibilitySettings()
@@ -534,7 +547,7 @@ public class MainUi : IDisposable
             mobType: MobType.Character,
             displayOrigination: DisplayOrigination.DeepDungeon
         );
-        
+
         UiHelpers.DrawSeperator($"Loot Options", ConfigConstants.Red);
         DrawSettingsOverview(
             configInterface.cfg.DeepDungeonOptions.GoldChestOption,
@@ -583,7 +596,7 @@ public class MainUi : IDisposable
     }
 
     private void DrawSettingsOverview(
-        Configuration.Configuration.ESPOption espOption,
+        ESPOption espOption,
         string tag,
         string? description = null,
         MobType mobType = MobType.Object,
@@ -622,6 +635,85 @@ public class MainUi : IDisposable
             configInterface.Save();
     }
 
+    private bool HitboxOptions(string id)
+    {
+        var shouldSave = false;
+
+        shouldSave |= ImGui.Checkbox(
+            $"Show Hitbox{id}-hitbox",
+            ref configInterface.cfg.HitboxOptions.HitboxEnabled
+        );
+
+        shouldSave |= ImGui.DragFloat(
+            $"Thickness{id}",
+            ref configInterface.cfg.HitboxOptions.Thickness,
+            0.1f,
+            0.1f,
+            14f
+        );
+
+        shouldSave |= ImGui.Checkbox(
+            $"Override Mob Color{id}-hitbox",
+            ref configInterface.cfg.HitboxOptions.OverrideMobColor
+        );
+
+        if (configInterface.cfg.HitboxOptions.OverrideMobColor)
+        {
+            var hitboxColor = ImGui.ColorConvertU32ToFloat4(
+                configInterface.cfg.HitboxOptions.HitboxColor
+            );
+            if (
+                ImGui.ColorEdit4(
+                    $"Color{id}-hitbox-color",
+                    ref hitboxColor,
+                    ImGuiColorEditFlags.NoInputs
+                )
+            )
+            {
+                configInterface.cfg.HitboxOptions.HitboxColor = ImGui.ColorConvertFloat4ToU32(
+                    hitboxColor
+                );
+                configInterface.Save();
+            }
+        }
+
+        shouldSave |= ImGui.Checkbox(
+            $"Draw Inside Color{id}-hitbox",
+            ref configInterface.cfg.HitboxOptions.DrawInsideCircle
+        );
+
+        if (configInterface.cfg.HitboxOptions.DrawInsideCircle)
+        {
+            shouldSave |= ImGui.Checkbox(
+                "Use Different Inside Color",
+                ref configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor
+            );
+
+            if (!configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
+            {
+                var circleOpacity =
+                    (float)(configInterface.cfg.HitboxOptions.InsideCircleOpacity >> 24)
+                    / byte.MaxValue;
+                if (ImGui.DragFloat($"Inside Circle Opacity{id}", ref circleOpacity, 0.005f, 0, 1))
+                {
+                    configInterface.cfg.HitboxOptions.InsideCircleOpacity =
+                        ((uint)(circleOpacity * 255) << 24) | 0x00FFFFFF;
+                    configInterface.Save();
+                }
+            }
+
+            if (configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
+            {
+                shouldSave |= UiHelpers.Vector4ColorSelector(
+                    $"Inside Circle Color{id}-hitbox",
+                    ref configInterface.cfg.HitboxOptions.InsideCircleColor
+                );
+            }
+        }
+
+        return shouldSave;
+    }
+
     private void ShowMiscSettings()
     {
         var shouldSave = false;
@@ -630,90 +722,17 @@ public class MainUi : IDisposable
 
         if (ImGui.CollapsingHeader($"Hitbox Options{id}"))
         {
-            shouldSave |= ImGui.Checkbox(
-                $"Show Hitbox{id}-hitbox",
-                ref configInterface.cfg.HitboxOptions.HitboxEnabled
-            );
-
-            shouldSave |= ImGui.DragFloat(
-                $"Thickness{id}",
-                ref configInterface.cfg.HitboxOptions.Thickness,
-                0.1f,
-                0.1f,
-                14f
-            );
-
-            shouldSave |= ImGui.Checkbox(
-                $"Override Mob Color{id}-hitbox",
-                ref configInterface.cfg.HitboxOptions.OverrideMobColor
-            );
-
-            if (configInterface.cfg.HitboxOptions.OverrideMobColor)
-            {
-                var hitboxColor = ImGui.ColorConvertU32ToFloat4(
-                    configInterface.cfg.HitboxOptions.HitboxColor
-                );
-                if (
-                    ImGui.ColorEdit4(
-                        $"Color{id}-hitbox-color",
-                        ref hitboxColor,
-                        ImGuiColorEditFlags.NoInputs
-                    )
-                )
-                {
-                    configInterface.cfg.HitboxOptions.HitboxColor = ImGui.ColorConvertFloat4ToU32(
-                        hitboxColor
-                    );
-                    configInterface.Save();
-                }
-            }
-
-            shouldSave |= ImGui.Checkbox(
-                $"Draw Inside Color{id}-hitbox",
-                ref configInterface.cfg.HitboxOptions.DrawInsideCircle
-            );
-
-            if (configInterface.cfg.HitboxOptions.DrawInsideCircle)
-            {
-                shouldSave |= ImGui.Checkbox(
-                    "Use Different Inside Color",
-                    ref configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor
-                );
-
-                if (!configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
-                {
-                    var circleOpacity =
-                        (float)(configInterface.cfg.HitboxOptions.InsideCircleOpacity >> 24)
-                        / byte.MaxValue;
-                    if (
-                        ImGui.DragFloat(
-                            $"Inside Circle Opacity{id}",
-                            ref circleOpacity,
-                            0.005f,
-                            0,
-                            1
-                        )
-                    )
-                    {
-                        configInterface.cfg.HitboxOptions.InsideCircleOpacity =
-                            ((uint)(circleOpacity * 255) << 24) | 0x00FFFFFF;
-                        configInterface.Save();
-                    }
-                }
-
-                if (configInterface.cfg.HitboxOptions.UseDifferentInsideCircleColor)
-                {
-                    shouldSave |= UiHelpers.Vector4ColorSelector(
-                        $"Inside Circle Color{id}-hitbox",
-                        ref configInterface.cfg.HitboxOptions.InsideCircleColor
-                    );
-                }
-            }
+            shouldSave |= HitboxOptions(id);
         }
 
         if (ImGui.CollapsingHeader("Aggro Radius Options"))
         {
             DrawAggroCircleSettings();
+        }
+
+        if (ImGui.CollapsingHeader("Cast Bar Options"))
+        {
+            DrawCastBarOptions();
         }
 
         if (ImGui.CollapsingHeader("Off Screen Objects Settings"))
@@ -795,6 +814,120 @@ public class MainUi : IDisposable
             configInterface.Save();
     }
 
+    private void DrawCastBarOptions()
+    {
+        var shouldSave = false;
+        var id = "##castbaroptions";
+
+        shouldSave |= UiHelpers.DrawCheckbox(
+            $"Enabled{id}",
+            ref configInterface.cfg.CastBarOptions.Enabled,
+            "Draws cast bars under the enemy when they cast something"
+        );
+
+        shouldSave |= UiHelpers.DrawCheckbox(
+            $"Players Castbars{id}",
+            ref configInterface.cfg.CastBarOptions.Players,
+            "Shows players castbars"
+        );
+        shouldSave |= UiHelpers.DrawCheckbox(
+            $"Enemy Castbars{id}",
+            ref configInterface.cfg.CastBarOptions.BattleNpcs,
+            "Shows enemy castbars"
+        );
+
+        shouldSave |= UiHelpers.DrawCheckbox(
+            $"Draw Time Until Cast",
+            ref configInterface.cfg.CastBarOptions.DrawTime,
+            "Draws how much time is remaining on the cast"
+        );
+
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref configInterface.cfg.CastBarOptions.YOffset,
+            "Offset",
+            $"{id}-y-offset",
+            10f,
+            90f,
+            20f
+        );
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref configInterface.cfg.CastBarOptions.YSize,
+            "Height",
+            $"{id}-y-size",
+            10f,
+            50f,
+            20f
+        );
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref configInterface.cfg.CastBarOptions.XSize,
+            "Width",
+            $"{id}-x-size",
+            50f,
+            400f,
+            200f
+        );
+
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Background Color",
+            ref configInterface.cfg.CastBarOptions.BackgroundColor,
+            defaultColor: Color.Black
+        );
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Progress Color",
+            ref configInterface.cfg.CastBarOptions.ProgressColor,
+            defaultColor: Color.Blue
+        );
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Border Color",
+            ref configInterface.cfg.CastBarOptions.BorderColor,
+            defaultColor: Color.Black
+        );
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Text Color",
+            ref configInterface.cfg.CastBarOptions.TextColor,
+            defaultColor: Color.White
+        );
+
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref configInterface.cfg.CastBarOptions.BorderThickness,
+            "Border Thickness",
+            $"{id}-border-thickness",
+            0f,
+            4f,
+            0.4f
+        );
+        var drawListPtr = ImGui.GetWindowDrawList();
+        var progress = DateTime.UtcNow.Millisecond / 999f;
+        var cursorScreenPos = ImGui.GetCursorScreenPos();
+        var label = "Example Cast";
+        if (configInterface.cfg.CastBarOptions.DrawTime)
+        {
+            var timeLeft = DateTime.UtcNow.Millisecond / 1000f;
+            label += $" ({timeLeft.ToString("F1")}s)";
+        }
+        UiHelpers.BufferingBar(
+            drawListPtr,
+            cursorScreenPos,
+            label,
+            bgColor: configInterface.cfg.CastBarOptions.BackgroundColor,
+            configInterface.cfg.CastBarOptions.ProgressColor,
+            configInterface.cfg.CastBarOptions.BorderColor,
+            configInterface.cfg.CastBarOptions.TextColor,
+            configInterface.cfg.CastBarOptions.XSize,
+            configInterface.cfg.CastBarOptions.YSize,
+            configInterface.cfg.CastBarOptions.BorderThickness,
+            progress
+        );
+
+        ImGui.SetCursorScreenPos(
+            cursorScreenPos + new Vector2(0, configInterface.cfg.CastBarOptions.YSize + 5)
+        );
+        if (shouldSave)
+        {
+            configInterface.Save();
+        }
+    }
+
     private void DrawAggroCircleSettings()
     {
         var shouldSave = false;
@@ -821,7 +954,7 @@ public class MainUi : IDisposable
             ConfigConstants.DefaultMaxAggroRadiusDistance,
             "%.0fm"
         );
-        
+
         shouldSave |= UiHelpers.DrawCheckbox(
             $"Enable Maximum Distance Circle Draw From Player##{tag}-max-arc-dist",
             ref configInterface.cfg.AggroRadiusOptions.EnableMaxDistanceArcFromPlayer,
@@ -968,7 +1101,7 @@ public class MainUi : IDisposable
     }
 
     private bool DrawBoolSeparatedSettingsOverview(
-        ref Configuration.Configuration.SeparatedEspOption separatedEspOption,
+        ref SeparatedEspOption separatedEspOption,
         string tag,
         MobType mobType,
         string? infoDescription = null

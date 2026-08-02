@@ -6,6 +6,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using RadarPlugin.Configuration.Models.ESPOption;
 using RadarPlugin.Enums;
 using RadarPlugin.RadarLogic;
 using CameraManager = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager;
@@ -40,10 +41,7 @@ public unsafe class Radar2D
     }
 
     public void Radar2DOnTick(
-        IEnumerable<(
-            IGameObject areaObject,
-            Configuration.Configuration.ESPOption espOption
-        )> gameObjects
+        IEnumerable<(IGameObject areaObject, ESPOption espOption)> gameObjects
     )
     {
         var config = configuration.cfg.Radar2DConfiguration;
@@ -78,12 +76,7 @@ public unsafe class Radar2D
         ImGui.PopStyleColor(1);
     }
 
-    private void DrawRadar(
-        IEnumerable<(
-            IGameObject areaObject,
-            Configuration.Configuration.ESPOption espOption
-        )> gameObjects
-    )
+    private void DrawRadar(IEnumerable<(IGameObject areaObject, ESPOption espOption)> gameObjects)
     {
         var imDrawListPtr = ImGui.GetWindowDrawList();
         var region = ImGui.GetContentRegionAvail();
