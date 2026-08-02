@@ -462,7 +462,6 @@ public static class UiHelpers
         }
 
         configColor = ImGui.ColorConvertFloat4ToU32(tempColor);
-        shouldSave = true;
         if (defaultColor.HasValue)
         {
             ImGui.SameLine();

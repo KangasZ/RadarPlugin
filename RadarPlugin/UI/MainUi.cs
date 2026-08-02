@@ -846,7 +846,7 @@ public class MainUi : IDisposable
             ref configInterface.cfg.CastBarOptions.YOffset,
             "Offset",
             $"{id}-y-offset",
-            10f,
+           -50f,
             90f,
             20f
         );
@@ -875,6 +875,11 @@ public class MainUi : IDisposable
         shouldSave |= UiHelpers.Vector4ColorSelector(
             "Progress Color",
             ref configInterface.cfg.CastBarOptions.ProgressColor,
+            defaultColor: Color.Blue
+        );
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Player Progress Color",
+            ref configInterface.cfg.CastBarOptions.PlayerProgressColor,
             defaultColor: Color.Blue
         );
         shouldSave |= UiHelpers.Vector4ColorSelector(

@@ -13,6 +13,7 @@ public class CastBarOptions
     public float XSize = 200f;
     public uint BackgroundColor = Color.Black;
     public uint ProgressColor = Color.Blue;
+    public uint PlayerProgressColor = Color.Blue;
     public uint BorderColor = Color.Black;
     public uint TextColor = Color.White;
     public float BorderThickness = 0.4f;

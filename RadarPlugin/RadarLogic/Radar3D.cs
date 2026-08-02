@@ -148,10 +148,10 @@ public class Radar3D
                 DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
             }
 
-            if (displayFlags.HasFlag(DisplayTypeFlags.HealthBar))
-            {
-                //DrawRadarHelper.DrawHealthBar(drawListPtr, onScreenPosition, gameObject);
-            }
+            // if (displayFlags.HasFlag(DisplayTypeFlags.HealthBar))
+            // {
+            //     DrawRadarHelper.DrawHealthBar(drawListPtr, onScreenPosition, gameObject);
+            // }
         }
         else if (configInterface.cfg.ShowOffScreen)
         {
@@ -287,7 +287,7 @@ public class Radar3D
 
                 if (configInterface.cfg.CastBarOptions.BattleNpcs)
                 {
-                    DrawCastBar(drawListPtr, npc2, onScreenPosition);
+                    DrawCastBar(drawListPtr, npc2, onScreenPosition, configInterface.cfg.CastBarOptions.ProgressColor);
                 }
 
                 break;
@@ -300,7 +300,7 @@ public class Radar3D
 
                 if (configInterface.cfg.CastBarOptions.Players)
                 {
-                    DrawCastBar(drawListPtr, pc, onScreenPosition);
+                    DrawCastBar(drawListPtr, pc, onScreenPosition, configInterface.cfg.CastBarOptions.PlayerProgressColor);
                 }
 
                 break;
@@ -310,7 +310,8 @@ public class Radar3D
     private void DrawCastBar(
         ImDrawListPtr drawListPtr,
         IBattleChara battleChara,
-        Vector2 onScreenPosition
+        Vector2 onScreenPosition,
+        uint progressColor
     )
     {
         if (
@@ -348,7 +349,7 @@ public class Radar3D
                 onScreenPosition - new Vector2(xSize / 2, -(castBarOptions.YOffset) + ySize / 2),
                 label,
                 castBarOptions.BackgroundColor,
-                castBarOptions.ProgressColor,
+                progressColor,
                 castBarOptions.BorderColor,
                 castBarOptions.TextColor,
                 xSize,
