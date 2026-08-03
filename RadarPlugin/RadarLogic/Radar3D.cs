@@ -318,10 +318,11 @@ public class Radar3D
         }
 
         if (
-            battleChara.IsCasting
-            && battleChara.CastActionType == 1
-            && battleChara.TotalCastTime != 0
-            && configInterface.cfg.CastBarOptions.Enabled
+            configInterface.cfg.CastBarOptions.Enabled &&
+            battleChara.BaseCastTime != 0 &&
+            battleChara.TotalCastTime != 0 &&
+            battleChara.CastActionType == 1
+            && battleChara.IsCasting
         )
         {
             if (configInterface.cfg.CastBarOptions.BattleNpcs && gameObject is IBattleNpc battleNpc)
