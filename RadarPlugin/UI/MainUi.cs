@@ -16,7 +16,6 @@ public class MainUi : IDisposable
 {
     private Configuration.Configuration configInterface;
     private readonly IDalamudPluginInterface dalamudPluginInterface;
-    private readonly LocalMobsUi localMobsUi;
     private bool mainWindowVisible;
     private readonly IClientState clientState;
     private readonly TypeConfigurator typeConfigurator;
@@ -28,7 +27,6 @@ public class MainUi : IDisposable
     public MainUi(
         IDalamudPluginInterface dalamudPluginInterface,
         Configuration.Configuration configInterface,
-        LocalMobsUi localMobsUi,
         IClientState clientState,
         TypeConfigurator typeConfigurator,
         CustomizedEntitiesUI customizedEntitiesUi,
@@ -38,7 +36,6 @@ public class MainUi : IDisposable
     )
     {
         this.clientState = clientState;
-        this.localMobsUi = localMobsUi;
         this.configInterface = configInterface;
         this.dalamudPluginInterface = dalamudPluginInterface;
         this.typeConfigurator = typeConfigurator;
@@ -180,20 +177,16 @@ public class MainUi : IDisposable
 
         ImGui.Separator();
 
-        if (ImGui.Button("Load Current Objects Menu"))
+        if (ImGui.Button("Current Objects & Customizations Menu"))
         {
             pluginLog.Debug("Pulling Area Objects");
-            this.localMobsUi.DrawLocalMobsUi();
+            customizedEntitiesUi.ShowCustomizedEntitiesUI();
         }
 
         ImGui.Separator();
 
         ImGui.Text($"Current Map ID: {clientState.TerritoryType}");
         ImGui.Text($"Zone Type: {radarModules.zoneTypeModule.GetLocationType()}");
-        if (ImGui.Button("Show Current Customizations"))
-        {
-            customizedEntitiesUi.ShowCustomizedEntitiesUI();
-        }
 
         if (configInterface.cfg.DebugMode)
         {

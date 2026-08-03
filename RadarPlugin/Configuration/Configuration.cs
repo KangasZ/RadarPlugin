@@ -173,9 +173,7 @@ public class Configuration
     public void Customize(
         IGameObject gameObject,
         bool customizeEnabled,
-        ESPOption currentSettings,
-        ulong obfuscatedSelfId,
-        uint yourBaseId
+        ESPOption currentSettings
     )
     {
         var dataId = gameObject.DataId;

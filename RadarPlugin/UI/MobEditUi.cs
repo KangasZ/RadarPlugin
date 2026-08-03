@@ -51,8 +51,6 @@ public class MobEditUi : IDisposable
         var size = new Vector2(600, 300);
         ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));
-        var selfObfuscated = objectTable.LocalPlayer?.GetAccountId() ?? 0;
-        var baseId = configInterface.cfg.YourAccountId;
         if (ImGui.Begin("Radar Plugin Modify Mobs Window", ref mobEditVisible))
         {
             ImGui.Columns(2);
@@ -149,9 +147,7 @@ public class MobEditUi : IDisposable
                     configInterface.Customize(
                         localObject,
                         isUsingCustomEspOption,
-                        defaulParams,
-                        selfObfuscated,
-                        baseId
+                        defaulParams
                     );
                 }
 

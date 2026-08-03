@@ -14,7 +14,6 @@ public class RadarPlugin : IDalamudPlugin
     private readonly PluginCommands pluginCommands;
     private readonly MainUi mainUi;
     private readonly MobEditUi mobEditUi;
-    private readonly LocalMobsUi localMobsUi;
     private readonly TypeConfigurator typeConfiguratorUi;
     private readonly CustomizedEntitiesUI customizedEntitiesUi;
     private readonly RadarModules radarModules;
@@ -62,28 +61,20 @@ public class RadarPlugin : IDalamudPlugin
             clientState,
             objectTable
         );
-        localMobsUi = new LocalMobsUi(
-            this.pluginInterface,
-            Configuration,
-            objectTable,
-            mobEditUi,
-            pluginLog,
-            radarModules,
-            typeConfiguratorUi,
-            clientState
-        );
         customizedEntitiesUi = new CustomizedEntitiesUI(
             this.pluginInterface,
             Configuration,
             pluginLog,
-            typeConfiguratorUi
+            typeConfiguratorUi,
+            objectTable,
+            radarModules,
+            mobEditUi
         );
         this.fontManager = new FontManager(pluginInterface, dataManager, Configuration, pluginLog);
         fontManager.BuildFonts();
         mainUi = new MainUi(
             this.pluginInterface,
             Configuration,
-            localMobsUi,
             clientState,
             typeConfiguratorUi,
             customizedEntitiesUi,
@@ -118,7 +109,6 @@ public class RadarPlugin : IDalamudPlugin
         Configuration.Save();
         // UI
         mainUi.Dispose();
-        localMobsUi.Dispose();
         mobEditUi.Dispose();
 
         // Customer services
