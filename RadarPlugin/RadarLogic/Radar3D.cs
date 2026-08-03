@@ -148,10 +148,12 @@ public class Radar3D
                 DrawRadarHelper.DrawHealthValue(drawListPtr, onScreenPosition, gameObject, color);
             }
 
-            // if (displayFlags.HasFlag(DisplayTypeFlags.HealthBar))
-            // {
-            //     DrawRadarHelper.DrawHealthBar(drawListPtr, onScreenPosition, gameObject);
-            // }
+            DrawHealthBarAndCastBar(drawListPtr, gameObject, onScreenPosition, espOption);
+
+            if (espOption.ShowMp)
+            {
+                DrawMp(drawListPtr, onScreenPosition, gameObject, color);
+            }
         }
         else if (configInterface.cfg.ShowOffScreen)
         {
@@ -284,26 +286,69 @@ public class Radar3D
                         configInterface.cfg.AggroRadiusOptions.MaxDistanceArcFromPlayer
                     );
                 }
-
-                if (configInterface.cfg.CastBarOptions.BattleNpcs)
-                {
-                    DrawCastBar(drawListPtr, npc2, onScreenPosition, configInterface.cfg.CastBarOptions.ProgressColor);
-                }
-
                 break;
             }
-            case IPlayerCharacter pc:
-                if (espOption.ShowMp)
-                {
-                    DrawMp(drawListPtr, onScreenPosition, pc, color);
-                }
+        }
+    }
 
-                if (configInterface.cfg.CastBarOptions.Players)
-                {
-                    DrawCastBar(drawListPtr, pc, onScreenPosition, configInterface.cfg.CastBarOptions.PlayerProgressColor);
-                }
+    private void DrawHealthBarAndCastBar(
+        ImDrawListPtr drawListPtr,
+        IGameObject gameObject,
+        Vector2 onScreenPosition,
+        ESPOption espOption
+    )
+    {
+        if (gameObject is not IBattleChara battleChara)
+        {
+            return;
+        }
 
-                break;
+        var drawHealthBar = false;
+        var drawCastBar = false;
+        var castBarProgressColor = Color.White;
+
+        if (
+            configInterface.cfg.HealthBarOptions.Enabled
+            && espOption.DisplayTypeFlags.HasFlag(DisplayTypeFlags.HealthBar)
+            && battleChara.CurrentHp > 0
+            && battleChara.MaxHp > 0
+        )
+        {
+            drawHealthBar = true;
+        }
+
+        if (
+            battleChara.IsCasting
+            && battleChara.CastActionType == 1
+            && battleChara.TotalCastTime != 0
+            && configInterface.cfg.CastBarOptions.Enabled
+        )
+        {
+            if (configInterface.cfg.CastBarOptions.BattleNpcs && gameObject is IBattleNpc battleNpc)
+            {
+                drawCastBar = true;
+                castBarProgressColor = configInterface.cfg.CastBarOptions.ProgressColor;
+            }
+
+            if (
+                configInterface.cfg.CastBarOptions.Players
+                && gameObject is IPlayerCharacter playerCharacter
+            )
+            {
+                drawCastBar = true;
+                castBarProgressColor = configInterface.cfg.CastBarOptions.ProgressColor;
+            }
+        }
+
+        if (drawCastBar)
+        {
+            var offset = drawHealthBar ? configInterface.cfg.HealthBarOptions.YSize : 0;
+            DrawCastBar(drawListPtr, battleChara, onScreenPosition, castBarProgressColor, offset);
+        }
+
+        if (drawHealthBar)
+        {
+            DrawHealthBar(drawListPtr, battleChara, onScreenPosition);
         }
     }
 
@@ -311,64 +356,97 @@ public class Radar3D
         ImDrawListPtr drawListPtr,
         IBattleChara battleChara,
         Vector2 onScreenPosition,
-        uint progressColor
+        uint progressColor,
+        float yOffset
     )
     {
-        if (
-            battleChara.IsCasting
-            && configInterface.cfg.CastBarOptions.Enabled
-            && battleChara.CastActionType == 1
-        )
+        var castTime = battleChara.TotalCastTime;
+        var currentCastTime = battleChara.CurrentCastTime;
+        var excelBnpcs = this.dataManager.Excel.GetSheet<Action>();
+        var castBarAction = battleChara.CastActionId;
+        var action = excelBnpcs.GetRowOrDefault(castBarAction);
+        if (action == null)
         {
-            var castTime = battleChara.TotalCastTime;
-            var currentCastTime = battleChara.CurrentCastTime;
-            if (castTime == 0)
-            {
-                return;
-            }
-            var excelBnpcs = this.dataManager.Excel.GetSheet<Action>();
-            var castBarAction = battleChara.CastActionId;
-            var action = excelBnpcs.GetRowOrDefault(castBarAction);
-            if (action == null)
-            {
-                return;
-            }
-
-            var castBarOptions = configInterface.cfg.CastBarOptions;
-            var castTimePercent = currentCastTime / castTime;
-            var xSize = castBarOptions.XSize;
-            var ySize = castBarOptions.YSize;
-            var label = $"{action.Value.Name.ExtractText()}";
-            if (configInterface.cfg.CastBarOptions.DrawTime)
-            {
-                var timeLeft = castTime - currentCastTime;
-                label += $" ({timeLeft.ToString("F1")}s)";
-            }
-            UiHelpers.BufferingBar(
-                drawListPtr,
-                onScreenPosition - new Vector2(xSize / 2, -(castBarOptions.YOffset) + ySize / 2),
-                label,
-                castBarOptions.BackgroundColor,
-                progressColor,
-                castBarOptions.BorderColor,
-                castBarOptions.TextColor,
-                xSize,
-                ySize,
-                castBarOptions.BorderThickness,
-                castTimePercent
-            );
+            return;
         }
+
+        var castBarOptions = configInterface.cfg.CastBarOptions;
+        var castTimePercent = currentCastTime / castTime;
+        var xSize = castBarOptions.XSize;
+        var ySize = castBarOptions.YSize;
+        var label = $"{action.Value.Name.ExtractText()}";
+        if (configInterface.cfg.CastBarOptions.DrawTime)
+        {
+            var timeLeft = castTime - currentCastTime;
+            label += $" ({timeLeft.ToString("F1")}s)";
+        }
+        UiHelpers.BufferingBar(
+            drawListPtr,
+            onScreenPosition
+                - new Vector2(xSize / 2, -yOffset - castBarOptions.YOffset + ySize / 2),
+            label,
+            castBarOptions.BackgroundColor,
+            progressColor,
+            castBarOptions.BorderColor,
+            castBarOptions.TextColor,
+            xSize,
+            ySize,
+            castBarOptions.BorderThickness,
+            castTimePercent,
+            castBarOptions.CenteredText
+        );
+    }
+
+    private void DrawHealthBar(
+        ImDrawListPtr drawListPtr,
+        IBattleChara battleChara,
+        Vector2 onScreenPosition
+    )
+    {
+        var healthBarOptions = configInterface.cfg.HealthBarOptions;
+        var xSize = healthBarOptions.XSize;
+        var ySize = healthBarOptions.YSize;
+        var label = $"";
+        var healthPercent = battleChara.CurrentHp / battleChara.MaxHp;
+        if (healthBarOptions.DrawName)
+        {
+            label += battleChara.Name.TextValue;
+        }
+
+        if (healthBarOptions.DrawPercent)
+        {
+            label += $" {(healthPercent * 100).ToString("F0")}%";
+        }
+        UiHelpers.BufferingBar(
+            drawListPtr,
+            onScreenPosition - new Vector2(xSize / 2, -(healthBarOptions.YOffset) + ySize / 2),
+            label,
+            healthBarOptions.BackgroundColor,
+            healthBarOptions.ProgressColor,
+            healthBarOptions.BorderColor,
+            healthBarOptions.TextColor,
+            xSize,
+            ySize,
+            healthBarOptions.BorderThickness,
+            healthPercent,
+            healthBarOptions.CenteredText
+        );
     }
 
     //todo better
     private void DrawMp(
         ImDrawListPtr imDrawListPtr,
         Vector2 position,
-        IPlayerCharacter gameObject,
+        IGameObject gameObject,
         uint playerOptColor
     )
     {
-        var mpText = gameObject.CurrentMp.ToString();
+        if (gameObject is not IPlayerCharacter battleChara)
+        {
+            return;
+        }
+
+        var mpText = battleChara.CurrentMp.ToString();
         var mptextSize = ImGui.CalcTextSize(mpText);
         imDrawListPtr.AddText(
             new Vector2((position.X - mptextSize.X / 2.0f), (position.Y + mptextSize.Y * 1.5f)),

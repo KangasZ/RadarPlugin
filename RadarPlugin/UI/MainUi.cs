@@ -735,6 +735,11 @@ public class MainUi : IDisposable
             DrawCastBarOptions();
         }
 
+        if (ImGui.CollapsingHeader("Health Bar Options"))
+        {
+            DrawHealthBarOptions();
+        }
+
         if (ImGui.CollapsingHeader("Off Screen Objects Settings"))
         {
             shouldSave |= ImGui.Checkbox(
@@ -818,40 +823,47 @@ public class MainUi : IDisposable
     {
         var shouldSave = false;
         var id = "##castbaroptions";
+        var castBarOptions = configInterface.cfg.CastBarOptions;
 
         shouldSave |= UiHelpers.DrawCheckbox(
             $"Enabled{id}",
-            ref configInterface.cfg.CastBarOptions.Enabled,
+            ref castBarOptions.Enabled,
             "Draws cast bars under the enemy when they cast something"
         );
 
         shouldSave |= UiHelpers.DrawCheckbox(
             $"Players Castbars{id}",
-            ref configInterface.cfg.CastBarOptions.Players,
+            ref castBarOptions.Players,
             "Shows players castbars"
         );
         shouldSave |= UiHelpers.DrawCheckbox(
             $"Enemy Castbars{id}",
-            ref configInterface.cfg.CastBarOptions.BattleNpcs,
+            ref castBarOptions.BattleNpcs,
             "Shows enemy castbars"
         );
 
         shouldSave |= UiHelpers.DrawCheckbox(
             $"Draw Time Until Cast",
-            ref configInterface.cfg.CastBarOptions.DrawTime,
+            ref castBarOptions.DrawTime,
             "Draws how much time is remaining on the cast"
         );
 
+        shouldSave |= UiHelpers.DrawCheckbox(
+            "Center Text",
+            ref castBarOptions.CenteredText,
+            "Centers the text in the cast bar"
+        );
+
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(
-            ref configInterface.cfg.CastBarOptions.YOffset,
+            ref castBarOptions.YOffset,
             "Offset",
             $"{id}-y-offset",
-           -50f,
+            -50f,
             90f,
             20f
         );
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(
-            ref configInterface.cfg.CastBarOptions.YSize,
+            ref castBarOptions.YSize,
             "Height",
             $"{id}-y-size",
             10f,
@@ -859,7 +871,7 @@ public class MainUi : IDisposable
             20f
         );
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(
-            ref configInterface.cfg.CastBarOptions.XSize,
+            ref castBarOptions.XSize,
             "Width",
             $"{id}-x-size",
             50f,
@@ -869,32 +881,32 @@ public class MainUi : IDisposable
 
         shouldSave |= UiHelpers.Vector4ColorSelector(
             "Background Color",
-            ref configInterface.cfg.CastBarOptions.BackgroundColor,
+            ref castBarOptions.BackgroundColor,
             defaultColor: Color.Black
         );
         shouldSave |= UiHelpers.Vector4ColorSelector(
             "Progress Color",
-            ref configInterface.cfg.CastBarOptions.ProgressColor,
+            ref castBarOptions.ProgressColor,
             defaultColor: Color.Blue
         );
         shouldSave |= UiHelpers.Vector4ColorSelector(
             "Player Progress Color",
-            ref configInterface.cfg.CastBarOptions.PlayerProgressColor,
+            ref castBarOptions.PlayerProgressColor,
             defaultColor: Color.Blue
         );
         shouldSave |= UiHelpers.Vector4ColorSelector(
             "Border Color",
-            ref configInterface.cfg.CastBarOptions.BorderColor,
+            ref castBarOptions.BorderColor,
             defaultColor: Color.Black
         );
         shouldSave |= UiHelpers.Vector4ColorSelector(
             "Text Color",
-            ref configInterface.cfg.CastBarOptions.TextColor,
+            ref castBarOptions.TextColor,
             defaultColor: Color.White
         );
 
         shouldSave |= UiHelpers.DrawFloatWithResetSlider(
-            ref configInterface.cfg.CastBarOptions.BorderThickness,
+            ref castBarOptions.BorderThickness,
             "Border Thickness",
             $"{id}-border-thickness",
             0f,
@@ -905,7 +917,7 @@ public class MainUi : IDisposable
         var progress = DateTime.UtcNow.Millisecond / 999f;
         var cursorScreenPos = ImGui.GetCursorScreenPos();
         var label = "Example Cast";
-        if (configInterface.cfg.CastBarOptions.DrawTime)
+        if (castBarOptions.DrawTime)
         {
             var timeLeft = DateTime.UtcNow.Millisecond / 1000f;
             label += $" ({timeLeft.ToString("F1")}s)";
@@ -914,19 +926,132 @@ public class MainUi : IDisposable
             drawListPtr,
             cursorScreenPos,
             label,
-            bgColor: configInterface.cfg.CastBarOptions.BackgroundColor,
-            configInterface.cfg.CastBarOptions.ProgressColor,
-            configInterface.cfg.CastBarOptions.BorderColor,
-            configInterface.cfg.CastBarOptions.TextColor,
-            configInterface.cfg.CastBarOptions.XSize,
-            configInterface.cfg.CastBarOptions.YSize,
-            configInterface.cfg.CastBarOptions.BorderThickness,
-            progress
+            bgColor: castBarOptions.BackgroundColor,
+            castBarOptions.ProgressColor,
+            castBarOptions.BorderColor,
+            castBarOptions.TextColor,
+            castBarOptions.XSize,
+            castBarOptions.YSize,
+            castBarOptions.BorderThickness,
+            progress,
+            castBarOptions.CenteredText
         );
 
-        ImGui.SetCursorScreenPos(
-            cursorScreenPos + new Vector2(0, configInterface.cfg.CastBarOptions.YSize + 5)
+        ImGui.SetCursorScreenPos(cursorScreenPos + new Vector2(0, castBarOptions.YSize + 5));
+        if (shouldSave)
+        {
+            configInterface.Save();
+        }
+    }
+
+    private void DrawHealthBarOptions()
+    {
+        var shouldSave = false;
+        var id = "##healthbaroptions";
+        var healthBarOptions = configInterface.cfg.HealthBarOptions;
+
+        shouldSave |= UiHelpers.DrawCheckbox(
+            "Blanket Enabled",
+            ref healthBarOptions.Enabled,
+            "This completely toggles healthbar. If this is enabled, individual mobs must still be set to have healthbar displayed"
         );
+
+        shouldSave |= UiHelpers.DrawCheckbox(
+            $"Draw Health Percent{id}",
+            ref healthBarOptions.DrawPercent
+        );
+
+        shouldSave |= UiHelpers.DrawCheckbox(
+            $"Centered Text{id}",
+            ref healthBarOptions.CenteredText
+        );
+
+        shouldSave |= UiHelpers.DrawCheckbox($"Draw Name{id}", ref healthBarOptions.DrawName);
+
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref healthBarOptions.YOffset,
+            "Offset",
+            $"{id}-y-offset",
+            -50f,
+            90f,
+            20f
+        );
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref healthBarOptions.YSize,
+            "Height",
+            $"{id}-y-size",
+            10f,
+            50f,
+            20f
+        );
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref healthBarOptions.XSize,
+            "Width",
+            $"{id}-x-size",
+            50f,
+            400f,
+            200f
+        );
+
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Background Color",
+            ref healthBarOptions.BackgroundColor,
+            defaultColor: Color.Black
+        );
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Health Bar Color",
+            ref healthBarOptions.ProgressColor,
+            defaultColor: Color.Blue
+        );
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Border Color",
+            ref healthBarOptions.BorderColor,
+            defaultColor: Color.Black
+        );
+        shouldSave |= UiHelpers.Vector4ColorSelector(
+            "Text Color",
+            ref healthBarOptions.TextColor,
+            defaultColor: Color.White
+        );
+
+        shouldSave |= UiHelpers.DrawFloatWithResetSlider(
+            ref healthBarOptions.BorderThickness,
+            "Border Thickness",
+            $"{id}-border-thickness",
+            0f,
+            4f,
+            0.4f
+        );
+        var drawListPtr = ImGui.GetWindowDrawList();
+        var progress = 1 - (DateTime.UtcNow.Millisecond / 999f);
+        var cursorScreenPos = ImGui.GetCursorScreenPos();
+        var label = "";
+
+        if (healthBarOptions.DrawName)
+        {
+            label += "Example Name";
+        }
+
+        if (healthBarOptions.DrawPercent)
+        {
+            label += $" {(progress * 100).ToString("F0")}%";
+        }
+        UiHelpers.BufferingBar(
+            drawListPtr,
+            cursorScreenPos,
+            label,
+            bgColor: healthBarOptions.BackgroundColor,
+            healthBarOptions.ProgressColor,
+            healthBarOptions.BorderColor,
+            healthBarOptions.TextColor,
+            healthBarOptions.XSize,
+            healthBarOptions.YSize,
+            healthBarOptions.BorderThickness,
+            progress,
+            healthBarOptions.CenteredText
+        );
+
+        ImGui.SetCursorScreenPos(cursorScreenPos + new Vector2(0, healthBarOptions.YSize + 5));
         if (shouldSave)
         {
             configInterface.Save();

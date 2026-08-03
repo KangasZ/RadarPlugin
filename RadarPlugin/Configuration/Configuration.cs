@@ -42,6 +42,7 @@ public class Configuration
         public DeepDungeonOptions DeepDungeonOptions { get; set; } = new();
         public AggroRadiusOptions AggroRadiusOptions { get; set; } = new();
         public CastBarOptions CastBarOptions { get; set; } = new();
+        public HealthBarOptions HealthBarOptions { get; set; } = new();
         public ESPOption NpcOption { get; set; } =
             new(DefaultESPOptions.mobOptDefault) { Enabled = true, AppendLevelToName = false };
         public ESPOption PlayerOption { get; set; } = new(DefaultESPOptions.playerOptDefault);

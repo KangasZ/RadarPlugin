@@ -48,7 +48,8 @@ public static class UiHelpers
         float xSize,
         float ySize,
         float borderThickness,
-        float filledPercent
+        float filledPercent,
+        bool centerLabel
     )
     {
         var tagTextSize = ImGui.CalcTextSize(label);
@@ -71,12 +72,11 @@ public static class UiHelpers
                 borderThickness
             );
         }
+        var xOffsetForText = centerLabel
+            ? size.X / 2 - tagTextSize.X / 2
+            : size.X - (tagTextSize.X + borderThickness);
         imDrawListPtr.AddText(
-            cursorScreenPos
-                + new Vector2(
-                    size.X - (tagTextSize.X + borderThickness),
-                    size.Y / 2 - tagTextSize.Y / 2
-                ),
+            cursorScreenPos + new Vector2(xOffsetForText, size.Y / 2 - tagTextSize.Y / 2),
             textColor,
             label
         );
@@ -111,7 +111,10 @@ public static class UiHelpers
         {
             ImGui.OpenPopup("MoreDisplayOptionsPopup");
         }
-        DrawMobDisplaySettingsPopup("MoreDisplayOptionsPopup", ref option.DisplayTypeFlags);
+        shouldSave |= DrawMobDisplaySettingsPopup(
+            "MoreDisplayOptionsPopup",
+            ref option.DisplayTypeFlags
+        );
         ImGui.Columns(1);
         shouldSave |= ImGui.Checkbox(
             $"Display Types 2D Override##{id}-2d-bool",
@@ -256,12 +259,19 @@ public static class UiHelpers
                 shouldSave = true;
             }
 
-            //var drawHealthBar = option.HasFlag(DisplayTypeFlags.HealthBar);
-            //if (UiHelpers.DrawCheckbox($"Draw Health Bar##{popupId}", ref drawHealthBar, "Draws the health bar of an object"))
-            //{
-            //    option.SetFlag(DisplayTypeFlags.HealthBar, drawHealthBar);
-            //    shouldSave = true;
-            //}
+            var drawHealthBar = option.HasFlag(DisplayTypeFlags.HealthBar);
+            if (
+                UiHelpers.DrawCheckbox(
+                    $"Draw Health Bar##{popupId}",
+                    ref drawHealthBar,
+                    "Draws the health bar of an object\n"
+                        + "To configure this, go to additional settings tab"
+                )
+            )
+            {
+                option.SetFlag(DisplayTypeFlags.HealthBar, drawHealthBar);
+                shouldSave = true;
+            }
             ImGui.EndPopup();
         }
 
