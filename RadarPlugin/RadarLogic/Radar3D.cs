@@ -312,6 +312,7 @@ public class Radar3D
             && espOption.DisplayTypeFlags.HasFlag(DisplayTypeFlags.HealthBar)
             && battleChara.CurrentHp > 0
             && battleChara.MaxHp > 0
+            && battleChara.IsTargetable
         )
         {
             drawHealthBar = true;
