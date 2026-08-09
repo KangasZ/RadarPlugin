@@ -281,12 +281,12 @@ public class CustomizedEntitiesUI : IDisposable
         if (configInterface.cfg.LocalMobsUiSettings is { Duplicates: false, ShowNpcs: true })
         {
             areaObjects.AddRange(
-                objectTable.Where(x => x.DataId != 0).GroupBy(x => x.DataId).Select(x => x.First())
+                objectTable.Where(x => x.BaseId != 0).GroupBy(x => x.BaseId).Select(x => x.First())
             );
         }
         else if (configInterface.cfg.LocalMobsUiSettings.ShowNpcs)
         {
-            areaObjects.AddRange(objectTable.Where(x => x.DataId != 0));
+            areaObjects.AddRange(objectTable.Where(x => x.BaseId != 0));
         }
 
         // Sort the array

@@ -15,7 +15,7 @@ public class MobEditUi : IDisposable
 {
     private Configuration.Configuration configInterface;
     private readonly IDalamudPluginInterface dalamudPluginInterface;
-    private IGameObject localObject;
+    private IGameObject? localObject = null;
 
     private bool mobEditVisible = false;
     private readonly TypeConfigurator typeConfiguration;
@@ -48,6 +48,12 @@ public class MobEditUi : IDisposable
             return;
         }
 
+        if (localObject is null || !localObject.IsValid())
+        {
+            mobEditVisible = false;
+            return;
+        }
+        
         var size = new Vector2(600, 300);
         ImGui.SetNextWindowSize(size, ImGuiCond.Appearing);
         ImGui.SetNextWindowSizeConstraints(size, new Vector2(float.MaxValue, float.MaxValue));

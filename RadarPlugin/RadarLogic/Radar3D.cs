@@ -306,12 +306,15 @@ public class Radar3D
         var drawHealthBar = false;
         var drawCastBar = false;
         var castBarProgressColor = Color.White;
+        var healthPercent = (float)battleChara.CurrentHp / (float)battleChara.MaxHp;
 
         if (
             configInterface.cfg.HealthBarOptions.Enabled
             && espOption.DisplayTypeFlags.HasFlag(DisplayTypeFlags.HealthBar)
-            && battleChara.CurrentHp > 0
-            && battleChara.MaxHp > 0
+            && battleChara.CurrentHp != 0u
+            && battleChara.MaxHp != 0u
+            && Math.Round(healthPercent) > 0.001f // 0.1%
+            && healthPercent <= 1
             && battleChara.IsTargetable
         )
         {
@@ -320,10 +323,9 @@ public class Radar3D
 
         if (
             configInterface.cfg.CastBarOptions.Enabled &&
-            battleChara.BaseCastTime != 0 &&
-            battleChara.TotalCastTime != 0 &&
-            battleChara.CastActionType == 1
-            && battleChara.IsCasting
+            battleChara.IsCasting &&
+            battleChara.CastActionType == 1 &&
+            battleChara.TotalCastTime != 0
         )
         {
             if (configInterface.cfg.CastBarOptions.BattleNpcs && gameObject is IBattleNpc battleNpc)
@@ -350,7 +352,7 @@ public class Radar3D
 
         if (drawHealthBar)
         {
-            DrawHealthBar(drawListPtr, battleChara, onScreenPosition);
+            DrawHealthBar(drawListPtr, battleChara, onScreenPosition, healthPercent);
         }
     }
 
@@ -402,14 +404,14 @@ public class Radar3D
     private void DrawHealthBar(
         ImDrawListPtr drawListPtr,
         IBattleChara battleChara,
-        Vector2 onScreenPosition
+        Vector2 onScreenPosition,
+        float healthPercent
     )
     {
         var healthBarOptions = configInterface.cfg.HealthBarOptions;
         var xSize = healthBarOptions.XSize;
         var ySize = healthBarOptions.YSize;
         var label = $"";
-        var healthPercent = battleChara.CurrentHp / battleChara.MaxHp;
         if (healthBarOptions.DrawName)
         {
             label += battleChara.Name.TextValue;
