@@ -313,8 +313,8 @@ public class Radar3D
             && espOption.DisplayTypeFlags.HasFlag(DisplayTypeFlags.HealthBar)
             && battleChara.CurrentHp != 0u
             && battleChara.MaxHp != 0u
-            && Math.Round(healthPercent) > 0.001f // 0.1%
-            && healthPercent <= 1
+            // && Math.Round(healthPercent) > 0.001f // 0.1%
+            // && healthPercent <= 1
             && battleChara.IsTargetable
         )
         {
